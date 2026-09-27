@@ -322,7 +322,7 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
    (см. @media max-width:650px ниже) она прилипает ко дну прокручиваемой
    боковой панели, чтобы кнопки не уезжали за невидимую внутреннюю
    прокрутку вместе с остальным содержимым панели. */
-.talent-side-footer{display:grid;gap:8px}
+.talent-side-footer{display:grid;gap:14px;margin-top:14px}
 .talent-hide{width:100%;margin-top:14px;height:36px;border:1px solid #4a4e50;border-bottom:3px solid #232526;border-radius:4px;background:linear-gradient(180deg,#26292a,#1b1d1e);color:#bfc2c3;cursor:pointer;box-shadow:0 3px 0 #0c0d0d;transition:transform .08s ease,box-shadow .08s ease,border-bottom-width .08s ease}
 .talent-side-footer .talent-hide{margin-top:0}
 .talent-hide:hover:not(:disabled){background:linear-gradient(180deg,#2e3132,#1f2122)}
