@@ -228,7 +228,7 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .top100-rank{display:flex;align-items:center;gap:6px;white-space:nowrap}
 .top100-rank-num{font-variant-numeric:tabular-nums;color:#93a8ba}
 .top100-value{color:var(--accent,#54bfff);font-weight:700}
-.top100-nick{overflow-wrap:anywhere;word-break:break-word}
+.top100-table td.top100-nick{white-space:normal;overflow-wrap:anywhere;word-break:break-word}
 
 /* Радиационные «медали» 1–3 места — в тон логотипа сайта (☢), а не исходные
    картинки-медали из экспортированных таблиц */
