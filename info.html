@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Сердце Зоны — Информация</title>
-<meta name="description" content="Справочные таблицы по уровням для игры «Сердце Зоны»: стоимость улучшения таланта, опыт ПДА и опыт персонажа.">
+<meta name="description" content="Справочные таблицы для игры «Сердце Зоны»: стоимость улучшения таланта, опыт ПДА и персонажа, награды за задания по локациям.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Сердце Зоны">
 <meta property="og:title" content="Сердце Зоны — Информация">
-<meta property="og:description" content="Справочные таблицы по уровням для игры «Сердце Зоны».">
+<meta property="og:description" content="Справочные таблицы для игры «Сердце Зоны».">
 <meta property="og:url" content="https://sof-oss.github.io/helper/info.html">
 <meta property="og:image" content="https://sof-oss.github.io/helper/assets/preview.jpg">
 <meta property="og:image:width" content="1200">
@@ -21,6 +21,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="info-tasks.css">
 </head>
 <body>
 <header class="site-header">
@@ -40,12 +41,27 @@
 <main class="content info-content">
 <div class="result-title"><svg class="target-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4.2" y="3.4" width="15.6" height="17.2" rx="2.2" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="10.3" r="3.3" stroke="currentColor" stroke-width="1.5"/><path d="M12 10.3 13.9 8.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M7.2 16.6h9.6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><h1>Информация</h1></div>
 <section class="result-panel">
-  <div class="section-heading"><span>★</span><b>Прогресс по уровням</b></div>
-  <p class="info-lead">Стоимость улучшения таланта на уровень, опыт ПДА и опыт персонажа по уровням</p>
-  <!-- Вкладки видны только на телефоне (см. #infoTabs в styles.css) — на
-       столе все три таблицы и так помещаются рядом друг с другом. -->
-  <div class="top100-tabs" id="infoTabs"></div>
-  <div class="info-groups" id="infoGroups"></div>
+  <!-- Разделы страницы: на всех экранах. Внутри «Прогресса по уровням» на телефоне
+       есть свои вкладки (#infoTabs: Таланты / ПДА / Персонаж) — они не менялись. -->
+  <div class="info-sections" id="infoSections">
+    <button type="button" class="top100-tab active" data-section="levels" aria-pressed="true" style="--accent:#54bfff">Прогресс по уровням</button>
+    <button type="button" class="top100-tab" data-section="tasks" aria-pressed="false" style="--accent:#ffb74d">Задания</button>
+  </div>
+
+  <div data-section-panel="levels">
+    <div class="section-heading"><span>★</span><b>Прогресс по уровням</b></div>
+    <p class="info-lead">Стоимость улучшения таланта на уровень, опыт ПДА и опыт персонажа по уровням</p>
+    <!-- Вкладки видны только на телефоне (см. #infoTabs в styles.css) — на
+         столе все три таблицы и так помещаются рядом друг с другом. -->
+    <div class="top100-tabs" id="infoTabs"></div>
+    <div class="info-groups" id="infoGroups"></div>
+  </div>
+
+  <div data-section-panel="tasks" hidden>
+    <div class="section-heading"><span>★</span><b>Задания</b></div>
+    <p class="info-lead">Награды и затраты энергии по этапам заданий на каждой локации. Выгода — сколько ресурса приходится на единицу затраченной энергии</p>
+    <div id="tasksRoot"></div>
+  </div>
 </section>
 </main>
 
@@ -53,4 +69,4 @@
      оставляем её ненавязчивой и внизу каждой страницы, а не только на главной -->
 <footer class="site-footer"><span>© by Sof</span></footer>
 
-<script src="info-data.js"></script><script src="info.js"></script></body></html>
+<script src="info-data.js"></script><script src="info.js"></script><script src="tasks-data.js"></script><script src="info-tasks.js"></script></body></html>

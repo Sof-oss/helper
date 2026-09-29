@@ -1,0 +1,42 @@
+/* ===== Вкладка «Задания» на странице «Информация» ===== */
+[data-section-panel][hidden]{display:none!important}
+.info-sections{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 16px}
+.info-sections .top100-tab{height:42px;padding:0 10px;border-radius:8px;font-size:13px}
+.res-exp{--c:#54bfff}.res-bul{--c:#ffb74d}.res-rep{--c:#26c6da}.res-en{--c:#ff6b6f}.res-tok{--c:#9fdc9f}
+.tasks-mobile{display:none}
+
+/* Десктоп: полная матрица «этап × ресурс × локация» */
+.data-table.tasks-matrix th,.data-table.tasks-matrix td{text-align:center;padding:6px 10px}
+.data-table.tasks-matrix thead th{font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;font-weight:700;border-bottom:1px solid #23475f}
+.data-table.tasks-matrix td{font-weight:600;border-top:1px solid #12222f}
+.data-table.tasks-matrix tbody th{font-size:12.5px;font-weight:600;color:#cbd9e5;text-transform:none;letter-spacing:0;border-bottom:0;border-top:1px solid #12222f}
+.data-table.tasks-matrix th.task-res{text-align:left;white-space:nowrap}
+.data-table.tasks-matrix th.task-stage{width:130px;line-height:1.35;color:#eef4fa;text-align:center;vertical-align:middle;border-right:1px solid #142735;background:rgba(255,255,255,.025)}
+.data-table.tasks-matrix .task-first>*{border-top-color:#2a4a62}
+.task-res i{display:inline-block;width:8px;height:8px;margin-right:8px;border-radius:50%;background:var(--c);box-shadow:0 0 6px var(--c)}
+.task-s1>td,.task-s1>.task-res{background:rgba(159,220,159,.045)}
+.task-reward>td,.task-reward>.task-res,.task-reward>.task-stage{background:rgba(255,183,77,.10)!important}
+.task-total>td,.task-total>.task-res,.task-total>.task-stage{background:rgba(84,191,255,.10)!important}
+.task-gain>td,.task-gain>.task-res,.task-gain>.task-stage{background:rgba(39,219,136,.08)!important}
+
+/* Телефон: одна локация за раз + сводка */
+.task-sub{margin:14px 0 8px;color:#8196a9;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.task-tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.task-tiles>div{display:flex;flex-direction:column;gap:3px;padding:9px 6px;border:1px solid #193246;border-radius:8px;background:#091621;text-align:center}
+.task-tiles small{color:var(--c);font-size:11px;font-weight:700}
+.task-tiles b{color:#edf5fc;font-size:18px;font-variant-numeric:tabular-nums}
+.data-table.tasks-table{table-layout:fixed}
+.data-table.tasks-table th,.data-table.tasks-table td{text-align:center;padding:7px 3px}
+.data-table.tasks-table th{color:var(--c,#7c93a6);font-size:10px;letter-spacing:0;text-transform:uppercase;font-weight:700}
+.data-table.tasks-table td{font-weight:600}
+.tasks-stages th:first-child,.tasks-stages td:first-child{width:46px;text-align:center}
+.tasks-stages tbody tr:nth-child(even) td{background:rgba(159,220,159,.045)}
+.tasks-cmp th:first-child,.tasks-cmp td:first-child{width:40%;padding-left:8px;text-align:left}
+.tasks-cmp tr.task-cur td{background:rgba(255,183,77,.13)}
+
+@media(max-width:760px){
+  .tasks-desktop{display:none}
+  .tasks-mobile{display:block}
+  .tasks-mobile .info-group{margin-bottom:12px}
+  .info-sections .top100-tab{font-size:12px}
+}
