@@ -1,0 +1,18 @@
+/* ===== Сортировка по уровню на странице «Топ-100» =====
+   Кликабельный заголовок колонки «Ур.» (см. sortLevel в top100.js). Стрелка ▼ всегда
+   видна как подсказка, что колонку можно нажать, а при включённой сортировке загорается
+   акцентным цветом вкладки. Колонка «Ур.» чуть шире обычной, чтобы вместе со стрелкой
+   заголовок помещался в одну строку, в том числе на телефоне. */
+.top100-sort{cursor:pointer;user-select:none;white-space:nowrap}
+.top100-sort:hover{color:#c3d4e2}
+.top100-sort:focus-visible{outline:2px solid #54bfff;outline-offset:-2px}
+.top100-sort i{margin-left:3px;font-style:normal;font-size:9px;opacity:.5}
+.top100-sort.active{color:var(--accent,#54bfff)}
+.top100-sort.active i{opacity:1}
+.top100-table.top100-sortable th:nth-child(3),.top100-table.top100-sortable td:nth-child(3){width:82px}
+@media(max-width:760px){
+  .top100-table.top100-sortable th:nth-child(3),.top100-table.top100-sortable td:nth-child(3){width:58px}
+}
+@media(max-width:430px){
+  .top100-table.top100-sortable th:nth-child(3),.top100-table.top100-sortable td:nth-child(3){width:52px}
+}
