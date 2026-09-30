@@ -2,7 +2,7 @@
 "use strict";
 /* Конвертирует CSV-выгрузки рейтингов «Сердце Зоны» в top100-data.js
  * Использование: node build-top100.js [папка_с_csv] [путь_к_top100-data.js]
- * По умолчанию ищет CSV рядом со скриптом и пишет ./top100-data.js.
+ * По умолчанию ищет CSV в папке ./top100 рядом со скриптом и пишет ./top100-data.js.
  * Заодно обновляет дату «Обновлено» в top100.html рядом с файлом данных. */
 const fs = require("fs");
 const path = require("path");
@@ -61,7 +61,8 @@ const SOURCES = [
   { file: "heart-of-the-zone-top100-bosses.csv", varName: "TOP100_BOSSES" },
 ];
 
-const inputDir = process.argv[2] || __dirname;
+/* CSV лежат в отдельной папке top100/ рядом со скриптом */
+const inputDir = process.argv[2] || path.join(__dirname, "top100");
 const outputFile = process.argv[3] || path.join(process.cwd(), "top100-data.js");
 
 const blocks = SOURCES.map(({ file, varName }) => {
