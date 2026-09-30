@@ -2,13 +2,17 @@ const $=id=>document.getElementById(id);
 const fmt=n=>Math.round(n).toLocaleString("ru-RU");
 const TOP100_TAB_KEY="gameHelperTop100Tab";
 
-/* Три раздела рейтинга: ключ, подпись вкладки, подпись колонки-показателя,
+/* Разделы рейтинга: ключ, подпись вкладки, подпись колонки-показателя,
    данные и акцентный цвет (перекликается с блоками вкладки «Информация»:
-   таланты — янтарный, экспедиции — зелёный, защита лагеря — синий). */
+   таланты — янтарный, экспедиции — зелёный, защита лагеря — синий; остальные — свои оттенки). */
 const TOP100_TABS=[
  {key:"talents",label:"Таланты",metric:"Таланты",data:()=>window.TOP100_TALENTS,accent:"#ffb74d"},
  {key:"defense",label:"Защита лагеря",metric:"Защита лагеря",data:()=>window.TOP100_DEFENSE,accent:"#54bfff"},
- {key:"expeditions",label:"Экспедиции",metric:"Экспедиции",data:()=>window.TOP100_EXPEDITIONS,accent:"#9fdc9f"}
+ {key:"expeditions",label:"Экспедиции",metric:"Экспедиции",data:()=>window.TOP100_EXPEDITIONS,accent:"#9fdc9f"},
+ {key:"collections",label:"Коллекции",metric:"Коллекции",data:()=>window.TOP100_COLLECTIONS,accent:"#c9a6ff"},
+ {key:"stashes",label:"Тайники",metric:"Тайники",data:()=>window.TOP100_STASHES,accent:"#26c6da"},
+ {key:"reputation",label:"Репутация",metric:"Репутация",data:()=>window.TOP100_REPUTATION,accent:"#f48fb1"},
+ {key:"bosses",label:"Боссы",metric:"Боссы",data:()=>window.TOP100_BOSSES,accent:"#ff8a65"}
 ];
 
 let currentTop100Tab="talents";
@@ -23,6 +27,7 @@ function rankCell(rank){
 
 function top100RowMarkup(row,rank){
  const[nick,level,value,inactive]=row;
+ rank=row[4]||rank; // настоящее место, если в выгрузке был пропуск
  const nickHtml=nick.replace(/</g,"&lt;");
  return '<tr class="'+(rank<=3?"top100-podium top100-podium-"+rank:"")+(inactive?" top100-inactive":"")+'"><td class="top100-rank">'+rankCell(rank)+'</td><td class="top100-nick">'+nickHtml+'</td><td>'+level+'</td><td class="top100-value">'+fmt(value)+'</td></tr>';
 }
