@@ -3,7 +3,7 @@
 /* Конвертирует CSV-выгрузки рейтингов «Сердце Зоны» в top100-data.js
  * Использование: node build-top100.js [папка_с_csv] [путь_к_top100-data.js]
  * По умолчанию ищет CSV в папке ./top100 рядом со скриптом и пишет ./top100-data.js.
- * Заодно обновляет дату «Обновлено» в top100.html рядом с файлом данных. */
+ * Дата обновления пишется в тот же файл (window.TOP100_UPDATED), top100.html не трогаем. */
 const fs = require("fs");
 const path = require("path");
 
@@ -73,19 +73,15 @@ const blocks = SOURCES.map(({ file, varName }) => {
   return `window.${varName}=[\n${body}\n];`;
 });
 
-const header = "/* Данные вкладки «Топ-100»: [ник, уровень, значение, покинул отряд(0/1)[, место]] — место = индекс+1, если не указано пятым элементом */\n";
-fs.writeFileSync(outputFile, header + blocks.join("\n") + "\n");
-console.log("Готово:", outputFile);
+/* Дата сборки по Москве, формат «ДД.ММ.ГГГГ ЧЧ:ММ:СС». Лежит в файле данных,
+   а не в HTML: так она меняется вместе с данными и не откатывается,
+   если top100.html подменили старой версией. */
+const p = Object.fromEntries(new Intl.DateTimeFormat("ru-RU", {
+  timeZone: "Europe/Moscow", day: "2-digit", month: "2-digit", year: "numeric",
+  hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
+}).formatToParts(new Date()).map(x => [x.type, x.value]));
+const stamp = `${p.day}.${p.month}.${p.year} ${p.hour}:${p.minute}:${p.second}`;
 
-/* Дата обновления на странице (по Москве), формат «ДД.ММ.ГГГГ ЧЧ:ММ:СС» */
-const htmlFile = path.join(path.dirname(outputFile), "top100.html");
-if (fs.existsSync(htmlFile)) {
-  const p = Object.fromEntries(new Intl.DateTimeFormat("ru-RU", {
-    timeZone: "Europe/Moscow", day: "2-digit", month: "2-digit", year: "numeric",
-    hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
-  }).formatToParts(new Date()).map(x => [x.type, x.value]));
-  const stamp = `${p.day}.${p.month}.${p.year} ${p.hour}:${p.minute}:${p.second}`;
-  const html = fs.readFileSync(htmlFile, "utf8");
-  const next = html.replace(/(<span id="top100Updated">)[^<]*(<\/span>)/, `$1${stamp}$2`);
-  if (next !== html) { fs.writeFileSync(htmlFile, next); console.log("Дата обновлена:", stamp); }
-}
+const header = "/* Данные вкладки «Топ-100»: [ник, уровень, значение, покинул отряд(0/1)[, место]] — место = индекс+1, если не указано пятым элементом */\n";
+fs.writeFileSync(outputFile, header + `window.TOP100_UPDATED=${JSON.stringify(stamp)};\n` + blocks.join("\n") + "\n");
+console.log("Готово:", outputFile, "| дата:", stamp);

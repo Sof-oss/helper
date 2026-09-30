@@ -84,4 +84,9 @@ document.addEventListener("keydown",e=>{
  toggleLevelSort(true);
 });
 
+/* Дату обновления отдаёт top100-data.js (её пишет build-top100.js);
+   в разметке остаётся только заглушка */
+const updatedEl=$("top100Updated");
+if(updatedEl&&window.TOP100_UPDATED)updatedEl.textContent=window.TOP100_UPDATED;
+
 renderTop100();
