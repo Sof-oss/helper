@@ -5,7 +5,7 @@
 .res-exp{--c:#54bfff}.res-bul{--c:#ffb74d}.res-rep{--c:#26c6da}.res-en{--c:#ff6b6f}.res-tok{--c:#9fdc9f}
 .tasks-mobile{display:none}
 
-/* Десктоп: полная матрица «этап × ресурс × локация» */
+/* десктоп: матрица этап × ресурс × локация */
 .data-table.tasks-matrix th,.data-table.tasks-matrix td{text-align:center;padding:6px 10px}
 .data-table.tasks-matrix thead th{font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;font-weight:700;border-bottom:1px solid #23475f}
 .data-table.tasks-matrix td{font-weight:600;border-top:1px solid #12222f}
@@ -19,7 +19,7 @@
 .task-total>td,.task-total>.task-res,.task-total>.task-stage{background:rgba(84,191,255,.10)!important}
 .task-gain>td,.task-gain>.task-res,.task-gain>.task-stage{background:rgba(39,219,136,.08)!important}
 
-/* Телефон: одна локация за раз + сводка */
+/* телефон: одна локация + сводка */
 .task-sub{margin:14px 0 8px;color:#8196a9;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
 .task-tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .task-tiles>div{display:flex;flex-direction:column;gap:3px;padding:9px 6px;border:1px solid #193246;border-radius:8px;background:#091621;text-align:center}

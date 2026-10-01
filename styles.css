@@ -1,17 +1,8 @@
 /* ===== Основа ===== */
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:#060d13;color:#dce7f2;font-family:"Segoe UI",Arial,sans-serif;overflow-x:hidden}body{min-height:100vh;display:flex;flex-direction:column}
-/* Затемнение раньше считалось в процентах от всей высоты body: на коротких
-   страницах (например «Гайды») оно начиналось почти сразу и заливало тёмным
-   весь экран. Теперь полоса затемнения — фиксированной высоты и всегда
-   прижата к самому низу страницы, где стоит подпись автора, независимо от
-   того, короткая страница или длинная (с большими таблицами/деревом талантов). */
-/* background-size для картинки — cover (не «100% auto»): при «100% auto»
-   высота картинки зависела только от её пропорций и ширины экрана, и на
-   короткой странице (мало контента) картинка не дотягивалась до низа —
-   ниже неё была видна голая заливка #060d13 без плавного перехода. cover
-   всегда растягивает картинку на всю высоту body, сколько бы контента ни
-   было на странице. */
+/* затемнение внизу страницы: полоса фиксированной высоты, прижата к низу */
+/* cover, а не «100% auto»: на коротких страницах картинка иначе не доходит до низа */
 body{background-color:#060d13;background-image:linear-gradient(180deg,rgba(6,13,19,0) 0,rgba(6,13,19,0) calc(100% - 340px),rgba(6,13,19,.3) calc(100% - 220px),rgba(6,13,19,.78) calc(100% - 110px),#060d13 100%),radial-gradient(circle at 75% 0%,rgba(49,73,91,.32),transparent 35%),url("assets/bg-zone.jpg");background-position:0 0,0 0,center top;background-size:auto,auto,cover;background-repeat:no-repeat;font-size:14px}
 :where(button,input,a):focus-visible{outline:2px solid #54bfff;outline-offset:2px}
 
@@ -25,24 +16,18 @@ body{background-color:#060d13;background-image:linear-gradient(180deg,rgba(6,13,
 .main-nav{height:100%;display:flex;align-items:center;gap:14px}
 .main-nav a{height:100%;padding:0 17px;display:flex;align-items:center;gap:12px;color:#9fb1c0;text-decoration:none;font-weight:600;position:relative;white-space:nowrap}
 .main-nav a:focus-visible{outline-offset:-2px;border-radius:4px}
-/* Иконки в шапке — inline SVG на currentColor, поэтому подсветку активного пункта
-   красим один раз через .main-nav a.active, а не дублируем цвет на каждой иконке */
+/* иконки на currentColor, активный пункт красим в одном месте */
 .main-nav a .nav-icon{width:20px;height:20px;flex:0 0 20px}
 .main-nav a.active{color:#dcecff}
 .main-nav a.active:after{content:"";position:absolute;bottom:15px;left:10px;right:10px;height:4px;border-radius:4px;background:#4aa8ff;box-shadow:0 0 8px #238cff}
 
-/* Рекламный баннер в шапке: ссылка-картинка, прижатая к правому краю за счёт
-   margin-left:auto — остаётся последним элементом в потоке header-inner,
-   поэтому не требует отдельной обёртки или изменения flex-раскладки шапки.
-   Высота чуть больше обычной (94px против 84px раньше) — на новом баннере
-   у текста плотный трэшевый шрифт, и на маленьком размере он терял чёткость. */
+/* баннер в шапке, прижат вправо */
 .header-promo{margin-left:auto;flex:0 0 auto;display:block;height:94px;line-height:0;border:1px solid #2d5578;border-radius:8px;overflow:hidden;box-shadow:0 0 14px rgba(84,191,255,.22);transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
 .header-promo:hover{transform:translateY(-1px);box-shadow:0 0 20px rgba(84,191,255,.4);border-color:#4aa8ff}
 .header-promo img{display:block;height:100%;width:auto}
 
 /* ===== Вкладки сайта =====
-   Каждый раздел (Калькулятор, Информация) — это .view; активен тот,
-   у которого нет атрибута hidden. Переключение — в app.js (switchView). */
+   активен тот .view, у которого нет hidden (switchView в app.js) */
 
 /* ===== Раскладка ===== */
 .page{display:grid;grid-template-columns:330px minmax(0,1fr);gap:4px;min-height:calc(100vh - 92px);padding:4px;align-items:start}
@@ -70,12 +55,7 @@ body{background-color:#060d13;background-image:linear-gradient(180deg,rgba(6,13,
 .talent-open b{font-size:11px;color:#73c8ff;font-weight:600}
 .talent-summary{margin-top:6px;color:#71889b;font-size:10px;text-align:right}
 
-/* На телефоне max-height:500px здесь раньше обрезал список снаряжения
-   невидимой внутренней прокруткой (чекбоксы «Одиночные вещи» уезжали за
-   край и не были видны без скролла внутри узкой области). На мобильных
-   .page переходит в обычный блочный поток (см. @media max-width:760px),
-   так что ограничение по высоте там снимается — вся секция скроллится
-   вместе со страницей, а не отдельно от неё. */
+/* на телефоне лимит высоты снимается, список скроллится вместе со страницей */
 .equipment-section{padding-bottom:9px;max-height:500px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#31566f #08131d}
 .items-divider{display:flex;align-items:center;gap:10px;margin:18px 0 7px;padding-top:9px;border-top:1px solid #193246;color:#cbd9e5;font-size:13px}
 .items-divider span{font-size:16px;color:#dbe9f6;width:18px;text-align:center}
@@ -92,7 +72,7 @@ body{background-color:#060d13;background-image:linear-gradient(180deg,rgba(6,13,
 .select-all{display:flex;align-items:center;gap:8px;padding:0 4px;color:#a9baca;font-size:12px;cursor:pointer}
 .select-all input{accent-color:#54bfff;cursor:pointer}
 .select-all span{user-select:none}
-/* Кнопки-«клавиши»: металлическая клавиша со скосом снизу, проседает при нажатии */
+/* кнопки-«клавиши», при нажатии проседают */
 .side-btn{height:42px;border:1px solid #2d5578;border-bottom:3px solid #143047;border-radius:6px;background:linear-gradient(180deg,#123049 0%,#0a1c2b 100%);color:#c3d4e2;font-size:13px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;cursor:pointer;box-shadow:0 3px 0 #05121c,inset 0 1px 0 rgba(255,255,255,.08);transition:transform .08s ease,box-shadow .08s ease,border-bottom-width .08s ease}
 .side-btn:hover{background:linear-gradient(180deg,#173a5c 0%,#0d2536 100%)}
 .side-btn:active{transform:translateY(3px);border-bottom-width:0;box-shadow:inset 0 2px 6px #000a}
@@ -121,7 +101,7 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .damage-card h3{margin:1px 0 9px;font-size:16px;color:#dce7f0}
 .damage-card strong{font-size:29px;line-height:1;color:#f1f6fb;font-variant-numeric:tabular-nums}
 
-/* Разбивка урона: четыре ячейки одинаковой ширины во всех карточках */
+/* разбивка урона, 4 ячейки одной ширины */
 .breakdown{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:8px}
 .bd-cell{display:flex;flex-direction:column;gap:2px}
 .bd-cell small{font-size:12px;color:#7f95a8}
@@ -134,13 +114,13 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .crit-chip-label{color:#ff5a5f;text-transform:uppercase;font-size:10px;letter-spacing:.4px;font-weight:700}
 .crit-chip-sep{color:#ff5a5f;opacity:.6}
 
-/* Прибавка/убыль рядом с изменившимся значением */
+/* дельта рядом со значением */
 .delta{position:absolute;top:10px;right:14px;font-style:normal;font-weight:700;font-size:14px;opacity:0;transform:translateY(4px);transition:opacity .25s,transform .25s;pointer-events:none;font-variant-numeric:tabular-nums}
 .delta.show{opacity:1;transform:none}
 .delta.up{color:#27db88}
 .delta.down{color:#ff6b6f}
 
-/* Таблицы (расчёт по жетонам, вкладка «Информация») */
+/* таблицы (жетоны, «Информация») */
 .data-wrap{overflow-x:auto}
 .data-table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
 .data-table th{color:#7c93a6;font-size:11px;font-weight:600;text-align:right;padding:5px 8px;border-bottom:1px solid #193246}
@@ -154,16 +134,13 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .tok-field input{width:140px;height:36px;font-size:16px}
 .tok-field input::-webkit-inner-spin-button,.tok-field input::-webkit-outer-spin-button{appearance:none;margin:0}
 
-/* Дополнительные характеристики — на всю ширину панели */
+/* доп. характеристики на всю ширину */
 .extra-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
 .extra-grid>div{position:relative;min-height:74px;border:1px solid #193246;border-radius:8px;background:#091621;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px;text-align:center}
 .extra-grid small{color:#8196a9;font-size:12px;line-height:1.2}
 .extra-grid strong{font-size:20px;color:#edf5fc;font-variant-numeric:tabular-nums}
 
-/* ===== Стартовая страница =====
-   Раньше это была просто плашка с тремя ссылками. Добавили "датчик" сверху
-   (пульсирующая точка, как индикатор ПДА), крупный вотермарк-радиацию за
-   заголовком и статы, чтобы страница не выглядела заглушкой. */
+/* ===== Стартовая страница ===== */
 .home-content{max-width:1040px;margin:0 auto;padding:56px 20px 44px;flex:1}
 .home-hero{position:relative;text-align:center;margin-bottom:42px;padding:8px 0 4px;isolation:isolate}
 .home-eyebrow{position:relative;display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1px solid #24506e;border-radius:20px;background:rgba(15,34,51,.65);color:#6fc3ff;font-size:11px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;margin-bottom:20px}
@@ -172,8 +149,7 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .home-hero h1{margin:0 0 14px;font-family:"Graffiti1C","Segoe UI",Arial,sans-serif;font-weight:400;font-size:42px;letter-spacing:-.6px;color:#e4eef8;text-shadow:0 0 22px rgba(90,174,255,.25)}
 .home-hero p{margin:0 auto;max-width:620px;color:#c3d1dd;font-size:14px;line-height:1.65;text-shadow:0 2px 10px rgba(0,0,0,.85),0 1px 3px rgba(0,0,0,.9)}
 .home-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
-/* Акцентный цвет карточки задаётся инлайново (--accent/--accent-bg/--accent-border),
-   чтобы не плодить по три модификатора класса на каждую карточку */
+/* акцент карточки задаётся инлайном (--accent, --accent-bg, --accent-border) */
 .home-card{display:flex;flex-direction:column;border:1px solid #1a3346;border-radius:11px;background:linear-gradient(160deg,#0b1925,#08121b);overflow:hidden;color:inherit;text-decoration:none;position:relative;box-shadow:0 10px 24px #0005;transition:transform .18s,border-color .18s,box-shadow .18s}
 .home-card::before{content:"";display:block;height:3px;background:var(--accent,#54bfff)}
 .home-card:hover{transform:translateY(-3px);border-color:#2e6384;box-shadow:0 16px 34px #0008}
@@ -193,33 +169,21 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .placeholder-panel{padding:32px 16px;text-align:center;color:#8196a9;font-size:14px}
 .info-groups{display:grid;grid-template-columns:2.3fr 1fr 1fr;gap:16px;align-items:start}
 
-/* Вкладки для мобильной версии «Информации» (см. #infoTabs в info.html/js):
-   на столе не нужны — все три блока и так помещаются рядом друг с другом,
-   поэтому скрыты по умолчанию и включаются только в @media max-width:760px
-   ниже, где иначе пришлось бы скроллить страницу примерно на 7000px, чтобы
-   долистать таланты → ПДА → персонажа. Разметка и стили кнопок намеренно
-   переиспользуют .top100-tab — тот же паттерн вкладок уже есть на «Топ-100». */
+/* вкладки «Информации» для телефона (#infoTabs). На десктопе скрыты, включаются в @media 760px. Кнопки общие с .top100-tab */
 #infoTabs{display:none}
 
-/* Общая карточка блока — базовое оформление, у каждого блока свой акцентный
-   цвет рамки/подложки/тени ниже (info-group-talents/pda/char), чтобы три
-   блока не сливались друг с другом визуально. */
+/* базовая карточка блока, акцент у каждого свой (talents/pda/char) */
 .info-group{border:1px solid #1a3346;border-radius:9px;background:linear-gradient(135deg,#0b1925,#09141e);padding:14px 16px 16px;box-shadow:inset 0 0 22px #0a223433;min-width:0}
 .info-group-title{display:flex;align-items:center;justify-content:center;gap:9px;font-size:15px;color:#dce7f0;margin-bottom:11px;text-align:center}
 .info-led{width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:var(--led,#54bfff);box-shadow:0 0 8px var(--led,#54bfff)}
 .info-subcols{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 
-/* Отличительное оформление трёх блоков: у каждого свой лёгкий оттенок рамки,
-   подложки и внутренней тени, в тон его индикатора (info-led). */
+/* оттенки рамки, фона и тени под цвет индикатора (info-led) */
 .info-group-talents{border-color:#3a3320;background:linear-gradient(135deg,#141008,#0d0b06),linear-gradient(135deg,#0b1925,#09141e);box-shadow:inset 0 0 26px rgba(255,183,77,.05)}
 .info-group-pda{border-color:#1f3a28;background:linear-gradient(135deg,#0c1712,#090f0b),linear-gradient(135deg,#0b1925,#09141e);box-shadow:inset 0 0 26px rgba(159,220,159,.05)}
 .info-group-char{border-color:#1a3350;background:linear-gradient(135deg,#0a1826,#07121c),linear-gradient(135deg,#0b1925,#09141e);box-shadow:inset 0 0 26px rgba(84,191,255,.06)}
 
-/* Таблицы «Информация» — усиленная читаемость: те же чёткие пропорциональные
-   цифры, что и в остальном интерфейсе (а не мелкий моноширинный шрифт),
-   более контрастная зебра и явные разделители между колонками
-   ("Уровень" / "Урон" / "Всего"), как в исходном экспортируемом изображении
-   (html_progress-tables.html), где числа не сливались друг с другом. */
+/* таблицы «Информация»: пропорциональные цифры, контрастная зебра, разделители колонок */
 .info-table{font-family:"Segoe UI",Arial,sans-serif;table-layout:fixed;-webkit-font-smoothing:antialiased}
 .info-table th{padding:6px 6px 8px;font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid #23475f;text-align:center;font-weight:700}
 .info-table td{padding:5px 6px;font-size:12.5px;font-weight:600;border-top:1px solid #12222f;text-align:center;color:#eef4fa}
@@ -250,8 +214,7 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .top100-value{color:var(--accent,#54bfff);font-weight:700}
 .top100-table td.top100-nick{white-space:normal;overflow-wrap:anywhere;word-break:break-word}
 
-/* Радиационные «медали» 1–3 места — в тон логотипа сайта (☢), а не исходные
-   картинки-медали из экспортированных таблиц */
+/* ☢-медали 1–3 места, в тон логотипа */
 .top100-medal{display:inline-grid;place-items:center;width:19px;height:19px;flex:0 0 19px;border-radius:50%;font-size:11px;line-height:1;color:#0a1017}
 .top100-medal-1{background:radial-gradient(circle at 35% 30%,#ffe08a,#e8ae3d);box-shadow:0 0 8px rgba(232,174,61,.55)}
 .top100-medal-2{background:radial-gradient(circle at 35% 30%,#eef2f4,#a9bac6);box-shadow:0 0 8px rgba(169,186,198,.45)}
@@ -261,8 +224,7 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .top100-podium-2 td{background:rgba(169,186,198,.08)}
 .top100-podium-3 td{background:rgba(179,112,63,.08)}
 
-/* Строки сталкеров, покинувших отряд — тот же красный акцент, что и у
-   остальных «тревожных» значений на сайте (delta.down, crit-chip) */
+/* ушедшие из отряда — красным, как delta.down и crit-chip */
 .top100-inactive td{color:#ff9498;font-style:italic}
 .top100-inactive .top100-rank-num{color:#ff9498}
 .top100-footnote{display:flex;align-items:center;gap:6px}
@@ -292,7 +254,7 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .talent-game-sidebar{flex:0 0 320px;width:320px;height:100%;padding:16px 14px;z-index:2;background-color:rgba(11,12,13,.72);border-right:1px solid rgba(72,78,84,.5);background-image:linear-gradient(rgba(72,78,84,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(72,78,84,.12) 1px,transparent 1px);background-size:12px 12px;overflow:auto}
 .talent-side-title{display:flex;justify-content:space-between;align-items:center;font-family:"Rubik Dirt","Segoe UI",sans-serif;font-size:22px;margin-bottom:10px}
 .talent-side-title b{font:600 13px "Segoe UI";color:#aaa}
-/* Круговой аналоговый индикатор очков талантов (в духе приборной панели ПДА) */
+/* круговой индикатор очков талантов */
 .talent-gauge{position:relative;width:118px;height:118px;margin:2px auto 16px}
 .talent-gauge-ticks{position:absolute;inset:-6px;border-radius:50%;background:repeating-conic-gradient(rgba(222,222,216,.55) 0deg 1.4deg,transparent 1.4deg 15deg);-webkit-mask-image:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 calc(100% - 5px));mask-image:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 calc(100% - 5px))}
 .talent-gauge::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(#f0ae58 calc(var(--pct)*3.6deg),rgba(255,255,255,.08) 0);box-shadow:0 0 0 1px #383c3e,inset 0 0 16px #000c,0 0 14px rgba(240,174,88,.16)}
@@ -318,10 +280,7 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .talent-branch-description{display:flex;flex-direction:column;gap:3px;padding:12px 2px 14px;color:#777;font-size:12px}
 .talent-branch-description b{font-size:17px;color:#e1e1dd}
 .talent-side-hint{color:#777;font-size:11px;line-height:1.5;padding:10px 2px 0;border-top:1px solid #34383a;margin-top:10px}
-/* Обёртка вокруг кнопок «Сбросить таланты» / «Скрыть» — на мобильных
-   (см. @media max-width:650px ниже) она прилипает ко дну прокручиваемой
-   боковой панели, чтобы кнопки не уезжали за невидимую внутреннюю
-   прокрутку вместе с остальным содержимым панели. */
+/* обёртка для кнопок, на телефоне липнет ко дну панели (@media 650px) */
 .talent-side-footer{display:grid;gap:14px;margin-top:14px}
 .talent-hide{width:100%;margin-top:14px;height:36px;border:1px solid #4a4e50;border-bottom:3px solid #232526;border-radius:4px;background:linear-gradient(180deg,#26292a,#1b1d1e);color:#bfc2c3;cursor:pointer;box-shadow:0 3px 0 #0c0d0d;transition:transform .08s ease,box-shadow .08s ease,border-bottom-width .08s ease}
 .talent-side-footer .talent-hide{margin-top:0}
@@ -329,7 +288,7 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .talent-hide:active:not(:disabled){transform:translateY(3px);border-bottom-width:0;box-shadow:inset 0 2px 5px #000a}
 .talent-hide:disabled{opacity:.5;cursor:default}
 
-/* Описание таланта — отдельное окно по центру экрана */
+/* окно с описанием таланта */
 .talent-detail{border:1px solid #34383a;background:rgba(10,11,12,.72);padding:12px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.4)}
 .talent-detail-art{width:72px;height:72px;border:1px solid #8b8c86;background:#111;overflow:hidden;display:grid;place-items:center;font-size:34px;color:#eee;margin-bottom:10px}
 .talent-detail-art img{display:block;width:100%;height:100%;object-fit:cover}
@@ -358,7 +317,7 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .talent-detail-close{position:absolute;top:-14px;right:-14px;width:30px;height:30px;border:1px solid #404447;border-radius:50%;background:#1b1d1e;color:#ddd;font-size:17px;line-height:1;cursor:pointer}
 @keyframes talentDetailIn{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
 
-/* Дерево талантов: масштаб и перетаскивание */
+/* дерево талантов: зум и drag */
 .talent-flow-wrap{position:relative;flex:1 1 auto;min-width:0;min-height:0;overflow:hidden;background:rgba(7,9,8,.24);touch-action:none;cursor:grab}
 .talent-flow{position:relative;min-width:100%;min-height:100%;width:max-content;padding:0 24px 24px}
 .talent-flow-canvas{position:relative;margin:10px auto 20px;background:url("assets/talents-CjzNNTY-.webp") center/cover no-repeat;transform-origin:0 0;will-change:transform}
@@ -377,7 +336,7 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .talent-node-art img{display:block;width:100%;height:100%;object-fit:cover}
 .talent-node-rank{position:absolute;right:5px;bottom:3px;color:#fff;text-shadow:0 1px 0 #000,1px 0 #000,-1px 0 #000;font:600 13px/1 "Segoe UI";z-index:1}
 
-/* Бонусы снаряжения и расчёт по жетонам */
+/* бонусы снаряжения, жетоны */
 .gear-info-window{width:min(760px,92vw);height:auto;max-height:86vh}
 .tokens-window{width:min(1040px,94vw)}
 .gear-info-dialog{align-items:center}
@@ -403,11 +362,7 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .tok-note{color:#71889b;font-size:11px;line-height:1.5}
 
 /* ===== Подпись автора =====
-   Тот же рукописный шрифт (Caveat) и лёгкий наклон, что и в исходном
-   экспортируемом изображении (html_progress-tables.html, ctx.font =
-   "12px 'Caveat', cursive"), перекрашено под голубой акцент сайта
-   (тот же оттенок, что у логотипа и активных пунктов навигации), чтобы
-   подпись не выглядела чужеродной вставкой среди остальной палитры. */
+   шрифт Caveat как в экспортируемой картинке, цвет — голубой акцент сайта */
 .site-footer{padding:8px 0 12px;text-align:center;flex:0 0 auto}
 .site-footer span{display:inline-block;font-family:"Caveat","Segoe UI",cursive;font-size:12px;font-weight:400;line-height:1;color:#5aaeff;transform:skewX(-8deg);text-shadow:none;opacity:.55}
 
@@ -434,33 +389,22 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
   .header-inner{min-height:88px;flex-wrap:wrap;padding:10px 14px}
   .logo{width:auto}
   .main-nav{order:3;width:100%;height:44px;overflow:auto}
-  /* Меню на телефоне шире экрана и скроллится вбок, но раньше это ничем не
-     выдавало себя — обрезанные «Гайды» выглядели просто как конец списка.
-     Маска на краях создаёт лёгкое затухание, которое и на глаз читается
-     как «тут ещё есть пункты», без добавления новых элементов в разметку. */
+  /* меню шире экрана и скроллится вбок: маска по краям намекает, что пункты есть ещё */
   .main-nav{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 18px,#000 calc(100% - 28px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 18px,#000 calc(100% - 28px),transparent 100%)}
   .main-nav a{font-size:12px}
   .main-nav a.active:after{bottom:5px;height:3px}
-  /* На узкой шапке баннер держим на первой строке рядом с логотипом,
-     а меню переносится на вторую строку целиком (order:3 выше) */
+  /* баннер на первой строке рядом с логотипом, меню уходит на вторую (order:3) */
   .header-promo{order:2;height:60px}
   .page{display:block}
   .sidebar{margin-bottom:8px}
-  /* .page переходит в блочный поток на телефоне — сайдбар больше не сжат
-     фиксированной высотой grid-колонки, поэтому и снаряжение может
-     спокойно скроллиться вместе со всей страницей, а не в тесной
-     500-пиксельной форточке, где «Одиночные вещи» было не видно и
-     физически недоступно без скролла внутри самого списка. */
+  /* .page теперь блок, сайдбар не зажат колонкой, поэтому снаряжение скроллится вместе со страницей */
   .equipment-section{max-height:none;overflow-y:visible}
   .content{padding:8px}
   .damage-grid{grid-template-columns:1fr}
   .toast{min-width:0;width:calc(100% - 40px);padding:22px 24px 25px;font-size:20px}
   .toast::before{font-size:50px}
   .info-content{padding:10px}
-  /* Мобильные вкладки «Информации»: показываем сразу только один из трёх
-     блоков (Таланты/ПДА/Персонаж) вместо длинного скролла через все три —
-     переключение делает info.js через #infoTabs и data-active на
-     #infoGroups. */
+  /* вкладки «Информации»: показываем один из трёх блоков (info.js, data-active на #infoGroups) */
   #infoTabs{display:flex}
   .info-groups[data-active] [data-info-group]{display:none}
   .info-groups[data-active="talents"] [data-info-group="talents"],
@@ -483,13 +427,7 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 @media(max-width:650px){
   .talent-game-body{display:block;overflow:auto}
   .talent-game-sidebar{width:100%;height:auto;max-height:48%;border-right:0;border-bottom:1px solid #34383a}
-  /* Кнопки «Сбросить таланты» / «Скрыть» раньше были обычными последними
-     элементами внутри .talent-game-sidebar (48% высоты, overflow:auto) —
-     на телефоне список статов/веток занимал всю видимую область, а кнопки
-     уезжали за край, доступные только внутренней прокруткой, о которой
-     ничего не намекало. Прилипаем их ко дну панели, чтобы они были видны
-     всегда, независимо от того, докрутил пользователь список до конца
-     или нет. */
+  /* кнопки талантов липнут ко дну панели, иначе на телефоне уезжают за прокрутку списка статов */
   .talent-side-footer{position:sticky;bottom:0;margin-top:10px;padding-top:12px;background:linear-gradient(180deg,rgba(11,12,13,0) 0%,#0b0c0c 40%)}
   .talent-flow-wrap{height:52%}
   .talent-detail-overlay{padding:12px}

@@ -35,15 +35,14 @@ function talentNodeIcon(t){const file=TALENT_ASSETS[t[0]],alt=t[2].replace(/"/g,
 function talentEffectLines(t){const rank=talentRank(t[0]),stat=t[7],values=t[6],unit=stat&&stat.endsWith("_pct")?"%":"";return values.map((v,i)=>'<span class="'+(i<rank?"talent-rank-done":"")+'">Ранг '+(i+1)+': <b>+'+v+unit+'</b></span>').join("")}
 function renderTalentDetails(t){const rank=talentRank(t[0]),up=canUpgrade(t),down=canDowngrade(t),req=t[9].length?t[9].map(code=>talentDef(code)?.[2]||code).join(", "):"Нет",target=Array.isArray(t[8])?t[8][0]:t[8],stat=t[7],labels={free_boss_damage_flat:"Урон от бесплатных ударов",free_hit_damage_flat:"Урон",first_free_hit_damage_bonus_pct:"Урон первого бесплатного удара",paid_hit_damage_flat:"Урон",paid_hit_crit_damage_flat:"Бонус к критическому урону",paid_hit_crit_chance_pct:"Шанс критического удара",free_hit_cooldown_reduction_pct:"Уменьшение времени перезарядки",free_hit_cooldown_dodge_chance_pct:"Шанс удара без отката"},targetNames={knife:"Нож",pistol:"Пистолет",rifle:"Автомат",grenade:"Граната",ubgl:"Гранатомёт",gauss:"Гаусс"},next=rank<5?t[6][rank]:t[6][4];return '<div class="talent-detail"><div class="talent-detail-art">'+talentNodeIcon(t)+'</div><div class="talent-detail-title"><h3>'+t[2]+'</h3><span>'+rank+' / 5</span></div><p class="talent-detail-desc">'+t[3]+'</p><div class="talent-detail-effect"><small>'+labels[stat]+(target?" · "+targetNames[target]:"")+'</small>'+talentEffectLines(t)+'</div><div class="talent-detail-requirement"><span>Требования</span><b>'+req+'</b></div><div class="talent-detail-actions">'+(down?'<button type="button" class="talent-detail-minus" data-talent-down="'+t[0]+'">−</button>':"")+'<button type="button" class="talent-detail-up" data-talent-up="'+t[0]+'" '+(up?"":"disabled")+'>'+(rank>=5?"Максимум":rank?"Прокачать":"Изучить")+(rank<5?" · +"+next+(stat&&stat.endsWith("_pct")?"%":""):"")+'</button></div></div>'}
 
-/* Путь от выбранного таланта до его требований (для подсветки в дереве) */
+/* путь от таланта до его требований, для подсветки */
 function talentAncestors(code){const seen=new Set();const walk=c=>{if(seen.has(c))return;seen.add(c);const t=talentDef(c);if(!t)return;t[9].forEach(walk)};walk(code);return seen}
 
-/* Масштаб/панорама дерева талантов (pinch-zoom и drag на мобильных и десктопе) */
+/* масштаб и сдвиг дерева талантов */
 const treeT={s:1,x:0,y:0};
 function clampTreeScale(s){return Math.min(2.5,Math.max(.5,s))}
 function applyTreeTransform(){const c=document.querySelector(".talent-flow-canvas");if(c)c.style.transform="translate("+treeT.x+"px,"+treeT.y+"px) scale("+treeT.s+")"}
-/* Подгоняет дерево под размер видимой области и центрирует его.
-   offsetLeft/offsetTop игнорируют CSS transform, поэтому дают "естественную" позицию канваса. */
+/* вписать дерево в окно и отцентровать (offsetLeft/Top не учитывают transform) */
 function resetTreeTransform(){
  const wrap=document.querySelector(".talent-flow-wrap"),canvas=document.querySelector(".talent-flow-canvas");
  if(wrap&&canvas&&wrap.clientWidth&&canvas.offsetWidth){
@@ -57,7 +56,7 @@ function resetTreeTransform(){
  applyTreeTransform();
 }
 
-/* Итоговые значения калькулятора: урон, крит и дополнительные характеристики */
+/* суммарные бонусы, урон и крит */
 const MIN_LEVEL=1;
 function baseDamageByLevel(level){return{grenade:Math.round(55*Math.pow(1.02,level)),gl:Math.round(113*Math.pow(1.02,level)),gauss:Math.round(360*Math.pow(1.02,level)),knife:Math.floor(45.85+1.15*level),pistol:Math.floor(47.8+1.2*level),auto:Math.floor(53.65+1.35*level)}}
 function totals(){
@@ -77,7 +76,7 @@ function results(){
  return r;
 }
 
-/* Что изменилось: подписи показателей для сводки в окне талантов [ключ, подпись, в процентах?] */
+/* подписи для сводки изменений: [ключ, подпись, в процентах?] */
 const RES_META=[["knife","Нож"],["pistol","Пистолет"],["auto","Автомат"],["grenade","Граната"],["gl","Гранатомёт"],["gauss","Гаусс"],["critDmgGrenade","Крит гранаты"],["critDmgGl","Крит гранатомёта"],["critDmgGauss","Крит гаусса"],["critGl","Шанс крита",1],["noCooldown","Удар без отката",1],["cooldown","Сокращение отката",1],["firstFreeHit","Первый удар",1]];
 const isZero=(v,pct)=>pct?Math.round(v*100)===0:v===0;
 function fmtDelta(v,pct){return(v>0?"+":"−")+(pct?Math.abs(Math.round(v*100))+"%":fmt(Math.abs(v)))}
@@ -103,11 +102,7 @@ function renderTalents(){
  $("talentFlow").innerHTML='<div class="talent-flow-canvas" style="width:'+graphWidth+'px;height:760px"><svg class="talent-edge-layer" width="'+graphWidth+'" height="760" viewBox="0 0 '+graphWidth+' 760">'+edges+'</svg>'+nodes+'</div>';
  const spent=spentTalentPoints(),pct=Math.min(100,Math.round(spent/MAX_TALENT_POINTS*100));
  const last=lastTalentChange&&lastTalentChange.length?'<div class="talent-last"><small>Последнее изменение</small><div class="talent-last-list">'+lastTalentChange.map(c=>'<span class="'+(c.v>0?"up":"down")+'">'+c.l+' <b>'+fmtDelta(c.v,c.p)+'</b></span>').join("")+'</div></div>':"";
- /* Кнопки «Сбросить таланты» / «Скрыть» обёрнуты в .talent-side-footer —
-    на телефоне (см. @media max-width:650px в styles.css) эта обёртка
-    прилипает ко дну прокручиваемой боковой панели, поэтому кнопки всегда
-    видны и доступны, даже если пользователь не докрутил список статов
-    до конца. */
+ /* кнопки в .talent-side-footer, на телефоне он липнет ко дну панели (styles.css) */
  $("talentSidebar").innerHTML='<div class="talent-side-title"><span>Таланты</span><b>'+spent+' / '+MAX_TALENT_POINTS+'</b></div><div class="talent-gauge" style="--pct:'+pct+'"><div class="talent-gauge-ticks"></div><div class="talent-gauge-value"><b>'+pct+'</b><small>%</small></div></div><div class="talent-side-stats"><div><b>'+Math.max(0,MAX_TALENT_POINTS-spent)+'</b><small>свободно</small></div><div><b>'+spent+'</b><small>распределено</small></div></div>'+last+'<div class="talent-branch-tabs">'+branches.map(b=>'<button type="button" class="'+(b.code===currentTalentBranch?"active":"")+'" data-talent-branch="'+b.code+'">'+b.name+'</button>').join("")+'</div><div class="talent-branch-description"><b>'+branch.name+'</b><span>'+branch.desc+'</span></div><div class="talent-side-hint">Нажми на узел дерева, чтобы открыть его описание и прокачку</div><div class="talent-side-footer"><button type="button" class="talent-hide" data-reset-talents '+(spent?"":"disabled")+'>↻ Сбросить таланты</button><button type="button" class="talent-hide" data-close-talents>← Скрыть</button></div>';
  const detailOverlay=$("talentDetailOverlay");
  if(talentDetailOpen&&selectedTalentCode){detailOverlay.innerHTML='<div class="talent-detail-backdrop" data-close-talent-detail></div><div class="talent-detail-modal">'+renderTalentDetails(talentDef(selectedTalentCode))+'<button type="button" class="talent-detail-close" data-close-talent-detail aria-label="Закрыть">×</button></div>';detailOverlay.classList.add("show")}
@@ -119,7 +114,7 @@ function openTalents(){lastTalentChange=null;$("talentModal").classList.add("sho
 function closeTalents(){$("talentModal").classList.remove("show");$("talentModal").setAttribute("aria-hidden","true");talentDetailOpen=false}
 function resetTalents(){if(!spentTalentPoints())return;if(!confirm("Сбросить все очки талантов? Уровень и снаряжение останутся без изменений."))return;state.talents={};selectedTalentCode=null;talentDetailOpen=false;lastTalentChange=null;saveState();render()}
 
-/* Бонусы снаряжения (справка по всем комплектам и вещам, вне зависимости от выбора) */
+/* бонусы всех комплектов и вещей для справки */
 const GEAR_BONUS_LABELS={knife:"Нож",pistol:"Пистолет",auto:"Автомат",grenade:"Граната",gl:"Гранатомёт",gauss:"Гаусс",critChance:"Шанс крита (общий)",critDamage:"Урон крита (общий)",critGaussChance:"Шанс крита (гаусс)",critGrenadeChance:"Шанс крита (граната)",critGaussDamage:"Урон крита (гаусс)",critGrenadeDamage:"Урон крита (граната)",freeNoCooldown:"Шанс удара без отката",cooldown:"Сокращение отката"};
 const GEAR_BONUS_PCT=new Set(["critChance","critGaussChance","critGrenadeChance","freeNoCooldown","cooldown"]);
 const GEAR_EXTRA=["critChance","critDamage","critGaussChance","critGrenadeChance","critGaussDamage","critGrenadeDamage","freeNoCooldown","cooldown"];
@@ -137,12 +132,12 @@ function renderGearInfo(){$("gearInfoBody").innerHTML='<div class="gear-info-gro
 function openGearInfo(){$("gearInfoModal").classList.add("show");$("gearInfoModal").setAttribute("aria-hidden","false");renderGearInfo()}
 function closeGearInfo(){$("gearInfoModal").classList.remove("show");$("gearInfoModal").setAttribute("aria-hidden","true")}
 
-/* Расчёт по жетонам: сколько урона даёт запас жетонов, сколько жетонов нужно на заданный урон и что выгоднее */
+/* расчёт по жетонам */
 const TOKEN_PRICES={grenade:3,gl:5,gauss:15},TOKEN_KEY="gameHelperTokens",TOKEN_WEAPONS=[["grenade","Граната"],["gl","Гранатомёт"],["gauss","Гаусс"]],TOKEN_CRIT={grenade:["critGrenade","critDmgGrenade"],gl:["critGl","critDmgGl"],gauss:["critGauss","critDmgGauss"]};
 const tokenInt=id=>Math.max(0,Math.floor(Number($(id).value)||0));
 function saveTokens(){try{localStorage.setItem(TOKEN_KEY,JSON.stringify({count:$("tokenCount").value,target:$("tokenTarget").value}))}catch{}}
 function loadTokens(){try{const d=JSON.parse(localStorage.getItem(TOKEN_KEY)||"null");if(!d)return;if(d.count!==undefined)$("tokenCount").value=d.count;if(d.target!==undefined)$("tokenTarget").value=d.target}catch{}}
-/* Урон за удар и ожидаемый урон с учётом крита: урон + шанс × бонус крита */
+/* урон за удар и средний урон с критом: урон + шанс * бонус */
 function tokenWeaponStats(){
  const r=results();
  return TOKEN_WEAPONS.map(([k,name])=>{const dmg=r[k],chance=Math.min(1,r[TOKEN_CRIT[k][0]]),bonus=r[TOKEN_CRIT[k][1]];return{key:k,name,price:TOKEN_PRICES[k],dmg,chance,bonus,avg:dmg+chance*bonus}});
@@ -158,7 +153,7 @@ function renderTokens(){
 function openTokens(){$("tokensModal").classList.add("show");$("tokensModal").setAttribute("aria-hidden","false");renderTokens()}
 function closeTokens(){$("tokensModal").classList.remove("show");$("tokensModal").setAttribute("aria-hidden","true")}
 
-/* Карточки урона */
+/* карточки урона */
 const CARDS={paid:[["grenade","Граната","grenade"],["gl","Гранатомёт","ubgl"],["gauss","Гаусс","gauss"]],free:[["knife","Нож","knife"],["pistol","Пистолет","pistol"],["auto","Автомат","rifle"]]};
 function cardMarkup([k,name,icon],withCrit){
  const K=cap(k),cellHtml=(cls,label,id)=>'<div class="bd-cell '+cls+'"><small>'+label+'</small><em id="'+id+K+'">0</em></div>';
@@ -183,7 +178,7 @@ function calc(){
 function render(){$("sets").innerHTML=optionMarkup(SETS,state.sets,"set");$("items").innerHTML=optionMarkup(ITEMS,state.items,"item");$("selectAllEquipment").checked=state.sets.size===SETS.length&&state.items.size===ITEMS.length;renderTalents();calc()}
 function showToast(text){const t=$("toast");t.textContent=text||"В разработке";t.classList.add("show");clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>t.classList.remove("show"),1800)}
 
-/* Ссылка на билд: уровень, снаряжение и таланты в адресе после # */
+/* билд в ссылке: уровень, снаряжение и таланты после # */
 const toBits=s=>[...s].reduce((a,i)=>a|1<<i,0);
 function buildHash(){const p=new URLSearchParams();p.set("l",String(Math.max(1,Math.min(100,num("level")))));p.set("s",String(toBits(state.sets)));p.set("i",String(toBits(state.items)));p.set("t",TALENTS.map(t=>talentRank(t[0])).join(""));return p.toString()}
 function applyHash(){
@@ -222,7 +217,7 @@ $("selectAllEquipment").addEventListener("change",e=>{state.sets.clear();state.i
 $("level").addEventListener("input",()=>{saveState();calc()});
 $("resetAll").onclick=()=>{if(!confirm("Точно сбросить весь прогресс — уровень, снаряжение и все очки талантов?"))return;state.sets.clear();state.items.clear();state.talents={};lastTalentChange=null;$("level").value=1;saveState();render()};
 
-/* Pinch-zoom и панорамирование дерева талантов (тач) */
+/* pinch-zoom и сдвиг дерева (тач) */
 const distTouch=(a,b)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
 const midTouch=(a,b)=>({x:(a.clientX+b.clientX)/2,y:(a.clientY+b.clientY)/2});
 let touchState=null;
@@ -251,7 +246,7 @@ document.addEventListener("touchend",e=>{
  else touchState=null;
 });
 
-/* Панорама мышью и зум колесом (десктоп) */
+/* сдвиг мышью, зум колесом */
 let dragState=null;
 document.addEventListener("mousedown",e=>{
  const wrap=e.target.closest(".talent-flow-wrap");if(!wrap||e.target.closest(".talent-node-game"))return;

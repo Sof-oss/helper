@@ -2,12 +2,8 @@ const $=id=>document.getElementById(id);
 const fmt=n=>Math.round(n).toLocaleString("ru-RU");
 const TOP100_TAB_KEY="gameHelperTop100Tab";
 
-/* Разделы рейтинга: ключ, подпись вкладки, подпись колонки-показателя,
-   данные и акцентный цвет (перекликается с блоками вкладки «Информация»:
-   таланты — янтарный, экспедиции — зелёный, защита лагеря — синий; остальные — свои оттенки).
-   Порядок в массиве — это порядок вкладок на странице.
-   sortLevel:true — колонку «Ур.» этой вкладки можно кликнуть, чтобы отсортировать
-   игроков по уровню от большего к меньшему (повторный клик возвращает исходный порядок). */
+/* разделы рейтинга: ключ, вкладка, подпись колонки, данные, цвет.
+   Порядок = порядок вкладок. sortLevel: клик по «Ур.» сортирует по уровню (повторный клик сбрасывает) */
 const TOP100_TABS=[
  {key:"reputation",label:"Репутация",metric:"Репутация",data:()=>window.TOP100_REPUTATION,accent:"#f48fb1",sortLevel:true},
  {key:"bosses",label:"Боссы",metric:"Боссы",data:()=>window.TOP100_BOSSES,accent:"#ff8a65"},
@@ -21,18 +17,16 @@ const TOP100_TABS=[
 let currentTop100Tab=TOP100_TABS[0].key;
 try{const saved=localStorage.getItem(TOP100_TAB_KEY);if(TOP100_TABS.some(t=>t.key===saved))currentTop100Tab=saved}catch{}
 
-/* Включена ли сортировка по уровню (действует только на вкладках с sortLevel) */
+/* сортировка по уровню (только для вкладок с sortLevel) */
 let levelSortDesc=false;
 
-/* Значки 1–3 места вместо медалей — радиационный символ в цвете места,
-   в духе логотипа сайта (☢), а не игровые иконки из исходных картинок. */
+/* ☢ вместо медалей для 1–3 мест, цвет по месту */
 function rankCell(rank){
  if(rank>3)return '<span class="top100-rank-num">'+rank+'</span>';
  return '<span class="top100-medal top100-medal-'+rank+'" title="'+rank+' место">☢</span><span class="top100-rank-num">'+rank+'</span>';
 }
 
-/* rank — настоящее место игрока в рейтинге. plain — без медалей и подсветки
-   призёров: при сортировке по уровню места идут вразнобой, и медали были бы не к месту. */
+/* rank — реальное место. plain — без медалей и подсветки (при сортировке по уровню места вразброс) */
 function top100RowMarkup(row,rank,plain){
  const[nick,level,value,inactive]=row;
  const nickHtml=nick.replace(/</g,"&lt;");
@@ -41,7 +35,7 @@ function top100RowMarkup(row,rank,plain){
 }
 
 function top100TableMarkup(tab){
- /* место = пятый элемент строки, если в выгрузке был пропуск, иначе индекс+1 */
+ /* место = 5-й элемент, если в выгрузке был пропуск, иначе индекс+1 */
  let entries=tab.data().map((r,i)=>({row:r,rank:r[4]||i+1}));
  const sorted=!!tab.sortLevel&&levelSortDesc;
  if(sorted)entries.sort((a,b)=>b.row[1]-a.row[1]||a.rank-b.rank);
@@ -84,8 +78,7 @@ document.addEventListener("keydown",e=>{
  toggleLevelSort(true);
 });
 
-/* Дату обновления отдаёт top100-data.js (её пишет build-top100.js);
-   в разметке остаётся только заглушка */
+/* дату отдаёт top100-data.js, в разметке только заглушка */
 const updatedEl=$("top100Updated");
 if(updatedEl&&window.TOP100_UPDATED)updatedEl.textContent=window.TOP100_UPDATED;
 

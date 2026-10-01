@@ -1,8 +1,6 @@
-/* Вкладка «Задания» на странице «Информация»: переключатель разделов
-   («Прогресс по уровням» / «Задания») и сама таблица. На десктопе — полная
-   матрица, на телефоне — выбор локации и компактные блоки (5 колонок
-   в одну строку на экране 360px не помещаются). Обёрнуто в функцию, чтобы
-   не конфликтовать с глобальными $ и fmt из info.js. */
+/* вкладка «Задания» на странице «Информация»: переключатель разделов и таблица.
+   Десктоп: полная матрица, телефон: выбор локации (5 колонок на 360px не влезают).
+   В функции, чтобы не пересекаться с $ и fmt из info.js */
 (function(){
 "use strict";
 const D=window.TASKS_DATA,L=D.locations.map(l=>l.replace(/"([^"]*)"/g,"«$1»"));
@@ -13,7 +11,7 @@ const gain=k=>L.map((_,i)=>D.total[k][i]/D.total.energy[i]);
 const round2=v=>Math.round(v*100)/100;
 const card=(led,title,body)=>'<div class="info-group"><div class="info-group-title"><i class="info-led" style="--led:'+led+'"></i><b>'+title+'</b></div>'+body+'</div>';
 
-/* ---------- десктоп ---------- */
+/* десктоп */
 function block(cls,label,items){
  return items.map(([key,vals,f,best],i)=>{
   const r=best?vals.map(round2):vals,m=best?Math.max(...r):0;
@@ -31,7 +29,7 @@ function matrix(){
  return '<div class="data-wrap"><table class="data-table tasks-matrix"><thead><tr><th>Этап</th><th>Ресурс</th>'+L.map(l=>'<th>'+l+'</th>').join("")+'</tr></thead><tbody>'+b+'</tbody></table></div>';
 }
 
-/* ---------- телефон ---------- */
+/* телефон */
 let cur=0;
 try{const s=Number(localStorage.getItem(LOC_KEY));if(s>=0&&s<L.length)cur=s}catch{}
 function mobile(){
@@ -53,7 +51,7 @@ function renderTasks(){
 }
 function renderMobile(){root.querySelector(".tasks-mobile").innerHTML=mobile()}
 
-/* ---------- переключатель разделов ---------- */
+/* переключатель разделов */
 function setSection(k){
  document.querySelectorAll("[data-section]").forEach(b=>{const on=b.dataset.section===k;b.classList.toggle("active",on);b.setAttribute("aria-pressed",on)});
  document.querySelectorAll("[data-section-panel]").forEach(p=>{p.hidden=p.dataset.sectionPanel!==k});
