@@ -219,7 +219,7 @@ function cmpRow(label,x,y,pct,best){
 function renderCompare(){
  const body=$("compareBody");
  $("cmpClear").disabled=!cmpBuild;
- if(!cmpBuild){body.innerHTML='<p class="cmp-note">Пока не с чем сравнивать. Вставьте ссылку на билд выше или запомните свой текущий билд, поменяйте его и вернитесь сюда.</p>';return}
+ if(!cmpBuild){body.innerHTML='<p class="cmp-note">Пока не с чем сравнивать. Вставьте ссылку на билд в поле выше.</p>';return}
  const a=currentBuild(),b=cmpBuild,ra=results(),rb=resultsFor(b);
  let rows=cmpRow("Уровень",a.level,b.level)+cmpRow("Очки талантов",sumRanks(a.talents),sumRanks(b.talents))+cmpRow("Комплекты",a.sets.length,b.sets.length)+cmpRow("Одиночные вещи",a.items.length,b.items.length);
  CMP_GROUPS.forEach(([title,list])=>{rows+='<tr class="cmp-group"><td colspan="4">'+title+'</td></tr>'+list.map(([k,l,p])=>cmpRow(l,ra[k],rb[k],p,true)).join("")});
@@ -257,7 +257,6 @@ document.addEventListener("click",e=>{
  if(e.target.closest("#openCompare")){openCompare();return}
  if(e.target.closest("[data-close-compare]")){closeCompare();return}
  if(e.target.closest("#cmpLoad")){loadCmpFromInput();return}
- if(e.target.closest("#cmpSnap")){cmpBuild=currentBuild();saveCompare();renderCompare();showToast("Билд запомнен");return}
  if(e.target.closest("#cmpClear")){cmpBuild=null;saveCompare();renderCompare();return}
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(talentDetailOpen){talentDetailOpen=false;renderTalents()}else if($("compareModal").classList.contains("show")){closeCompare()}else if($("tokensModal").classList.contains("show")){closeTokens()}else if($("gearInfoModal").classList.contains("show")){closeGearInfo()}else closeTalents()}});
