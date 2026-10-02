@@ -505,15 +505,17 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .cmp-table .cmp-c0{width:40%}
 .cmp-table th{position:sticky;top:0;z-index:2;background:#070908;padding:8px}
 .cmp-table td:first-child{white-space:normal}
+.cmp-table th:not(:first-child),.cmp-table td:not(:first-child){text-align:center}
+.data-table td.cmp-up{color:#27db88;font-weight:700}
+.data-table td.cmp-down{color:#ff6b6f;font-weight:700}
+.cmp-v{position:relative;display:inline-block}
+.cmp-arr{position:absolute;left:100%;top:50%;transform:translateY(-50%);margin-left:5px;font-style:normal;font-size:9px;line-height:1}
 .cmp-table tbody tr:hover td{background:#0b1925}
 .cmp-table th.cmp-h-a{color:#54bfff}
 .cmp-table th.cmp-h-b{color:#f0ae58}
 .data-table tr.cmp-group td{padding-top:16px;color:#7c93a6;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;border-top:1px solid #193246}
 .data-table tr.cmp-group:hover td{background:none}
 .data-table tr.cmp-eq td{color:#4f677a}
-.data-table td.cmp-lead-a{color:#54bfff;font-weight:700}
-.data-table td.cmp-lead-b{color:#f0ae58;font-weight:700}
-.data-table td.cmp-d{font-size:12px}
 .cmp-diff{margin-top:14px;border:1px solid #1a3346;border-radius:8px;background:#0b1925;padding:10px 12px;font-size:12px;color:#a9bed0}
 .cmp-diff summary{cursor:pointer;color:#cbd9e5;font-weight:600}
 .cmp-diff p{margin:8px 0 0}
