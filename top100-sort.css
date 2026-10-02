@@ -21,21 +21,23 @@
 .top100-table th{font-size:12px;color:#9db2c4}
 
 /* ===== Подиум ===== */
-.t100-podium{display:grid;grid-template-columns:1fr 1.12fr 1fr;gap:12px;align-items:end;margin:4px 0 16px}
+.t100-podium{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:10px;align-items:end;max-width:640px;margin:4px auto 14px}
 .t100-podium[hidden]{display:none}
 .t100-pc:nth-child(1){order:2}
 .t100-pc:nth-child(2){order:1}
 .t100-pc:nth-child(3){order:3}
-.t100-pc{--m:#a9bac6;padding:14px 12px 13px;text-align:center;border:1px solid #1a3346;border-top:3px solid var(--m);border-radius:10px;background:linear-gradient(160deg,#0b1925,#08121b);box-shadow:0 8px 20px #0005}
-.t100-pc.p1{--m:#e8ae3d;padding-top:22px;padding-bottom:18px;box-shadow:0 0 22px rgba(232,174,61,.14),0 8px 20px #0005}
+.t100-pc{--m:#a9bac6;padding:10px 10px 10px;text-align:center;border:1px solid #1a3346;border-top:3px solid var(--m);border-radius:10px;background:linear-gradient(160deg,#0b1925,#08121b);box-shadow:0 6px 16px #0005}
+.t100-pc.p1{--m:#e8ae3d;padding-top:14px;padding-bottom:13px;box-shadow:0 0 18px rgba(232,174,61,.14),0 6px 16px #0005}
 .t100-pc.p3{--m:#b3703f}
-.t100-pc .top100-medal{width:30px;height:30px;font-size:16px;margin-bottom:8px}
-.t100-nick{display:flex;align-items:center;justify-content:center;gap:6px;min-height:35px;font-size:14px;font-weight:700;line-height:1.25;color:#e4eef8;overflow-wrap:anywhere}
+.t100-head{display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:5px}
+.t100-pc .top100-medal{width:24px;height:24px;flex-basis:24px;font-size:13px}
+.t100-place{font-size:17px;font-weight:800;line-height:1;color:var(--m);font-variant-numeric:tabular-nums}
+.t100-nick{display:flex;align-items:center;justify-content:center;gap:6px;min-height:30px;font-size:13px;font-weight:700;line-height:1.25;color:#e4eef8;overflow-wrap:anywhere}
 .t100-nick .t100-dot{margin:0}
-.t100-lvl{margin:4px 0 8px;font-size:12px;color:#9db2c4}
-.t100-val{font-size:24px;font-weight:800;line-height:1;color:var(--accent,#54bfff);font-variant-numeric:tabular-nums}
-.t100-pc.p1 .t100-val{font-size:28px}
-.t100-metric{margin-top:4px;font-size:12px;color:#9db2c4}
+.t100-lvl{margin:2px 0 6px;font-size:12px;color:#9db2c4}
+.t100-val{font-size:20px;font-weight:800;line-height:1;color:var(--accent,#54bfff);font-variant-numeric:tabular-nums}
+.t100-pc.p1 .t100-val{font-size:24px}
+.t100-metric{margin-top:3px;font-size:11.5px;color:#9db2c4}
 .t100-pc.off .t100-nick{color:#ff9498;font-style:italic}
 
 /* ===== Поиск и отряды ===== */
@@ -56,8 +58,10 @@
 
 @media(max-width:650px){
   .t100-podium{gap:6px}
-  .t100-pc{padding:10px 5px}
-  .t100-pc.p1{padding-top:14px;padding-bottom:12px}
+  .t100-pc{padding:8px 5px}
+  .t100-pc.p1{padding-top:10px;padding-bottom:10px}
+  .t100-head{gap:5px}
+  .t100-place{font-size:15px}
   .t100-nick{min-height:44px;font-size:11.5px}
   .t100-val{font-size:17px}
   .t100-pc.p1 .t100-val{font-size:19px}

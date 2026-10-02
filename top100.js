@@ -78,7 +78,7 @@ function renderPodium(){
  el.style.setProperty("--accent",tab.accent);
  el.innerHTML=tab.data().slice(0,3).map((r,i)=>{
   const[nick,level,value,off]=r;
-  return '<div class="t100-pc p'+(i+1)+(off?" off":"")+'"><span class="top100-medal top100-medal-'+(i+1)+'" title="'+(i+1)+' место">☢</span><span class="t100-nick">'+dotMarkup(factionOf(nick),"t100-dot")+esc(nick)+'</span><div class="t100-lvl">Ур. '+level+'</div><div class="t100-val">'+fmt(value)+'</div><div class="t100-metric">'+tab.metric+'</div></div>';
+  return '<div class="t100-pc p'+(i+1)+(off?" off":"")+'"><div class="t100-head"><span class="top100-medal top100-medal-'+(i+1)+'" title="'+(i+1)+' место">☢</span><b class="t100-place">'+(i+1)+'</b></div><span class="t100-nick">'+dotMarkup(factionOf(nick),"t100-dot")+esc(nick)+'</span><div class="t100-lvl">Ур. '+level+'</div><div class="t100-val">'+fmt(value)+'</div><div class="t100-metric">'+tab.metric+'</div></div>';
  }).join("");
 }
 
