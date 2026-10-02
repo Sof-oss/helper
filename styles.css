@@ -1,9 +1,13 @@
 /* ===== Основа ===== */
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:#060d13;color:#dce7f2;font-family:"Segoe UI",Arial,sans-serif;overflow-x:hidden}body{min-height:100vh;display:flex;flex-direction:column}
-/* затемнение внизу страницы: полоса фиксированной высоты, прижата к низу */
-/* cover, а не «100% auto»: на коротких страницах картинка иначе не доходит до низа */
-body{background-color:#060d13;background-image:linear-gradient(180deg,rgba(6,13,19,0) 0,rgba(6,13,19,0) calc(100% - 340px),rgba(6,13,19,.3) calc(100% - 220px),rgba(6,13,19,.78) calc(100% - 110px),#060d13 100%),radial-gradient(circle at 75% 0%,rgba(49,73,91,.32),transparent 35%),url("assets/bg-zone.jpg");background-position:0 0,0 0,center top;background-size:auto,auto,cover;background-repeat:no-repeat;font-size:14px}
+html{background:#060d13}
+html,body{margin:0;min-height:100%;color:#dce7f2;font-family:"Segoe UI",Arial,sans-serif;overflow-x:hidden}body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;font-size:14px}
+/* фон закреплён за окном, а не за страницей: слой фиксированной высоты в экран, поэтому картинка одинаковая на всех страницах
+   и не растягивается, не едет при прокрутке и не прыгает при смене высоты контента (вкладки, поиск, фильтры).
+   100lvh — чтобы на телефоне фон не дёргался, когда браузер прячет адресную строку; 100vh — запасной вариант.
+   Цвет #060d13 лежит на html, body прозрачный, иначе он закроет слой с z-index:-1.
+   Слои: затемнение внизу (полоса 340px), подсветка сверху справа, картинка cover */
+body::before{content:"";position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:-1;pointer-events:none;background-image:linear-gradient(180deg,rgba(6,13,19,0) 0,rgba(6,13,19,0) calc(100% - 340px),rgba(6,13,19,.3) calc(100% - 220px),rgba(6,13,19,.78) calc(100% - 110px),#060d13 100%),radial-gradient(circle at 75% 0%,rgba(49,73,91,.32),transparent 35%),url("assets/bg-zone.jpg");background-position:0 0,0 0,center top;background-size:auto,auto,cover;background-repeat:no-repeat}
 :where(button,input,a):focus-visible{outline:2px solid #54bfff;outline-offset:2px}
 
 /* ===== Шапка ===== */
