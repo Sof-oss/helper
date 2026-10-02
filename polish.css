@@ -102,14 +102,14 @@
 .tokens-window .data-table{font-size:13.5px}
 .tokens-window .data-table th{padding:8px 10px;border-bottom:1px solid #23475f;color:#8fa6b8;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
 .tokens-window .data-table th.tok-crit{color:#ff9aa0}
-.tokens-window .data-table td{padding:11px 10px;border-top:1px solid #12222f;font-weight:600}
+.tokens-window .data-table td{padding:9px 10px;border-top:1px solid #12222f;font-weight:600}
 .tokens-window .data-table tbody tr:first-child td{border-top:0}
 .tokens-window .data-table tbody tr:hover td:not(.tok-best){background:rgba(84,191,255,.06)}
-.tokens-window .gear-info-body>.tok-col .data-table{min-width:680px}
+.tokens-window .gear-info-body>.tok-col .data-table{min-width:620px}
 
 /* иконка оружия перед названием: порядок строк всегда граната, гранатомёт, гаусс (те же картинки, что на карточках урона) */
 .tokens-window .data-table td:first-child{color:#e3edf6;white-space:nowrap}
-.tokens-window .data-table td:first-child::before{content:"";display:inline-block;width:38px;height:30px;margin-right:10px;vertical-align:middle;background:no-repeat center/contain}
+.tokens-window .data-table td:first-child::before{content:"";display:inline-block;width:30px;height:22px;margin-right:9px;vertical-align:middle;background:no-repeat center/contain}
 .tokens-window tbody tr:nth-child(1) td:first-child::before{background-image:url("assets/grenade-IrR3fcAU.webp")}
 .tokens-window tbody tr:nth-child(2) td:first-child::before{background-image:url("assets/ubgl-9PMpxB6a.webp")}
 .tokens-window tbody tr:nth-child(3) td:first-child::before{background-image:url("assets/gauss-IaBtaAzR.webp")}
@@ -126,5 +126,5 @@
   .tokens-window .tok-field input{width:120px;height:40px}
   .tokens-window .data-table td{padding:9px 6px}
   .tokens-window .data-table th{padding:8px 6px}
-  .tokens-window .data-table td:first-child::before{width:30px;height:24px;margin-right:7px}
+  .tokens-window .data-table td:first-child::before{width:24px;height:18px;margin-right:6px}
 }
