@@ -67,8 +67,8 @@ function totals(){
  const t=talentTotals();keys.forEach(k=>total[k]+=t.total[k]);
  return{total,critChance:critChance+t.critChance,critDamage,critGaussChance,critGrenadeChance,critGaussDamage:critGaussDamage+t.critDamageByWeapon.gauss,critGrenadeDamage:critGrenadeDamage+t.critDamageByWeapon.grenade,critGlDamageTal:t.critDamageByWeapon.gl,noCooldown:noCooldown+t.noCooldown,cooldown:cooldown+t.cooldown};
 }
-function results(){
- const level=Math.max(1,Math.min(100,num("level"))),base=baseDamageByLevel(level),T=totals(),r={};
+function results(lvl){
+ const level=Math.max(1,Math.min(100,lvl===undefined?num("level"):lvl)),base=baseDamageByLevel(level),T=totals(),r={};
  keys.forEach(k=>r[k]=base[k]+T.total[k]);
  r.critGrenade=T.critChance+T.critGrenadeChance;r.critGl=T.critChance;r.critGauss=T.critChance+T.critGaussChance;
  r.critDmgGrenade=T.critDamage+T.critGrenadeDamage;r.critDmgGl=T.critDamage+T.critGlDamageTal;r.critDmgGauss=T.critDamage+T.critGaussDamage;
@@ -180,16 +180,61 @@ function showToast(text){const t=$("toast");t.textContent=text||"В разраб
 
 /* билд в ссылке: уровень, снаряжение и таланты после # */
 const toBits=s=>[...s].reduce((a,i)=>a|1<<i,0);
-function buildHash(){const p=new URLSearchParams();p.set("l",String(Math.max(1,Math.min(100,num("level")))));p.set("s",String(toBits(state.sets)));p.set("i",String(toBits(state.items)));p.set("t",TALENTS.map(t=>talentRank(t[0])).join(""));return p.toString()}
-function applyHash(){
- const h=location.hash.replace(/^#/,"");if(!h)return false;
- const p=new URLSearchParams(h);if(!p.has("t")&&!p.has("l")&&!p.has("s")&&!p.has("i"))return false;
- $("level").value=Math.max(1,Math.min(100,parseInt(p.get("l"),10)||1));
+const currentBuild=()=>({level:Math.max(1,Math.min(100,num("level"))),sets:[...state.sets],items:[...state.items],talents:{...state.talents}});
+function buildHashOf(b){const p=new URLSearchParams();p.set("l",String(b.level));p.set("s",String(toBits(b.sets)));p.set("i",String(toBits(b.items)));p.set("t",TALENTS.map(t=>b.talents[t[0]]||0).join(""));return p.toString()}
+function buildHash(){return buildHashOf(currentBuild())}
+/* разбор билда: принимает ссылку целиком, хвост после # или просто l=..&s=..; ранги без выполненных требований отбрасываются */
+function parseBuild(raw){
+ const p=new URLSearchParams(raw.replace(/^[^#]*#/,""));
+ if(!["l","s","i","t"].some(k=>p.has(k)))return null;
  const sm=parseInt(p.get("s"),10)||0,im=parseInt(p.get("i"),10)||0,ts=p.get("t")||"";
- state.sets.clear();state.items.clear();state.talents={};
- SETS.forEach((_,i)=>{if((sm>>i)&1)state.sets.add(i)});ITEMS.forEach((_,i)=>{if((im>>i)&1)state.items.add(i)});
- TALENTS.forEach((t,i)=>{const r=Math.max(0,Math.min(5,parseInt(ts[i],10)||0));if(r&&t[9].every(q=>talentRank(q)>=5))state.talents[t[0]]=r});
- history.replaceState(null,"",location.href.split("#")[0]);saveState();return true;
+ const b={level:Math.max(1,Math.min(100,parseInt(p.get("l"),10)||1)),sets:[],items:[],talents:{}};
+ SETS.forEach((_,i)=>{if((sm>>i)&1)b.sets.push(i)});
+ ITEMS.forEach((_,i)=>{if((im>>i)&1)b.items.push(i)});
+ TALENTS.forEach((t,i)=>{const r=Math.max(0,Math.min(5,parseInt(ts[i],10)||0));if(r&&t[9].every(q=>(b.talents[q]||0)>=5))b.talents[t[0]]=r});
+ return b;
+}
+/* расчёт чужого билда: на время подменяем состояние и возвращаем как было */
+function resultsFor(b){
+ const keep={sets:state.sets,items:state.items,talents:state.talents};
+ state.sets=new Set(b.sets);state.items=new Set(b.items);state.talents=b.talents;
+ try{return results(b.level)}finally{Object.assign(state,keep)}
+}
+
+/* сравнение: второй билд хранится отдельно и не трогает основной */
+const CMP_KEY="gameHelperCompare";
+let cmpBuild=null;
+function saveCompare(){try{if(cmpBuild)localStorage.setItem(CMP_KEY,buildHashOf(cmpBuild));else localStorage.removeItem(CMP_KEY)}catch{}}
+function loadCompare(){try{const h=localStorage.getItem(CMP_KEY);if(h)cmpBuild=parseBuild(h)}catch{}}
+const CMP_GROUPS=[
+ ["Урон за удар",[["knife","Нож"],["pistol","Пистолет"],["auto","Автомат"],["grenade","Граната"],["gl","Гранатомёт"],["gauss","Гаусс"]]],
+ ["Крит",[["critDmgGrenade","Урон крита, граната"],["critDmgGl","Урон крита, гранатомёт"],["critDmgGauss","Урон крита, гаусс"],["critGrenade","Шанс крита, граната",1],["critGl","Шанс крита, гранатомёт",1],["critGauss","Шанс крита, гаусс",1]]],
+ ["Дополнительно",[["noCooldown","Удар без отката",1],["cooldown","Сокращение отката",1],["firstFreeHit","Первый бесплатный удар",1]]]
+];
+const sumRanks=t=>Object.values(t).reduce((a,b)=>a+b,0);
+function cmpRow(label,x,y,pct,best){
+ const d=y-x,zero=Math.abs(d)<(pct?.005:.5),hi=best&&!zero,show=v=>pct?Math.round(v*100)+"%":fmt(v);
+ return '<tr><td>'+label+'</td><td class="'+(hi&&x>y?"tok-best":"")+'">'+show(x)+'</td><td class="'+(hi&&y>x?"tok-best":"")+'">'+show(y)+'</td><td class="'+(zero?"cmp-zero":d>0?"cmp-up":"cmp-down")+'">'+(zero?"—":fmtDelta(d,pct))+'</td></tr>';
+}
+function renderCompare(){
+ const body=$("compareBody");
+ $("cmpClear").disabled=!cmpBuild;
+ if(!cmpBuild){body.innerHTML='<p class="cmp-note">Пока не с чем сравнивать. Вставьте ссылку на билд выше или запомните свой текущий билд, поменяйте его и вернитесь сюда.</p>';return}
+ const a=currentBuild(),b=cmpBuild,ra=results(),rb=resultsFor(b);
+ let rows=cmpRow("Уровень",a.level,b.level)+cmpRow("Очки талантов",sumRanks(a.talents),sumRanks(b.talents))+cmpRow("Комплекты",a.sets.length,b.sets.length)+cmpRow("Одиночные вещи",a.items.length,b.items.length);
+ CMP_GROUPS.forEach(([title,list])=>{rows+='<tr class="cmp-group"><td colspan="4">'+title+'</td></tr>'+list.map(([k,l,p])=>cmpRow(l,ra[k],rb[k],p,true)).join("")});
+ const only=(x,y,list)=>x.filter(i=>!y.includes(i)).map(i=>list[i].name),line=(t,arr)=>arr.length?'<p><b>'+t+':</b> '+arr.join(", ")+'</p>':"";
+ const mine=[...only(a.sets,b.sets,SETS),...only(a.items,b.items,ITEMS)],theirs=[...only(b.sets,a.sets,SETS),...only(b.items,a.items,ITEMS)];
+ const tal=TALENTS.filter(t=>(a.talents[t[0]]||0)!==(b.talents[t[0]]||0)).map(t=>t[2]+" "+(a.talents[t[0]]||0)+" → "+(b.talents[t[0]]||0));
+ const diff=line("Снаряжение только у вас",mine)+line("Снаряжение только в сравниваемом",theirs)+line("Таланты (ваш → сравниваемый)",tal);
+ body.innerHTML='<div class="data-wrap"><table class="data-table cmp-table"><thead><tr><th>Параметр</th><th>Ваш билд</th><th>Сравниваемый</th><th>Разница</th></tr></thead><tbody>'+rows+'</tbody></table></div><details class="cmp-diff"><summary>Что отличается</summary>'+(diff||'<p>Снаряжение и таланты совпадают.</p>')+'</details>';
+}
+function openCompare(){$("compareModal").classList.add("show");$("compareModal").setAttribute("aria-hidden","false");renderCompare()}
+function closeCompare(){$("compareModal").classList.remove("show");$("compareModal").setAttribute("aria-hidden","true")}
+function loadCmpFromInput(){
+ const v=$("cmpInput").value.trim(),b=v&&parseBuild(v);
+ if(!b){showToast("Не похоже на ссылку на билд");return}
+ cmpBuild=b;saveCompare();$("cmpInput").value="";renderCompare();
 }
 function fallbackCopy(s){const a=document.createElement("textarea");a.value=s;a.style.cssText="position:fixed;opacity:0";document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand("copy")}catch{}a.remove();return ok}
 function copyText(s){return navigator.clipboard&&window.isSecureContext?navigator.clipboard.writeText(s).then(()=>true,()=>fallbackCopy(s)):Promise.resolve(fallbackCopy(s))}
@@ -209,8 +254,13 @@ document.addEventListener("click",e=>{
  if(e.target.closest("#openTokens")){openTokens();return}
  if(e.target.closest("[data-close-tokens]")){closeTokens();return}
  if(e.target.closest("#shareBuild")){shareBuild();return}
+ if(e.target.closest("#openCompare")){openCompare();return}
+ if(e.target.closest("[data-close-compare]")){closeCompare();return}
+ if(e.target.closest("#cmpLoad")){loadCmpFromInput();return}
+ if(e.target.closest("#cmpSnap")){cmpBuild=currentBuild();saveCompare();renderCompare();showToast("Билд запомнен");return}
+ if(e.target.closest("#cmpClear")){cmpBuild=null;saveCompare();renderCompare();return}
 });
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(talentDetailOpen){talentDetailOpen=false;renderTalents()}else if($("tokensModal").classList.contains("show")){closeTokens()}else if($("gearInfoModal").classList.contains("show")){closeGearInfo()}else closeTalents()}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(talentDetailOpen){talentDetailOpen=false;renderTalents()}else if($("compareModal").classList.contains("show")){closeCompare()}else if($("tokensModal").classList.contains("show")){closeTokens()}else if($("gearInfoModal").classList.contains("show")){closeGearInfo()}else closeTalents()}});
 document.addEventListener("change",e=>{const i=e.target;if(!i.matches("[data-type]"))return;const s=i.dataset.type==="set"?state.sets:state.items,n=Number(i.dataset.index);i.checked?s.add(n):s.delete(n);saveState();render()});
 document.addEventListener("click",e=>{const b=e.target.closest("[data-step]");if(!b)return;const input=$(b.dataset.step),dir=Number(b.dataset.dir)||0,min=Number(input.min)||0,max=Number(input.max)||999;input.value=Math.min(max,Math.max(min,(Number(input.value)||0)+dir));saveState();calc()});
 $("selectAllEquipment").addEventListener("change",e=>{state.sets.clear();state.items.clear();if(e.target.checked){SETS.forEach((_,i)=>state.sets.add(i));ITEMS.forEach((_,i)=>state.items.add(i))}saveState();render()});
@@ -271,6 +321,9 @@ document.addEventListener("wheel",e=>{
 
 ["tokenCount","tokenTarget"].forEach(id=>$(id).addEventListener("input",()=>{saveTokens();renderTokens()}));
 renderCards();loadState();loadTokens();
-const openedFromLink=applyHash();
+$("cmpInput").addEventListener("keydown",e=>{if(e.key==="Enter")loadCmpFromInput()});
+/* билд из ссылки идёт в сравнение, свой сохранённый не трогаем */
+const linked=parseBuild(location.hash);
+if(linked){cmpBuild=linked;saveCompare();history.replaceState(null,"",location.href.split("#")[0])}else loadCompare();
 render();
-if(openedFromLink)showToast("Открыт билд по ссылке");
+if(linked)openCompare();
