@@ -64,3 +64,66 @@
 /* --- урон первого бесплатного удара рядом с основным значением --- */
 .first-hit{margin-left:8px;font-size:18px;font-weight:700;color:#27db88;white-space:nowrap;font-variant-numeric:tabular-nums}
 @media(max-width:430px){.first-hit{font-size:15px;margin-left:6px}}
+
+/* ===== Шрифты заголовков калькулятора =====
+   Rubik Dirt (грязный, очень жирный) заменён на Rubik 500–600: кириллица читается чисто, начертание остаётся «игровым».
+   Размеры из styles.css не трогаем (кроме двух заголовков), чтобы работали его media-запросы */
+.talent-game-header h2,.talent-side-title,.talent-gauge-value b,.td-head h3{font-family:"Rubik","Segoe UI",Arial,sans-serif}
+.talent-game-header h2{font-size:24px;font-weight:600;line-height:1.15;letter-spacing:.1px}
+.talent-side-title{font-weight:500}
+.talent-gauge-value b{font-weight:600}
+.td-head h3{font-size:24px;font-weight:500;line-height:1.2}
+@media(max-width:430px){.talent-game-header h2{font-size:18px}.td-head h3{font-size:20px}}
+
+/* заголовки страницы и блоков: 700 → 600, только на странице калькулятора (там обёртка .page) */
+.page .result-title h1{font-weight:600;letter-spacing:-.3px}
+.page .section-heading b,.page .side-title b,.page .items-divider b{font-weight:600}
+.page .damage-card h3{font-weight:600}
+.page .damage-card strong{font-weight:600}
+
+/* ===== Окно «Расчёт по жетонам» ===== */
+.tokens-window .gear-info-body{gap:14px;padding:18px 20px 22px}
+.tokens-window .tok-grid{gap:14px}
+.tokens-window .tok-col{padding:16px 18px 14px;border-color:#1c3a50;background:linear-gradient(160deg,#0c1b28,#09141e);box-shadow:inset 0 0 24px rgba(10,34,52,.35)}
+
+/* поле ввода: подпись слева, крупное число справа */
+.tokens-window .tok-field{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #16303f;color:#dce7f0;font-size:14px;font-weight:600}
+.tokens-window .tok-field input{width:150px;height:42px;border-color:#27506d;border-radius:8px;background:#071522;font-size:18px;transition:border-color .15s,box-shadow .15s}
+.tokens-window .tok-field input:hover{border-color:#3a7096}
+.tokens-window .tok-field input:focus{outline:none;border-color:#54bfff;box-shadow:0 0 0 3px rgba(84,191,255,.18)}
+
+/* подзаголовки с цветной меткой */
+.tokens-window .tok-title{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.7px;color:#8fb3cc}
+.tokens-window .tok-title::before{content:"";width:3px;height:12px;border-radius:2px;background:#54bfff}
+.tokens-window .tok-grid>.tok-col:nth-child(2) .tok-title::before{background:#f0ae58}
+.tokens-window .gear-info-group-title{margin:6px 0 0;padding-top:18px;border-top:1px solid #1c3a50;font-size:12px;font-weight:700;letter-spacing:.7px;color:#8fb3cc}
+
+/* таблицы */
+.tokens-window .data-table{font-size:13.5px}
+.tokens-window .data-table th{padding:8px 10px;border-bottom:1px solid #23475f;color:#8fa6b8;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
+.tokens-window .data-table th.tok-crit{color:#ff9aa0}
+.tokens-window .data-table td{padding:11px 10px;border-top:1px solid #12222f;font-weight:600}
+.tokens-window .data-table tbody tr:first-child td{border-top:0}
+.tokens-window .data-table tbody tr:hover td:not(.tok-best){background:rgba(84,191,255,.06)}
+.tokens-window .gear-info-body>.tok-col .data-table{min-width:680px}
+
+/* цветная точка у названия оружия: порядок строк всегда граната, гранатомёт, гаусс */
+.tokens-window .data-table td:first-child{color:#e3edf6;white-space:nowrap}
+.tokens-window .data-table td:first-child::before{content:"";display:inline-block;width:8px;height:8px;margin-right:10px;border-radius:50%;background:var(--w);box-shadow:0 0 7px var(--w)}
+.tokens-window tbody tr:nth-child(1){--w:#f0ae58}
+.tokens-window tbody tr:nth-child(2){--w:#54bfff}
+.tokens-window tbody tr:nth-child(3){--w:#b48cff}
+
+/* самое выгодное оружие */
+.tokens-window .data-table td.tok-best{background:rgba(39,219,136,.09);color:#27db88;font-weight:700}
+
+/* пояснение внизу */
+.tokens-window .tok-note{margin:0;padding:12px 14px;border-left:3px solid #2e6384;border-radius:0 8px 8px 0;background:rgba(84,191,255,.05);color:#9db2c4;font-size:12.5px;line-height:1.6}
+
+@media(max-width:650px){
+  .tokens-window .gear-info-body{padding:14px 12px 18px}
+  .tokens-window .tok-col{padding:12px 12px 10px}
+  .tokens-window .tok-field input{width:120px;height:40px}
+  .tokens-window .data-table td{padding:9px 6px}
+  .tokens-window .data-table th{padding:8px 6px}
+}
