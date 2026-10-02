@@ -51,4 +51,22 @@ function fixTalentButtons(){
 }
 new MutationObserver(fixTalentButtons).observe(ts,{childList:true});
 fixTalentButtons();
+
+/* --- окно таланта: не «моргает» при прокачке ---
+   renderTalents() в app.js пересоздаёт содержимое окна при каждом клике, и анимация появления проигрывается заново.
+   Первое открытие анимируем, а пока окно уже открыто, ставим .rerender (анимация выключена, см. polish.css).
+   Закрытие (содержимое пустое) сбрасывает флаги */
+const dov=$("talentDetailOverlay");
+if(dov){
+ let wasOpen=false;
+ new MutationObserver(()=>{
+  if(dov.childElementCount){
+   if(wasOpen)dov.classList.add("rerender");
+   else wasOpen=true;
+  }else{
+   wasOpen=false;
+   dov.classList.remove("rerender");
+  }
+ }).observe(dov,{childList:true});
+}
 })();

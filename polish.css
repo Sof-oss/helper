@@ -128,3 +128,7 @@
   .tokens-window .data-table th{padding:8px 6px}
   .tokens-window .data-table td:first-child::before{width:24px;height:18px;margin-right:6px}
 }
+
+/* ===== Окно таланта: без повторной анимации при прокачке =====
+   polish.js ставит .rerender, пока окно уже открыто и его содержимое перерисовывается */
+.talent-detail-overlay.rerender .talent-detail-modal{animation:none}
