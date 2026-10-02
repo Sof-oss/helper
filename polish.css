@@ -62,3 +62,7 @@
 .bd-cell.bd-gear{border-top-color:#54bfff}
 .bd-cell.bd-talent{border-top-color:#27db88}
 @media(prefers-reduced-motion:reduce){.dmg-bar i{transition:none}}
+
+/* --- урон первого бесплатного удара рядом с основным значением --- */
+.first-hit{margin-left:8px;font-size:18px;font-weight:700;color:#27db88;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(max-width:430px){.first-hit{font-size:15px;margin-left:6px}}

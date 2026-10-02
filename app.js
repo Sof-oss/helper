@@ -157,7 +157,7 @@ function closeTokens(){$("tokensModal").classList.remove("show");$("tokensModal"
 const CARDS={paid:[["grenade","Граната","grenade"],["gl","Гранатомёт","ubgl"],["gauss","Гаусс","gauss"]],free:[["knife","Нож","knife"],["pistol","Пистолет","pistol"],["auto","Автомат","rifle"]]};
 function cardMarkup([k,name,icon],withCrit){
  const K=cap(k),cellHtml=(cls,label,id)=>'<div class="bd-cell '+cls+'"><small>'+label+'</small><em id="'+id+K+'">0</em></div>';
- return '<article class="damage-card"><div class="weapon-icon weapon-'+icon+'" aria-hidden="true"></div><div class="dmg-main"><h3>'+name+'</h3><strong id="result'+K+'">0</strong></div><i class="delta" id="delta'+K+'"></i><div class="breakdown">'+cellHtml("","База","base")+cellHtml("bd-level","Уровень","level")+cellHtml("bd-gear","Экипировка","gear")+cellHtml("bd-talent","Таланты","talentOut")+'</div>'+(withCrit?'<span class="crit-chip"><span class="crit-chip-label">Крит*</span><em id="crit'+K+'">0%</em><span class="crit-chip-sep">/</span><em id="critDmg'+K+'">0</em></span>':"")+'</article>';
+ return '<article class="damage-card"><div class="weapon-icon weapon-'+icon+'" aria-hidden="true"></div><div class="dmg-main"><h3>'+name+'</h3><strong id="result'+K+'">0</strong>'+(withCrit?"":'<span class="first-hit" id="first'+K+'">(0)</span>')+'</div><i class="delta" id="delta'+K+'"></i><div class="breakdown">'+cellHtml("","База","base")+cellHtml("bd-level","Уровень","level")+cellHtml("bd-gear","Экипировка","gear")+cellHtml("bd-talent","Таланты","talentOut")+'</div>'+(withCrit?'<span class="crit-chip"><span class="crit-chip-label">Крит*</span><em id="crit'+K+'">0%</em><span class="crit-chip-sep">/</span><em id="critDmg'+K+'">0</em></span>':"")+'</article>';
 }
 function renderCards(){$("paidCards").innerHTML=CARDS.paid.map(c=>cardMarkup(c,true)).join("");$("freeCards").innerHTML=CARDS.free.map(c=>cardMarkup(c,false)).join("")}
 
@@ -167,6 +167,8 @@ function calc(){
  const level=Math.max(1,Math.min(100,num("level")));$("level").value=level;
  const T=totals(),tal=talentTotals().total,base=baseDamageByLevel(level),baseFlat=baseDamageByLevel(MIN_LEVEL),r=results();
  keys.forEach(k=>{const K=cap(k);set("base"+K,fmt(baseFlat[k]));set("level"+K,fmt(base[k]-baseFlat[k]));set("gear"+K,fmt(T.total[k]-tal[k]));set("talentOut"+K,fmt(tal[k]));set("result"+K,fmt(r[k]))});
+ /* первый бесплатный удар: итоговый урон плюс процентный бонус таланта */
+ ["knife","pistol","auto"].forEach(k=>set("first"+cap(k),"("+fmt(r[k]*(1+r.firstFreeHit))+")"));
  ["Grenade","Gl","Gauss"].forEach(K=>{set("crit"+K,(r["crit"+K]*100).toFixed(0)+"%");set("critDmg"+K,fmt(r["critDmg"+K]))});
  set("noCooldown",(r.noCooldown*100).toFixed(0)+"%");set("cooldown",(r.cooldown*100).toFixed(0)+"%");set("firstFreeHit","+"+(r.firstFreeHit*100).toFixed(0)+"%");
  if(prevResults){
