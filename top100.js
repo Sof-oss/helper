@@ -70,18 +70,6 @@ function top100TableMarkup(tab){
  return '<div class="data-wrap top100-scroll" style="--accent:'+tab.accent+'"><table class="data-table top100-table'+(tab.sortLevel?" top100-sortable":"")+'"><thead><tr><th>#</th><th>Ник</th>'+levelTh+'<th>'+tab.metric+'</th></tr></thead><tbody>'+body+'</tbody></table></div>';
 }
 
-/* подиум: первые три места текущей вкладки, прячется при поиске и фильтре */
-function renderPodium(){
- const tab=currentTab(),el=$("top100Podium"),on=!top100Query.trim()&&!top100Faction;
- el.hidden=!on;
- if(!on)return;
- el.style.setProperty("--accent",tab.accent);
- el.innerHTML=tab.data().slice(0,3).map((r,i)=>{
-  const[nick,level,value,off]=r;
-  return '<div class="t100-pc p'+(i+1)+(off?" off":"")+'"><div class="t100-head"><span class="top100-medal top100-medal-'+(i+1)+'" title="'+(i+1)+' место">☢</span><b class="t100-place">'+(i+1)+'</b></div><span class="t100-nick">'+dotMarkup(factionOf(nick),"t100-dot")+esc(nick)+'</span><div class="t100-lvl">Ур. '+level+'</div><div class="t100-val">'+fmt(value)+'</div><div class="t100-metric">'+tab.metric+'</div></div>';
- }).join("");
-}
-
 function renderFactions(){
  const rows=currentTab().data(),count={};
  rows.forEach(r=>{const f=factionOf(r[0]),k=f?f.key:NO_FACTION;count[k]=(count[k]||0)+1});
@@ -94,15 +82,14 @@ function renderTop100Tabs(){
 }
 function renderTop100Table(){$("top100TableWrap").innerHTML=top100TableMarkup(currentTab())}
 
-/* подиум и поиск вставляются между вкладками и таблицей один раз, top100.html менять не нужно */
+/* поиск и фильтр по отрядам вставляются между вкладками и таблицей один раз, top100.html менять не нужно */
 function ensureShell(){
- if($("top100Podium"))return;
+ if($("top100Search"))return;
  $("top100Tabs").insertAdjacentHTML("afterend",
-  '<div class="t100-podium" id="top100Podium"></div>'+
   '<div class="t100-tools"><label class="t100-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="top100Search" type="search" placeholder="Поиск по нику" autocomplete="off" aria-label="Поиск по нику"></label><div class="t100-factions" id="top100Factions"></div></div>');
- $("top100Search").addEventListener("input",e=>{top100Query=e.target.value;renderPodium();renderTop100Table()});
+ $("top100Search").addEventListener("input",e=>{top100Query=e.target.value;renderTop100Table()});
 }
-function renderTop100(){ensureShell();renderTop100Tabs();renderFactions();renderPodium();renderTop100Table()}
+function renderTop100(){ensureShell();renderTop100Tabs();renderFactions();renderTop100Table()}
 
 function toggleLevelSort(refocus){
  levelSortDesc=!levelSortDesc;
@@ -117,7 +104,7 @@ document.addEventListener("click",e=>{
  if(chip){
   const v=chip.dataset.t100Faction;
   top100Faction=v&&top100Faction===v?"":v;
-  renderFactions();renderPodium();renderTop100Table();
+  renderFactions();renderTop100Table();
   return;
  }
  const btn=e.target.closest("[data-top100-tab]");
