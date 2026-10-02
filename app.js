@@ -68,7 +68,9 @@ function resetTreeTransform(){
 
 /* суммарные бонусы, урон и крит */
 const MIN_LEVEL=1;
-function baseDamageByLevel(level){return{grenade:Math.round(55*Math.pow(1.02,level)),gl:Math.round(113*Math.pow(1.02,level)),gauss:Math.round(360*Math.pow(1.02,level)),knife:Math.floor(45.85+1.15*level),pistol:Math.floor(47.8+1.2*level),auto:Math.floor(53.65+1.35*level)}}
+/* бесплатные удары растут на 2% за уровень от значения на 1 уровне (47/49/55), подтверждено замерами на 1 и 24 уровне */
+const freeBase=(atLevel1,level)=>Math.round(atLevel1*Math.pow(1.02,level-1));
+function baseDamageByLevel(level){return{grenade:Math.round(55*Math.pow(1.02,level)),gl:Math.round(113*Math.pow(1.02,level)),gauss:Math.round(360*Math.pow(1.02,level)),knife:freeBase(47,level),pistol:freeBase(49,level),auto:freeBase(55,level)}}
 function totals(){
  const total=Object.fromEntries(keys.map(k=>[k,0]));let critChance=0,critDamage=0,critGaussChance=0,critGrenadeChance=0,critGaussDamage=0,critGrenadeDamage=0,noCooldown=0,cooldown=0;
  const addBonuses=x=>{keys.forEach(k=>total[k]+=x.bonuses[k]||0);critChance+=x.critChance||0;critDamage+=x.critDamage||0;critGaussChance+=x.critGaussChance||0;critGrenadeChance+=x.critGrenadeChance||0;critGaussDamage+=x.critGaussDamage||0;critGrenadeDamage+=x.critGrenadeDamage||0;noCooldown+=x.freeNoCooldown||0;cooldown+=x.cooldown||0};
