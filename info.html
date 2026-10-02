@@ -23,9 +23,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="polish.css">
 <link rel="stylesheet" href="info-tasks.css">
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></symbol></defs></svg>
 <header class="site-header">
   <div class="header-inner">
     <a class="logo" href="/"><div class="rad-logo">☢</div><div class="logo-copy"><div class="logo-title">Сердце Зоны</div></div></a>
@@ -50,7 +52,7 @@
   </div>
 
   <div data-section-panel="levels">
-    <div class="section-heading"><span>★</span><b>Прогресс по уровням</b></div>
+    <div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></span><b>Прогресс по уровням</b></div>
     <p class="info-lead">Стоимость улучшения таланта на уровень, опыт ПДА и опыт персонажа по уровням</p>
     <!-- вкладки только для телефона (#infoTabs в styles.css) -->
     <div class="top100-tabs" id="infoTabs"></div>
@@ -58,7 +60,7 @@
   </div>
 
   <div data-section-panel="tasks" hidden>
-    <div class="section-heading"><span>★</span><b>Задания</b></div>
+    <div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></span><b>Задания</b></div>
     <p class="info-lead">Награды и затраты энергии по этапам заданий на каждой локации. Выгода — сколько ресурса приходится на единицу затраченной энергии</p>
     <div id="tasksRoot"></div>
   </div>
