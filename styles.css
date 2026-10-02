@@ -289,32 +289,43 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .talent-hide:disabled{opacity:.5;cursor:default}
 
 /* окно с описанием таланта */
-.talent-detail{border:1px solid #34383a;background:rgba(10,11,12,.72);padding:12px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.4)}
-.talent-detail-art{width:72px;height:72px;border:1px solid #8b8c86;background:#111;overflow:hidden;display:grid;place-items:center;font-size:34px;color:#eee;margin-bottom:10px}
-.talent-detail-art img{display:block;width:100%;height:100%;object-fit:cover}
-.talent-detail-title{display:flex;justify-content:space-between;gap:8px;align-items:start}
-.talent-detail-title h3{margin:0;color:#f0f0ec;font-size:18px}
-.talent-detail-title span{font-size:12px;color:#bcbdb8}
-.talent-detail-desc{font-size:12px;line-height:1.45;color:#9a9d9e;margin:7px 0 10px}
-.talent-detail-effect{border-top:1px solid #34383a;border-bottom:1px solid #34383a;padding:8px 0;display:flex;flex-direction:column;gap:2px}
-.talent-detail-effect small{color:#777}
-.talent-detail-effect span{font-size:11px;color:#999}
-.talent-detail-effect .talent-rank-done{color:#d2d2cd}
-.talent-detail-effect b{color:#f0ae58}
-.talent-detail-requirement{display:flex;flex-direction:column;gap:2px;padding:8px 0;color:#777;font-size:10px}
-.talent-detail-requirement b{color:#bbb;font-size:11px}
-.talent-detail-actions{display:flex;gap:5px}
-.talent-detail-actions button{height:36px;border:1px solid #4a4c4d;background:#252728;color:#ddd;cursor:pointer}
-.talent-detail-minus{width:38px;font-size:20px}
-.talent-detail-up{flex:1}
-.talent-detail-up:not(:disabled){background:#9a6e2e;border-color:#d19a4a;color:#fff}
-.talent-detail-up:disabled{opacity:.5;cursor:default}
+/* окно таланта: заголовок, ромбы рангов, блоки «Эффекты» и «Требования» */
+.talent-detail{--td-orange:#f58a1f;--td-green:#4cbf4c;padding:18px 20px 20px;border:1px solid #3a3d3f;background:linear-gradient(180deg,#151717,#0c0d0d);box-shadow:inset 0 0 0 1px rgba(0,0,0,.5)}
+.td-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.td-head h3{margin:0;font:400 30px/1.1 "Rubik Dirt","Segoe UI",sans-serif;color:#f2f2ee}
+.td-close{flex:0 0 38px;width:38px;height:38px;border:1px solid #5a5d5f;background:transparent;color:#e2e2de;font-size:26px;line-height:1;cursor:pointer}
+.td-close:hover{background:#1d1f20}
+.td-rank{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.td-pips{display:flex;gap:8px}
+.td-pip{width:11px;height:11px;background:#3b3d3e;transform:rotate(45deg)}
+.td-pip.on{background:var(--td-orange)}
+.td-rank b{font-size:15px;color:#f2f2ee}
+.td-rank span{padding-left:12px;border-left:1px solid #46494b;color:#8d9295;font-size:13px}
+.td-desc{margin:0 0 18px;font-size:15px;line-height:1.45;color:#e4e5e1}
+.td-sec{margin:0 0 8px;font-size:11.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--td-orange)}
+.td-effect{margin-bottom:18px;padding:5px 0 5px 14px;border-left:2px solid var(--td-orange);background:linear-gradient(90deg,rgba(245,138,31,.07),transparent)}
+.td-effect small{display:block;margin-bottom:5px;font-size:13px;color:#a9adae}
+.td-vals{display:flex;flex-wrap:wrap;gap:0 6px;font-size:13px;font-weight:600;color:#606466;font-variant-numeric:tabular-nums}
+.td-vals em{font-style:normal;color:#44484a}
+.td-vals .td-cur{color:var(--td-green);font-weight:700}
+.td-req{display:flex;align-items:center;gap:12px;margin-bottom:6px;padding:12px 14px;border-left:2px solid #4a4d4f;background:rgba(255,255,255,.03)}
+.td-req.ok{border-left-color:var(--td-green);background:linear-gradient(90deg,rgba(76,191,76,.08),transparent)}
+.td-req svg{width:24px;height:24px;flex:0 0 24px;fill:none;stroke:#6b6f71;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.td-req.ok svg{stroke:var(--td-green)}
+.td-req b{flex:1;font-size:14px;color:#f2f2ee}
+.td-req span{font-size:13px;font-weight:700;color:#8d9295}
+.td-req.ok span{color:var(--td-green)}
+.td-req.none{color:#8d9295;font-size:13px}
+.td-actions{display:flex;gap:6px;margin-top:18px}
+.td-actions button{height:44px;border:1px solid #3a3d3f;background:#242627;color:#6f7476;font:inherit;font-size:14px;font-weight:700}
+.td-minus{width:46px;color:#ddd!important;font-size:20px!important;cursor:pointer}
+.td-up{flex:1;cursor:default}
+.td-up:not(:disabled){background:linear-gradient(180deg,#d9822a,#a85f17)!important;border-color:#f0a050!important;color:#fff!important;cursor:pointer}
 .talent-detail-overlay{position:fixed;inset:0;z-index:2500;display:none;align-items:center;justify-content:center;padding:20px}
 .talent-detail-overlay.show{display:flex}
 .talent-detail-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(2px)}
-.talent-detail-modal{position:relative;z-index:1;width:min(420px,100%);max-height:86vh;overflow:auto;animation:talentDetailIn .14s ease}
+.talent-detail-modal{position:relative;z-index:1;width:min(440px,100%);max-height:86vh;overflow:auto;animation:talentDetailIn .14s ease}
 .talent-detail-modal .talent-detail{box-shadow:inset 0 0 0 1px rgba(0,0,0,.4),0 24px 60px rgba(0,0,0,.65)}
-.talent-detail-close{position:absolute;top:-14px;right:-14px;width:30px;height:30px;border:1px solid #404447;border-radius:50%;background:#1b1d1e;color:#ddd;font-size:17px;line-height:1;cursor:pointer}
 @keyframes talentDetailIn{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
 
 /* дерево талантов: зум и drag */
@@ -432,7 +443,6 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
   .talent-flow-wrap{height:52%}
   .talent-detail-overlay{padding:12px}
   .talent-detail-modal{max-height:82vh}
-  .talent-detail-close{top:-12px;right:-12px;width:28px;height:28px}
   .gear-info-window{width:94vw}
   .gear-info-body{padding:14px}
   .gear-info-total-wrap{margin:6px -14px -14px;padding:10px 14px 14px}
@@ -471,7 +481,6 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
   .talent-icon-button{width:32px;height:32px;font-size:20px}
   .talent-node-game{width:82px;height:82px}
   .talent-node-art{font-size:32px}
-  .talent-detail-art{width:56px;height:56px;font-size:26px}
   .talent-side-title{font-size:16px;margin-bottom:6px}
   .talent-side-stats{gap:18px;margin-bottom:10px}
   .talent-side-stats b{font-size:18px}
