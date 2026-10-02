@@ -39,3 +39,15 @@
 @media(max-width:650px){
   .t100-search{max-width:none;flex-basis:100%}
 }
+
+/* ===== Дата обновления: плашка с часами ===== */
+.top100-meta{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin:0 2px 16px}
+.top100-updated{display:inline-flex;align-items:center;gap:8px;margin:0;padding:7px 14px 7px 11px;border:1px solid #2e6384;border-radius:20px;background:linear-gradient(135deg,rgba(84,191,255,.18),rgba(84,191,255,.06));box-shadow:0 0 14px rgba(84,191,255,.16);color:#a9c4d9;font-size:13px;font-weight:600;line-height:1}
+.top100-updated svg{width:17px;height:17px;flex:0 0 17px;fill:none;stroke:#54bfff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.top100-updated b{color:#f2f8fd;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.2px}
+.top100-meta-note{color:#9db2c4;font-size:12.5px;font-style:italic;line-height:1.4}
+@media(max-width:430px){
+  .top100-updated{font-size:12px;padding:6px 12px 6px 9px}
+  .top100-updated b{font-size:13px}
+  .top100-meta-note{font-size:12px}
+}

@@ -47,9 +47,11 @@
 <section class="result-panel top100-panel">
   <div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></span><b>Рейтинг игроков</b></div>
   <p class="info-lead">Топ-100 сталкеров по репутации, боссам, тайникам, талантам, коллекциям, экспедициям и защите лагеря</p>
-  <!-- дату подставляет top100.js из top100-data.js, руками не править -->
-  <p class="info-lead top100-update-note">Обновлено: <span id="top100Updated">—</span></p>
-  <p class="info-lead top100-update-note"><em>*рейтинги обновляются раз в неделю — по понедельникам</em></p>
+  <!-- дату подставляет top100.js из top100-data.js в #top100Updated, руками не править -->
+  <div class="top100-meta">
+    <p class="top100-updated"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>Обновлено:</span><b id="top100Updated">—</b></p>
+    <span class="top100-meta-note">*рейтинги обновляются раз в неделю — по понедельникам</span>
+  </div>
   <div class="top100-tabs" id="top100Tabs"></div>
   <div class="top100-table-wrap" id="top100TableWrap"></div>
   <p class="damage-footnote top100-footnote">Отмечены красным — сталкеры, давно не заходившие в игру</p>
