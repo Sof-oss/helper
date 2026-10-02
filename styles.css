@@ -487,22 +487,38 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
   .top100-nick{font-size:11.5px}
 }
 
-/* сравнение билдов */
-.cmp-tools{display:flex;flex-direction:column;gap:10px;margin-bottom:6px}
-.cmp-paste{display:flex;gap:8px}
-.cmp-paste input{flex:1;min-width:0;height:36px;padding:0 10px;border:1px solid #1b3447;border-radius:6px;background:#0b1f30;color:#e7f0f8;font:inherit;font-size:13px}
-.cmp-paste input::placeholder{color:#5f7a8f}
-.cmp-btns{display:flex;flex-wrap:wrap;gap:8px}
-.cmp-btn{height:34px;padding:0 14px;border:1px solid #2d5578;border-radius:6px;background:linear-gradient(180deg,#123049,#0a1c2b);color:#c3d4e2;font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+/* сравнение билдов: синий — вы, янтарный — сравниваемый */
+.cmp-tools{display:flex;gap:8px;margin-bottom:4px}
+.cmp-tools input{flex:1;min-width:0;height:36px;padding:0 10px;border:1px solid #1b3447;border-radius:6px;background:#0b1f30;color:#e7f0f8;font:inherit;font-size:13px}
+.cmp-tools input::placeholder{color:#5f7a8f}
+.cmp-btn{height:36px;padding:0 14px;border:1px solid #2d5578;border-radius:6px;background:linear-gradient(180deg,#123049,#0a1c2b);color:#c3d4e2;font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
 .cmp-btn:hover:not(:disabled){background:linear-gradient(180deg,#173a5c,#0d2536)}
 .cmp-btn:disabled{opacity:.4;cursor:default}
-.cmp-note{color:#71889b;font-size:12px;line-height:1.5;margin:0}
+.cmp-note{color:#71889b;font-size:11px;line-height:1.5;margin:8px 0 0}
+.cmp-sum{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 6px}
+.cmp-chip{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:20px;border:1px solid #234157;background:#0b1925;color:#a9bed0;font-size:12px}
+.cmp-chip b{color:#e7f0f8;font-size:13px}
+.cmp-chip i{width:8px;height:8px;border-radius:50%;background:#4f677a}
+.cmp-chip.a{border-color:#2b6a94}.cmp-chip.a i{background:#54bfff;box-shadow:0 0 8px #54bfff}
+.cmp-chip.b{border-color:#8a6a2e}.cmp-chip.b i{background:#f0ae58;box-shadow:0 0 8px #f0ae58}
+.cmp-table{table-layout:fixed}
+.cmp-table .cmp-c0{width:40%}
+.cmp-table th{position:sticky;top:0;z-index:2;background:#070908;padding:8px}
 .cmp-table td:first-child{white-space:normal}
-.data-table tr.cmp-group td{padding-top:14px;color:#7c93a6;font-size:11px;text-transform:uppercase;letter-spacing:.6px;border-top:1px solid #193246}
-.data-table td.cmp-up{color:#27db88}
-.data-table td.cmp-down{color:#ff6b6f}
-.data-table td.cmp-zero{color:#4f677a}
-.cmp-diff{margin-top:12px;border:1px solid #1a3346;border-radius:8px;background:#0b1925;padding:10px 12px;font-size:12px;color:#a9bed0}
+.cmp-table tbody tr:hover td{background:#0b1925}
+.cmp-table th.cmp-h-a{color:#54bfff}
+.cmp-table th.cmp-h-b{color:#f0ae58}
+.data-table tr.cmp-group td{padding-top:16px;color:#7c93a6;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;border-top:1px solid #193246}
+.data-table tr.cmp-group:hover td{background:none}
+.data-table tr.cmp-eq td{color:#4f677a}
+.data-table td.cmp-lead-a{color:#54bfff;font-weight:700}
+.data-table td.cmp-lead-b{color:#f0ae58;font-weight:700}
+.data-table td.cmp-d{font-size:12px}
+.cmp-diff{margin-top:14px;border:1px solid #1a3346;border-radius:8px;background:#0b1925;padding:10px 12px;font-size:12px;color:#a9bed0}
 .cmp-diff summary{cursor:pointer;color:#cbd9e5;font-weight:600}
-.cmp-diff p{margin:8px 0 0;line-height:1.5}
-.cmp-diff b{color:#dce7f0}
+.cmp-diff p{margin:8px 0 0}
+.cmp-diff-row{margin-top:10px}
+.cmp-diff-row small{display:block;margin-bottom:5px;color:#7c93a6;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.cmp-tag{white-space:normal}
+.cmp-tag.a{border-color:#2b6a94;color:#9fd6f7}
+.cmp-tag.b{border-color:#8a6a2e;color:#f0c98a}

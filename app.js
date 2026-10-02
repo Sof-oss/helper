@@ -207,27 +207,37 @@ let cmpBuild=null;
 function saveCompare(){try{if(cmpBuild)localStorage.setItem(CMP_KEY,buildHashOf(cmpBuild));else localStorage.removeItem(CMP_KEY)}catch{}}
 function loadCompare(){try{const h=localStorage.getItem(CMP_KEY);if(h)cmpBuild=parseBuild(h)}catch{}}
 const CMP_GROUPS=[
- ["Урон за удар",[["knife","Нож"],["pistol","Пистолет"],["auto","Автомат"],["grenade","Граната"],["gl","Гранатомёт"],["gauss","Гаусс"]]],
- ["Крит",[["critDmgGrenade","Урон крита, граната"],["critDmgGl","Урон крита, гранатомёт"],["critDmgGauss","Урон крита, гаусс"],["critGrenade","Шанс крита, граната",1],["critGl","Шанс крита, гранатомёт",1],["critGauss","Шанс крита, гаусс",1]]],
- ["Дополнительно",[["noCooldown","Удар без отката",1],["cooldown","Сокращение отката",1],["firstFreeHit","Первый бесплатный удар",1]]]
+ ["⚔ Урон за удар",[["knife","Нож"],["pistol","Пистолет"],["auto","Автомат"],["grenade","Граната"],["gl","Гранатомёт"],["gauss","Гаусс"]]],
+ ["✦ Крит",[["critDmgGrenade","Урон крита, граната"],["critDmgGl","Урон крита, гранатомёт"],["critDmgGauss","Урон крита, гаусс"],["critGrenade","Шанс крита, граната",1],["critGl","Шанс крита, гранатомёт",1],["critGauss","Шанс крита, гаусс",1]]],
+ ["◷ Дополнительно",[["noCooldown","Удар без отката",1],["cooldown","Сокращение отката",1],["firstFreeHit","Первый бесплатный удар",1]]]
 ];
 const sumRanks=t=>Object.values(t).reduce((a,b)=>a+b,0);
-function cmpRow(label,x,y,pct,best){
- const d=y-x,zero=Math.abs(d)<(pct?.005:.5),hi=best&&!zero,show=v=>pct?Math.round(v*100)+"%":fmt(v);
- return '<tr><td>'+label+'</td><td class="'+(hi&&x>y?"tok-best":"")+'">'+show(x)+'</td><td class="'+(hi&&y>x?"tok-best":"")+'">'+show(y)+'</td><td class="'+(zero?"cmp-zero":d>0?"cmp-up":"cmp-down")+'">'+(zero?"—":fmtDelta(d,pct))+'</td></tr>';
+/* синий — вы, янтарный — сравниваемый; сильнее подсвечивается тем цветом, чей билд впереди */
+function cmpRow(label,x,y,pct){
+ const d=y-x,eq=Math.abs(d)<(pct?.005:.5),lead=eq?"":y>x?"b":"a",show=v=>pct?Math.round(v*100)+"%":fmt(v);
+ return '<tr class="'+(eq?"cmp-eq":"")+'"><td>'+label+'</td><td class="'+(lead==="a"?"cmp-lead-a":"")+'">'+show(x)+'</td><td class="'+(lead==="b"?"cmp-lead-b":"")+'">'+show(y)+'</td><td class="cmp-d'+(lead?" cmp-lead-"+lead:"")+'">'+(eq?"—":fmtDelta(d,pct))+'</td></tr>';
 }
+const cmpTags=(arr,cls)=>arr.map(t=>'<span class="gear-info-tag cmp-tag '+cls+'">'+t+'</span>').join("");
 function renderCompare(){
  const body=$("compareBody");
  $("cmpClear").disabled=!cmpBuild;
  if(!cmpBuild){body.innerHTML='<p class="cmp-note">Пока не с чем сравнивать. Вставьте ссылку на билд в поле выше.</p>';return}
  const a=currentBuild(),b=cmpBuild,ra=results(),rb=resultsFor(b);
- let rows=cmpRow("Уровень",a.level,b.level)+cmpRow("Очки талантов",sumRanks(a.talents),sumRanks(b.talents))+cmpRow("Комплекты",a.sets.length,b.sets.length)+cmpRow("Одиночные вещи",a.items.length,b.items.length);
- CMP_GROUPS.forEach(([title,list])=>{rows+='<tr class="cmp-group"><td colspan="4">'+title+'</td></tr>'+list.map(([k,l,p])=>cmpRow(l,ra[k],rb[k],p,true)).join("")});
- const only=(x,y,list)=>x.filter(i=>!y.includes(i)).map(i=>list[i].name),line=(t,arr)=>arr.length?'<p><b>'+t+':</b> '+arr.join(", ")+'</p>':"";
+ let rows='<tr class="cmp-group"><td colspan="4">★ Общее</td></tr>'+cmpRow("Уровень",a.level,b.level)+cmpRow("Очки талантов",sumRanks(a.talents),sumRanks(b.talents))+cmpRow("Комплекты",a.sets.length,b.sets.length)+cmpRow("Одиночные вещи",a.items.length,b.items.length);
+ let win=0,lose=0,same=0;
+ CMP_GROUPS.forEach(([title,list])=>{
+  rows+='<tr class="cmp-group"><td colspan="4">'+title+'</td></tr>'+list.map(([k,l,p])=>{
+   const d=rb[k]-ra[k];if(Math.abs(d)<(p?.005:.5))same++;else if(d>0)lose++;else win++;
+   return cmpRow(l,ra[k],rb[k],p);
+  }).join("");
+ });
+ const chips='<div class="cmp-sum"><span class="cmp-chip a"><i></i>Ваш билд выше: <b>'+win+'</b></span><span class="cmp-chip b"><i></i>Другой билд выше: <b>'+lose+'</b></span><span class="cmp-chip"><i></i>Поровну: <b>'+same+'</b></span></div>';
+ const only=(x,y,list)=>x.filter(i=>!y.includes(i)).map(i=>list[i].name);
  const mine=[...only(a.sets,b.sets,SETS),...only(a.items,b.items,ITEMS)],theirs=[...only(b.sets,a.sets,SETS),...only(b.items,a.items,ITEMS)];
- const tal=TALENTS.filter(t=>(a.talents[t[0]]||0)!==(b.talents[t[0]]||0)).map(t=>t[2]+" "+(a.talents[t[0]]||0)+" → "+(b.talents[t[0]]||0));
- const diff=line("Снаряжение только у вас",mine)+line("Снаряжение только в сравниваемом",theirs)+line("Таланты (ваш → сравниваемый)",tal);
- body.innerHTML='<div class="data-wrap"><table class="data-table cmp-table"><thead><tr><th>Параметр</th><th>Ваш билд</th><th>Сравниваемый</th><th>Разница</th></tr></thead><tbody>'+rows+'</tbody></table></div><details class="cmp-diff"><summary>Что отличается</summary>'+(diff||'<p>Снаряжение и таланты совпадают.</p>')+'</details>';
+ const tal=TALENTS.filter(t=>(a.talents[t[0]]||0)!==(b.talents[t[0]]||0)).map(t=>{const x=a.talents[t[0]]||0,y=b.talents[t[0]]||0;return{t:t[2]+" "+x+" → "+y,cls:y>x?"b":"a"}});
+ const block=(title,html)=>html?'<div class="cmp-diff-row"><small>'+title+'</small><div class="gear-info-tags">'+html+'</div></div>':"";
+ const diff=block("Снаряжение только у вас",cmpTags(mine,"a"))+block("Снаряжение только у другого билда",cmpTags(theirs,"b"))+block("Таланты (ваш → другого билда)",tal.map(x=>cmpTags([x.t],x.cls)).join(""));
+ body.innerHTML=chips+'<table class="data-table cmp-table"><colgroup><col class="cmp-c0"><col><col><col></colgroup><thead><tr><th>Параметр</th><th class="cmp-h-a">Ваш билд</th><th class="cmp-h-b">Другой билд</th><th>Разница</th></tr></thead><tbody>'+rows+'</tbody></table><p class="cmp-note">Разница: у другого билда минус у вас.</p><details class="cmp-diff"'+(diff?" open":"")+'><summary>Что отличается</summary>'+(diff||'<p>Снаряжение и таланты совпадают.</p>')+'</details>';
 }
 function openCompare(){$("compareModal").classList.add("show");$("compareModal").setAttribute("aria-hidden","false");renderCompare()}
 function closeCompare(){$("compareModal").classList.remove("show");$("compareModal").setAttribute("aria-hidden","true")}
