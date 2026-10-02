@@ -23,8 +23,21 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="polish.css">
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<symbol id="i-sword" viewBox="0 0 24 24"><path d="M5 19 19 5M14 5h5v5M5 14l5 5M3.5 20.5 6 18"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><path d="M12 2.6v3.3M12 18.1v3.3M2.6 12h3.3M18.1 12h3.3"/><circle cx="12" cy="12" r="1.3"/></symbol>
+<symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></symbol>
+<symbol id="i-shirt" viewBox="0 0 24 24"><path d="M8 4 3.5 7l2 3.5L8 9.5V20h8V9.5l2.5 1 2-3.5L16 4c-.6 1.3-2 2-4 2s-3.4-.7-4-2z"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+<symbol id="i-compare" viewBox="0 0 24 24"><path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/></symbol>
+<symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v4h4"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8v.01"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></symbol>
+</defs></svg>
 <header class="site-header">
   <div class="header-inner">
     <a class="logo" href="/"><div class="rad-logo">☢</div><div class="logo-copy"><div class="logo-title">Сердце Зоны</div></div></a>
@@ -42,20 +55,20 @@
 <div class="page">
 <aside class="sidebar">
 <section class="side-section level-section"><div class="side-title"><svg class="person-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.2" r="3.6"/><path d="M4.5 20c.4-4.6 3.9-7.3 7.5-7.3s7.1 2.7 7.5 7.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><b>Уровень персонажа</b></div><div class="level-row"><button type="button" data-step="level" data-dir="-1">−</button><input id="level" type="number" min="1" max="100" value="1"><button type="button" data-step="level" data-dir="1">+</button></div></section>
-<section class="side-section talent-launcher"><div class="side-title"><span>★</span><b>Таланты</b></div><button type="button" id="openTalents" class="talent-open"><span>✦</span><span>Открыть древо талантов</span><b id="talentPointsBadge">0 / 135</b></button><div class="talent-summary" id="talentSummary">Очки не распределены</div></section>
-<section class="side-section equipment-section"><div class="side-title"><span class="clothes-icon" aria-hidden="true">🧥</span><b>Комплекты</b><button type="button" id="openGearInfo" class="gear-info-btn" aria-label="Бонусы снаряжения" title="Бонусы снаряжения">ℹ</button></div><div id="sets" class="options"></div><div class="items-divider"><span>•</span><b>Одиночные вещи</b></div><div id="items" class="options"></div></section>
+<section class="side-section talent-launcher"><div class="side-title"><span><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></span><b>Таланты</b></div><button type="button" id="openTalents" class="talent-open"><span><svg class="ic" aria-hidden="true"><use href="#i-spark"/></svg></span><span>Открыть древо талантов</span><b id="talentPointsBadge">0 / 135</b></button><div class="talent-summary" id="talentSummary">Очки не распределены</div></section>
+<section class="side-section equipment-section"><div class="side-title"><span class="clothes-icon" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-shirt"/></svg></span><b>Комплекты</b><button type="button" id="openGearInfo" class="gear-info-btn" aria-label="Бонусы снаряжения" title="Бонусы снаряжения"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg></button></div><div id="sets" class="options"></div><div class="items-divider"><span>•</span><b>Одиночные вещи</b></div><div id="items" class="options"></div></section>
 <div class="side-actions">
 <label class="select-all"><input id="selectAllEquipment" type="checkbox"> <span>Выбрать всё снаряжение</span></label>
-<button type="button" class="side-btn" id="shareBuild">🔗 &nbsp; Ссылка на билд</button>
-<button type="button" class="side-btn" id="openCompare">⇄ &nbsp; Сравнить билды</button>
-<button type="button" class="side-btn" id="resetAll">↻ &nbsp; Сбросить</button>
+<button type="button" class="side-btn" id="shareBuild"><svg class="ic" aria-hidden="true"><use href="#i-link"/></svg>Ссылка на билд</button>
+<button type="button" class="side-btn" id="openCompare"><svg class="ic" aria-hidden="true"><use href="#i-compare"/></svg>Сравнить</button>
+<button type="button" class="side-btn ghost" id="resetAll"><svg class="ic" aria-hidden="true"><use href="#i-reset"/></svg>Сбросить всё</button>
 </div>
 </aside>
 <main class="content">
-<div class="result-title"><span class="target-icon">◎</span><h1>Результат расчёта</h1></div>
-<section class="result-panel"><div class="section-heading"><span>⚔</span><b>Урон (оружие за жетоны)</b><button type="button" id="openTokens" class="tokens-btn">Расчёт по жетонам</button></div><div class="damage-grid" id="paidCards"></div><p class="damage-footnote">* Без учёта базового шанса критического удара и базовой прибавки критического урона</p></section>
-<section class="result-panel"><div class="section-heading"><span>⚔</span><b>Урон (бесплатные удары)</b></div><div class="damage-grid" id="freeCards"></div></section>
-<section class="result-panel extra-panel"><div class="section-heading"><span>★</span><b>Дополнительные характеристики</b></div><div class="extra-grid"><div><i class="delta" id="deltaNoCooldown"></i><span>⚔</span><small>Шанс удара без отката</small><strong id="noCooldown">0%</strong></div><div><i class="delta" id="deltaCooldown"></i><span>◷</span><small>Сокращение отката</small><strong id="cooldown">0%</strong></div><div><i class="delta" id="deltaFirstFreeHit"></i><span>✦</span><small>Урон первого бесплатного удара</small><strong id="firstFreeHit">+0%</strong></div></div></section>
+<div class="result-title"><svg class="ic target-icon" aria-hidden="true"><use href="#i-target"/></svg><h1>Результат расчёта</h1></div>
+<section class="result-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-sword"/></svg></span><b>Урон (оружие за жетоны)</b><button type="button" id="openTokens" class="tokens-btn">Расчёт по жетонам</button></div><div class="damage-grid" id="paidCards"></div><p class="damage-footnote">* Без учёта базового шанса критического удара и базовой прибавки критического урона</p></section>
+<section class="result-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-sword"/></svg></span><b>Урон (бесплатные удары)</b></div><div class="damage-grid" id="freeCards"></div></section>
+<section class="result-panel extra-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></span><b>Дополнительные характеристики</b></div><div class="extra-grid"><div><i class="delta" id="deltaNoCooldown"></i><span><svg class="ic" aria-hidden="true"><use href="#i-sword"/></svg></span><small>Шанс удара без отката</small><strong id="noCooldown">0%</strong></div><div><i class="delta" id="deltaCooldown"></i><span><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg></span><small>Сокращение отката</small><strong id="cooldown">0%</strong></div><div><i class="delta" id="deltaFirstFreeHit"></i><span><svg class="ic" aria-hidden="true"><use href="#i-spark"/></svg></span><small>Урон первого бесплатного удара</small><strong id="firstFreeHit">+0%</strong></div></div></section>
 </main>
 </div>
 
@@ -135,4 +148,4 @@
 <!-- подпись автора -->
 <footer class="site-footer"><span>© by Sof</span></footer>
 
-<script src="talents.js"></script><script src="app.js"></script></body></html>
+<script src="talents.js"></script><script src="app.js"></script><script src="polish.js"></script></body></html>

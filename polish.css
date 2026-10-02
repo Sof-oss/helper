@@ -1,0 +1,64 @@
+/* ===== polish.css — подключается после styles.css =====
+   единые SVG-иконки, читаемый мелкий текст, плитки снаряжения, полоса урона, компактные кнопки */
+
+/* --- иконки (спрайт в начале body) --- */
+.ic{width:1em;height:1em;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.14em}
+.side-title>span .ic{width:18px;height:18px}
+.section-heading>span .ic{width:20px;height:20px}
+.talent-open>span:first-child .ic{width:18px;height:18px}
+.extra-grid .ic{width:20px;height:20px;color:#54bfff}
+.gear-info-btn .ic{width:14px;height:14px;stroke-width:2.2}
+
+/* --- читаемость: мельче 12px текста почти нет, цвет светлее --- */
+.talent-summary{font-size:12px;color:#9db2c4}
+.damage-footnote,.tok-note,.cmp-note{font-size:12.5px;color:#9db2c4}
+.talent-side-hint,.talent-last small,.talent-side-stats small,.talent-gauge-value small,.talent-branch-description{font-size:12px;color:#9db2c4}
+.talent-detail-requirement{font-size:12px;color:#9db2c4}
+.talent-detail-effect small,.talent-detail-effect span{font-size:12px;color:#a9bbc9}
+.talent-game-header p{color:#9db2c4}
+.bd-cell small{font-size:12px;color:#9db2c4}
+.extra-grid small{font-size:13px;color:#a9bed0}
+.data-table th{font-size:12px;color:#9db2c4}
+.tok-title,.gear-info-group-title{font-size:12.5px;color:#9db2c4}
+.gear-info-tag{font-size:12px}
+.info-lead{font-size:13px;color:#a9bbc9}
+
+/* --- кнопки сайдбара: компактные, без CAPS --- */
+.side-actions{grid-template-columns:1fr 1fr;gap:8px}
+.select-all{grid-column:1/-1}
+.side-btn{height:38px;display:flex;align-items:center;justify-content:center;gap:7px;padding:0 8px;font-size:13px;font-weight:600;letter-spacing:0;text-transform:none;border-bottom-width:2px;box-shadow:0 2px 0 #05121c,inset 0 1px 0 rgba(255,255,255,.08)}
+.side-btn .ic{width:16px;height:16px}
+.side-btn.ghost{grid-column:1/-1;height:32px;background:transparent;border-color:#1f3d54;box-shadow:none;color:#93a8ba;font-weight:500}
+.side-btn.ghost:hover{background:#0e2334;color:#c3d4e2}
+.talent-hide{display:flex;align-items:center;justify-content:center;gap:7px}
+.talent-hide .ic{width:15px;height:15px}
+
+/* --- снаряжение плитками (разметку дополняет polish.js) --- */
+#sets,#items{grid-template-columns:1fr 1fr;gap:6px}
+.option{position:relative;min-height:48px;padding:7px 9px;gap:8px;border:1px solid #1c3446;border-radius:8px;background:#0a1824;transition:background .12s,border-color .12s}
+.option:hover{border-color:#2e6384;background:#0d1e2d}
+.option input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.option:has(input:checked){border-color:#3d9fff;background:linear-gradient(135deg,rgba(61,159,255,.2),rgba(13,34,49,.9));box-shadow:0 0 10px rgba(84,191,255,.15)}
+.option:has(input:focus-visible){outline:2px solid #54bfff;outline-offset:1px}
+.option:has(input:checked)::after{content:"";position:absolute;top:5px;right:7px;width:4px;height:8px;border:solid #54bfff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.opt-ic{width:18px;height:18px;color:#6f8ba0;opacity:.75}
+.opt-free .opt-ic{color:#f0ae58}
+.opt-paid .opt-ic{color:#54bfff}
+.option:has(input:checked) .opt-ic{opacity:1}
+.option span{display:flex;flex-direction:column;gap:2px;min-width:0;line-height:1.2}
+.option b{font-size:12px;font-weight:600;color:#dce7f0}
+.option:has(input:checked) b{color:#fff}
+.option small{font-size:11.5px;color:#9db2c4;font-variant-numeric:tabular-nums}
+
+/* --- полоса состава урона под числом --- */
+.dmg-bar{grid-column:1/-1;display:flex;height:6px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.06)}
+.dmg-bar i{display:block;height:100%;width:0;transition:width .35s ease}
+.dmg-bar .s0{background:#a9bed0}
+.dmg-bar .s1{background:#f0ae58}
+.dmg-bar .s2{background:#54bfff}
+.dmg-bar .s3{background:#27db88}
+.bd-cell{padding-top:5px;border-top:2px solid #a9bed0}
+.bd-cell.bd-level{border-top-color:#f0ae58}
+.bd-cell.bd-gear{border-top-color:#54bfff}
+.bd-cell.bd-talent{border-top-color:#27db88}
+@media(prefers-reduced-motion:reduce){.dmg-bar i{transition:none}}

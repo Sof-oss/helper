@@ -14,3 +14,53 @@
 @media(max-width:430px){
   .top100-table.top100-sortable th:nth-child(3),.top100-table.top100-sortable td:nth-child(3){width:52px}
 }
+
+/* ===== Читаемость: мелкий текст крупнее и светлее ===== */
+.info-lead{font-size:13px;color:#a9bbc9}
+.damage-footnote{font-size:12.5px;color:#9db2c4}
+.top100-table th{font-size:12px;color:#9db2c4}
+
+/* ===== Подиум ===== */
+.t100-podium{display:grid;grid-template-columns:1fr 1.12fr 1fr;gap:12px;align-items:end;margin:4px 0 16px}
+.t100-podium[hidden]{display:none}
+.t100-pc:nth-child(1){order:2}
+.t100-pc:nth-child(2){order:1}
+.t100-pc:nth-child(3){order:3}
+.t100-pc{--m:#a9bac6;padding:14px 12px 13px;text-align:center;border:1px solid #1a3346;border-top:3px solid var(--m);border-radius:10px;background:linear-gradient(160deg,#0b1925,#08121b);box-shadow:0 8px 20px #0005}
+.t100-pc.p1{--m:#e8ae3d;padding-top:22px;padding-bottom:18px;box-shadow:0 0 22px rgba(232,174,61,.14),0 8px 20px #0005}
+.t100-pc.p3{--m:#b3703f}
+.t100-pc .top100-medal{width:30px;height:30px;font-size:16px;margin-bottom:8px}
+.t100-nick{display:flex;align-items:center;justify-content:center;gap:6px;min-height:35px;font-size:14px;font-weight:700;line-height:1.25;color:#e4eef8;overflow-wrap:anywhere}
+.t100-nick .t100-dot{margin:0}
+.t100-lvl{margin:4px 0 8px;font-size:12px;color:#9db2c4}
+.t100-val{font-size:24px;font-weight:800;line-height:1;color:var(--accent,#54bfff);font-variant-numeric:tabular-nums}
+.t100-pc.p1 .t100-val{font-size:28px}
+.t100-metric{margin-top:4px;font-size:12px;color:#9db2c4}
+.t100-pc.off .t100-nick{color:#ff9498;font-style:italic}
+
+/* ===== Поиск и отряды ===== */
+.t100-tools{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 12px}
+.t100-search{position:relative;flex:1 1 220px;max-width:320px}
+.t100-search svg{position:absolute;left:12px;top:50%;width:16px;height:16px;transform:translateY(-50%);fill:none;stroke:#7c93a6;stroke-width:1.8;stroke-linecap:round;pointer-events:none}
+.t100-search input{width:100%;height:36px;padding:0 12px 0 35px;border:1px solid #1f3d54;border-radius:20px;background:#0a1a27;color:#e7f0f8;font:inherit;font-size:13px}
+.t100-search input::placeholder{color:#7f95a8}
+.t100-search input:focus{outline:none;border-color:#54bfff;box-shadow:0 0 0 2px rgba(84,191,255,.2)}
+.t100-factions{display:flex;flex-wrap:wrap;gap:6px}
+.t100-chip{height:30px;padding:0 11px;display:inline-flex;align-items:center;gap:6px;border:1px solid #1f3d54;border-radius:16px;background:#0a1a27;color:#a9bbc9;font:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.t100-chip i{width:8px;height:8px;border-radius:50%;background:var(--f);box-shadow:0 0 6px var(--f)}
+.t100-chip small{font-size:11.5px;font-weight:600;color:#8aa0b2}
+.t100-chip:hover{background:#0e2334;color:#d5e1ea}
+.t100-chip.active{border-color:var(--f);background:color-mix(in srgb,var(--f) 16%,#0a1a27);color:#eef4fa}
+.t100-dot{display:inline-block;flex:0 0 7px;width:7px;height:7px;margin-right:7px;border-radius:50%;background:var(--f);box-shadow:0 0 5px var(--f);vertical-align:1px}
+.t100-empty td{padding:22px 8px!important;text-align:center!important;color:#9db2c4!important;white-space:normal!important}
+
+@media(max-width:650px){
+  .t100-podium{gap:6px}
+  .t100-pc{padding:10px 5px}
+  .t100-pc.p1{padding-top:14px;padding-bottom:12px}
+  .t100-nick{min-height:44px;font-size:11.5px}
+  .t100-val{font-size:17px}
+  .t100-pc.p1 .t100-val{font-size:19px}
+  .t100-metric{display:none}
+  .t100-search{max-width:none;flex-basis:100%}
+}
