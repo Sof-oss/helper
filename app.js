@@ -212,10 +212,10 @@ const CMP_GROUPS=[
  ["◷ Дополнительно",[["noCooldown","Удар без отката",1],["cooldown","Сокращение отката",1],["firstFreeHit","Первый бесплатный удар",1]]]
 ];
 const sumRanks=t=>Object.values(t).reduce((a,b)=>a+b,0);
-/* у большего значения зелёная стрелка вверх, у меньшего красная вниз; поровну — без отметок */
+/* у большего значения зелёная стрелка вверх, у меньшего красная вниз, рядом на сколько; поровну — без отметок */
 function cmpRow(label,x,y,pct){
- const eq=Math.abs(y-x)<(pct?.005:.5),show=v=>pct?Math.round(v*100)+"%":fmt(v);
- const cell=(v,hi)=>eq?'<td>'+show(v)+'</td>':'<td class="'+(hi?"cmp-up":"cmp-down")+'"><span class="cmp-v">'+show(v)+'<i class="cmp-arr">'+(hi?"▲":"▼")+'</i></span></td>';
+ const d=Math.abs(y-x),eq=d<(pct?.005:.5),show=v=>pct?Math.round(v*100)+"%":fmt(v),gap=pct?Math.round(d*100)+"%":fmt(d);
+ const cell=(v,hi)=>eq?'<td>'+show(v)+'</td>':'<td class="'+(hi?"cmp-up":"cmp-down")+'"><span class="cmp-v">'+show(v)+'<i class="cmp-arr">'+(hi?"▲":"▼")+" "+gap+'</i></span></td>';
  return '<tr class="'+(eq?"cmp-eq":"")+'"><td>'+label+'</td>'+cell(x,x>y)+cell(y,y>x)+'</tr>';
 }
 const cmpTags=(arr,cls)=>arr.map(t=>'<span class="gear-info-tag cmp-tag '+cls+'">'+t+'</span>').join("");
@@ -225,20 +225,15 @@ function renderCompare(){
  if(!cmpBuild){body.innerHTML='<p class="cmp-note">Пока не с чем сравнивать. Вставьте ссылку на билд в поле выше.</p>';return}
  const a=currentBuild(),b=cmpBuild,ra=results(),rb=resultsFor(b);
  let rows='<tr class="cmp-group"><td colspan="3">★ Общее</td></tr>'+cmpRow("Уровень",a.level,b.level)+cmpRow("Очки талантов",sumRanks(a.talents),sumRanks(b.talents))+cmpRow("Комплекты",a.sets.length,b.sets.length)+cmpRow("Одиночные вещи",a.items.length,b.items.length);
- let win=0,lose=0,same=0;
  CMP_GROUPS.forEach(([title,list])=>{
-  rows+='<tr class="cmp-group"><td colspan="3">'+title+'</td></tr>'+list.map(([k,l,p])=>{
-   const d=rb[k]-ra[k];if(Math.abs(d)<(p?.005:.5))same++;else if(d>0)lose++;else win++;
-   return cmpRow(l,ra[k],rb[k],p);
-  }).join("");
+  rows+='<tr class="cmp-group"><td colspan="3">'+title+'</td></tr>'+list.map(([k,l,p])=>cmpRow(l,ra[k],rb[k],p)).join("");
  });
- const chips='<div class="cmp-sum"><span class="cmp-chip a"><i></i>Ваш билд выше: <b>'+win+'</b></span><span class="cmp-chip b"><i></i>Другой билд выше: <b>'+lose+'</b></span><span class="cmp-chip"><i></i>Поровну: <b>'+same+'</b></span></div>';
  const only=(x,y,list)=>x.filter(i=>!y.includes(i)).map(i=>list[i].name);
  const mine=[...only(a.sets,b.sets,SETS),...only(a.items,b.items,ITEMS)],theirs=[...only(b.sets,a.sets,SETS),...only(b.items,a.items,ITEMS)];
  const tal=TALENTS.filter(t=>(a.talents[t[0]]||0)!==(b.talents[t[0]]||0)).map(t=>{const x=a.talents[t[0]]||0,y=b.talents[t[0]]||0;return{t:t[2]+" "+x+" → "+y,cls:y>x?"b":"a"}});
  const block=(title,html)=>html?'<div class="cmp-diff-row"><small>'+title+'</small><div class="gear-info-tags">'+html+'</div></div>':"";
  const diff=block("Снаряжение только у вас",cmpTags(mine,"a"))+block("Снаряжение только у другого билда",cmpTags(theirs,"b"))+block("Таланты (ваш → другого билда)",tal.map(x=>cmpTags([x.t],x.cls)).join(""));
- body.innerHTML=chips+'<table class="data-table cmp-table"><colgroup><col class="cmp-c0"><col><col></colgroup><thead><tr><th>Параметр</th><th class="cmp-h-a">Ваш билд</th><th class="cmp-h-b">Другой билд</th></tr></thead><tbody>'+rows+'</tbody></table><p class="cmp-note">▲ больше, ▼ меньше, чем у второго билда.</p><details class="cmp-diff"'+(diff?" open":"")+'><summary>Что отличается</summary>'+(diff||'<p>Снаряжение и таланты совпадают.</p>')+'</details>';
+ body.innerHTML='<table class="data-table cmp-table"><colgroup><col class="cmp-c0"><col><col></colgroup><thead><tr><th>Параметр</th><th class="cmp-h-a">Ваш билд</th><th class="cmp-h-b">Другой билд</th></tr></thead><tbody>'+rows+'</tbody></table><p class="cmp-note">▲ больше, ▼ меньше; рядом показано, на сколько.</p><details class="cmp-diff"'+(diff?" open":"")+'><summary>Что отличается</summary>'+(diff||'<p>Снаряжение и таланты совпадают.</p>')+'</details>';
 }
 function openCompare(){$("compareModal").classList.add("show");$("compareModal").setAttribute("aria-hidden","false");renderCompare()}
 function closeCompare(){$("compareModal").classList.remove("show");$("compareModal").setAttribute("aria-hidden","true")}
