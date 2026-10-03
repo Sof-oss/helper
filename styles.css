@@ -223,7 +223,9 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .top100-table th:nth-child(2),.top100-table td:nth-child(2){width:auto;text-align:left}
 .top100-table th:nth-child(3),.top100-table td:nth-child(3){width:70px}
 .top100-table th:nth-child(4),.top100-table td:nth-child(4){width:130px}
-.top100-rank{display:flex;align-items:center;gap:6px;white-space:nowrap}
+/* flex на самой td ломал табличную раскладку: ячейка не тянулась на высоту строки с дельтой, flex вынесен во вложенный div */
+.top100-rank{white-space:nowrap;vertical-align:middle}
+.top100-rank-in{display:flex;align-items:center;gap:6px}
 .top100-rank-num{font-variant-numeric:tabular-nums;color:#93a8ba}
 .top100-value{color:var(--accent,#54bfff);font-weight:700}
 .top100-table td.top100-nick{white-space:normal;overflow-wrap:anywhere;word-break:break-word}

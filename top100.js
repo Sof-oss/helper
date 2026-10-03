@@ -71,7 +71,7 @@ function metricDeltaMarkup(nick,tabKey){
 function top100RowMarkup(row,rank,plain,tabKey){
  const[nick,level,value,inactive]=row;
  const podium=!plain&&rank<=3;
- return '<tr class="'+(podium?"top100-podium top100-podium-"+rank:"")+(inactive?" top100-inactive":"")+'"><td class="top100-rank">'+(plain?'<span class="top100-rank-num">'+rank+'</span>':rankCell(rank))+rankMoveMarkup(nick,tabKey)+'</td><td class="top100-nick">'+dotMarkup(factionOf(nick),"t100-dot")+esc(nick)+'</td><td>'+level+'</td><td class="top100-value">'+fmt(value)+metricDeltaMarkup(nick,tabKey)+'</td></tr>';
+ return '<tr class="'+(podium?"top100-podium top100-podium-"+rank:"")+(inactive?" top100-inactive":"")+'"><td class="top100-rank"><div class="top100-rank-in">'+(plain?'<span class="top100-rank-num">'+rank+'</span>':rankCell(rank))+rankMoveMarkup(nick,tabKey)+'</div></td><td class="top100-nick">'+dotMarkup(factionOf(nick),"t100-dot")+esc(nick)+'</td><td>'+level+'</td><td class="top100-value">'+fmt(value)+metricDeltaMarkup(nick,tabKey)+'</td></tr>';
 }
 
 /* строки после поиска и фильтра; место = 5-й элемент, если в выгрузке был пропуск, иначе индекс+1 */
