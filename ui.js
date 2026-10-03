@@ -118,8 +118,7 @@ window.__roll = function (el, text) {
       b.style.setProperty("--t", t.color);
       b.style.setProperty("--t2", t.color2 || t.color);
       b.innerHTML = '<span class="ti-badge"><svg viewBox="0 0 24 24" aria-hidden="true">' + t.symbol + "</svg></span>"
-        + '<span class="ti-text"><b>' + t.label + "</b><small>" + t.tone + "</small></span>"
-        + '<span class="ti-mark" aria-hidden="true"></span>';
+        + '<span class="ti-text"><b>' + t.label + "</b><small>" + t.tone + "</small></span>";
       list.appendChild(b);
     });
     box.appendChild(list);
