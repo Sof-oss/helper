@@ -50,37 +50,14 @@ function renderTalentDetails(t){
 /* путь от таланта до его требований, для подсветки */
 function talentAncestors(code){const seen=new Set();const walk=c=>{if(seen.has(c))return;seen.add(c);const t=talentDef(c);if(!t)return;t[9].forEach(walk)};walk(code);return seen}
 
-/* масштаб и сдвиг дерева талантов */
+/* Дерево статичное: пользователь его не двигает и не масштабирует.
+   Масштаб считается один раз — так, чтобы дерево целиком помещалось в окно,
+   и пересчитывается при изменении размеров окна */
 const treeT={s:1,x:0,y:0};
 function clampTreeScale(s){return Math.min(2.5,Math.max(.5,s))}
-/* Дерево нельзя утащить за пределы окна: если холст больше видимой области, его края
-   не заходят внутрь (окно всегда заполнено), если меньше — холст целиком остаётся в окне.
-   Считаем по фактическим прямоугольникам: у холста transform-origin 0 0, поэтому смена
-   масштаба не двигает его левый верхний угол, а сдвиг — просто прибавка к координатам.
-   Проверка стоит в applyTreeTransform, поэтому работает и для мыши, и для тача,
-   и для колеса, и для кнопок зума */
-const treeApplied={x:0,y:0,s:1,ready:false};
-function clampTreeTranslate(){
- const wrap=document.querySelector(".talent-flow-wrap"),canvas=document.querySelector(".talent-flow-canvas");
- if(!wrap||!canvas||!treeApplied.ready)return;
- const wr=wrap.getBoundingClientRect(),cr=canvas.getBoundingClientRect();
- if(!wr.width||!wr.height)return;
- const k=treeT.s/treeApplied.s,nw=cr.width*k,nh=cr.height*k;
- const dx=treeT.x-treeApplied.x,dy=treeT.y-treeApplied.y;
- /* холст больше окна — обязан его перекрывать, меньше — обязан помещаться целиком */
- const limits=(viewStart,viewEnd,start,size)=>size>=viewEnd-viewStart
-  ?[viewEnd-size-start,viewStart-start]
-  :[viewStart-start,viewEnd-size-start];
- const bx=limits(wr.left,wr.right,cr.left,nw),by=limits(wr.top,wr.bottom,cr.top,nh);
- const cx=bx[0]>bx[1]?(bx[0]+bx[1])/2:Math.min(bx[1],Math.max(bx[0],dx));
- const cy=by[0]>by[1]?(by[0]+by[1])/2:Math.min(by[1],Math.max(by[0],dy));
- treeT.x=treeApplied.x+cx;treeT.y=treeApplied.y+cy;
-}
 function applyTreeTransform(){
- clampTreeTranslate();
  const c=document.querySelector(".talent-flow-canvas");
  if(c)c.style.transform="translate("+treeT.x+"px,"+treeT.y+"px) scale("+treeT.s+")";
- treeApplied.x=treeT.x;treeApplied.y=treeT.y;treeApplied.s=treeT.s;treeApplied.ready=true;
 }
 /* вписать дерево в окно и отцентровать (offsetLeft/Top не учитывают transform) */
 function resetTreeTransform(){
@@ -95,14 +72,14 @@ function resetTreeTransform(){
  }else{treeT.s=1;treeT.x=0;treeT.y=0}
  applyTreeTransform();
 }
-/* зум кнопками: масштаб меняется вокруг центра видимой области, а не угла */
-function zoomTree(f){
- const wrap=document.querySelector(".talent-flow-wrap");if(!wrap)return;
- const rect=wrap.getBoundingClientRect(),cx=rect.width/2,cy=rect.height/2;
- const next=clampTreeScale(treeT.s*f),k=next/treeT.s;
- treeT.x=cx-(cx-treeT.x)*k;treeT.y=cy-(cy-treeT.y)*k;treeT.s=next;
- applyTreeTransform();hideTalentTip();
-}
+/* при повороте телефона или изменении размера окна дерево снова вписывается */
+let treeFitFrame=0;
+window.addEventListener("resize",()=>{
+ const modal=document.getElementById("talentModal");
+ if(!modal||!modal.classList.contains("show"))return;
+ cancelAnimationFrame(treeFitFrame);
+ treeFitFrame=requestAnimationFrame(resetTreeTransform);
+});
 
 /* подсказка при наведении на узел: без клика видно, что даёт талант */
 function showTalentTip(code,node){
@@ -184,7 +161,7 @@ function renderTalents(){
  const branchRows='<div class="talent-branches">'+branches.map(b=>{const got=branchSpent[b.code]||0,all=branchMax[b.code]||1;return '<div class="talent-branch-progress"><div><span>'+b.name+'</span><b>'+got+' / '+all+'</b></div><span class="talent-branch-bar"><i style="width:'+Math.round(got/all*100)+'%"></i></span></div>'}).join("")+'</div>';
  const last=lastTalentChange&&lastTalentChange.length?'<div class="talent-last"><small>Последнее изменение</small><div class="talent-last-list">'+lastTalentChange.map(c=>'<span class="'+(c.v>0?"up":"down")+'">'+c.l+' <b>'+fmtDelta(c.v,c.p)+'</b></span>').join("")+'</div></div>':"";
  /* кнопки в .talent-side-footer, на телефоне он липнет ко дну панели (styles.css) */
- $("talentSidebar").innerHTML='<div class="talent-side-title"><span>Таланты</span><b>'+spent+' / '+MAX_TALENT_POINTS+'</b></div><div class="talent-gauge" style="--pct:'+pct+'"><div class="talent-gauge-ticks"></div><div class="talent-gauge-value"><b>'+pct+'</b><small>%</small></div></div><div class="talent-side-stats"><div><b>'+Math.max(0,MAX_TALENT_POINTS-spent)+'</b><small>свободно</small></div><div><b>'+spent+'</b><small>распределено</small></div></div>'+branchRows+last+'<div class="talent-branch-tabs">'+branches.map(b=>'<button type="button" class="'+(b.code===currentTalentBranch?"active":"")+'" data-talent-branch="'+b.code+'">'+b.name+'</button>').join("")+'</div><div class="talent-branch-description"><b>'+branch.name+'</b><span>'+branch.desc+'</span></div><div class="talent-side-hint">Нажми на узел дерева, чтобы открыть описание и прокачку. Колесо мыши или Ctrl + колесо — зум, перетаскивание — сдвиг.</div><div class="talent-side-footer"><button type="button" class="talent-hide talent-hide-reset" data-reset-talents '+(spent?"":"disabled")+'>↻ Сбросить таланты</button><button type="button" class="talent-hide" data-close-talents>← Скрыть</button></div>';
+ $("talentSidebar").innerHTML='<div class="talent-side-title"><span>Таланты</span><b>'+spent+' / '+MAX_TALENT_POINTS+'</b></div><div class="talent-gauge" style="--pct:'+pct+'"><div class="talent-gauge-ticks"></div><div class="talent-gauge-value"><b>'+pct+'</b><small>%</small></div></div><div class="talent-side-stats"><div><b>'+Math.max(0,MAX_TALENT_POINTS-spent)+'</b><small>свободно</small></div><div><b>'+spent+'</b><small>распределено</small></div></div>'+branchRows+last+'<div class="talent-branch-tabs">'+branches.map(b=>'<button type="button" class="'+(b.code===currentTalentBranch?"active":"")+'" data-talent-branch="'+b.code+'">'+b.name+'</button>').join("")+'</div><div class="talent-branch-description"><b>'+branch.name+'</b><span>'+branch.desc+'</span></div><div class="talent-side-hint">Нажми на узел дерева, чтобы открыть описание и прокачку</div><div class="talent-side-footer"><button type="button" class="talent-hide talent-hide-reset" data-reset-talents '+(spent?"":"disabled")+'>↻ Сбросить таланты</button><button type="button" class="talent-hide" data-close-talents>← Скрыть</button></div>';
  const detailOverlay=$("talentDetailOverlay"),detailOn=talentDetailOpen&&!!selectedTalentCode;
  if(detailOn){const dt=talentDef(selectedTalentCode);detailOverlay.innerHTML='<div class="talent-detail-backdrop" data-close-talent-detail></div><div class="talent-detail-modal" role="dialog" aria-modal="true" aria-label="'+dt[2].replace(/"/g,"&quot;")+'" tabindex="-1">'+renderTalentDetails(dt)+'</div>';detailOverlay.classList.add("show")}
  else{detailOverlay.classList.remove("show");detailOverlay.innerHTML=""}
@@ -398,8 +375,6 @@ function announceResults(r){
 document.addEventListener("click",e=>{
  const gt=e.target.closest("#gearToggle");if(gt){const open=gt.closest(".equipment-section").classList.toggle("gear-open");gt.setAttribute("aria-expanded",open);return}
  /* зум дерева талантов кнопками и вписать в окно */
- const zoom=e.target.closest("[data-tree-zoom]");if(zoom){zoomTree(Number(zoom.dataset.treeZoom)>0?1.18:1/1.18);return}
- if(e.target.closest("[data-tree-fit]")){resetTreeTransform();hideTalentTip();return}
  const closeDetail=e.target.closest("[data-close-talent-detail]");if(closeDetail){talentDetailOpen=false;renderTalents();return}
  const up=e.target.closest("[data-talent-up]");if(up){changeTalent(up.dataset.talentUp,1);return}
  const branch=e.target.closest("[data-talent-branch]");if(branch){currentTalentBranch=branch.dataset.talentBranch;selectedTalentCode=null;talentDetailOpen=false;renderTalents();resetTreeTransform();return}
@@ -422,68 +397,11 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(talentDetailOpen
 /* подсказка к узлу дерева: появляется при наведении, исчезает при уходе курсора */
 document.addEventListener("mouseover",e=>{const n=e.target.closest&&e.target.closest(".talent-node-game");if(!n||!$("talentModal").classList.contains("show"))return;showTalentTip(n.dataset.selectTalent,n)});
 document.addEventListener("mouseout",e=>{if(e.target.closest&&e.target.closest(".talent-node-game"))hideTalentTip()});
-/* при перетаскивании и зуме подсказка уезжает от узла — прячем */
-document.addEventListener("wheel",()=>hideTalentTip(),{passive:true});
-document.addEventListener("touchstart",()=>hideTalentTip(),{passive:true});
 document.addEventListener("change",e=>{const i=e.target;if(!i.matches("[data-type]"))return;const s=i.dataset.type==="set"?state.sets:state.items,n=Number(i.dataset.index);i.checked?s.add(n):s.delete(n);saveState();render()});
 document.addEventListener("click",e=>{const b=e.target.closest("[data-step]");if(!b)return;const input=$(b.dataset.step),dir=Number(b.dataset.dir)||0,min=Number(input.min)||0,max=Number(input.max)||999;input.value=Math.min(max,Math.max(min,(Number(input.value)||0)+dir));saveState();calc()});
 $("selectAllEquipment").addEventListener("change",e=>{state.sets.clear();state.items.clear();if(e.target.checked){SETS.forEach((_,i)=>state.sets.add(i));ITEMS.forEach((_,i)=>state.items.add(i))}saveState();render()});
 $("level").addEventListener("input",()=>{saveState();calc()});
 $("resetAll").onclick=()=>{if(!confirm("Точно сбросить весь прогресс — уровень, снаряжение и все очки талантов?"))return;state.sets.clear();state.items.clear();state.talents={};lastTalentChange=null;$("level").value=1;saveState();render()};
-
-/* pinch-zoom и сдвиг дерева (тач) */
-/* у события может не быть элемента в target (например, синтетическое событие на document) */
-const hitTarget=(e,sel)=>{const t=e.target;return t&&typeof t.closest==="function"?t.closest(sel):null};
-const distTouch=(a,b)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
-const midTouch=(a,b)=>({x:(a.clientX+b.clientX)/2,y:(a.clientY+b.clientY)/2});
-let touchState=null;
-document.addEventListener("touchstart",e=>{
- const wrap=hitTarget(e,".talent-flow-wrap");if(!wrap)return;
- if(e.touches.length===1)touchState={mode:"pan",lastX:e.touches[0].clientX,lastY:e.touches[0].clientY};
- else if(e.touches.length===2)touchState={mode:"pinch",lastDist:distTouch(e.touches[0],e.touches[1])};
-},{passive:true});
-document.addEventListener("touchmove",e=>{
- if(!touchState)return;const wrap=hitTarget(e,".talent-flow-wrap");if(!wrap)return;
- if(touchState.mode==="pan"&&e.touches.length===1){
-  const dx=e.touches[0].clientX-touchState.lastX,dy=e.touches[0].clientY-touchState.lastY;
-  treeT.x+=dx;treeT.y+=dy;touchState.lastX=e.touches[0].clientX;touchState.lastY=e.touches[0].clientY;
-  applyTreeTransform();e.preventDefault();
- }else if(touchState.mode==="pinch"&&e.touches.length===2){
-  const rect=wrap.getBoundingClientRect(),mid=midTouch(e.touches[0],e.touches[1]),d=distTouch(e.touches[0],e.touches[1]);
-  const canvasX=(mid.x-rect.left-treeT.x)/treeT.s,canvasY=(mid.y-rect.top-treeT.y)/treeT.s;
-  const newScale=clampTreeScale(treeT.s*(d/touchState.lastDist));
-  treeT.x=mid.x-rect.left-canvasX*newScale;treeT.y=mid.y-rect.top-canvasY*newScale;treeT.s=newScale;touchState.lastDist=d;
-  applyTreeTransform();e.preventDefault();
- }
-},{passive:false});
-document.addEventListener("touchend",e=>{
- const wrap=hitTarget(e,".talent-flow-wrap");
- if(wrap&&e.touches.length===1)touchState={mode:"pan",lastX:e.touches[0].clientX,lastY:e.touches[0].clientY};
- else touchState=null;
-});
-
-/* сдвиг мышью, зум колесом */
-let dragState=null;
-document.addEventListener("mousedown",e=>{
- const wrap=hitTarget(e,".talent-flow-wrap");if(!wrap||hitTarget(e,".talent-node-game"))return;
- dragState={x:e.clientX,y:e.clientY};wrap.style.cursor="grabbing";
-});
-document.addEventListener("mousemove",e=>{
- if(!dragState)return;
- treeT.x+=e.clientX-dragState.x;treeT.y+=e.clientY-dragState.y;dragState={x:e.clientX,y:e.clientY};
- applyTreeTransform();
-});
-document.addEventListener("mouseup",()=>{if(dragState){dragState=null;const wrap=document.querySelector(".talent-flow-wrap");if(wrap)wrap.style.cursor="grab"}});
-document.addEventListener("wheel",e=>{
- const wrap=hitTarget(e,".talent-flow-wrap");if(!wrap)return;
- e.preventDefault();const rect=wrap.getBoundingClientRect();
- if(e.ctrlKey){
-  const canvasX=(e.clientX-rect.left-treeT.x)/treeT.s,canvasY=(e.clientY-rect.top-treeT.y)/treeT.s;
-  const newScale=clampTreeScale(treeT.s*(1-e.deltaY*.01));
-  treeT.x=e.clientX-rect.left-canvasX*newScale;treeT.y=e.clientY-rect.top-canvasY*newScale;treeT.s=newScale;
- }else{treeT.x-=e.deltaX;treeT.y-=e.deltaY}
- applyTreeTransform();
-},{passive:false});
 
 ["tokenCount","tokenTarget"].forEach(id=>$(id).addEventListener("input",()=>{saveTokens();renderTokens()}));
 renderCards();loadState();loadTokens();
