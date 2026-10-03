@@ -41,11 +41,30 @@ function rankCell(rank){
 }
 const dotMarkup=(f,cls)=>f?'<i class="'+cls+'" style="--f:'+f.color+'" title="'+f.label+'"></i>':"";
 
+/* изменение места к прошлой неделе (top100-data.js -> TOP100_RANK): данных может не быть */
+function rankMoveMarkup(nick,tabKey){
+ const d=window.TOP100_RANK&&window.TOP100_RANK[tabKey];
+ if(!d||!(nick in d))return "";
+ const v=d[nick];
+ if(v===null)return '<i class="t100-move new" title="Впервые в списке">new</i>';
+ if(!v)return "";
+ return '<i class="t100-move '+(v>0?"up":"down")+'" title="Место за неделю: '+(v>0?"+":"")+v+'">'+(v>0?"▲":"▼")+Math.abs(v)+'</i>';
+}
+/* прирост метрики за неделю (TOP100_DELTA, есть только там, где игра отдаёт колонку «Δ …») */
+function metricDeltaMarkup(nick,tabKey){
+ const d=window.TOP100_DELTA&&window.TOP100_DELTA[tabKey];
+ if(!d||!(nick in d))return "";
+ const v=d[nick];
+ if(v===null||v===undefined)return "";
+ if(!v)return '<span class="t100-delta same">без изменений</span>';
+ return '<span class="t100-delta '+(v>0?"up":"down")+'">'+(v>0?"▲":"▼")+" "+fmt(Math.abs(v))+'</span>';
+}
+
 /* rank — реальное место. plain — без медалей и подсветки (при сортировке по уровню места вразброс) */
-function top100RowMarkup(row,rank,plain){
+function top100RowMarkup(row,rank,plain,tabKey){
  const[nick,level,value,inactive]=row;
  const podium=!plain&&rank<=3;
- return '<tr class="'+(podium?"top100-podium top100-podium-"+rank:"")+(inactive?" top100-inactive":"")+'"><td class="top100-rank">'+(plain?'<span class="top100-rank-num">'+rank+'</span>':rankCell(rank))+'</td><td class="top100-nick">'+dotMarkup(factionOf(nick),"t100-dot")+esc(nick)+'</td><td>'+level+'</td><td class="top100-value">'+fmt(value)+'</td></tr>';
+ return '<tr class="'+(podium?"top100-podium top100-podium-"+rank:"")+(inactive?" top100-inactive":"")+'"><td class="top100-rank">'+(plain?'<span class="top100-rank-num">'+rank+'</span>':rankCell(rank))+rankMoveMarkup(nick,tabKey)+'</td><td class="top100-nick">'+dotMarkup(factionOf(nick),"t100-dot")+esc(nick)+'</td><td>'+level+'</td><td class="top100-value">'+fmt(value)+metricDeltaMarkup(nick,tabKey)+'</td></tr>';
 }
 
 /* строки после поиска и фильтра; место = 5-й элемент, если в выгрузке был пропуск, иначе индекс+1 */
@@ -66,7 +85,7 @@ function top100TableMarkup(tab){
  const levelTh=tab.sortLevel
   ?'<th class="top100-sort'+(sorted?" active":"")+'" data-top100-sort="level" role="button" tabindex="0" aria-pressed="'+sorted+'" title="Сортировать по уровню">Ур.<i aria-hidden="true">▼</i></th>'
   :'<th>Ур.</th>';
- const body=entries.length?entries.map(e=>top100RowMarkup(e.row,e.rank,sorted)).join(""):'<tr class="t100-empty"><td colspan="4">Никого не нашли. Попробуй другой ник или сбрось фильтр</td></tr>';
+ const body=entries.length?entries.map(e=>top100RowMarkup(e.row,e.rank,sorted,tab.key)).join(""):'<tr class="t100-empty"><td colspan="4">Никого не нашли. Попробуй другой ник или сбрось фильтр</td></tr>';
  return '<div class="data-wrap top100-scroll" style="--accent:'+tab.accent+'"><table class="data-table top100-table'+(tab.sortLevel?" top100-sortable":"")+'"><thead><tr><th>#</th><th>Ник</th>'+levelTh+'<th>'+tab.metric+'</th></tr></thead><tbody>'+body+'</tbody></table></div>';
 }
 
@@ -109,10 +128,14 @@ document.addEventListener("click",e=>{
  }
  const btn=e.target.closest("[data-top100-tab]");
  if(!btn)return;
- currentTop100Tab=btn.dataset.top100Tab;
- levelSortDesc=false; // сортировка не переносится на другую вкладку
- try{localStorage.setItem(TOP100_TAB_KEY,currentTop100Tab)}catch{}
- renderTop100();
+ /* смена раздела проходит через View Transition, если браузер умеет */
+ const swap=()=>{
+  currentTop100Tab=btn.dataset.top100Tab;
+  levelSortDesc=false; // сортировка не переносится на другую вкладку
+  try{localStorage.setItem(TOP100_TAB_KEY,currentTop100Tab)}catch{}
+  renderTop100();
+ };
+ window.__vt?window.__vt(swap):swap();
 });
 document.addEventListener("keydown",e=>{
  if(e.key!=="Enter"&&e.key!==" ")return;

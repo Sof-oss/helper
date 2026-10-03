@@ -50,10 +50,14 @@ function renderInfo(){
 document.addEventListener("click",e=>{
  const btn=e.target.closest("[data-info-tab]");
  if(!btn)return;
- currentInfoTab=btn.dataset.infoTab;
- try{localStorage.setItem(INFO_TAB_KEY,currentInfoTab)}catch{}
- renderInfoTabs();
- applyInfoActiveTab();
+ /* смена вкладки проходит через View Transition, если браузер умеет */
+ const swap=()=>{
+  currentInfoTab=btn.dataset.infoTab;
+  try{localStorage.setItem(INFO_TAB_KEY,currentInfoTab)}catch{}
+  renderInfoTabs();
+  applyInfoActiveTab();
+ };
+ window.__vt?window.__vt(swap):swap();
 });
 
 renderInfo();

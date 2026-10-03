@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050f16">
+<script>/* тема до первой отрисовки, чтобы не мигало */(function(){try{var t=localStorage.getItem("zoneTheme");if(t)document.documentElement.dataset.theme=t}catch(e){}})();</script>
 <title>Сердце Зоны — сайт-помощник</title>
 <meta name="description" content="Сайт-помощник для игры «Сердце Зоны»: калькулятор урона, справочная информация по уровням и гайды.">
 <link rel="canonical" href="https://heart-of-the-zone.ru/">
@@ -26,6 +28,7 @@
 <link rel="preload" as="image" href="assets/bg-zone-1280.webp" media="(min-width:761px) and (max-width:1366px)" fetchpriority="high">
 <link rel="preload" as="image" href="assets/bg-zone.webp" media="(min-width:1367px)" fetchpriority="high">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="visual.css">
 </head>
 <body>
 <header class="site-header">
@@ -87,4 +90,4 @@
 <!-- подпись автора -->
 <footer class="site-footer"><span>© by Sof</span></footer>
 
-<script src="nav.js"></script></body></html>
+<script src="ui.js"></script><script src="nav.js"></script></body></html>

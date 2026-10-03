@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#050f16">
+<script>/* тема до первой отрисовки, чтобы не мигало */(function(){try{var t=localStorage.getItem("zoneTheme");if(t)document.documentElement.dataset.theme=t}catch(e){}})();</script>
 <title>Сердце Зоны — Калькулятор урона</title>
 <meta name="description" content="Калькулятор урона для игры «Сердце Зоны»: оружие, снаряжение и таланты.">
 <link rel="canonical" href="https://heart-of-the-zone.ru/calculator.html">
@@ -27,6 +29,7 @@
 <link rel="preload" as="image" href="assets/bg-zone.webp" media="(min-width:1367px)" fetchpriority="high">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="polish.css">
+<link rel="stylesheet" href="visual.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -153,4 +156,4 @@
 <!-- подпись автора -->
 <footer class="site-footer"><span>© by Sof</span></footer>
 
-<script src="talents.js"></script><script src="app.js"></script><script src="polish.js"></script><script src="nav.js"></script></body></html>
+<script src="ui.js"></script><script src="talents.js"></script><script src="app.js"></script><script src="polish.js"></script><script src="nav.js"></script></body></html>

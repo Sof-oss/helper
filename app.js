@@ -193,11 +193,16 @@ function cardMarkup([k,name,icon],withCrit){
 function renderCards(){$("paidCards").innerHTML=CARDS.paid.map(c=>cardMarkup(c,true)).join("");$("freeCards").innerHTML=CARDS.free.map(c=>cardMarkup(c,false)).join("")}
 
 function optionMarkup(arr,set,type){return arr.map((x,i)=>'<label class="option"><input type="checkbox" data-type="'+type+'" data-index="'+i+'" '+(set.has(i)?"checked":"")+'><span>'+x.name+'</span></label>').join("")}
-function set(id,v){$(id).textContent=v}
+function set(id,v,roll){
+ const el=$(id);if(!el)return;
+ /* итоговый урон «докручивается» до нового значения (ui.js), остальные подписи — сразу */
+ if(roll&&window.__roll){window.__roll(el,v);return}
+ el.textContent=v;
+}
 function calc(){
  const level=Math.max(1,Math.min(100,num("level")));$("level").value=level;
  const T=totals(),tal=T.talentTotal,base=baseDamageByLevel(level),baseFlat=baseDamageByLevel(MIN_LEVEL),r=results(undefined,T);
- keys.forEach(k=>{const K=cap(k);set("base"+K,fmt(baseFlat[k]));set("level"+K,fmt(base[k]-baseFlat[k]));set("gear"+K,fmt(T.total[k]-tal[k]));set("talentOut"+K,fmt(tal[k]));set("result"+K,fmt(r[k]))});
+ keys.forEach(k=>{const K=cap(k);set("base"+K,fmt(baseFlat[k]));set("level"+K,fmt(base[k]-baseFlat[k]));set("gear"+K,fmt(T.total[k]-tal[k]));set("talentOut"+K,fmt(tal[k]));set("result"+K,fmt(r[k]),true)});
  /* первый бесплатный удар: итоговый урон плюс процентный бонус таланта */
  ["knife","pistol","auto"].forEach(k=>set("first"+cap(k),"("+fmt(r[k]*(1+r.firstFreeHit))+")"));
  ["Grenade","Gl","Gauss"].forEach(K=>{set("crit"+K,(r["crit"+K]*100).toFixed(0)+"%");set("critDmg"+K,fmt(r["critDmg"+K]))});

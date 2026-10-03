@@ -58,7 +58,12 @@ function setSection(k){
 }
 document.addEventListener("click",e=>{
  const s=e.target.closest("[data-section]");
- if(s){setSection(s.dataset.section);try{localStorage.setItem(SEC_KEY,s.dataset.section)}catch{}return}
+ if(s){
+  /* смена раздела проходит через View Transition, если браузер умеет */
+  const swap=()=>{setSection(s.dataset.section);try{localStorage.setItem(SEC_KEY,s.dataset.section)}catch{}};
+  window.__vt?window.__vt(swap):swap();
+  return;
+ }
  const l=e.target.closest("[data-task-loc]");
  if(l){cur=Number(l.dataset.taskLoc);try{localStorage.setItem(LOC_KEY,cur)}catch{}renderMobile()}
 });

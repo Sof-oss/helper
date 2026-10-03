@@ -1,0 +1,138 @@
+/* ============================================================================
+   Визуальный пакет: темы, «стеклянная» шапка, цифры-герои, нижнее меню на
+   телефоне, дельты рейтинга, атмосферный дрейф и View Transitions.
+   Подключается последним, поэтому аккуратно переопределяет styles.css/polish.css.
+   Всё, что двигается, отключается при prefers-reduced-motion.
+   ============================================================================ */
+
+/* ---------- 1. Палитра тем ----------
+   data-theme ставится на <html> скриптом в <head> (до первой отрисовки),
+   чтобы не мигало; выбор хранится в localStorage ключом zoneTheme. */
+:root{
+  --accent:#54bfff;
+  --accent-2:#a8e0ff;
+  --accent-ink:#04121d;
+  --r-lg:14px;
+  --r-md:10px;
+  --sh-1:0 1px 2px rgba(0,0,0,.5);
+  --sh-2:0 14px 34px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05);
+  --glass:rgba(6,14,21,.55);
+  --glass-line:rgba(120,190,255,.14);
+  --tabbar-h:58px;
+}
+:root[data-theme="merc"]{--accent:#ffb74d;--accent-2:#ffd9a1;--accent-ink:#1d1204;--glass-line:rgba(255,183,77,.16)}
+:root[data-theme="dolg"]{--accent:#ff6b6f;--accent-2:#ffb3b5;--accent-ink:#1d0506;--glass-line:rgba(255,107,111,.16)}
+:root[data-theme="svoboda"]{--accent:#9fdc9f;--accent-2:#d6f5d6;--accent-ink:#08170a;--glass-line:rgba(159,220,159,.16)}
+:root[data-theme="science"]{--accent:#54bfff;--accent-2:#a8e0ff;--accent-ink:#04121d;--glass-line:rgba(84,191,255,.16)}
+:root[data-theme="winx"]{--accent:#c9a6ff;--accent-2:#e3d4ff;--accent-ink:#120a1f;--glass-line:rgba(201,166,255,.16)}
+:root{color-scheme:dark}
+
+/* ---------- 2. Атмосфера: медленный дрейф свечения поверх фона ---------- */
+body::after{
+  content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;filter:blur(14px);
+  background:
+    radial-gradient(38% 28% at 28% 18%,color-mix(in srgb,var(--accent) 12%,transparent),transparent 70%),
+    radial-gradient(32% 24% at 76% 62%,rgba(255,183,77,.07),transparent 72%);
+  animation:zone-drift 90s ease-in-out infinite alternate;
+}
+@keyframes zone-drift{to{transform:translate3d(-3%,2%,0) scale(1.06)}}
+
+/* ---------- 3. Шапка: стекло, липкость, тень при скролле ---------- */
+.site-header{
+  position:sticky;top:0;z-index:40;
+  background:linear-gradient(180deg,var(--glass),color-mix(in srgb,var(--glass) 65%,transparent));
+  -webkit-backdrop-filter:blur(12px) saturate(140%);
+  backdrop-filter:blur(12px) saturate(140%);
+  border-bottom:1px solid var(--glass-line);
+  transition:box-shadow .2s ease,background .2s ease;
+}
+.site-header.scrolled{box-shadow:0 12px 34px rgba(0,0,0,.55)}
+.main-nav a.active{color:color-mix(in srgb,var(--accent) 30%,#ffffff)}
+.main-nav a.active:after{background:var(--accent);box-shadow:0 0 10px var(--accent)}
+.rad-logo{color:var(--accent-2);filter:drop-shadow(0 0 6px var(--accent))}
+.logo-title{text-shadow:1px 1px 0 #04090e,0 0 14px color-mix(in srgb,var(--accent) 45%,transparent)}
+:where(button,input,a,summary):focus-visible{outline-color:var(--accent)}
+
+/* ---------- 4. Переключатель тем ---------- */
+.theme-switch{margin-left:auto;display:flex;align-items:center;gap:6px;padding:4px 6px;border:1px solid var(--glass-line);border-radius:999px;background:rgba(5,12,18,.45)}
+.theme-switch button{width:19px;height:19px;padding:0;border:0;border-radius:50%;background:var(--t);opacity:.55;cursor:pointer;transition:opacity .15s ease,transform .15s ease,box-shadow .15s ease}
+.theme-switch button:hover{opacity:.9;transform:translateY(-1px) scale(1.08)}
+.theme-switch button[aria-pressed="true"]{opacity:1;box-shadow:0 0 0 2px #0a141d,0 0 0 3px var(--t),0 0 12px var(--t)}
+@media(max-width:760px){.theme-switch{gap:5px;padding:3px 5px}.theme-switch button{width:17px;height:17px}}
+
+/* ---------- 5. Цифры-герои ---------- */
+.page .damage-card strong,.dmg-main strong{
+  font-family:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
+  font-size:clamp(30px,5.6vw,44px);font-weight:700;line-height:1.02;letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums;
+  text-shadow:0 0 22px color-mix(in srgb,var(--accent) 45%,transparent);
+}
+.first-hit{font-variant-numeric:tabular-nums;opacity:.9}
+.dmg-main{display:flex;flex-direction:column;gap:2px}
+
+/* ---------- 6. Глубина интерфейса ---------- */
+.result-panel,.sidebar,.top100-panel{border-radius:var(--r-lg);box-shadow:var(--sh-2)}
+.home-card{border-radius:var(--r-lg);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.home-card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 40%,#1a3346);box-shadow:0 18px 40px rgba(0,0,0,.5)}
+.side-btn,.tokens-btn,.cmp-btn,.talent-open,.gear-toggle{transition:transform .12s ease,box-shadow .18s ease,border-color .18s ease}
+.side-btn:hover,.tokens-btn:hover,.cmp-btn:hover{transform:translateY(-1px);box-shadow:0 0 18px color-mix(in srgb,var(--accent) 30%,transparent)}
+.side-btn:active,.tokens-btn:active,.cmp-btn:active{transform:translateY(0)}
+
+/* ---------- 7. Нижнее меню на телефоне ---------- */
+.tabbar{display:none}
+@media(max-width:760px){
+  .main-nav{display:none}                 /* верхний ряд заменяет нижнее меню */
+  .site-header{min-height:64px}
+  .header-inner{min-height:64px;flex-wrap:nowrap;padding:8px 12px}
+  body{padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px))}
+  .tabbar{
+    display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:60;
+    height:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px));
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    background:linear-gradient(180deg,rgba(5,12,18,.82),rgba(4,10,16,.96));
+    -webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);
+    border-top:1px solid var(--glass-line);
+  }
+  .tabbar a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    color:#8fa3b4;text-decoration:none;font-size:10.5px;font-weight:600;padding-top:6px;line-height:1.1}
+  .tabbar a span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .tabbar a .nav-icon{width:22px;height:22px;flex:0 0 22px}
+  .tabbar a.active{color:color-mix(in srgb,var(--accent) 25%,#ffffff)}
+  .tabbar a.active .nav-icon{filter:drop-shadow(0 0 7px var(--accent))}
+}
+
+/* ---------- 8. Дельты рейтинга ---------- */
+.t100-delta{display:block;margin-top:2px;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.2px;white-space:nowrap}
+.t100-delta.up{color:#5fd08a}
+.t100-delta.down{color:#ff7a7d}
+.t100-delta.same{color:#5c7386;font-weight:600}
+.t100-delta.new{color:var(--accent-2);font-weight:700}
+/* изменение места рядом с номером: ▲ поднялся, ▼ опустился, new — впервые в списке */
+.t100-move{display:block;margin-top:1px;font-style:normal;font-size:10.5px;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums;white-space:nowrap}
+.t100-move.up{color:#5fd08a}
+.t100-move.down{color:#ff7a7d}
+.t100-move.new{color:var(--accent-2);text-transform:uppercase;letter-spacing:.4px}
+@media(max-width:430px){.t100-delta{font-size:10.5px}.t100-move{font-size:10px}}
+
+/* ---------- 8б. Акцент темы в мелких деталях ---------- */
+.home-eyebrow{color:color-mix(in srgb,var(--accent) 75%,#ffffff)}
+.home-eyebrow i{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.section-heading span .ic,.section-heading .ic{color:var(--accent)}
+.site-footer span{color:var(--accent)}
+.top100-updated{border-color:color-mix(in srgb,var(--accent) 45%,#2e6384)}
+.top100-updated svg{stroke:var(--accent)}
+
+/* ---------- 9. View Transitions ---------- */
+#top100TableWrap{view-transition-name:leaderboard}
+#infoGroups{view-transition-name:infogroups}
+::view-transition-old(leaderboard),::view-transition-new(leaderboard),
+::view-transition-old(infogroups),::view-transition-new(infogroups){animation-duration:.22s;animation-timing-function:cubic-bezier(.2,.7,.3,1)}
+
+/* ---------- 10. Уважение к настройкам системы ---------- */
+@media(prefers-reduced-motion:reduce){
+  body::after{animation:none}
+  .home-card,.side-btn,.tokens-btn,.cmp-btn,.theme-switch button{transition:none}
+  .home-card:hover{transform:none}
+  ::view-transition-old(leaderboard),::view-transition-new(leaderboard),
+  ::view-transition-old(infogroups),::view-transition-new(infogroups){animation:none}
+}
