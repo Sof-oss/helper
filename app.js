@@ -54,21 +54,34 @@ function talentAncestors(code){const seen=new Set();const walk=c=>{if(seen.has(c
    Масштаб считается один раз — так, чтобы дерево целиком помещалось в окно,
    и пересчитывается при изменении размеров окна */
 const treeT={s:1,x:0,y:0};
-function clampTreeScale(s){return Math.min(2.5,Math.max(.5,s))}
+function clampTreeScale(s){return Math.min(2.5,Math.max(.2,s))}
 function applyTreeTransform(){
  const c=document.querySelector(".talent-flow-canvas");
  if(c)c.style.transform="translate("+treeT.x+"px,"+treeT.y+"px) scale("+treeT.s+")";
 }
-/* вписать дерево в окно и отцентровать (offsetLeft/Top не учитывают transform) */
+/* вписать дерево в окно и отцентровать (offsetLeft/Top не учитывают transform).
+   Считаем по фактическим границам узлов, а не по холсту: у холста есть поля,
+   из-за которых дерево выглядело мелким на широком экране */
+function talentNodeBox(){
+ const nodes=[...document.querySelectorAll(".talent-flow-canvas .talent-node-game")];
+ if(!nodes.length)return null;
+ let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+ nodes.forEach(n=>{
+  const l=parseFloat(n.style.left)||0,t=parseFloat(n.style.top)||0,w=n.offsetWidth||100,h=n.offsetHeight||100;
+  x0=Math.min(x0,l);y0=Math.min(y0,t);x1=Math.max(x1,l+w);y1=Math.max(y1,t+h);
+ });
+ return{x0,y0,w:x1-x0,h:y1-y0};
+}
 function resetTreeTransform(){
  const wrap=document.querySelector(".talent-flow-wrap"),canvas=document.querySelector(".talent-flow-canvas");
  if(wrap&&canvas&&wrap.clientWidth&&canvas.offsetWidth){
-  const ww=wrap.clientWidth,wh=wrap.clientHeight||ww,cw=canvas.offsetWidth,ch=canvas.offsetHeight||cw;
-  const s=clampTreeScale(Math.min(1,ww/cw,wh/ch)*.92);
-  const dx=(ww-cw*s)/2,dy=Math.max(10,(wh-ch*s)/2);
+  const ww=wrap.clientWidth,wh=wrap.clientHeight||ww,pad=20,box=talentNodeBox();
+  const bw=box?box.w:canvas.offsetWidth,bh=box?box.h:canvas.offsetHeight;
+  const s=clampTreeScale(Math.min(1.4,(ww-pad*2)/bw,(wh-pad*2)/bh));
+  const bx=box?box.x0+box.w/2:canvas.offsetWidth/2,by=box?box.y0+box.h/2:canvas.offsetHeight/2;
   treeT.s=s;
-  treeT.x=dx-canvas.offsetLeft;
-  treeT.y=dy-canvas.offsetTop;
+  treeT.x=ww/2-bx*s-canvas.offsetLeft;
+  treeT.y=wh/2-by*s-canvas.offsetTop;
  }else{treeT.s=1;treeT.x=0;treeT.y=0}
  applyTreeTransform();
 }
@@ -161,7 +174,9 @@ function renderTalents(){
  const branchRows='<div class="talent-branches">'+branches.map(b=>{const got=branchSpent[b.code]||0,all=branchMax[b.code]||1;return '<div class="talent-branch-progress"><div><span>'+b.name+'</span><b>'+got+' / '+all+'</b></div><span class="talent-branch-bar"><i style="width:'+Math.round(got/all*100)+'%"></i></span></div>'}).join("")+'</div>';
  const last=lastTalentChange&&lastTalentChange.length?'<div class="talent-last"><small>Последнее изменение</small><div class="talent-last-list">'+lastTalentChange.map(c=>'<span class="'+(c.v>0?"up":"down")+'">'+c.l+' <b>'+fmtDelta(c.v,c.p)+'</b></span>').join("")+'</div></div>':"";
  /* кнопки в .talent-side-footer, на телефоне он липнет ко дну панели (styles.css) */
- $("talentSidebar").innerHTML='<div class="talent-side-title"><span>Таланты</span><b>'+spent+' / '+MAX_TALENT_POINTS+'</b></div><div class="talent-gauge" style="--pct:'+pct+'"><div class="talent-gauge-ticks"></div><div class="talent-gauge-value"><b>'+pct+'</b><small>%</small></div></div><div class="talent-side-stats"><div><b>'+Math.max(0,MAX_TALENT_POINTS-spent)+'</b><small>свободно</small></div><div><b>'+spent+'</b><small>распределено</small></div></div>'+branchRows+last+'<div class="talent-branch-tabs">'+branches.map(b=>'<button type="button" class="'+(b.code===currentTalentBranch?"active":"")+'" data-talent-branch="'+b.code+'">'+b.name+'</button>').join("")+'</div><div class="talent-branch-description"><b>'+branch.name+'</b><span>'+branch.desc+'</span></div><div class="talent-side-hint">Нажми на узел дерева, чтобы открыть описание и прокачку</div><div class="talent-side-footer"><button type="button" class="talent-hide talent-hide-reset" data-reset-talents '+(spent?"":"disabled")+'>↻ Сбросить таланты</button><button type="button" class="talent-hide" data-close-talents>← Скрыть</button></div>';
+ /* легенда состояний живёт в панели, а не поверх дерева: иначе она перекрывает крайние узлы */
+ const legend='<div class="talent-legend" aria-hidden="true"><span><i class="lg-maxed"></i>Изучено до максимума</span><span><i class="lg-ready"></i>Можно прокачать</span><span><i class="lg-open"></i>Открыт, очков нет</span><span><i class="lg-locked"></i>Закрыт требованием</span></div>';
+ $("talentSidebar").innerHTML='<div class="talent-side-title"><span>Таланты</span><b>'+spent+' / '+MAX_TALENT_POINTS+'</b></div><div class="talent-gauge" style="--pct:'+pct+'"><div class="talent-gauge-ticks"></div><div class="talent-gauge-value"><b>'+pct+'</b><small>%</small></div></div><div class="talent-side-stats"><div><b>'+Math.max(0,MAX_TALENT_POINTS-spent)+'</b><small>свободно</small></div><div><b>'+spent+'</b><small>распределено</small></div></div>'+branchRows+last+'<div class="talent-branch-tabs">'+branches.map(b=>'<button type="button" class="'+(b.code===currentTalentBranch?"active":"")+'" data-talent-branch="'+b.code+'">'+b.name+'</button>').join("")+'</div><div class="talent-branch-description"><b>'+branch.name+'</b><span>'+branch.desc+'</span></div>'+legend+'<div class="talent-side-hint">Нажми на узел дерева, чтобы открыть описание и прокачку</div><div class="talent-side-footer"><button type="button" class="talent-hide talent-hide-reset" data-reset-talents '+(spent?"":"disabled")+'>↻ Сбросить таланты</button><button type="button" class="talent-hide" data-close-talents>← Скрыть</button></div>';
  const detailOverlay=$("talentDetailOverlay"),detailOn=talentDetailOpen&&!!selectedTalentCode;
  if(detailOn){const dt=talentDef(selectedTalentCode);detailOverlay.innerHTML='<div class="talent-detail-backdrop" data-close-talent-detail></div><div class="talent-detail-modal" role="dialog" aria-modal="true" aria-label="'+dt[2].replace(/"/g,"&quot;")+'" tabindex="-1">'+renderTalentDetails(dt)+'</div>';detailOverlay.classList.add("show")}
  else{detailOverlay.classList.remove("show");detailOverlay.innerHTML=""}
