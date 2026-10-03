@@ -110,7 +110,7 @@ window.renderGearInfo=function(){
  const btn=(key,label)=>'<button type="button" class="gi-filter'+(giFilter===key?" active":"")+'" data-gear-filter="'+key+'" aria-pressed="'+(giFilter===key)+'">'+label+'</button>';
  $("gearInfoBody").innerHTML='<div class="gi-scroll">'
   +'<div class="gi-tools"><div class="gi-filters" role="group" aria-label="Фильтр снаряжения">'
-  +btn("all","Все "+counts.all)+btn("free",GI_NAMES.free+" "+counts.free)+btn("token",GI_NAMES.token+" "+counts.token)
+  +btn("all","Все "+counts.all)+btn("free",GI_NAMES.free+" "+counts.free)+btn("token","За жетоны "+counts.token)
   +'</div><p class="gi-note">Полоски — вклад в урон: шкала общая для комплектов и вещей, длина полоски показывает, сколько даёт предмет</p></div>'
   +giSection("Комплекты",GI_ICON_SET,sets,"покупаются все, бонусы складываются")
   +giSection("Одиночные вещи",GI_ICON_ITEM,items,"докупаются отдельно, дают заметно меньше")
