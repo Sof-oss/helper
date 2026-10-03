@@ -55,10 +55,10 @@ window.__roll = function (el, text) {
   var THEME_KEY = "zoneTheme";
   var saved = null;
   try { saved = localStorage.getItem(THEME_KEY); } catch (e) {}
-  var current = THEMES.some(function (t) { return t.key === saved; }) ? saved : "science";
+  var current = THEMES.some(function (t) { return t.key === saved; }) ? saved : "merc";
 
   function applyTheme(key) {
-    var t = THEMES.filter(function (x) { return x.key === key; })[0] || THEMES[3];
+    var t = THEMES.filter(function (x) { return x.key === key; })[0] || THEMES[0];
     current = t.key;
     d.documentElement.dataset.theme = t.key;
     var meta = d.querySelector('meta[name="theme-color"]');
