@@ -228,9 +228,10 @@
 .gi-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border:1px solid #22475f;border-radius:14px;background:#0a1a26;color:#a9bccc;font-size:12px;white-space:nowrap}
 .gi-chip b{color:#e7f1f9;font-weight:700}
 
-/* сумма: закреплённая панель под списком, значения — плотными плитками */
-.gi-total{flex:0 0 auto;padding:12px 20px 14px;border-top:1px solid #2e6384;background:linear-gradient(180deg,#0d2231,#0a1a27);box-shadow:0 -10px 22px rgba(0,0,0,.5)}
-.gi-total-title{margin-bottom:8px;color:#73c8ff;font-size:13.5px;font-weight:700}
+/* сумма: обычный блок в конце списка (не прилипает к окну), значения — плотными плитками */
+.gi-total{margin-top:18px;padding:14px 16px;border:1px solid rgba(84,191,255,.35);border-radius:12px;
+  background:linear-gradient(120deg,rgba(84,191,255,.09),rgba(8,18,28,.92))}
+.gi-total-title{margin-bottom:10px;color:#73c8ff;font-size:13.5px;font-weight:700}
 .gi-total-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:start;padding:7px 0;border-top:1px solid #16303f}
 .gi-total-row:first-of-type{border-top:0}
 .gi-total-row>small{padding-top:5px;color:#8fb3cc;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
@@ -245,7 +246,7 @@
 @media(max-width:650px){
   #gearInfoModal .gear-info-window{height:92vh}
   .gi-scroll{padding:12px 14px 16px}
-  .gi-total{max-height:40%;overflow-y:auto;padding:10px 14px 12px}
+  .gi-total{margin-top:14px;padding:12px 13px}
   .gi-total-row{grid-template-columns:1fr;gap:5px}
   .gi-total-row>small{padding-top:0}
 }
