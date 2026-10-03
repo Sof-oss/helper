@@ -17,8 +17,8 @@
   --r-md:10px;
   --sh-1:0 1px 2px rgba(0,0,0,.5);
   --sh-2:0 14px 34px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05);
-  --glass:rgba(12,20,28,.12);          /* почти как в iOS: фото видно, остаётся лишь вуаль */
-  --glass-line:rgba(255,255,255,.12);
+  --glass:rgba(10,18,26,.04);          /* почти без вуали: фото видно как есть */
+  --glass-line:rgba(255,255,255,.14);
   --tabbar-h:58px;
 }
 /* цвета группировок сняты с эмблем (вики S.T.A.L.K.E.R.) и осветлены под тёмный интерфейс:
@@ -30,46 +30,40 @@
 :root[data-theme="monolith"]{--accent:#d9a52c;--accent-2:#f2d68a;--accent-3:#b98ae0;--accent-ink:#1a1205;--glass-line:rgba(225,190,120,.2)}
 :root{color-scheme:dark}
 
-/* ---------- 2. Аномалия «Электра» ----------
-   Световые пятна заменены аномалией: canvas поверх фона, разряды не рисуются
-   внутри панелей, таблиц и модальных окон (см. anomaly.js).
-   Смешивание обычное: аддитивный screen гас на светлом небе. */
-.anomaly{position:fixed;inset:0;z-index:5;pointer-events:none}
+/* ---------- 2. Второй цвет темы в интерфейсе ----------
+   Раньше красный у учёных жил во вспышках аномалии; теперь он виден в
+   двухцветных точках переключателя, во второй полосе подчёркивания и в
+   светодиоде у плашки «онлайн-помощник Зоны». */
+.theme-switch{margin-left:auto}
 
-/* ---------- 3. Шапка: настоящее стекло ----------
-   Тонкая вуаль 12 % + умеренный блюр 10 px (сильный блюр давал «мутность»),
-   насыщенность и лёгкое высветление, блик по верхней кромке и волосяная
-   граница — из этого складывается ощущение стекла, а не матовой плёнки. */
+/* ---------- 3. Шапка: чистое стекло ----------
+   Вуаль 4 %, блюр 2 px: фото проступает почти как есть. Замер: отличие шапки
+   от чистого фото 13,8/255 при блюре 2 px, 15,4 при 6 px и 8,3 без блюра вовсе —
+   «мутной» её делал именно сильный блюр, а не затемнение. Читаемость держат
+   тень текста, волосяная граница и блик по верхней кромке. */
 .site-header{
   position:sticky;top:0;z-index:40;
-  background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0) 60%),var(--glass);
-  -webkit-backdrop-filter:blur(10px) saturate(180%) brightness(1.06);
-  backdrop-filter:blur(10px) saturate(180%) brightness(1.06);
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0) 65%),var(--glass);
+  -webkit-backdrop-filter:blur(2px) saturate(160%) brightness(1.08);
+  backdrop-filter:blur(2px) saturate(160%) brightness(1.08);
   border-bottom:1px solid var(--glass-line);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
   transition:box-shadow .2s ease,background .2s ease;
 }
-.site-header.scrolled{box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 12px 34px rgba(0,0,0,.45)}
-.main-nav a{text-shadow:0 1px 6px rgba(0,0,0,.75)}
+.site-header.scrolled{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0) 65%),rgba(10,18,26,.14);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 12px 34px rgba(0,0,0,.4)}
+.main-nav a{text-shadow:0 1px 7px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.6)}
 .logo-title{text-shadow:1px 1px 0 #04090e,0 0 14px color-mix(in srgb,var(--accent) 45%,transparent)}
 .main-nav a.active{color:color-mix(in srgb,var(--accent) 30%,#ffffff)}
-.main-nav a.active:after{background:var(--accent);box-shadow:0 0 10px var(--accent)}
+.main-nav a.active:after{background:linear-gradient(90deg,var(--accent),var(--accent-3));box-shadow:0 0 10px var(--accent)}
 .rad-logo{color:var(--accent-2);filter:drop-shadow(0 0 6px var(--accent))}
 :where(button,input,a,summary):focus-visible{outline-color:var(--accent)}
 
-/* кнопка звука аномалии */
-.sound-toggle{margin-left:8px;width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;padding:0;
-  border:1px solid var(--glass-line);border-radius:50%;background:rgba(8,16,24,.35);color:#9fb6c9;cursor:pointer;
-  transition:color .15s ease,border-color .15s ease,box-shadow .15s ease}
-.sound-toggle svg{width:16px;height:16px;fill:currentColor}
-.sound-toggle svg .waves{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;opacity:0}
-.sound-toggle[aria-pressed="true"]{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 55%,transparent);box-shadow:0 0 12px color-mix(in srgb,var(--accent) 35%,transparent)}
-.sound-toggle[aria-pressed="true"] svg .waves{opacity:1}
-.theme-switch{margin-left:auto}
-
-/* ---------- 4. Переключатель тем ---------- */
+/* ---------- 4. Переключатель тем ----------
+   Точка двухцветная: основной тон нашивки и второй цвет с неё (у учёных —
+   синий с красным, у монолита — янтарь с фиолетовым). */
 .theme-switch{margin-left:auto;display:flex;align-items:center;gap:6px;padding:4px 6px;border:1px solid var(--glass-line);border-radius:999px;background:rgba(5,12,18,.45)}
-.theme-switch button{width:19px;height:19px;padding:0;border:0;border-radius:50%;background:var(--t);opacity:.55;cursor:pointer;transition:opacity .15s ease,transform .15s ease,box-shadow .15s ease}
+.theme-switch button{width:19px;height:19px;padding:0;border:0;border-radius:50%;background:radial-gradient(circle at 32% 28%,var(--t) 54%,var(--t2) 55%);opacity:.55;cursor:pointer;transition:opacity .15s ease,transform .15s ease,box-shadow .15s ease}
 .theme-switch button:hover{opacity:.9;transform:translateY(-1px) scale(1.08)}
 .theme-switch button[aria-pressed="true"]{opacity:1;box-shadow:0 0 0 2px #0a141d,0 0 0 3px var(--t),0 0 12px var(--t)}
 @media(max-width:760px){.theme-switch{gap:5px;padding:3px 5px}.theme-switch button{width:17px;height:17px}}
@@ -135,9 +129,9 @@
 
 /* ---------- 8б. Акцент темы в мелких деталях ---------- */
 .home-eyebrow{color:color-mix(in srgb,var(--accent) 75%,#ffffff)}
-.home-eyebrow i{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.home-eyebrow i{background:var(--accent-3);box-shadow:0 0 8px var(--accent-3)}
 .section-heading span .ic,.section-heading .ic{color:var(--accent)}
-.site-footer span{color:var(--accent)}
+.site-footer span{color:color-mix(in srgb,var(--accent) 80%,var(--accent-3))}
 .top100-updated{border-color:color-mix(in srgb,var(--accent) 45%,#2e6384)}
 .top100-updated svg{stroke:var(--accent)}
 
@@ -159,7 +153,6 @@
 
 /* ---------- 10. Уважение к настройкам системы ---------- */
 @media(prefers-reduced-motion:reduce){
-  .anomaly{display:none}                 /* аномалия не запускается и по JS */
   .home-card,.side-btn,.tokens-btn,.cmp-btn,.theme-switch button{transition:none}
   .home-card:hover{transform:none}
   ::view-transition-old(leaderboard),::view-transition-new(leaderboard),

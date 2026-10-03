@@ -45,11 +45,11 @@ window.__roll = function (el, text) {
   if (!d.documentElement || typeof d.createElement !== "function" || !d.body) return;
 
   var THEMES = [
-    { key: "merc", label: "Наёмники", color: "#5f8ac9", tint: "#070d18" },
-    { key: "dolg", label: "Долг", color: "#d9483f", tint: "#120607" },
-    { key: "svoboda", label: "Свобода", color: "#4fb058", tint: "#06120a" },
-    { key: "science", label: "Учёные", color: "#57c4f0", tint: "#04121c" },
-    { key: "monolith", label: "Монолит", color: "#d9a52c", tint: "#120d05" }
+    { key: "merc", label: "Наёмники", color: "#5f8ac9", color2: "#9fb3c8", tint: "#070d18" },
+    { key: "dolg", label: "Долг", color: "#d9483f", color2: "#d9b558", tint: "#120607" },
+    { key: "svoboda", label: "Свобода", color: "#4fb058", color2: "#5b9bd5", tint: "#06120a" },
+    { key: "science", label: "Учёные", color: "#57c4f0", color2: "#e0574f", tint: "#04121c" },
+    { key: "monolith", label: "Монолит", color: "#d9a52c", color2: "#b98ae0", tint: "#120d05" }
   ];
   var THEME_KEY = "zoneTheme";
   var saved = null;
@@ -85,6 +85,7 @@ window.__roll = function (el, text) {
       b.type = "button";
       b.dataset.themeBtn = t.key;
       b.style.setProperty("--t", t.color);
+      b.style.setProperty("--t2", t.color2 || t.color);
       b.title = t.label;
       b.setAttribute("aria-label", "Тема: " + t.label);
       b.setAttribute("aria-pressed", String(t.key === current));
