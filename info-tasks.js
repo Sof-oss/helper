@@ -1,76 +1,88 @@
 /* вкладка «Задания» на странице «Информация».
-   ПК: кнопками выбирается этап, данные показаны таблицами «ресурс × локация» —
-   так видно все локации сразу, без прокрутки вбок и без повторов названий ресурсов.
-   Телефон: выбирается локация, этапы идут строками, итоги — плитками.
+   Три таблицы: награда за прохождение локации, итог (все этапы + награда) и выгода.
+   Строки — ресурсы с иконками, столбцы — локации: все локации видно сразу.
    Всё в функции, чтобы не пересекаться с $ и fmt из info.js */
 (function(){
 "use strict";
 const D=window.TASKS_DATA,L=D.locations.map(l=>l.replace(/"([^"]*)"/g,"«$1»"));
-const SEC_KEY="gameHelperInfoSection",LOC_KEY="gameHelperTasksLocation",STAGE_KEY="gameHelperTasksStage";
-const R={exp:["Опыт","Опыт","exp"],bullets:["Пули","Пули","bul"],rep:["Репутация","Репут.","rep"],energy:["Затраты энергии","Энергия","en"],tokens:["Жетоны","Жетоны","tok"]};
+const SEC_KEY="gameHelperInfoSection";
+/* короткие подписи показываются на телефоне, длинные — на компьютере */
+const R={
+ exp:{full:"Опыт",short:"Опыт",cls:"exp"},
+ bullets:{full:"Пули",short:"Пули",cls:"bul"},
+ rep:{full:"Репутация",short:"Репутация",cls:"rep"},
+ energy:{full:"Затраты энергии",short:"Энергия",cls:"en"},
+ tokens:{full:"Жетоны",short:"Жетоны",cls:"tok"}
+};
+/* иконки: три игровые картинки, для опыта — нарисованный значок «XP» */
+const ICON={
+ exp:'<svg class="res-xp" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.2" y="5.2" width="19.6" height="13.6" rx="3.2"/><text x="12" y="16.1" text-anchor="middle">XP</text></svg>',
+ bullets:'<img src="assets/common_currency-BGqetmZE.webp" alt="" loading="lazy" decoding="async">',
+ rep:'<img src="assets/reputation-DqOMMtrl.webp" alt="" loading="lazy" decoding="async">',
+ energy:'<img src="assets/energy-5drpfC6V.webp" alt="" loading="lazy" decoding="async">',
+ tokens:'<img src="assets/rare_currency-D0tYVDkc.webp" alt="" loading="lazy" decoding="async">'
+};
 const n0=v=>v.toLocaleString("ru-RU"),n2=v=>v.toLocaleString("ru-RU",{minimumFractionDigits:2,maximumFractionDigits:2});
 const gain=k=>L.map((_,i)=>D.total[k][i]/D.total.energy[i]);
 const round2=v=>Math.round(v*100)/100;
 const card=(led,title,body)=>'<div class="info-group"><div class="info-group-title"><i class="info-led" style="--led:'+led+'"></i><b>'+title+'</b></div>'+body+'</div>';
 
-/* таблица «ресурсы строками, локации колонками»: одинаковая на ПК и в сравнении на телефоне.
-   highlight — подсветить лучшее значение в каждой строке (для выгоды) */
-function locTable(head,items,keys,fmt,highlight){
- const body=keys.map(k=>{
-  const vals=items[k]||[],r=highlight?vals.map(round2):vals,best=highlight?Math.max.apply(null,r):null;
-  return '<tr><th scope="row" class="task-res res-'+R[k][2]+'"><i></i>'+R[k][0]+'</th>'
-   +vals.map((v,j)=>'<td'+(highlight&&r[j]===best?' class="tok-best"':'')+'>'+fmt(v)+'</td>').join("")+'</tr>';
- }).join("");
- return '<div class="data-wrap"><table class="data-table tasks-table tasks-loc"><thead><tr><th>'+head+'</th>'
-  +L.map(l=>'<th>'+l+'</th>').join("")+'</tr></thead><tbody>'+body+'</tbody></table></div>';
-}
+/* итог за все этапы плюс награда за полное прохождение: столько ресурсов даёт локация целиком */
+const combined={};
+["exp","bullets","rep"].forEach(k=>{combined[k]=L.map((_,i)=>D.total[k][i]+D.reward[k][i])});
+combined.tokens=D.reward.tokens.slice();
+combined.energy=D.total.energy.slice();
 const gainRows={exp:gain("exp"),bullets:gain("bullets"),rep:gain("rep")};
 
-/* ---------- ПК ---------- */
-let curStage=0;
-try{const s=Number(localStorage.getItem(STAGE_KEY));if(s>=0&&s<D.stages.length)curStage=s}catch{}
-function stageChips(){
- return '<div class="top100-tabs tasks-pick">'+D.stages.map((s,j)=>'<button type="button" class="top100-tab'+(j===curStage?" active":"")
-  +'" data-task-stage="'+j+'" style="--accent:#ffb74d">Этап '+s.n+'</button>').join("")+'</div>';
+const shortLoc=l=>l.split(/[ «]/)[0];
+function locHead(){
+ return L.map(l=>'<th><span class="loc-full">'+l+'</span><span class="loc-short">'+shortLoc(l)+'</span></th>').join("");
 }
-function desktop(){
- const st=D.stages[curStage];
- return card("#ffb74d","Задания по этапам",stageChips()+locTable("Этап "+st.n,st,["exp","bullets","rep","energy"],n0))
-  +card("#54bfff","Награды и итоги",
-    '<div class="task-sub">Награда за полное прохождение локации</div>'+locTable("Ресурс",D.reward,["exp","bullets","rep","tokens"],n0)
-    +'<div class="task-sub">Итого за все этапы</div>'+locTable("Ресурс",D.total,["exp","bullets","rep","energy"],n0))
-  +card("#27db88","Выгода: ресурс на единицу затраченной энергии",locTable("Ресурс",gainRows,["exp","bullets","rep"],n2,true));
+function row(k,vals,fmt,highlight){
+ const r=highlight?vals.map(round2):vals,best=highlight?Math.max.apply(null,r):null;
+ return '<tr class="res-'+R[k].cls+'"><th scope="row"><i class="res-ico">'+ICON[k]+'</i>'
+  +'<span class="lbl-full">'+R[k].full+'</span><span class="lbl-short">'+R[k].short+'</span></th>'
+  +vals.map((v,j)=>'<td'+(highlight&&r[j]===best?' class="best"':'')+'>'+fmt(v)+'</td>').join("")+'</tr>';
+}
+/* ПК: ресурсы строками, локации столбцами — все локации видно сразу */
+function locTable(keys,items,fmt,highlight){
+ return '<div class="data-wrap"><table class="data-table tasks-v2"><thead><tr><th class="th-corner">Ресурс</th>'+locHead()+'</tr></thead><tbody>'
+  +keys.map(k=>row(k,items[k]||[],fmt,highlight)).join("")+'</tbody></table></div>';
+}
+/* телефон: то же самое, но локации строками, а ресурсы — столбцами с иконками:
+   пять колонок с числами в экран не влезают, а так всё видно без прокрутки вбок */
+function locTableNarrow(keys,items,fmt,highlight){
+ const head=keys.map(k=>'<th class="res-'+R[k].cls+'" title="'+R[k].full+'"><i class="res-ico">'+ICON[k]+'</i><span class="t-only">'+R[k].full+'</span></th>').join("");
+ /* лучшее значение считаем по каждому ресурсу среди локаций — как и в широкой таблице */
+ const bests={};
+ if(highlight)keys.forEach(k=>{bests[k]=Math.max.apply(null,L.map((_,j)=>round2((items[k]||[])[j])))});
+ const body=L.map((l,i)=>{
+  const cells=keys.map(k=>{
+   const v=(items[k]||[])[i];
+   return '<td'+(highlight&&round2(v)===bests[k]?' class="best"':'')+'>'+fmt(v)+'</td>';
+  }).join("");
+  return '<tr><th scope="row">'+l+'</th>'+cells+'</tr>';
+ }).join("");
+ return '<div class="data-wrap"><table class="data-table tasks-v2 tasks-v2-n"><thead><tr><th class="th-corner">Локация</th>'+head+'</tr></thead><tbody>'+body+'</tbody></table></div>';
 }
 
-/* ---------- телефон ---------- */
-let cur=0;
-try{const s=Number(localStorage.getItem(LOC_KEY));if(s>=0&&s<L.length)cur=s}catch{}
-/* на телефоне та же выгода, но локации строками: 6 колонок в экран не влезают */
-function mobCmp(){
- const ks=["exp","bullets","rep"],cols=ks.map(gain),best=cols.map(a=>Math.max.apply(null,a.map(round2)));
- const th=k=>'<th class="res-'+R[k][2]+'" title="'+R[k][0]+'">'+R[k][1]+'</th>';
- return '<table class="data-table tasks-table tasks-cmp"><thead><tr><th>Локация</th>'+ks.map(th).join("")+'</tr></thead><tbody>'
-  +L.map((l,j)=>'<tr'+(j===cur?' class="task-cur"':'')+'><td>'+l+'</td>'+cols.map((a,c)=>'<td'+(round2(a[j])===best[c]?' class="tok-best"':'')+'>'+n2(a[j])+'</td>').join("")+'</tr>').join("")+'</tbody></table>';
+function block(led,title,keys,items,fmt,highlight,note){
+ return card(led,title,
+  '<div class="tasks-wide">'+locTable(keys,items,fmt,highlight)+'</div>'
+  +'<div class="tasks-narrow">'+locTableNarrow(keys,items,fmt,highlight)+'</div>'
+  +(note?'<p class="tasks-note">'+note+'</p>':""));
 }
-function mobile(){
- const i=cur,ks=["exp","bullets","rep","energy"];
- const th=k=>'<th class="res-'+R[k][2]+'" title="'+R[k][0]+'">'+R[k][1]+'</th>';
- const tiles=(o,keys)=>'<div class="task-tiles">'+keys.map(k=>'<div class="res-'+R[k][2]+'"><small>'+R[k][0]+'</small><b>'+n0(o[k][i])+'</b></div>').join("")+'</div>';
- const chips='<div class="top100-tabs tasks-pick">'+L.map((l,j)=>'<button type="button" class="top100-tab'+(j===i?" active":"")+'" data-task-loc="'+j+'" style="--accent:#ffb74d">'+l+'</button>').join("")+'</div>';
- const stages='<table class="data-table tasks-table tasks-stages"><thead><tr><th>Этап</th>'+ks.map(th).join("")+'</tr></thead><tbody>'
-  +D.stages.map(s=>'<tr><td>'+s.n+'</td>'+ks.map(k=>'<td>'+n0(s[k][i])+'</td>').join("")+'</tr>').join("")+'</tbody></table>';
- return card("#ffb74d","Задания по этапам",chips+stages)
-  +card("#54bfff","Награды и итоги — "+L[i],'<div class="task-sub">Награда за полное прохождение</div>'+tiles(D.reward,["exp","bullets","rep","tokens"])
-    +'<div class="task-sub">Итого за все этапы</div>'+tiles(D.total,ks))
-  +card("#27db88","Выгода: ресурс на единицу энергии",mobCmp());
+
+function tasksBody(){
+ return block("#ffb74d","Награда за полное прохождение локации",["exp","bullets","rep","tokens"],D.reward,n0)
+  +block("#54bfff","Итого за все этапы + награда за прохождение",["exp","bullets","rep","tokens","energy"],combined,n0,null,
+    "Затраты энергии — сколько уйдёт на все этапы локации; остальные строки — что получишь за них и за полное прохождение.")
+  +block("#27db88","Выгода: ресурс на единицу затраченной энергии",["exp","bullets","rep"],gainRows,n2,true,
+    "Зелёным отмечено самое выгодное значение в строке.");
 }
 
 const root=document.getElementById("tasksRoot");
-function renderTasks(){
- root.innerHTML='<div class="tasks-desktop">'+desktop()+'</div><div class="tasks-mobile">'+mobile()+'</div>';
-}
-/* в сборке DOM-заглушка, поэтому querySelector может ничего не вернуть */
-function renderPart(sel,html){const el=root.querySelector?root.querySelector(sel):null;if(el)el.innerHTML=html}
+function renderTasks(){root.innerHTML=tasksBody()}
 
 /* переключатель разделов «Прогресс по уровням» / «Задания» */
 function setSection(k){
@@ -79,16 +91,10 @@ function setSection(k){
 }
 document.addEventListener("click",e=>{
  const s=e.target.closest("[data-section]");
- if(s){
-  /* смена раздела проходит через View Transition, если браузер умеет */
-  const swap=()=>{setSection(s.dataset.section);try{localStorage.setItem(SEC_KEY,s.dataset.section)}catch{}};
-  window.__vt?window.__vt(swap):swap();
-  return;
- }
- const l=e.target.closest("[data-task-loc]");
- if(l){cur=Number(l.dataset.taskLoc);try{localStorage.setItem(LOC_KEY,cur)}catch{}renderPart(".tasks-mobile",mobile());return}
- const st=e.target.closest("[data-task-stage]");
- if(st){curStage=Number(st.dataset.taskStage);try{localStorage.setItem(STAGE_KEY,curStage)}catch{}renderPart(".tasks-desktop",desktop())}
+ if(!s)return;
+ /* смена раздела проходит через View Transition, если браузер умеет */
+ const swap=()=>{setSection(s.dataset.section);try{localStorage.setItem(SEC_KEY,s.dataset.section)}catch{}};
+ window.__vt?window.__vt(swap):swap();
 });
 renderTasks();
 let sec="levels";
