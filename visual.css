@@ -34,7 +34,7 @@
    Раньше красный у учёных жил во вспышках аномалии; теперь он виден в
    двухцветных точках переключателя, во второй полосе подчёркивания и в
    светодиоде у плашки «онлайн-помощник Зоны». */
-.theme-switch{margin-left:auto}
+.theme-pick{margin-left:auto}
 
 /* ---------- 3. Шапка: чистое стекло ----------
    Вуаль 4 %, блюр 2 px: фото проступает почти как есть. Замер: отличие шапки
@@ -60,25 +60,60 @@
 :where(button,input,a,summary):focus-visible{outline-color:var(--accent)}
 
 /* ---------- 4. Переключатель тем ----------
-   Дорожка с пятью остановками, по ним ездит светлый кружок: он и показывает
-   выбранную тему, а значок остановки — символ группировки. */
-.theme-switch{--slot:34px;--pad:4px;position:relative;margin-left:auto;display:flex;align-items:center;
-  padding:var(--pad);border:1px solid var(--glass-line);border-radius:999px;background:rgba(5,12,18,.55);
-  touch-action:none;user-select:none;-webkit-user-select:none}
-.theme-knob{position:absolute;top:var(--pad);left:calc(var(--pad) + var(--i,3) * var(--slot) + 2px);
-  width:calc(var(--slot) - 4px);height:calc(100% - var(--pad) * 2);border-radius:999px;
-  background:linear-gradient(180deg,#f2f8fd,#c9d8e4);box-shadow:0 1px 3px rgba(0,0,0,.55),0 0 14px color-mix(in srgb,var(--kt,#57c4f0) 55%,transparent);
-  transition:left .22s cubic-bezier(.4,0,.2,1),box-shadow .22s ease}
-.theme-switch button{position:relative;z-index:1;display:grid;place-items:center;width:var(--slot);height:calc(var(--slot) - 4px);
-  padding:0;border:0;border-radius:999px;background:transparent;color:#93a8ba;cursor:pointer;
-  transition:color .18s ease}
-.theme-switch button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.theme-switch button:hover{color:#e7f1f9}
-/* на светлом кружке значок тёмный, как на образце */
-.theme-switch button[aria-pressed="true"]{color:#0c1a26}
-@media(max-width:900px){
-  .theme-switch{--slot:30px;--pad:3px}
-  .theme-switch button svg{width:15px;height:15px}
+   В свёрнутом виде — значок текущей группировки, по клику раскрывается список
+   тем: каждая строка окрашена в цвета своей группировки, сверху — предупреждающая
+   полоса и светодиод, как на снаряжении Зоны. */
+.theme-pick{position:relative;margin-left:auto}
+.theme-pick-toggle{display:flex;align-items:center;gap:9px;height:38px;padding:0 11px 0 6px;
+  border:1px solid #24384a;border-radius:999px;background:linear-gradient(180deg,rgba(12,22,32,.92),rgba(6,12,18,.94));
+  color:#cfe0ec;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease}
+.theme-pick-toggle:hover{border-color:color-mix(in srgb,var(--t,#57c4f0) 55%,#24384a);
+  box-shadow:0 0 14px color-mix(in srgb,var(--t,#57c4f0) 26%,transparent)}
+.tp-badge{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;
+  background:radial-gradient(circle at 34% 28%,color-mix(in srgb,var(--t,#57c4f0) 78%,#0a1119),#0a1119 80%);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--t2,#e0574f) 55%,transparent),0 0 10px color-mix(in srgb,var(--t,#57c4f0) 32%,transparent)}
+.tp-badge svg{width:15px;height:15px;fill:none;stroke:#07101a;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tp-name{font-size:12px;font-weight:600;letter-spacing:.3px;white-space:nowrap}
+.tp-chev{width:14px;height:14px;fill:none;stroke:#8ea3b5;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s ease}
+.theme-pick.open .tp-chev{transform:rotate(180deg)}
+.theme-pick.open .theme-pick-toggle{border-color:color-mix(in srgb,var(--t,#57c4f0) 60%,#24384a)}
+
+/* раскрывающийся список тем */
+.theme-list{position:absolute;top:calc(100% + 10px);right:0;z-index:60;width:min(286px,calc(100vw - 20px));padding:8px;
+  border:1px solid #2a3f52;border-radius:12px;background:linear-gradient(180deg,rgba(16,24,32,.99),rgba(8,14,20,.99));
+  box-shadow:0 22px 48px rgba(0,0,0,.66),inset 0 1px 0 rgba(255,255,255,.05);
+  opacity:0;transform:translateY(-6px) scale(.985);pointer-events:none;transition:opacity .18s ease,transform .18s ease}
+.theme-pick.open .theme-list{opacity:1;transform:none;pointer-events:auto}
+.theme-list::before{content:"";position:absolute;left:10px;right:10px;top:0;height:4px;border-radius:0 0 3px 3px;
+  background:repeating-linear-gradient(45deg,rgba(255,196,64,.55) 0 5px,transparent 5px 10px);opacity:.5}
+.tl-head{display:flex;align-items:center;gap:8px;padding:9px 8px 10px;font-size:10.5px;font-weight:700;
+  letter-spacing:1.2px;text-transform:uppercase;color:#8ea3b5}
+.tl-head i{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.theme-item{position:relative;display:flex;align-items:center;gap:10px;width:100%;margin-bottom:3px;padding:8px 9px 8px 12px;
+  border:1px solid transparent;border-radius:9px;background:transparent;color:#dbe6ef;text-align:left;cursor:pointer;
+  transition:background .15s ease,border-color .15s ease,transform .15s ease}
+.theme-item::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:3px;background:var(--t);opacity:.8}
+.theme-item:hover{background:linear-gradient(90deg,color-mix(in srgb,var(--t) 26%,transparent),rgba(10,17,25,.5));transform:translateX(2px)}
+.theme-item[aria-selected="true"]{border-color:color-mix(in srgb,var(--t) 60%,transparent);
+  background:linear-gradient(90deg,color-mix(in srgb,var(--t) 32%,transparent),rgba(10,17,25,.55));
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--t) 20%,transparent)}
+.ti-badge{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border-radius:8px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--t) 58%,#0b1219),color-mix(in srgb,var(--t) 20%,#0b1219));
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--t2) 50%,transparent)}
+.ti-badge svg{width:17px;height:17px;fill:none;stroke:#f2f8fd;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ti-text{display:flex;flex-direction:column;gap:1px;min-width:0;line-height:1.25}
+.ti-text b{font-size:13px;font-weight:600;color:#f2f8fd}
+.ti-text small{font-size:11px;color:color-mix(in srgb,var(--t) 78%,#cfe0ec)}
+.ti-mark{position:relative;width:16px;height:16px;margin-left:auto;flex:0 0 16px;border-radius:4px;border:1px solid #33506a}
+.theme-item[aria-selected="true"] .ti-mark{border-color:var(--t);background:var(--t);
+  box-shadow:0 0 10px color-mix(in srgb,var(--t) 60%,transparent)}
+.theme-item[aria-selected="true"] .ti-mark::after{content:"";display:block;width:4px;height:8px;margin:0 auto 1px;
+  border:solid #0b141d;border-width:0 2px 2px 0;transform:rotate(45deg)}
+@media(max-width:760px){
+  .tp-name{display:none}
+  .theme-pick-toggle{height:34px;padding:0 9px 0 5px;gap:7px}
+  .tp-badge{width:24px;height:24px}
+  .theme-list{width:min(268px,calc(100vw - 16px))}
 }
 
 /* ---------- 5. Цифры-герои ---------- */
@@ -166,7 +201,7 @@
 
 /* ---------- 10. Уважение к настройкам системы ---------- */
 @media(prefers-reduced-motion:reduce){
-  .home-card,.side-btn,.tokens-btn,.cmp-btn,.theme-switch button{transition:none}
+  .home-card,.side-btn,.tokens-btn,.cmp-btn,.theme-pick *{transition:none}
   .home-card:hover{transform:none}
   ::view-transition-old(leaderboard),::view-transition-new(leaderboard),
   ::view-transition-old(infogroups),::view-transition-new(infogroups),
