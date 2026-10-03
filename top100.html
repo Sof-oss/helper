@@ -22,6 +22,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="assets/bg-zone-m.webp" media="(max-width:760px)" fetchpriority="high">
+<link rel="preload" as="image" href="assets/bg-zone-1280.webp" media="(min-width:761px) and (max-width:1366px)" fetchpriority="high">
+<link rel="preload" as="image" href="assets/bg-zone.webp" media="(min-width:1367px)" fetchpriority="high">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="polish.css">
 <link rel="stylesheet" href="top100-sort.css">
@@ -53,6 +56,7 @@
     <span class="top100-meta-note">*рейтинги обновляются раз в неделю — по понедельникам</span>
   </div>
   <div class="top100-tabs" id="top100Tabs"></div>
+  <noscript><p class="damage-footnote">Без JavaScript виден только раздел «Репутация». Чтобы переключать разделы и искать по нику, включите JavaScript.</p></noscript>
   <div class="top100-table-wrap" id="top100TableWrap"></div>
   <p class="damage-footnote top100-footnote">Отмечены красным — сталкеры, давно не заходившие в игру</p>
 </section>
