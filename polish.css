@@ -139,3 +139,51 @@
   .gear-info-btn{width:36px;height:36px;flex-basis:36px}
   .level-row{grid-template-columns:44px 1fr 44px}
 }
+
+/* ===== Окно «Бонусы снаряжения» =====
+   Список прокручивается внутри .gi-scroll, а сумма закреплена снизу отдельной панелью и больше не перекрывает карточки.
+   Цвета: янтарный — бесплатные удары, синий — оружие за жетоны, красный — крит, зелёный — откат (как в калькуляторе) */
+#gearInfoModal .gear-info-window{width:min(920px,94vw);height:min(86vh,860px);max-height:none}
+#gearInfoBody{padding:0;gap:0;overflow:hidden}
+.gi-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;padding:18px 20px 22px;scrollbar-width:thin;scrollbar-color:#31566f #08131d}
+.gi-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 0 4px;color:#9db2c4;font-size:12.5px}
+.gi-legend span{display:inline-flex;align-items:center;gap:7px}
+.gi-legend i{width:8px;height:8px;border-radius:50%;background:var(--tc);box-shadow:0 0 6px var(--tc)}
+.gi-section{display:flex;align-items:center;gap:10px;margin:18px 0 10px;color:#cbd9e5;font-size:14px;font-weight:600}
+.gi-section:first-of-type{margin-top:12px}
+.gi-section::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#23475f,transparent)}
+.gi-section small{padding:1px 8px;border:1px solid #234157;border-radius:10px;background:#0d1d2a;color:#9db2c4;font-size:11.5px;font-weight:600}
+.gi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.gi-card{position:relative;padding:11px 13px 12px 17px;border:1px solid #1a3346;border-radius:9px;background:linear-gradient(135deg,#0b1925,#09141e);overflow:hidden;transition:border-color .15s,background .15s}
+.gi-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ac);box-shadow:0 0 10px var(--ac)}
+.gi-card:hover{border-color:color-mix(in srgb,var(--ac) 55%,#1a3346);background:linear-gradient(135deg,#0d1e2d,#0a1620)}
+.gi-card.free{--ac:#f0ae58}
+.gi-card.paid{--ac:#54bfff}
+.gi-head{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.gi-head .ic{width:16px;height:16px;color:var(--ac)}
+.gi-head b{min-width:0;color:#e8f0f7;font-size:13.5px;font-weight:600;line-height:1.25}
+.gi-tags{display:flex;flex-wrap:wrap;gap:5px}
+.gi-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border:1px solid color-mix(in srgb,var(--tc) 32%,#0a1a27);border-radius:14px;background:color-mix(in srgb,var(--tc) 9%,#0a1a27);color:#b4c6d5;font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.gi-tag b{color:var(--tc);font-weight:700}
+.t-free{--tc:#f0ae58}
+.t-paid{--tc:#54bfff}
+.t-crit{--tc:#ff8a8f}
+.t-cd{--tc:#27db88}
+
+/* сумма: закреплённая панель под списком */
+.gi-total{flex:0 0 auto;padding:12px 20px 14px;border-top:1px solid #2e6384;background:linear-gradient(180deg,#0d2231,#0a1a27);box-shadow:0 -10px 22px rgba(0,0,0,.5)}
+.gi-total-title{display:flex;align-items:center;gap:8px;margin-bottom:6px;color:#73c8ff;font-size:14px;font-weight:700}
+.gi-total-title .ic{width:16px;height:16px}
+.gi-total-row{display:grid;grid-template-columns:128px minmax(0,1fr);gap:10px;align-items:start;padding:7px 0;border-top:1px solid #16303f}
+.gi-total-row>small{padding-top:4px;color:#8fb3cc;font-size:12px;font-weight:600}
+
+@media(max-width:760px){
+  .gi-grid{grid-template-columns:1fr}
+}
+@media(max-width:650px){
+  #gearInfoModal .gear-info-window{height:92vh}
+  .gi-scroll{padding:12px 14px 16px}
+  .gi-total{max-height:38%;overflow-y:auto;padding:10px 14px 12px}
+  .gi-total-row{grid-template-columns:1fr;gap:3px}
+  .gi-total-row>small{padding-top:0}
+}

@@ -69,4 +69,42 @@ if(dov){
   }
  }).observe(dov,{childList:true});
 }
+
+/* --- окно «Бонусы снаряжения» ---
+   Подменяет renderGearInfo из app.js: карточки в две колонки с цветом по типу (бесплатные удары / оружие за жетоны),
+   теги окрашены по смыслу, а сумма вынесена в закреплённую панель под списком, поэтому не перекрывает карточки.
+   openGearInfo() вызывает renderGearInfo по имени, так что подмена подхватывается сама */
+const GI_TYPE={knife:"free",pistol:"free",auto:"free",grenade:"paid",gl:"paid",gauss:"paid",freeNoCooldown:"cd",cooldown:"cd"};
+const giTag=(k,v)=>{
+ const pct=GEAR_BONUS_PCT.has(k),cls="t-"+(GI_TYPE[k]||"crit");
+ return '<span class="gi-tag '+cls+'">'+GEAR_BONUS_LABELS[k]+' <b>+'+(pct?Math.round(v*100)+"%":fmt(v))+'</b></span>';
+};
+/* теги в порядке: удары, оружие за жетоны, прочее (крит, откат) */
+function giTags(x,keysList){
+ let out="";
+ keysList.forEach(k=>{
+  const v=(keys.includes(k)?x.bonuses&&x.bonuses[k]:x[k]);
+  if(v)out+=giTag(k,v);
+ });
+ return out;
+}
+const GI_ALL=[...keys,...GEAR_EXTRA];
+function giCard(x){
+ const free=x.bonuses&&x.bonuses.knife!=null;
+ return '<div class="gi-card '+(free?"free":"paid")+'"><div class="gi-head"><svg class="ic" aria-hidden="true"><use href="'+(free?"#i-sword":"#i-spark")+'"/></svg><b>'+x.name+'</b></div><div class="gi-tags">'+(giTags(x,GI_ALL)||'<span class="gi-tag">Нет бонусов</span>')+'</div></div>';
+}
+function giSection(title,list){
+ return '<div class="gi-section"><span>'+title+'</span><small>'+list.length+'</small></div><div class="gi-grid">'+list.map(giCard).join("")+'</div>';
+}
+function giTotal(){
+ const sum=gearTotalItem(),row=(label,ks)=>{const t=giTags(sum,ks);return t?'<div class="gi-total-row"><small>'+label+'</small><div class="gi-tags">'+t+'</div></div>':""};
+ return '<div class="gi-total"><div class="gi-total-title"><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg>Сумма всех бонусов</div>'
+  +row("Бесплатные удары",["knife","pistol","auto"])
+  +row("Оружие за жетоны",["grenade","gl","gauss"])
+  +row("Крит и откат",GEAR_EXTRA)+'</div>';
+}
+window.renderGearInfo=function(){
+ $("gearInfoBody").innerHTML='<div class="gi-scroll"><div class="gi-legend"><span class="t-free"><i style="--tc:#f0ae58"></i>Бесплатные удары</span><span class="t-paid"><i style="--tc:#54bfff"></i>Оружие за жетоны</span><span class="t-crit"><i style="--tc:#ff8a8f"></i>Крит</span><span class="t-cd"><i style="--tc:#27db88"></i>Откат</span></div>'
+  +giSection("Комплекты",SETS)+giSection("Одиночные вещи",ITEMS)+'</div>'+giTotal();
+};
 })();
