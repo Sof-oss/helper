@@ -4,6 +4,12 @@
 "use strict";
 const $=id=>document.getElementById(id);
 
+/* Значки снаряжения: стопка слоёв — комплекты, футболка — одиночные вещи.
+   Одни и те же в списке снаряжения и в окне «Бонусы снаряжения» */
+const svgIcon=(paths,extra)=>'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"'+(extra||"")+'>'+paths+'</svg>';
+const ICON_SET=svgIcon('<path d="M12 3.5 20.5 8 12 12.5 3.5 8z"/><path d="M3.5 12 12 16.5 20.5 12M3.5 16 12 20.5 20.5 16"/>');
+const ICON_ITEM=svgIcon('<path d="M8 4 4.5 6.3l1.9 3.2L8 8.6V20h8V8.6l1.6.9 1.9-3.2L16 4c-.7 1.2-2.2 1.9-4 1.9S8.7 5.2 8 4Z"/>');
+
 /* --- полоса: база / уровень / снаряжение / таланты --- */
 const PARTS=["base","level","gear","talentOut"];
 const num=id=>{const e=$(id);return e?parseInt(e.textContent.replace(/\D/g,""),10)||0:0};
@@ -31,7 +37,9 @@ function chip(label){
  if(x.critChance||x.critDamage||x.critGaussChance||x.critGrenadeChance||x.critGaussDamage||x.critGrenadeDamage)ex.push("крит");
  if(x.cooldown||x.freeNoCooldown)ex.push("откат");
  label.querySelector("span").innerHTML="<b>"+x.name+"</b><small>+"+arr.join(" / +")+(ex.length?" · "+ex.join(", "):"")+"</small>";
- label.insertAdjacentHTML("afterbegin",'<svg class="ic opt-ic" aria-hidden="true"><use href="'+(free?"#i-sword":"#i-spark")+'"/></svg>');
+ /* значок как в окне бонусов: стопка слоёв у комплектов, футболка у одиночных вещей;
+    цвет значка по-прежнему показывает, к какому оружию бонусы */
+ label.insertAdjacentHTML("afterbegin",(inp.dataset.type==="set"?ICON_SET:ICON_ITEM).replace('class="ic"','class="ic opt-ic"'));
  label.classList.add(free?"opt-free":"opt-paid");
  label.dataset.chip="1";
  label.title=gearBonusTags(x).map(t=>t.label+" "+t.value).join(", ");
@@ -79,8 +87,7 @@ if(dov){
    иначе не подставляется --ac и у платных комплектов пропадают рейка и полоски */
 const GI_FAM={free:["knife","pistol","auto"],paid:["grenade","gl","gauss"]};
 const GI_NAMES={free:"Бесплатные удары",paid:"Оружие за жетоны"};
-const GI_ICON_SET='<svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 20.5 8 12 12.5 3.5 8z"/><path d="M3.5 12 12 16.5 20.5 12M3.5 16 12 20.5 20.5 16"/></svg>';
-const GI_ICON_ITEM='<svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4 4.5 6.3l1.9 3.2L8 8.6V20h8V8.6l1.6.9 1.9-3.2L16 4c-.7 1.2-2.2 1.9-4 1.9S8.7 5.2 8 4Z"/></svg>';
+const GI_ICON_SET=ICON_SET,GI_ICON_ITEM=ICON_ITEM;
 const giFamily=x=>(x.bonuses&&x.bonuses.knife!=null)?"free":"paid";
 /* общая шкала: максимум по каждому оружию среди всех комплектов и вещей */
 const giMax={};["free","paid"].forEach(f=>GI_FAM[f].forEach(k=>{giMax[k]=Math.max(...[...SETS,...ITEMS].map(x=>(x.bonuses&&x.bonuses[k])||0))}));

@@ -44,12 +44,13 @@ window.__roll = function (el, text) {
   var d = document;
   if (!d.documentElement || typeof d.createElement !== "function" || !d.body) return;
 
+  /* symbol — значок группировки: у каждой темы своя остановка в переключателе */
   var THEMES = [
-    { key: "merc", label: "Наёмники", color: "#5f8ac9", color2: "#9fb3c8", tint: "#070d18" },
-    { key: "dolg", label: "Долг", color: "#d9483f", color2: "#d9b558", tint: "#120607" },
-    { key: "svoboda", label: "Свобода", color: "#4fb058", color2: "#5b9bd5", tint: "#06120a" },
-    { key: "science", label: "Учёные", color: "#57c4f0", color2: "#e0574f", tint: "#04121c" },
-    { key: "monolith", label: "Монолит", color: "#d9a52c", color2: "#b98ae0", tint: "#120d05" }
+    { key: "merc", label: "Наёмники", color: "#5f8ac9", color2: "#9fb3c8", tint: "#070d18", symbol: '<path d="m5 9.5 7-4.2 7 4.2M5 14.5l7-4.2 7 4.2"/>' },
+    { key: "dolg", label: "Долг", color: "#d9483f", color2: "#d9b558", tint: "#120607", symbol: '<path d="M12 3.2 5.5 5.9v5.3c0 3.6 2.7 6.5 6.5 7.6 3.8-1.1 6.5-4 6.5-7.6V5.9z"/><path d="M12 8.4v6.2M9.4 11.2h5.2"/>' },
+    { key: "svoboda", label: "Свобода", color: "#4fb058", color2: "#5b9bd5", tint: "#06120a", symbol: '<path d="M6.5 21V3.6"/><path d="M6.5 4.6h10.8l-2.3 3.7 2.3 3.7H6.5z"/>' },
+    { key: "science", label: "Учёные", color: "#57c4f0", color2: "#e0574f", tint: "#04121c", symbol: '<circle cx="12" cy="12" r="2.1"/><ellipse cx="12" cy="12" rx="8.8" ry="3.8"/><ellipse cx="12" cy="12" rx="8.8" ry="3.8" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="8.8" ry="3.8" transform="rotate(-60 12 12)"/>' },
+    { key: "monolith", label: "Монолит", color: "#d9a52c", color2: "#b98ae0", tint: "#120d05", symbol: '<path d="M12 3 18.8 9.4 12 21 5.2 9.4z"/><path d="M5.2 9.4h13.6M12 3v18"/>' }
   ];
   var THEME_KEY = "zoneTheme";
   var saved = null;
@@ -69,6 +70,8 @@ window.__roll = function (el, text) {
       Array.prototype.forEach.call(box.querySelectorAll("button"), function (b) {
         b.setAttribute("aria-pressed", String(b.dataset.themeBtn === t.key));
       });
+      var name = d.getElementById("themeName");
+      if (name) name.textContent = t.label;
     }
   }
 
@@ -80,6 +83,12 @@ window.__roll = function (el, text) {
     box.id = "themeSwitch";
     box.setAttribute("role", "group");
     box.setAttribute("aria-label", "Цветовая тема");
+    /* подпись активной темы — видно, какая группировка выбрана */
+    var label = d.createElement("span");
+    label.className = "theme-name";
+    label.id = "themeName";
+    label.textContent = (THEMES.filter(function (t) { return t.key === current; })[0] || THEMES[3]).label;
+    box.appendChild(label);
     THEMES.forEach(function (t) {
       var b = d.createElement("button");
       b.type = "button";
@@ -89,6 +98,7 @@ window.__roll = function (el, text) {
       b.title = t.label;
       b.setAttribute("aria-label", "Тема: " + t.label);
       b.setAttribute("aria-pressed", String(t.key === current));
+      b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + t.symbol + "</svg>";
       box.appendChild(b);
     });
     box.addEventListener("click", function (e) {
