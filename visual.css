@@ -11,60 +11,61 @@
 :root{
   --accent:#57c4f0;
   --accent-2:#b6e7ff;
+  --accent-3:#e0574f;                  /* второй тон с эмблемы: у учёных — красная спираль */
   --accent-ink:#041420;
   --r-lg:14px;
   --r-md:10px;
   --sh-1:0 1px 2px rgba(0,0,0,.5);
   --sh-2:0 14px 34px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05);
-  --glass:rgba(10,18,26,.26);          /* прозрачность шапки: как в iOS, фото просвечивает */
-  --glass-line:rgba(255,255,255,.09);
+  --glass:rgba(12,20,28,.12);          /* почти как в iOS: фото видно, остаётся лишь вуаль */
+  --glass-line:rgba(255,255,255,.12);
   --tabbar-h:58px;
 }
-/* цвета группировок сняты с эмблем (вики S.T.A.L.K.E.R.) и осветлены под тёмный интерфейс */
-:root[data-theme="merc"]{--accent:#5f8ac9;--accent-2:#aec8ec;--accent-ink:#070d18;--glass-line:rgba(160,190,235,.16)}
-:root[data-theme="dolg"]{--accent:#d9483f;--accent-2:#f0a09a;--accent-ink:#1a0606;--glass-line:rgba(240,140,135,.18)}
-:root[data-theme="svoboda"]{--accent:#4fb058;--accent-2:#a9e0ad;--accent-ink:#061506;--glass-line:rgba(150,220,155,.16)}
-:root[data-theme="science"]{--accent:#57c4f0;--accent-2:#b6e7ff;--accent-ink:#041420;--glass-line:rgba(140,215,255,.16)}
-:root[data-theme="monolith"]{--accent:#d9a52c;--accent-2:#b98ae0;--accent-ink:#1a1205;--glass-line:rgba(225,190,120,.18)}
+/* цвета группировок сняты с эмблем (вики S.T.A.L.K.E.R.) и осветлены под тёмный интерфейс:
+   accent — основной тон нашивки, accent-3 — второй цвет с той же эмблемы */
+:root[data-theme="merc"]{--accent:#5f8ac9;--accent-2:#aec8ec;--accent-3:#9fb3c8;--accent-ink:#070d18;--glass-line:rgba(160,190,235,.18)}
+:root[data-theme="dolg"]{--accent:#d9483f;--accent-2:#f0a09a;--accent-3:#d9b558;--accent-ink:#1a0606;--glass-line:rgba(240,140,135,.2)}
+:root[data-theme="svoboda"]{--accent:#4fb058;--accent-2:#a9e0ad;--accent-3:#5b9bd5;--accent-ink:#061506;--glass-line:rgba(150,220,155,.18)}
+:root[data-theme="science"]{--accent:#57c4f0;--accent-2:#b6e7ff;--accent-3:#e0574f;--accent-ink:#041420;--glass-line:rgba(140,215,255,.18)}
+:root[data-theme="monolith"]{--accent:#d9a52c;--accent-2:#f2d68a;--accent-3:#b98ae0;--accent-ink:#1a1205;--glass-line:rgba(225,190,120,.2)}
 :root{color-scheme:dark}
 
-/* ---------- 2. Атмосфера: медленный дрейф свечения поверх фона ----------
-   Слой работает в режиме screen, поэтому на тёмном фото видно мягкую дымку:
-   лазурь темы, тёплый янтарь и фиолетовый отсвет, как у Монолита.
-   Цикл 45 с и ход ~7% ширины — движение заметно глазом, но не отвлекает. */
-body::after{
-  content:"";position:fixed;inset:-30%;z-index:-1;pointer-events:none;
-  filter:blur(42px);mix-blend-mode:screen;
-  background:
-    radial-gradient(38% 30% at 24% 20%,color-mix(in srgb,var(--accent) 46%,transparent),transparent 70%),
-    radial-gradient(34% 26% at 80% 68%,rgba(214,161,44,.36),transparent 72%),
-    radial-gradient(26% 20% at 58% 30%,rgba(185,138,224,.24),transparent 76%);
-  animation:zone-drift 35s ease-in-out infinite alternate;
-}
-@keyframes zone-drift{
-  from{transform:translate3d(0,0,0) scale(1);opacity:.7}
-  55%{opacity:1}
-  to{transform:translate3d(-8%,6%,0) scale(1.14);opacity:.95}
-}
+/* ---------- 2. Аномалия «Электра» ----------
+   Световые пятна заменены аномалией: canvas поверх фона, разряды не рисуются
+   внутри панелей, таблиц и модальных окон (см. anomaly.js).
+   Смешивание обычное: аддитивный screen гас на светлом небе. */
+.anomaly{position:fixed;inset:0;z-index:5;pointer-events:none}
 
-/* ---------- 3. Шапка: стекло, липкость, тень при скролле ----------
-   Прозрачность как в iOS: тонкая вуаль + сильный блюр с насыщением,
-   фото просвечивает; читаемость держат тень текста и волосяная граница. */
+/* ---------- 3. Шапка: настоящее стекло ----------
+   Тонкая вуаль 12 % + умеренный блюр 10 px (сильный блюр давал «мутность»),
+   насыщенность и лёгкое высветление, блик по верхней кромке и волосяная
+   граница — из этого складывается ощущение стекла, а не матовой плёнки. */
 .site-header{
   position:sticky;top:0;z-index:40;
-  background:linear-gradient(180deg,var(--glass),color-mix(in srgb,var(--glass) 78%,transparent));
-  -webkit-backdrop-filter:blur(24px) saturate(180%);
-  backdrop-filter:blur(24px) saturate(180%);
+  background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0) 60%),var(--glass);
+  -webkit-backdrop-filter:blur(10px) saturate(180%) brightness(1.06);
+  backdrop-filter:blur(10px) saturate(180%) brightness(1.06);
   border-bottom:1px solid var(--glass-line);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
   transition:box-shadow .2s ease,background .2s ease;
 }
-.site-header.scrolled{box-shadow:0 12px 34px rgba(0,0,0,.5)}
-.main-nav a{text-shadow:0 1px 6px rgba(0,0,0,.7)}
+.site-header.scrolled{box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 12px 34px rgba(0,0,0,.45)}
+.main-nav a{text-shadow:0 1px 6px rgba(0,0,0,.75)}
 .logo-title{text-shadow:1px 1px 0 #04090e,0 0 14px color-mix(in srgb,var(--accent) 45%,transparent)}
 .main-nav a.active{color:color-mix(in srgb,var(--accent) 30%,#ffffff)}
 .main-nav a.active:after{background:var(--accent);box-shadow:0 0 10px var(--accent)}
 .rad-logo{color:var(--accent-2);filter:drop-shadow(0 0 6px var(--accent))}
 :where(button,input,a,summary):focus-visible{outline-color:var(--accent)}
+
+/* кнопка звука аномалии */
+.sound-toggle{margin-left:8px;width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;padding:0;
+  border:1px solid var(--glass-line);border-radius:50%;background:rgba(8,16,24,.35);color:#9fb6c9;cursor:pointer;
+  transition:color .15s ease,border-color .15s ease,box-shadow .15s ease}
+.sound-toggle svg{width:16px;height:16px;fill:currentColor}
+.sound-toggle svg .waves{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;opacity:0}
+.sound-toggle[aria-pressed="true"]{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 55%,transparent);box-shadow:0 0 12px color-mix(in srgb,var(--accent) 35%,transparent)}
+.sound-toggle[aria-pressed="true"] svg .waves{opacity:1}
+.theme-switch{margin-left:auto}
 
 /* ---------- 4. Переключатель тем ---------- */
 .theme-switch{margin-left:auto;display:flex;align-items:center;gap:6px;padding:4px 6px;border:1px solid var(--glass-line);border-radius:999px;background:rgba(5,12,18,.45)}
@@ -140,22 +141,29 @@ body::after{
 .top100-updated{border-color:color-mix(in srgb,var(--accent) 45%,#2e6384)}
 .top100-updated svg{stroke:var(--accent)}
 
-/* ---------- 9. View Transitions ----------
-   Кроссфейдит только сама таблица: корень страницы не анимируем, иначе
-   на время перехода мигали шапка и нижнее меню. */
+/* ---------- 9. Переходы между страницами и вкладками ----------
+   Кросс-документные View Transitions: шапка и нижнее меню получают свои имена
+   и «переезжают» на новую страницу без мигания, остальное меняется моментально
+   (анимация корня отключена — именно она раньше мигала панелями). */
+@view-transition{navigation:auto}
+.site-header{view-transition-name:app-header}
+.tabbar{view-transition-name:app-tabbar}
+::view-transition-old(app-header),::view-transition-new(app-header),
+::view-transition-old(app-tabbar),::view-transition-new(app-tabbar){animation-duration:.18s}
+::view-transition-old(root),::view-transition-new(root){animation:none}
 #top100TableWrap{view-transition-name:leaderboard}
 #infoGroups{view-transition-name:infogroups}
-::view-transition-old(root){animation:none;opacity:0}
-::view-transition-new(root){animation:none;opacity:1}
 ::view-transition-old(leaderboard),::view-transition-new(leaderboard),
 ::view-transition-old(infogroups),::view-transition-new(infogroups){animation-duration:.22s;animation-timing-function:cubic-bezier(.2,.7,.3,1)}
 ::view-transition-group(leaderboard),::view-transition-group(infogroups){animation-duration:.22s}
 
 /* ---------- 10. Уважение к настройкам системы ---------- */
 @media(prefers-reduced-motion:reduce){
-  body::after{animation:none}
+  .anomaly{display:none}                 /* аномалия не запускается и по JS */
   .home-card,.side-btn,.tokens-btn,.cmp-btn,.theme-switch button{transition:none}
   .home-card:hover{transform:none}
   ::view-transition-old(leaderboard),::view-transition-new(leaderboard),
-  ::view-transition-old(infogroups),::view-transition-new(infogroups){animation:none}
+  ::view-transition-old(infogroups),::view-transition-new(infogroups),
+  ::view-transition-old(app-header),::view-transition-new(app-header),
+  ::view-transition-old(app-tabbar),::view-transition-new(app-tabbar){animation:none}
 }

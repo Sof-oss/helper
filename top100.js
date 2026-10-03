@@ -25,6 +25,9 @@ const FACTIONS=[
  {key:"svoboda",label:"Свобода",re:/[сc]вобода/,color:"#4fb058"},
  {key:"science",label:"Учёные",re:/ученые/,color:"#57c4f0"},
  {key:"monolith",label:"Монолит",re:/монолит/,color:"#d9a52c"},
+ /* «[Вольный сталкер]» — тег одиночек: жёлтый знак радиации на нашивке.
+    Скобка в шаблоне обязательна, иначе под правило попадает «Д.О.Л.Г Вольный стрелок» */
+ {key:"volny",label:"Вольный сталкер",re:/\[\s*вольн/i,color:"#e0c94d"},
  {key:"winx",label:"WINX",re:/winx/,color:"#b98ae0"}
 ];
 const norm=s=>String(s).toLowerCase().replace(/ё/g,"е");
