@@ -328,16 +328,14 @@ function cmpRow(label,x,y,pct){
  return '<tr class="'+(eq?"cmp-eq":"")+'"><th scope="row">'+label+'</th>'+cell(x,x>y,wa)+cell(y,y>x,wb)+'</tr>';
 }
 const CMP_WEAPONS=["grenade","gl","gauss","knife","pistol","auto"];
-const cmpSum=r=>CMP_WEAPONS.reduce((s,k)=>s+(r[k]||0),0);
 const cmpTags=(arr,cls)=>arr.map(t=>'<span class="gear-info-tag cmp-tag '+cls+'">'+t+'</span>').join("");
-/* сводка сверху: уровень, очки талантов, снаряжение и суммарный урон по обоим билдам */
-function cmpHead(a,b,ra,rb){
+/* сводка сверху: уровень, очки талантов и сколько собрано снаряжения */
+function cmpHead(a,b){
  const gear=x=>x.sets.length+x.items.length,total=SETS.length+ITEMS.length;
- const card=(cls,title,x,r)=>'<div class="cmp-card '+cls+'"><small>'+title+'</small><b>'+x.level+' уровень</b>'
+ const card=(cls,title,x)=>'<div class="cmp-card '+cls+'"><small>'+title+'</small><b>'+x.level+' уровень</b>'
   +'<span>'+sumRanks(x.talents)+' '+plural(sumRanks(x.talents),"очко","очка","очков")+' талантов</span>'
-  +'<span>снаряжение '+gear(x)+' из '+total+'</span>'
-  +'<span class="cmp-card-dmg">'+fmt(cmpSum(r))+' суммарного урона</span></div>';
- return '<div class="cmp-head">'+card("a","Ваш билд",a,ra)+'<div class="cmp-vs">против</div>'+card("b","Другой билд",b,rb)+'</div>';
+  +'<span>снаряжение '+gear(x)+' из '+total+'</span></div>';
+ return '<div class="cmp-head">'+card("a","Ваш билд",a)+'<div class="cmp-vs">против</div>'+card("b","Другой билд",b)+'</div>';
 }
 function renderCompare(){
  const body=$("compareBody");
@@ -353,7 +351,7 @@ function renderCompare(){
  const tal=TALENTS.filter(t=>(a.talents[t[0]]||0)!==(b.talents[t[0]]||0)).map(t=>{const x=a.talents[t[0]]||0,y=b.talents[t[0]]||0;return{t:t[2]+" "+x+" → "+y,cls:y>x?"b":"a"}});
  const block=(title,html)=>html?'<div class="cmp-diff-row"><small>'+title+'</small><div class="gear-info-tags">'+html+'</div></div>':"";
  const diff=block("Снаряжение только у вас",cmpTags(mine,"a"))+block("Снаряжение только у другого билда",cmpTags(theirs,"b"))+block("Таланты (ваш → другого билда)",tal.map(x=>cmpTags([x.t],x.cls)).join(""));
- body.innerHTML=cmpHead(a,b,ra,rb)
+ body.innerHTML=cmpHead(a,b)
   +'<table class="data-table cmp-table"><colgroup><col class="cmp-c0"><col><col></colgroup><thead><tr><th>Параметр</th>'
   +'<th class="cmp-h-a"><i class="cmp-dot"></i>Ваш билд</th><th class="cmp-h-b"><i class="cmp-dot"></i>Другой билд</th></tr></thead><tbody>'+rows+'</tbody></table>'
   +'<p class="cmp-note">▲ больше, ▼ меньше; рядом показано, на сколько, а полоска — насколько значение больше второго билда.</p>'

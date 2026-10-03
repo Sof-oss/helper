@@ -70,8 +70,11 @@ window.__roll = function (el, text) {
       Array.prototype.forEach.call(box.querySelectorAll("button"), function (b) {
         b.setAttribute("aria-pressed", String(b.dataset.themeBtn === t.key));
       });
-      var name = d.getElementById("themeName");
-      if (name) name.textContent = t.label;
+      var idx = 0;
+      THEMES.forEach(function (x, i) { if (x.key === t.key) idx = i; });
+      /* кружок уезжает на выбранную остановку — позиция задаётся переменной --i */
+      box.style.setProperty("--i", String(idx));
+      box.style.setProperty("--kt", t.color);
     }
   }
 
@@ -83,12 +86,11 @@ window.__roll = function (el, text) {
     box.id = "themeSwitch";
     box.setAttribute("role", "group");
     box.setAttribute("aria-label", "Цветовая тема");
-    /* подпись активной темы — видно, какая группировка выбрана */
-    var label = d.createElement("span");
-    label.className = "theme-name";
-    label.id = "themeName";
-    label.textContent = (THEMES.filter(function (t) { return t.key === current; })[0] || THEMES[3]).label;
-    box.appendChild(label);
+    /* кружок переключателя: ездит между остановками */
+    var knob = d.createElement("span");
+    knob.className = "theme-knob";
+    knob.setAttribute("aria-hidden", "true");
+    box.appendChild(knob);
     THEMES.forEach(function (t) {
       var b = d.createElement("button");
       b.type = "button";
@@ -100,6 +102,29 @@ window.__roll = function (el, text) {
       b.setAttribute("aria-pressed", String(t.key === current));
       b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + t.symbol + "</svg>";
       box.appendChild(b);
+    });
+    /* перетаскивание кружка: тема меняется по ходу движения */
+    box.addEventListener("pointerdown", function (e) {
+      if (e.button) return;
+      var rect = box.getBoundingClientRect(), btns = box.querySelectorAll("button");
+      if (!btns.length) return;
+      var slot = btns[0].getBoundingClientRect().width, off = btns[0].getBoundingClientRect().left - rect.left;
+      var pick = function (ev) {
+        var i = Math.round((ev.clientX - rect.left - off - slot / 2) / slot);
+        i = Math.max(0, Math.min(THEMES.length - 1, i));
+        if (THEMES[i].key !== current) applyTheme(THEMES[i].key);
+      };
+      pick(e);
+      try { box.setPointerCapture(e.pointerId); } catch (err) {}
+      var move = function (ev) { pick(ev); };
+      var stop = function () {
+        box.removeEventListener("pointermove", move);
+        box.removeEventListener("pointerup", stop);
+        box.removeEventListener("pointercancel", stop);
+      };
+      box.addEventListener("pointermove", move);
+      box.addEventListener("pointerup", stop);
+      box.addEventListener("pointercancel", stop);
     });
     box.addEventListener("click", function (e) {
       var b = e.target.closest("[data-theme-btn]");
