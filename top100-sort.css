@@ -51,3 +51,6 @@
   .top100-updated b{font-size:13px}
   .top100-meta-note{font-size:12px}
 }
+
+/* чипы отрядов: цель для пальца выше */
+@media(max-width:760px){.t100-chip{height:36px}}

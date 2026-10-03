@@ -7,7 +7,7 @@
 
 /* десктоп: матрица этап × ресурс × локация */
 .data-table.tasks-matrix th,.data-table.tasks-matrix td{text-align:center;padding:6px 10px}
-.data-table.tasks-matrix thead th{font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;font-weight:700;border-bottom:1px solid #23475f}
+.data-table.tasks-matrix thead th{font-size:11.5px;letter-spacing:.5px;text-transform:uppercase;font-weight:700;border-bottom:1px solid #23475f}
 .data-table.tasks-matrix td{font-weight:600;border-top:1px solid #12222f}
 .data-table.tasks-matrix tbody th{font-size:12.5px;font-weight:600;color:#cbd9e5;text-transform:none;letter-spacing:0;border-bottom:0;border-top:1px solid #12222f}
 .data-table.tasks-matrix th.task-res{text-align:left;white-space:nowrap}
@@ -27,7 +27,7 @@
 .task-tiles b{color:#edf5fc;font-size:18px;font-variant-numeric:tabular-nums}
 .data-table.tasks-table{table-layout:fixed}
 .data-table.tasks-table th,.data-table.tasks-table td{text-align:center;padding:7px 3px}
-.data-table.tasks-table th{color:var(--c,#7c93a6);font-size:10px;letter-spacing:0;text-transform:uppercase;font-weight:700}
+.data-table.tasks-table th{color:var(--c,#7c93a6);font-size:11.5px;letter-spacing:0;text-transform:uppercase;font-weight:700}
 .data-table.tasks-table td{font-weight:600}
 .tasks-stages th:first-child,.tasks-stages td:first-child{width:46px;text-align:center}
 .tasks-stages tbody tr:nth-child(even) td{background:rgba(159,220,159,.045)}

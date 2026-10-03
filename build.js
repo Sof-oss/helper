@@ -19,12 +19,16 @@ const SKIP = new Set([
   "README.md", "build.js", "build-top100.js", "build-top100.bat", "package.json", "package-lock.json"
 ]);
 
+/* файлы внутри папок, которые не нужны в dist (баннер в шапке сейчас закомментирован) */
+const SKIP_PATHS = new Set(["assets/promo-banner.webp"]);
+const rel = p => path.relative(ROOT, p).split(path.sep).join("/");
+
 /* ---------- копирование ---------- */
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT);
 for (const name of fs.readdirSync(ROOT)) {
   if (SKIP.has(name)) continue;
-  fs.cpSync(path.join(ROOT, name), path.join(OUT, name), { recursive: true });
+  fs.cpSync(path.join(ROOT, name), path.join(OUT, name), { recursive: true, filter: src => !SKIP_PATHS.has(rel(src)) });
 }
 
 /* ---------- пререндер ---------- */

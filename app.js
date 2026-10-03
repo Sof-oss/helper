@@ -209,7 +209,7 @@ function calc(){
  announceResults(r);
  prevResults=r;
 }
-function render(){$("sets").innerHTML=optionMarkup(SETS,state.sets,"set");$("items").innerHTML=optionMarkup(ITEMS,state.items,"item");$("selectAllEquipment").checked=state.sets.size===SETS.length&&state.items.size===ITEMS.length;renderTalents();calc()}
+function render(){$("sets").innerHTML=optionMarkup(SETS,state.sets,"set");$("items").innerHTML=optionMarkup(ITEMS,state.items,"item");$("selectAllEquipment").checked=state.sets.size===SETS.length&&state.items.size===ITEMS.length;renderTalents();$("gearToggle").textContent="Снаряжение: выбрано "+(state.sets.size+state.items.size)+" из "+(SETS.length+ITEMS.length);calc()}
 function showToast(text){const t=$("toast");t.textContent=text||"В разработке";t.classList.add("show");clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>t.classList.remove("show"),1800)}
 
 /* билд в ссылке: уровень, снаряжение и таланты после # */
@@ -317,6 +317,7 @@ function announceResults(r){
 }
 
 document.addEventListener("click",e=>{
+ const gt=e.target.closest("#gearToggle");if(gt){const open=gt.closest(".equipment-section").classList.toggle("gear-open");gt.setAttribute("aria-expanded",open);return}
  const closeDetail=e.target.closest("[data-close-talent-detail]");if(closeDetail){talentDetailOpen=false;renderTalents();return}
  const up=e.target.closest("[data-talent-up]");if(up){changeTalent(up.dataset.talentUp,1);return}
  const branch=e.target.closest("[data-talent-branch]");if(branch){currentTalentBranch=branch.dataset.talentBranch;selectedTalentCode=null;talentDetailOpen=false;renderTalents();resetTreeTransform();return}

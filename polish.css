@@ -132,3 +132,10 @@
 /* ===== Окно таланта: без повторной анимации при прокачке =====
    polish.js ставит .rerender, пока окно уже открыто и его содержимое перерисовывается */
 .talent-detail-overlay.rerender .talent-detail-modal{animation:none}
+
+/* ===== Мелкий текст и тач-цели ===== */
+.crit-chip-label{font-size:11.5px}
+@media(max-width:760px){
+  .gear-info-btn{width:36px;height:36px;flex-basis:36px}
+  .level-row{grid-template-columns:44px 1fr 44px}
+}
