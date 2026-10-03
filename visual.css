@@ -1,4 +1,4 @@
-/* ============================================================================
+﻿/* ============================================================================
    Визуальный пакет: темы, «стеклянная» шапка, цифры-герои, нижнее меню на
    телефоне, дельты рейтинга, атмосферный дрейф и View Transitions.
    Подключается последним, поэтому аккуратно переопределяет styles.css/polish.css.
@@ -50,7 +50,9 @@
 /* ---------- 2б. Тема окрашивает поверхности ----------
    Панели, карточки, кнопки, шапки таблиц и поля берут тон темы, поэтому смена
    темы меняет весь интерфейс, а не только мелкие акценты. */
-body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+/* подложка темы: body::before занят фотографией Зоны (styles.css), поэтому
+   подсветка живёт в body::after — он рисуется поверх фото, но под содержимым */
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
   background:radial-gradient(1200px 560px at 50% -8%,var(--wash),transparent 70%),
              radial-gradient(1000px 520px at 50% 108%,color-mix(in srgb,var(--accent-3) 10%,transparent),transparent 72%)}
 .result-panel,.damage-card,.info-group,.top100-scroll,.top100-panel,.gear-toggle,.option,
@@ -126,7 +128,6 @@ input[type="text"]:focus,input[type="search"]:focus,input[type="number"]:focus,.
   background:radial-gradient(circle at 34% 28%,color-mix(in srgb,var(--t,#57c4f0) 78%,#0a1119),#0a1119 80%);
   box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--t2,#e0574f) 55%,transparent),0 0 10px color-mix(in srgb,var(--t,#57c4f0) 32%,transparent)}
 .tp-badge svg{width:15px;height:15px;fill:none;stroke:#07101a;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.tp-name{font-size:12px;font-weight:600;letter-spacing:.3px;white-space:nowrap}
 .tp-chev{width:14px;height:14px;fill:none;stroke:#8ea3b5;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s ease}
 .theme-pick.open .tp-chev{transform:rotate(180deg)}
 .theme-pick.open .theme-pick-toggle{border-color:color-mix(in srgb,var(--t,#57c4f0) 60%,#24384a)}
@@ -160,7 +161,6 @@ input[type="text"]:focus,input[type="search"]:focus,input[type="number"]:focus,.
 /* выбранная тема просто подсвечивается — без галочек */
 .theme-item[aria-selected="true"] .ti-text b{color:#fff}
 @media(max-width:760px){
-  .tp-name{display:none}
   .theme-pick-toggle{height:34px;padding:0 9px 0 5px;gap:7px}
   .tp-badge{width:24px;height:24px}
   .theme-list{width:min(268px,calc(100vw - 16px))}

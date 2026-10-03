@@ -73,9 +73,8 @@ window.__roll = function (el, text) {
       tgl.style.setProperty("--t2", t.color2 || t.color);
       var badge = tgl.querySelector(".tp-badge svg");
       if (badge) badge.innerHTML = t.symbol;
-      var name = d.getElementById("themeCurrent");
-      if (name) name.textContent = t.label;
       tgl.setAttribute("title", "Тема: " + t.label);
+      tgl.setAttribute("aria-label", "Тема интерфейса: " + t.label + ". Нажмите, чтобы выбрать другую");
     }
     Array.prototype.forEach.call(box.querySelectorAll("[data-theme-btn]"), function (b) {
       var on = b.dataset.themeBtn === t.key;
@@ -99,7 +98,6 @@ window.__roll = function (el, text) {
     toggle.setAttribute("aria-controls", "themeList");
     toggle.setAttribute("aria-label", "Выбрать тему интерфейса");
     toggle.innerHTML = '<span class="tp-badge"><svg viewBox="0 0 24 24" aria-hidden="true"></svg></span>'
-      + '<span class="tp-name" id="themeCurrent"></span>'
       + '<svg class="tp-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
     box.appendChild(toggle);
 
