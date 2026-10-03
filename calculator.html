@@ -89,7 +89,20 @@
         <div><h2 id="talentModalTitle">Таланты</h2><p>Усиливай удары по боссам и открывай новые бонусы по цепочке</p></div>
         <div class="talent-game-actions"><span class="talent-points"><b id="modalSpentPoints">0</b> / <b id="modalMaxPoints">135</b></span><button type="button" class="talent-icon-button" data-close-talents aria-label="Закрыть">×</button></div>
       </header>
-      <div class="talent-game-body"><aside class="talent-game-sidebar" id="talentSidebar"></aside><main class="talent-flow-wrap"><div class="talent-flow" id="talentFlow"></div></main><div class="talent-detail-overlay" id="talentDetailOverlay"></div></div>
+      <div class="talent-game-body"><aside class="talent-game-sidebar" id="talentSidebar"></aside><main class="talent-flow-wrap"><div class="talent-flow" id="talentFlow"></div>
+        <div class="talent-legend" aria-hidden="true">
+          <span><i class="lg-maxed"></i>Изучено до максимума</span>
+          <span><i class="lg-ready"></i>Можно прокачать</span>
+          <span><i class="lg-open"></i>Открыт, очков нет</span>
+          <span><i class="lg-locked"></i>Закрыт требованием</span>
+        </div>
+        <div class="talent-zoom">
+          <button type="button" data-tree-zoom="-1" aria-label="Отдалить" title="Отдалить">−</button>
+          <button type="button" data-tree-zoom="1" aria-label="Приблизить" title="Приблизить">+</button>
+          <button type="button" data-tree-fit aria-label="Вписать в окно" title="Вписать в окно">⤢</button>
+        </div>
+        <div class="talent-tip" id="talentTip" role="tooltip" hidden></div>
+      </main><div class="talent-detail-overlay" id="talentDetailOverlay"></div></div>
     </div>
   </section>
 </div>
@@ -113,24 +126,15 @@
         <div><h2 id="tokensModalTitle">Расчёт по жетонам</h2><p>По текущему уровню, снаряжению и талантам из калькулятора</p></div>
         <div class="talent-game-actions"><button type="button" class="talent-icon-button" data-close-tokens aria-label="Закрыть">×</button></div>
       </header>
-      <div class="gear-info-body">
-        <div class="tok-grid">
-          <section class="tok-col">
-            <label class="tok-field"><span>Количество жетонов</span><input id="tokenCount" type="number" min="0" step="1" value="7200" inputmode="numeric"></label>
-            <div class="tok-title">Ожидаемый урон</div>
-            <div class="data-wrap"><table class="data-table"><thead><tr><th>Оружие</th><th>Ударов</th><th>Без крита</th><th class="tok-crit">С критом</th></tr></thead><tbody id="tokenExpected"></tbody></table></div>
-          </section>
-          <section class="tok-col">
-            <label class="tok-field"><span>Нужное количество урона</span><input id="tokenTarget" type="number" min="0" step="1" value="1000000" inputmode="numeric"></label>
-            <div class="tok-title">Необходимо жетонов</div>
-            <div class="data-wrap"><table class="data-table"><thead><tr><th>Оружие</th><th>Без крита</th><th class="tok-crit">С критом</th></tr></thead><tbody id="tokenNeeded"></tbody></table></div>
-          </section>
+      <div class="gear-info-body tokens-body">
+        <div class="tok-inputs">
+          <label class="tok-inp"><span class="tok-inp-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.6 10h4.8M9.6 14h4.8"/></svg></span><span class="tok-inp-lbl">Жетоны</span><input id="tokenCount" type="number" min="0" step="1" value="7200" inputmode="numeric" aria-label="Количество жетонов"></label>
+          <span class="tok-inp-sep" aria-hidden="true"></span>
+          <label class="tok-inp"><span class="tok-inp-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><path d="M12 2.6v3.3M12 18.1v3.3M2.6 12h3.3M18.1 12h3.3"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg></span><span class="tok-inp-lbl">Нужный урон</span><input id="tokenTarget" type="number" min="0" step="1" value="1000000" inputmode="numeric" aria-label="Нужное количество урона"></label>
         </div>
-        <div class="gear-info-group-title">Исходные данные и эффективность</div>
-        <section class="tok-col">
-          <div class="data-wrap"><table class="data-table"><thead><tr><th>Оружие</th><th>Цена, жетонов</th><th>Урон за удар</th><th>Крит (шанс / бонус)</th><th class="tok-crit">Средний урон с критом</th><th>Урон на жетон</th><th>На жетон с критом</th></tr></thead><tbody id="tokenBase"></tbody></table></div>
-        </section>
-        <p class="tok-note">Цена за удар: граната — 3, гранатомёт — 5, гаусс — 15 жетонов. Средний урон с критом = урон + шанс крита × бонус крита. Количество ударов целое: жетоны считаются на целые удары. Крит считается без учёта базового шанса критического удара и базовой прибавки критического урона. ★ — самое выгодное оружие по урону на один жетон.</p>
+        <p class="tok-hint">Жетоны считаются на целые удары: граната — 3, гранатомёт — 5, гаусс — 15. Во второе поле удобно вписать запас здоровья босса.</p>
+        <div class="tok-cards" id="tokCards"></div>
+        <p class="tok-note">Средний урон с критом = урон + шанс крита × бонус крита; в карточках указан именно он. Крит считается без учёта базового шанса критического удара и базовой прибавки критического урона.</p>
       </div>
     </div>
   </section>

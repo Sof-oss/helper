@@ -71,40 +71,56 @@ if(dov){
 }
 
 /* --- окно «Бонусы снаряжения» ---
-   Подменяет renderGearInfo из app.js: карточки в две колонки с цветом по типу (бесплатные удары / оружие за жетоны),
-   теги окрашены по смыслу, а сумма вынесена в закреплённую панель под списком, поэтому не перекрывает карточки.
-   openGearInfo() вызывает renderGearInfo по имени, так что подмена подхватывается сама */
-const GI_TYPE={knife:"free",pistol:"free",auto:"free",grenade:"paid",gl:"paid",gauss:"paid",freeNoCooldown:"cd",cooldown:"cd"};
-const giTag=(k,v)=>{
- const pct=GEAR_BONUS_PCT.has(k),cls="t-"+(GI_TYPE[k]||"crit");
- return '<span class="gi-tag '+cls+'">'+GEAR_BONUS_LABELS[k]+' <b>+'+(pct?Math.round(v*100)+"%":fmt(v))+'</b></span>';
-};
-/* теги в порядке: удары, оружие за жетоны, прочее (крит, откат) */
-function giTags(x,keysList){
- let out="";
- keysList.forEach(k=>{
-  const v=(keys.includes(k)?x.bonuses&&x.bonuses[k]:x[k]);
-  if(v)out+=giTag(k,v);
- });
- return out;
+   Подменяет renderGearInfo из app.js: две группы со своей иконкой (комплекты — стопка,
+   вещи — футболка), внутри карточки три строки по оружию с полоской вклада, шкала общая
+   для комплектов и вещей; крит и откат — чипами; сумма — плотными плитками.
+   openGearInfo() вызывает renderGearInfo по имени, поэтому подмена подхватывается сама */
+const GI_FAM={free:["knife","pistol","auto"],token:["grenade","gl","gauss"]};
+const GI_NAMES={free:"Бесплатные удары",token:"Оружие за жетоны"};
+const GI_ICON_SET='<svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 20.5 8 12 12.5 3.5 8z"/><path d="M3.5 12 12 16.5 20.5 12M3.5 16 12 20.5 20.5 16"/></svg>';
+const GI_ICON_ITEM='<svg class="ic" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4 4.5 6.3l1.9 3.2L8 8.6V20h8V8.6l1.6.9 1.9-3.2L16 4c-.7 1.2-2.2 1.9-4 1.9S8.7 5.2 8 4Z"/></svg>';
+const giFamily=x=>(x.bonuses&&x.bonuses.knife!=null)?"free":"token";
+/* общая шкала: максимум по каждому оружию среди всех комплектов и вещей */
+const giMax={};["free","token"].forEach(f=>GI_FAM[f].forEach(k=>{giMax[k]=Math.max(...[...SETS,...ITEMS].map(x=>(x.bonuses&&x.bonuses[k])||0))}));
+const giVal=(k,v)=>GEAR_BONUS_PCT.has(k)?"+"+Math.round(v*100)+"%":"+"+fmt(v);
+let giFilter="all";
+function giCard(x,icon){
+ const fam=giFamily(x);
+ const rows=GI_FAM[fam].map(k=>{
+  const v=(x.bonuses&&x.bonuses[k])||0,w=Math.max(3,Math.round(v/(giMax[k]||1)*100));
+  return '<div class="gi-row"><small>'+GEAR_BONUS_LABELS[k]+'</small><span class="gi-bar"><i style="width:'+w+'%"></i></span><b>'+giVal(k,v)+'</b></div>';
+ }).join("");
+ const chips=GEAR_EXTRA.filter(k=>x[k]).map(k=>'<span class="gi-chip">'+GEAR_BONUS_LABELS[k]+' <b>'+giVal(k,x[k])+'</b></span>').join("");
+ return '<div class="gi-card '+fam+'"><div class="gi-head">'+icon+'<b>'+x.name+'</b></div>'+rows+(chips?'<div class="gi-chips">'+chips+'</div>':"")+'</div>';
 }
-const GI_ALL=[...keys,...GEAR_EXTRA];
-function giCard(x){
- const free=x.bonuses&&x.bonuses.knife!=null;
- return '<div class="gi-card '+(free?"free":"paid")+'"><div class="gi-head"><svg class="ic" aria-hidden="true"><use href="'+(free?"#i-sword":"#i-spark")+'"/></svg><b>'+x.name+'</b></div><div class="gi-tags">'+(giTags(x,GI_ALL)||'<span class="gi-tag">Нет бонусов</span>')+'</div></div>';
+function giSection(title,icon,list,note){
+ if(!list.length)return "";
+ return '<div class="gi-section">'+icon+title+' <b>'+list.length+'</b>'+(note?' <small>'+note+'</small>':"")+'</div><div class="gi-grid">'+list.map(x=>giCard(x,icon)).join("")+'</div>';
 }
-function giSection(title,list){
- return '<div class="gi-section"><span>'+title+'</span><small>'+list.length+'</small></div><div class="gi-grid">'+list.map(giCard).join("")+'</div>';
-}
-function giTotal(){
- const sum=gearTotalItem(),row=(label,ks)=>{const t=giTags(sum,ks);return t?'<div class="gi-total-row"><small>'+label+'</small><div class="gi-tags">'+t+'</div></div>':""};
- return '<div class="gi-total"><div class="gi-total-title"><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg>Сумма всех бонусов</div>'
-  +row("Бесплатные удары",["knife","pistol","auto"])
-  +row("Оружие за жетоны",["grenade","gl","gauss"])
-  +row("Крит и откат",GEAR_EXTRA)+'</div>';
+function giTotal(count){
+ const sum=gearTotalItem(),pill=(k,v)=>'<span class="gi-pill">'+GEAR_BONUS_LABELS[k]+' <b>'+giVal(k,v)+'</b></span>';
+ const row=(label,ks)=>{const t=ks.filter(k=>sum[k]||(sum.bonuses&&sum.bonuses[k])).map(k=>pill(k,keys.includes(k)?sum.bonuses[k]:sum[k])).join("");return t?'<div class="gi-total-row"><small>'+label+'</small><div class="gi-pills">'+t+'</div></div>':""};
+ return '<div class="gi-total"><div class="gi-total-title">Сумма всех бонусов · '+count+' '+plural(count,"предмет","предмета","предметов")+'</div>'
+  +row(GI_NAMES.free,GI_FAM.free)+row(GI_NAMES.token,GI_FAM.token)+row("Крит и откат",GEAR_EXTRA)+'</div>';
 }
 window.renderGearInfo=function(){
- $("gearInfoBody").innerHTML='<div class="gi-scroll"><div class="gi-legend"><span class="t-free"><i style="--tc:#f0ae58"></i>Бесплатные удары</span><span class="t-paid"><i style="--tc:#54bfff"></i>Оружие за жетоны</span><span class="t-crit"><i style="--tc:#ff8a8f"></i>Крит</span><span class="t-cd"><i style="--tc:#27db88"></i>Откат</span></div>'
-  +giSection("Комплекты",SETS)+giSection("Одиночные вещи",ITEMS)+'</div>'+giTotal();
+ const visible=x=>giFilter==="all"||giFamily(x)===giFilter;
+ const sets=SETS.filter(visible),items=ITEMS.filter(visible),all=[...SETS,...ITEMS];
+ const counts={all:all.length,free:all.filter(x=>giFamily(x)==="free").length,token:all.filter(x=>giFamily(x)==="token").length};
+ const btn=(key,label)=>'<button type="button" class="gi-filter'+(giFilter===key?" active":"")+'" data-gear-filter="'+key+'" aria-pressed="'+(giFilter===key)+'">'+label+'</button>';
+ $("gearInfoBody").innerHTML='<div class="gi-scroll">'
+  +'<div class="gi-tools"><div class="gi-filters" role="group" aria-label="Фильтр снаряжения">'
+  +btn("all","Все "+counts.all)+btn("free",GI_NAMES.free+" "+counts.free)+btn("token",GI_NAMES.token+" "+counts.token)
+  +'</div><p class="gi-note">Полоски — вклад в урон: шкала общая для комплектов и вещей, длина полоски показывает, сколько даёт предмет</p></div>'
+  +giSection("Комплекты",GI_ICON_SET,sets,"покупаются все, бонусы складываются")
+  +giSection("Одиночные вещи",GI_ICON_ITEM,items,"докупаются отдельно, дают заметно меньше")
+  +'</div>'+giTotal(all.length);
 };
+/* фильтр: переключает список, сумма всегда считается по всем предметам */
+document.addEventListener("click",e=>{
+ const b=e.target.closest("[data-gear-filter]");
+ if(!b)return;
+ giFilter=b.dataset.gearFilter;
+ renderGearInfo();
+});
 })();

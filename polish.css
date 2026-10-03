@@ -81,53 +81,145 @@
 .page .damage-card h3{font-weight:600}
 .page .damage-card strong{font-weight:600}
 
-/* ===== Окно «Расчёт по жетонам» ===== */
-.tokens-window .gear-info-body{gap:14px;padding:18px 20px 22px}
-.tokens-window .tok-grid{gap:14px}
-.tokens-window .tok-col{padding:16px 18px 14px;border-color:#1c3a50;background:linear-gradient(160deg,#0c1b28,#09141e);box-shadow:inset 0 0 24px rgba(10,34,52,.35)}
+/* ===== Окно «Расчёт по жетонам» =====
+   Панель ввода компактная: иконка + подпись + узкое поле; ниже три карточки
+   оружия с полоской выгоды. Самое выгодное оружие — рамкой и зелёной полоской. */
+.tokens-body{padding:18px 20px 22px}
+.tok-inputs{display:inline-flex;align-items:center;border:1px solid #1d3a4f;border-radius:12px;
+  background:linear-gradient(180deg,#0a1a26,#081420);box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.tok-inp{display:flex;align-items:center;gap:10px;padding:9px 14px}
+.tok-inp-ic{width:19px;height:19px;flex:0 0 19px;color:#54bfff;display:grid;place-items:center}
+.tok-inp-ic .ic{width:19px;height:19px;stroke-width:1.6}
+.tok-inp-lbl{font-size:12.5px;color:#9fb3c4;white-space:nowrap}
+.tok-inp input{width:8.5ch;height:34px;padding:0 11px;box-sizing:border-box;border:1px solid #22475f;border-radius:8px;
+  background:#06121b;color:#eaf6ff;font:700 17px/1 ui-monospace,"Cascadia Mono",Consolas,monospace;text-align:right;
+  font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+.tok-inp input::-webkit-outer-spin-button,.tok-inp input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.tok-inp input:hover{border-color:#3a7096}
+.tok-inp input:focus{outline:none;border-color:#54bfff;box-shadow:0 0 0 3px rgba(84,191,255,.2)}
+.tok-inp:last-of-type input{width:10.5ch}
+.tok-inp-sep{width:1px;align-self:stretch;background:#1a3244;margin:6px 0}
+.tok-hint{margin:8px 0 0;font-size:11.5px;color:#6f8496}
 
-/* поле ввода: подпись слева, крупное число справа */
-.tokens-window .tok-field{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #16303f;color:#dce7f0;font-size:14px;font-weight:600}
-.tokens-window .tok-field input{width:150px;height:42px;border-color:#27506d;border-radius:8px;background:#071522;font-size:18px;transition:border-color .15s,box-shadow .15s}
-.tokens-window .tok-field input:hover{border-color:#3a7096}
-.tokens-window .tok-field input:focus{outline:none;border-color:#54bfff;box-shadow:0 0 0 3px rgba(84,191,255,.18)}
-
-/* подзаголовки с цветной меткой */
-.tokens-window .tok-title{display:flex;align-items:center;gap:8px;margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.7px;color:#8fb3cc}
-.tokens-window .tok-title::before{content:"";width:3px;height:12px;border-radius:2px;background:#54bfff}
-.tokens-window .tok-grid>.tok-col:nth-child(2) .tok-title::before{background:#f0ae58}
-.tokens-window .gear-info-group-title{margin:6px 0 0;padding-top:18px;border-top:1px solid #1c3a50;font-size:12px;font-weight:700;letter-spacing:.7px;color:#8fb3cc}
-
-/* таблицы */
-.tokens-window .data-table{font-size:13.5px}
-.tokens-window .data-table th{padding:8px 10px;border-bottom:1px solid #23475f;color:#8fa6b8;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
-.tokens-window .data-table th.tok-crit{color:#ff9aa0}
-.tokens-window .data-table td{padding:9px 10px;border-top:1px solid #12222f;font-weight:600}
-.tokens-window .data-table tbody tr:first-child td{border-top:0}
-.tokens-window .data-table tbody tr:hover td:not(.tok-best){background:rgba(84,191,255,.06)}
-.tokens-window .gear-info-body>.tok-col .data-table{min-width:620px}
-
-/* иконка оружия перед названием: порядок строк всегда граната, гранатомёт, гаусс (те же картинки, что на карточках урона) */
-.tokens-window .data-table td:first-child{color:#e3edf6;white-space:nowrap}
-.tokens-window .data-table td:first-child::before{content:"";display:inline-block;width:30px;height:22px;margin-right:9px;vertical-align:middle;background:no-repeat center/contain}
-.tokens-window tbody tr:nth-child(1) td:first-child::before{background-image:url("assets/grenade-IrR3fcAU.webp")}
-.tokens-window tbody tr:nth-child(2) td:first-child::before{background-image:url("assets/ubgl-9PMpxB6a.webp")}
-.tokens-window tbody tr:nth-child(3) td:first-child::before{background-image:url("assets/gauss-IaBtaAzR.webp")}
-
-/* самое выгодное оружие */
-.tokens-window .data-table td.tok-best{background:rgba(39,219,136,.09);color:#27db88;font-weight:700}
+.tok-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}
+.tok-card{border:1px solid #17364b;border-radius:12px;background:linear-gradient(180deg,#0a1a27,#081420);padding:14px 16px 15px;min-width:0}
+.tok-card.best{border-color:rgba(39,219,136,.55);box-shadow:0 0 22px rgba(39,219,136,.13)}
+.tok-card-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.tok-wicon{width:44px;height:44px;flex:0 0 44px;background-repeat:no-repeat;background-position:center;background-size:contain}
+.tok-card-head b{display:block;font-size:15px;color:#e7f1f9}
+.tok-card-head small{display:block;margin-top:2px;font-size:11.5px;color:#8ea3b5}
+.tok-card-big{font:700 30px/1 ui-monospace,"Cascadia Mono",Consolas,monospace;color:#eaf6ff;font-variant-numeric:tabular-nums}
+.tok-card-unit{font-size:11.5px;color:#8ea3b5;margin:4px 0 10px}
+.tok-card-bar{height:9px;border-radius:6px;background:#0d2130;border:1px solid #14293a;overflow:hidden}
+.tok-card-bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,rgba(84,191,255,.55),#54bfff)}
+.tok-card.best .tok-card-bar i{background:linear-gradient(90deg,#1f9d63,#27db88)}
+.tok-card-rows{margin-top:12px;display:flex;flex-direction:column;gap:7px}
+.tok-card-rows div{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:#a9bccc}
+.tok-card-rows div b{color:#e7f1f9;font-variant-numeric:tabular-nums;text-align:right}
+.tok-card-rows div.acc b{color:#a8e0ff}
 
 /* пояснение внизу */
-.tokens-window .tok-note{margin:0;padding:12px 14px;border-left:3px solid #2e6384;border-radius:0 8px 8px 0;background:rgba(84,191,255,.05);color:#9db2c4;font-size:12.5px;line-height:1.6}
+.tokens-window .tok-note{margin:16px 0 0;padding:12px 14px;border-left:3px solid #2e6384;border-radius:0 8px 8px 0;background:rgba(84,191,255,.05);color:#9db2c4;font-size:12.5px;line-height:1.6}
 
-@media(max-width:650px){
-  .tokens-window .gear-info-body{padding:14px 12px 18px}
-  .tokens-window .tok-col{padding:12px 12px 10px}
-  .tokens-window .tok-field input{width:120px;height:40px}
-  .tokens-window .data-table td{padding:9px 6px}
-  .tokens-window .data-table th{padding:8px 6px}
-  .tokens-window .data-table td:first-child::before{width:24px;height:18px;margin-right:6px}
+/* ===== Окно «Бонусы снаряжения» =====
+   Две группы со своей иконкой, внутри карточки — три строки по оружию с полоской
+   вклада (шкала общая для комплектов и вещей), сумма — плотными плитками. */
+#gearInfoBody{display:block}
+.gear-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;margin-bottom:4px}
+.gear-filters{display:inline-flex;border:1px solid #17364b;border-radius:999px;overflow:hidden}
+.gear-filter{border:0;background:transparent;color:#9fb3c4;font:inherit;font-size:12px;font-weight:600;padding:7px 14px;cursor:pointer}
+.gear-filter:hover{color:#e7f1f9}
+.gear-filter.active{background:rgba(84,191,255,.18);color:#eaf6ff}
+.gear-note{margin:0;font-size:11.5px;color:#6f8496}
+.gear-group-title{display:flex;align-items:center;gap:9px;margin:18px 0 10px;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#93a8ba}
+.gear-group-title .ic{width:17px;height:17px;flex:0 0 17px;stroke-width:1.6}
+.gear-group-title b{color:#e7f1f9;font-size:12px}
+.gear-group-title small{text-transform:none;letter-spacing:0;font-weight:400;color:#6f8496}
+.gear-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.gear-card{border:1px solid #17364b;border-radius:10px;background:linear-gradient(180deg,#0a1a27,#081420);padding:11px 13px 12px;border-left:3px solid #54bfff;min-width:0}
+.gear-card.gear-free{border-left-color:#ffb74d}
+.gear-card h4{display:flex;align-items:center;gap:9px;margin:0 0 9px;font-size:13.5px;color:#e7f1f9;font-weight:600}
+.gear-card h4 .ic{width:16px;height:16px;flex:0 0 16px;stroke-width:1.6;color:#9fb3c4}
+.gear-row{display:grid;grid-template-columns:78px minmax(0,1fr) 52px;align-items:center;gap:9px;margin-bottom:6px}
+.gear-row small{font-size:11.5px;color:#8ea3b5}
+.gear-row b{font:700 12.5px/1 ui-monospace,"Cascadia Mono",Consolas,monospace;color:#e7f1f9;text-align:right;font-variant-numeric:tabular-nums}
+.gear-bar{height:7px;border-radius:5px;background:#0d2130;overflow:hidden}
+.gear-bar i{display:block;height:100%;background:linear-gradient(90deg,#1b4d6b,#54bfff)}
+.gear-card.gear-free .gear-bar i{background:linear-gradient(90deg,#7a5a1f,#ffb74d)}
+.gear-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.gear-chip{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid #22475f;color:#a9bccc;background:#0a1a26}
+.gear-chip b{color:#e7f1f9}
+.gear-total{margin-top:16px;border:1px solid rgba(84,191,255,.35);border-radius:12px;padding:14px 16px;
+  background:linear-gradient(120deg,rgba(84,191,255,.09),rgba(8,18,28,.92))}
+.gear-total h4{margin:0 0 12px;font-size:14px;color:#eaf6ff;font-weight:600}
+.gear-total-rows{display:flex;flex-direction:column;gap:10px}
+.gear-total-row{display:grid;grid-template-columns:186px minmax(0,1fr);gap:14px;align-items:start}
+.gear-total-row>small{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#8ea3b5;padding-top:5px}
+.gear-pills{display:flex;flex-wrap:wrap;gap:7px}
+.gear-pill{display:inline-flex;align-items:baseline;gap:6px;padding:5px 11px;border:1px solid #1d3a4f;border-radius:999px;background:#0a1a26;font-size:12.5px;color:#a9bccc}
+.gear-pill b{color:#eaf6ff;font:700 13px/1 ui-monospace,"Cascadia Mono",Consolas,monospace}
+
+@media(max-width:900px){
+  .tok-cards{grid-template-columns:1fr}
+  .gear-grid{grid-template-columns:1fr}
+  .gear-total-row{grid-template-columns:1fr;gap:6px}
 }
+@media(max-width:650px){
+  .tokens-body{padding:14px 12px 18px}
+  .tok-inputs{display:flex;flex-direction:column;align-items:stretch;width:100%}
+  .tok-inp{justify-content:space-between}
+  .tok-inp input,.tok-inp:last-of-type input{width:11ch}
+  .tok-inp-sep{width:auto;height:1px;margin:0 12px}
+}
+
+/* ===== Древо талантов: состояния, ранги, легенда, зум, подсказка ===== */
+.talent-node-game{overflow:hidden}
+.talent-node-game.locked{opacity:.55;filter:grayscale(.6)}
+/* замок у закрытого узла: рисуем сами, эмодзи выглядят по-разному в системах */
+.talent-node-game.locked::before{content:"";position:absolute;left:10px;top:2px;width:9px;height:8px;border:2px solid #9fb3c4;border-bottom:0;border-radius:5px 5px 0 0;opacity:.85;z-index:2}
+.talent-node-game.locked::after{content:"";position:absolute;left:7px;top:8px;width:15px;height:12px;border:2px solid #9fb3c4;border-radius:2px;opacity:.85;z-index:2}
+.talent-node-game.maxed{border-color:rgba(121,196,103,.85);box-shadow:inset 0 0 0 1px rgba(0,0,0,.4),0 0 16px rgba(121,196,103,.3)}
+.talent-node-game.ready{border-color:var(--accent);box-shadow:inset 0 0 0 1px rgba(0,0,0,.4),0 0 18px color-mix(in srgb,var(--accent) 45%,transparent);animation:talent-ready 2.6s ease-in-out infinite}
+@keyframes talent-ready{50%{box-shadow:inset 0 0 0 1px rgba(0,0,0,.4),0 0 26px color-mix(in srgb,var(--accent) 62%,transparent)}}
+.talent-node-rank{right:-1px;bottom:10px;min-width:32px;height:19px;padding:0 6px;border-radius:9px 0 0 9px;background:rgba(8,12,15,.92);border:1px solid rgba(176,176,170,.35);border-right:0;font:700 11px/17px ui-monospace,"Cascadia Mono",Consolas,monospace;text-align:center;color:#dfe9f1}
+.talent-node-game.maxed .talent-node-rank{background:rgba(18,48,26,.92);border-color:#3f9a4a;color:#bff0c4}
+.talent-node-game.ready .talent-node-rank{background:rgba(12,39,53,.92);border-color:color-mix(in srgb,var(--accent) 55%,#2f3a42);color:#dff2ff}
+.talent-node-bar{position:absolute;left:0;right:0;bottom:0;height:5px;background:rgba(8,12,15,.9);z-index:1}
+.talent-node-bar i{display:block;height:100%;background:#5b6a75;transition:width .18s ease}
+.talent-node-game.maxed .talent-node-bar i{background:#79c463}
+.talent-node-game.ready .talent-node-bar i{background:var(--accent)}
+.talent-node-game.locked .talent-node-bar{opacity:.5}
+
+.talent-legend{position:absolute;left:14px;bottom:14px;z-index:3;display:flex;flex-direction:column;gap:7px;
+  padding:11px 13px;border:1px solid #1d3446;border-radius:10px;background:rgba(8,14,20,.88);box-shadow:0 10px 26px rgba(0,0,0,.5)}
+.talent-legend span{display:flex;align-items:center;gap:8px;font-size:11.5px;color:#a9bccc}
+.talent-legend i{width:12px;height:12px;border-radius:4px;display:inline-block;border:1px solid rgba(255,255,255,.15)}
+.talent-legend .lg-maxed{background:#79c463}
+.talent-legend .lg-ready{background:var(--accent)}
+.talent-legend .lg-open{background:#3a4046}
+.talent-legend .lg-locked{background:#171c20}
+
+.talent-zoom{position:absolute;right:14px;bottom:14px;z-index:3;display:flex;gap:8px}
+.talent-zoom button{width:38px;height:38px;border-radius:9px;border:1px solid #21445c;background:rgba(10,22,32,.92);
+  color:#cfe0ec;font:600 17px/1 "Segoe UI",Arial,sans-serif;cursor:pointer;transition:border-color .15s,color .15s}
+.talent-zoom button:hover{border-color:var(--accent);color:#fff}
+.talent-zoom button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.talent-tip{position:absolute;z-index:4;width:260px;padding:12px 13px;border:1px solid color-mix(in srgb,var(--accent) 45%,#1d3446);
+  border-radius:11px;background:linear-gradient(180deg,#0d1d29,#0a1620);box-shadow:0 18px 40px rgba(0,0,0,.6);pointer-events:none}
+.talent-tip b{display:block;font-size:14px;color:#eaf6ff;margin-bottom:5px}
+.talent-tip p{margin:0 0 8px;font-size:12px;color:#a9bccc;line-height:1.45}
+.talent-tip-eff{font-size:12px;line-height:1.45;color:#9fb3c4}
+.talent-tip-eff b{display:inline;font-size:12px;color:#bff0c4}
+.talent-tip-rank{margin-top:7px;font-size:11.5px;color:#7e93a5}
+
+.talent-branches{display:flex;flex-direction:column;gap:10px;margin:14px 0 4px}
+.talent-branch-progress>div{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#c5c8ca;margin-bottom:5px}
+.talent-branch-progress>div b{font:600 12px/1 ui-monospace,"Cascadia Mono",Consolas,monospace;color:#e1e1dd}
+.talent-branch-bar{display:block;height:7px;border-radius:5px;background:#202426;overflow:hidden}
+.talent-branch-bar i{display:block;height:100%;background:linear-gradient(90deg,#8a6a2e,#f0ae58)}
+.talent-hide-reset{border-color:#7a2b2b!important;color:#ff9c9c!important}
+.talent-hide-reset:disabled{border-color:#373a3d!important;color:#6f7476!important}
 
 /* ===== Окно таланта: без повторной анимации при прокачке =====
    polish.js ставит .rerender, пока окно уже открыто и его содержимое перерисовывается */
@@ -141,18 +233,23 @@
 }
 
 /* ===== Окно «Бонусы снаряжения» =====
-   Список прокручивается внутри .gi-scroll, а сумма закреплена снизу отдельной панелью и больше не перекрывает карточки.
-   Цвета: янтарный — бесплатные удары, синий — оружие за жетоны, красный — крит, зелёный — откат (как в калькуляторе) */
+   Список прокручивается внутри .gi-scroll, сумма закреплена снизу.
+   Внутри карточки — три строки по оружию с полоской вклада; шкала общая для
+   комплектов и вещей, поэтому видно, насколько вещи слабее комплектов.
+   Цвет полоски и рейки: янтарный — бесплатные удары, синий — оружие за жетоны */
 #gearInfoModal .gear-info-window{width:min(920px,94vw);height:min(86vh,860px);max-height:none}
 #gearInfoBody{padding:0;gap:0;overflow:hidden}
 .gi-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;padding:18px 20px 22px;scrollbar-width:thin;scrollbar-color:#31566f #08131d}
-.gi-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 0 4px;color:#9db2c4;font-size:12.5px}
-.gi-legend span{display:inline-flex;align-items:center;gap:7px}
-.gi-legend i{width:8px;height:8px;border-radius:50%;background:var(--tc);box-shadow:0 0 6px var(--tc)}
-.gi-section{display:flex;align-items:center;gap:10px;margin:18px 0 10px;color:#cbd9e5;font-size:14px;font-weight:600}
-.gi-section:first-of-type{margin-top:12px}
-.gi-section::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#23475f,transparent)}
-.gi-section small{padding:1px 8px;border:1px solid #234157;border-radius:10px;background:#0d1d2a;color:#9db2c4;font-size:11.5px;font-weight:600}
+.gi-tools{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px}
+.gi-filters{display:inline-flex;border:1px solid #17364b;border-radius:999px;overflow:hidden}
+.gi-filter{border:0;background:transparent;color:#9fb3c4;font:inherit;font-size:12px;font-weight:600;padding:7px 14px;cursor:pointer;transition:background .15s,color .15s}
+.gi-filter:hover{color:#e7f1f9}
+.gi-filter.active{background:rgba(84,191,255,.18);color:#eaf6ff}
+.gi-note{margin:0;font-size:11.5px;color:#6f8496}
+.gi-section{display:flex;align-items:center;gap:9px;margin:18px 0 10px;color:#cbd9e5;font-size:13px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.gi-section .ic{width:17px;height:17px;flex:0 0 17px;color:#8fb3cc}
+.gi-section b{color:#e8f0f7;font-size:13px}
+.gi-section small{text-transform:none;letter-spacing:0;font-weight:400;color:#6f8496;font-size:11.5px}
 .gi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .gi-card{position:relative;padding:11px 13px 12px 17px;border:1px solid #1a3346;border-radius:9px;background:linear-gradient(135deg,#0b1925,#09141e);overflow:hidden;transition:border-color .15s,background .15s}
 .gi-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--ac);box-shadow:0 0 10px var(--ac)}
@@ -162,28 +259,33 @@
 .gi-head{display:flex;align-items:center;gap:8px;margin-bottom:9px}
 .gi-head .ic{width:16px;height:16px;color:var(--ac)}
 .gi-head b{min-width:0;color:#e8f0f7;font-size:13.5px;font-weight:600;line-height:1.25}
-.gi-tags{display:flex;flex-wrap:wrap;gap:5px}
-.gi-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border:1px solid color-mix(in srgb,var(--tc) 32%,#0a1a27);border-radius:14px;background:color-mix(in srgb,var(--tc) 9%,#0a1a27);color:#b4c6d5;font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
-.gi-tag b{color:var(--tc);font-weight:700}
-.t-free{--tc:#f0ae58}
-.t-paid{--tc:#54bfff}
-.t-crit{--tc:#ff8a8f}
-.t-cd{--tc:#27db88}
+.gi-row{display:grid;grid-template-columns:82px minmax(0,1fr) 54px;align-items:center;gap:9px;margin-bottom:6px}
+.gi-row small{font-size:11.5px;color:#8ea3b5}
+.gi-row b{text-align:right;color:#e7f1f9;font:700 12.5px/1 ui-monospace,"Cascadia Mono",Consolas,monospace;font-variant-numeric:tabular-nums}
+.gi-bar{height:7px;border-radius:5px;background:#0d2130;overflow:hidden}
+.gi-bar i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,color-mix(in srgb,var(--ac) 45%,#0d2130),var(--ac))}
+.gi-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.gi-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border:1px solid #22475f;border-radius:14px;background:#0a1a26;color:#a9bccc;font-size:12px;white-space:nowrap}
+.gi-chip b{color:#e7f1f9;font-weight:700}
 
-/* сумма: закреплённая панель под списком */
+/* сумма: закреплённая панель под списком, значения — плотными плитками */
 .gi-total{flex:0 0 auto;padding:12px 20px 14px;border-top:1px solid #2e6384;background:linear-gradient(180deg,#0d2231,#0a1a27);box-shadow:0 -10px 22px rgba(0,0,0,.5)}
-.gi-total-title{display:flex;align-items:center;gap:8px;margin-bottom:6px;color:#73c8ff;font-size:14px;font-weight:700}
-.gi-total-title .ic{width:16px;height:16px}
-.gi-total-row{display:grid;grid-template-columns:128px minmax(0,1fr);gap:10px;align-items:start;padding:7px 0;border-top:1px solid #16303f}
-.gi-total-row>small{padding-top:4px;color:#8fb3cc;font-size:12px;font-weight:600}
+.gi-total-title{margin-bottom:8px;color:#73c8ff;font-size:13.5px;font-weight:700}
+.gi-total-row{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:start;padding:7px 0;border-top:1px solid #16303f}
+.gi-total-row:first-of-type{border-top:0}
+.gi-total-row>small{padding-top:5px;color:#8fb3cc;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.gi-pills{display:flex;flex-wrap:wrap;gap:6px}
+.gi-pill{display:inline-flex;align-items:baseline;gap:6px;padding:4px 10px;border:1px solid #1d3a4f;border-radius:999px;background:#0a1a26;color:#a9bccc;font-size:12px}
+.gi-pill b{color:#eaf6ff;font:700 12.5px/1 ui-monospace,"Cascadia Mono",Consolas,monospace}
 
 @media(max-width:760px){
   .gi-grid{grid-template-columns:1fr}
+  .gi-row{grid-template-columns:74px minmax(0,1fr) 50px;gap:7px}
 }
 @media(max-width:650px){
   #gearInfoModal .gear-info-window{height:92vh}
   .gi-scroll{padding:12px 14px 16px}
-  .gi-total{max-height:38%;overflow-y:auto;padding:10px 14px 12px}
-  .gi-total-row{grid-template-columns:1fr;gap:3px}
+  .gi-total{max-height:40%;overflow-y:auto;padding:10px 14px 12px}
+  .gi-total-row{grid-template-columns:1fr;gap:5px}
   .gi-total-row>small{padding-top:0}
 }

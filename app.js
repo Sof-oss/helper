@@ -26,6 +26,8 @@ const cap=k=>k[0].toUpperCase()+k.slice(1);
 function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({sets:[...state.sets],items:[...state.items],level:$("level").value,talents:state.talents}))}catch{}}
 function loadState(){try{const data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");if(!data)return;state.sets.clear();state.items.clear();state.talents={};(Array.isArray(data.sets)?data.sets:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<SETS.length).forEach(i=>state.sets.add(i));(Array.isArray(data.items)?data.items:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<ITEMS.length).forEach(i=>state.items.add(i));if(data.level!==undefined)$("level").value=data.level;if(data.talents&&typeof data.talents==="object")Object.entries(data.talents).forEach(([id,v])=>{if(TALENTS.some(t=>t[0]===id))state.talents[id]=Math.max(0,Math.min(5,Number(v)||0))})}catch{}}
 const num=id=>Math.max(0,Number($(id).value)||0),fmt=n=>Math.round(n).toLocaleString("ru-RU"),fmtD=n=>n.toLocaleString("ru-RU",{minimumFractionDigits:1,maximumFractionDigits:1}),talentRank=code=>state.talents[code]||0,talentDef=code=>TALENTS.find(t=>t[0]===code);
+/* русские формы числительных: 1 удар, 2 удара, 5 ударов */
+function plural(n,one,few,many){const a=Math.abs(n)%100,b=a%10;if(a>10&&a<20)return many;if(b>1&&b<5)return few;if(b===1)return one;return many}
 function canUpgrade(t){return talentRank(t[0])<5&&t[9].every(req=>talentRank(req)>=5)}
 function canDowngrade(t){return talentRank(t[0])>0&&!TALENTS.some(x=>talentRank(x[0])>0&&x[9].includes(t[0]))}
 function spentTalentPoints(){return Object.values(state.talents).reduce((a,b)=>a+b,0)}
@@ -65,6 +67,31 @@ function resetTreeTransform(){
  }else{treeT.s=1;treeT.x=0;treeT.y=0}
  applyTreeTransform();
 }
+/* зум кнопками: масштаб меняется вокруг центра видимой области, а не угла */
+function zoomTree(f){
+ const wrap=document.querySelector(".talent-flow-wrap");if(!wrap)return;
+ const rect=wrap.getBoundingClientRect(),cx=rect.width/2,cy=rect.height/2;
+ const next=clampTreeScale(treeT.s*f),k=next/treeT.s;
+ treeT.x=cx-(cx-treeT.x)*k;treeT.y=cy-(cy-treeT.y)*k;treeT.s=next;
+ applyTreeTransform();hideTalentTip();
+}
+
+/* подсказка при наведении на узел: без клика видно, что даёт талант */
+function showTalentTip(code,node){
+ const tip=$("talentTip")||document.getElementById("talentTip");if(!tip||!node)return;
+ const t=talentDef(code);if(!t)return;
+ const rank=talentRank(code),stat=t[7],unit=stat&&stat.endsWith("_pct")?"%":"",target=Array.isArray(t[8])?t[8][0]:t[8];
+ const label=(TALENT_STAT_LABELS[stat]||"Эффект")+(target?" · "+TALENT_TARGET_NAMES[target]:"");
+ const left=rank>=5?"изучено до максимума":rank?("сейчас "+rank+" "+plural(rank,"ранг","ранга","рангов")+" · до максимума "+(5-rank)):"не изучен · до максимума 5";
+ tip.innerHTML='<b>'+t[2]+'</b><p>'+t[3]+'</p><div class="talent-tip-eff">'+label+' <b>'+t[6].map(v=>"+"+v+unit).join(" / ")+'</b></div><div class="talent-tip-rank">'+left+'</div>';
+ const wrap=document.querySelector(".talent-flow-wrap");if(!wrap)return;
+ const w=wrap.getBoundingClientRect(),r=node.getBoundingClientRect();
+ tip.hidden=false;
+ const tw=tip.offsetWidth||260,th=tip.offsetHeight||110;
+ tip.style.left=Math.max(8,Math.min(w.width-tw-8,r.left-w.left+r.width+14))+"px";
+ tip.style.top=Math.max(8,Math.min(w.height-th-8,r.top-w.top-10))+"px";
+}
+function hideTalentTip(){const tip=document.getElementById("talentTip");if(tip&&!tip.hidden){tip.hidden=true;tip.innerHTML=""}}
 
 /* суммарные бонусы, урон и крит */
 const MIN_LEVEL=1;
@@ -120,12 +147,16 @@ function renderTalents(){
  const maxX=Math.max(0,...talents.map(t=>{const a=talents.filter(x=>x[4]===t[4]);return Math.abs((a.indexOf(t)-(a.length-1)/2)*164)})),graphWidth=Math.max(760,Math.ceil(maxX*2+100+40)),nodePos=new Map;
  talents.forEach(t=>{const a=talents.filter(x=>x[4]===t[4]),i=a.indexOf(t);nodePos.set(t[0],{x:graphWidth/2+(i-(a.length-1)/2)*164-50,y:28+(t[4]-1)*148})});
  const edges=talents.flatMap(t=>t[9].map(req=>{const a=nodePos.get(req),b=nodePos.get(t[0]);if(!a||!b)return"";const x1=a.x+50,y1=a.y+100,x2=b.x+50,y2=b.y,mid=(y1+y2)/2,met=talentRank(req)>=5,onPath=pathSet.has(t[0]),stroke=onPath?"#54bfff":met?"#d8d8d2":"rgba(190,190,184,.32)",width=onPath?2.6:met?2:1.35;return '<path d="M'+x1+" "+y1+" L "+x1+" "+mid+" L "+x2+" "+mid+" L "+x2+" "+y2+'" fill="none" stroke="'+stroke+'" stroke-width="'+width+'" stroke-linecap="round" stroke-linejoin="round"></path>'})).join("");
- const nodes=talents.map(t=>{const p=nodePos.get(t[0]),rank=talentRank(t[0]),status=talentNodeStatus(t);return '<button type="button" class="talent-node-game '+status+(t[0]===selectedTalentCode?" selected":"")+(pathSet.has(t[0])?" on-path":"")+'" data-select-talent="'+t[0]+'" style="left:'+p.x+"px;top:"+p.y+'px"><span class="talent-node-art">'+talentNodeIcon(t)+'</span><span class="talent-node-rank">'+rank+'/5</span></button>'}).join("");
+ const nodes=talents.map(t=>{const p=nodePos.get(t[0]),rank=talentRank(t[0]),status=talentNodeStatus(t);return '<button type="button" class="talent-node-game '+status+(t[0]===selectedTalentCode?" selected":"")+(pathSet.has(t[0])?" on-path":"")+'" data-select-talent="'+t[0]+'" style="left:'+p.x+"px;top:"+p.y+'px"><span class="talent-node-art">'+talentNodeIcon(t)+'</span><span class="talent-node-rank">'+rank+'/5</span><span class="talent-node-bar"><i style="width:'+(rank*20)+'%"></i></span></button>'}).join("");
  $("talentFlow").innerHTML='<div class="talent-flow-canvas" style="width:'+graphWidth+'px;height:760px"><svg class="talent-edge-layer" width="'+graphWidth+'" height="760" viewBox="0 0 '+graphWidth+' 760">'+edges+'</svg>'+nodes+'</div>';
  const spent=spentTalentPoints(),pct=Math.min(100,Math.round(spent/MAX_TALENT_POINTS*100));
+ /* прогресс по ветвям: сколько очков вложено из возможных */
+ const branchSpent={},branchMax={};
+ TALENTS.forEach(t=>{branchSpent[t[1]]=(branchSpent[t[1]]||0)+(talentRank(t[0])||0);branchMax[t[1]]=(branchMax[t[1]]||0)+5});
+ const branchRows='<div class="talent-branches">'+branches.map(b=>{const got=branchSpent[b.code]||0,all=branchMax[b.code]||1;return '<div class="talent-branch-progress"><div><span>'+b.name+'</span><b>'+got+' / '+all+'</b></div><span class="talent-branch-bar"><i style="width:'+Math.round(got/all*100)+'%"></i></span></div>'}).join("")+'</div>';
  const last=lastTalentChange&&lastTalentChange.length?'<div class="talent-last"><small>Последнее изменение</small><div class="talent-last-list">'+lastTalentChange.map(c=>'<span class="'+(c.v>0?"up":"down")+'">'+c.l+' <b>'+fmtDelta(c.v,c.p)+'</b></span>').join("")+'</div></div>':"";
  /* кнопки в .talent-side-footer, на телефоне он липнет ко дну панели (styles.css) */
- $("talentSidebar").innerHTML='<div class="talent-side-title"><span>Таланты</span><b>'+spent+' / '+MAX_TALENT_POINTS+'</b></div><div class="talent-gauge" style="--pct:'+pct+'"><div class="talent-gauge-ticks"></div><div class="talent-gauge-value"><b>'+pct+'</b><small>%</small></div></div><div class="talent-side-stats"><div><b>'+Math.max(0,MAX_TALENT_POINTS-spent)+'</b><small>свободно</small></div><div><b>'+spent+'</b><small>распределено</small></div></div>'+last+'<div class="talent-branch-tabs">'+branches.map(b=>'<button type="button" class="'+(b.code===currentTalentBranch?"active":"")+'" data-talent-branch="'+b.code+'">'+b.name+'</button>').join("")+'</div><div class="talent-branch-description"><b>'+branch.name+'</b><span>'+branch.desc+'</span></div><div class="talent-side-hint">Нажми на узел дерева, чтобы открыть его описание и прокачку</div><div class="talent-side-footer"><button type="button" class="talent-hide" data-reset-talents '+(spent?"":"disabled")+'>↻ Сбросить таланты</button><button type="button" class="talent-hide" data-close-talents>← Скрыть</button></div>';
+ $("talentSidebar").innerHTML='<div class="talent-side-title"><span>Таланты</span><b>'+spent+' / '+MAX_TALENT_POINTS+'</b></div><div class="talent-gauge" style="--pct:'+pct+'"><div class="talent-gauge-ticks"></div><div class="talent-gauge-value"><b>'+pct+'</b><small>%</small></div></div><div class="talent-side-stats"><div><b>'+Math.max(0,MAX_TALENT_POINTS-spent)+'</b><small>свободно</small></div><div><b>'+spent+'</b><small>распределено</small></div></div>'+branchRows+last+'<div class="talent-branch-tabs">'+branches.map(b=>'<button type="button" class="'+(b.code===currentTalentBranch?"active":"")+'" data-talent-branch="'+b.code+'">'+b.name+'</button>').join("")+'</div><div class="talent-branch-description"><b>'+branch.name+'</b><span>'+branch.desc+'</span></div><div class="talent-side-hint">Нажми на узел дерева, чтобы открыть описание и прокачку. Колесо мыши или Ctrl + колесо — зум, перетаскивание — сдвиг.</div><div class="talent-side-footer"><button type="button" class="talent-hide talent-hide-reset" data-reset-talents '+(spent?"":"disabled")+'>↻ Сбросить таланты</button><button type="button" class="talent-hide" data-close-talents>← Скрыть</button></div>';
  const detailOverlay=$("talentDetailOverlay"),detailOn=talentDetailOpen&&!!selectedTalentCode;
  if(detailOn){const dt=talentDef(selectedTalentCode);detailOverlay.innerHTML='<div class="talent-detail-backdrop" data-close-talent-detail></div><div class="talent-detail-modal" role="dialog" aria-modal="true" aria-label="'+dt[2].replace(/"/g,"&quot;")+'" tabindex="-1">'+renderTalentDetails(dt)+'</div>';detailOverlay.classList.add("show")}
  else{detailOverlay.classList.remove("show");detailOverlay.innerHTML=""}
@@ -159,6 +190,7 @@ function gearTotalItem(){
  });
  return sum;
 }
+/* базовый список; окно «Бонусы снаряжения» дорисовывает polish.js (полоски, фильтр, группы) */
 function renderGearInfo(){$("gearInfoBody").innerHTML='<div class="gear-info-group-title">Комплекты</div>'+SETS.map(x=>gearInfoCard(x)).join("")+'<div class="gear-info-group-title">Одиночные вещи</div>'+ITEMS.map(x=>gearInfoCard(x)).join("")+'<div class="gear-info-total-wrap">'+gearInfoCard(gearTotalItem(),"gear-info-total")+'</div>'}
 function openGearInfo(){$("gearInfoModal").classList.add("show");$("gearInfoModal").setAttribute("aria-hidden","false");renderGearInfo()}
 function closeGearInfo(){$("gearInfoModal").classList.remove("show");$("gearInfoModal").setAttribute("aria-hidden","true")}
@@ -173,13 +205,27 @@ function tokenWeaponStats(){
  const r=results();
  return TOKEN_WEAPONS.map(([k,name])=>{const dmg=r[k],chance=Math.min(1,r[TOKEN_CRIT[k][0]]),bonus=r[TOKEN_CRIT[k][1]];return{key:k,name,price:TOKEN_PRICES[k],dmg,chance,bonus,avg:dmg+chance*bonus}});
 }
+/* карточки оружия: урон за жетон, полоска выгоды и три строки расчёта.
+   Самое выгодное оружие выделено рамкой и зелёной полоской — этого достаточно. */
+const TOKEN_ICON_CLASS={grenade:"grenade",gl:"ubgl",gauss:"gauss"};
 function renderTokens(){
  const tokens=tokenInt("tokenCount"),target=tokenInt("tokenTarget"),st=tokenWeaponStats();
- const best=Math.max(...st.map(w=>w.dmg/w.price)),bestCrit=Math.max(...st.map(w=>w.avg/w.price));
- const cell=(v,b)=>{const top=Math.abs(v-b)<1e-9;return '<td class="'+(top?"tok-best":"")+'">'+fmtD(v)+(top?" ★":"")+'</td>'};
- $("tokenBase").innerHTML=st.map(w=>'<tr><td>'+w.name+'</td><td>'+w.price+'</td><td>'+fmt(w.dmg)+'</td><td>'+(w.chance*100).toFixed(0)+'% / +'+fmt(w.bonus)+'</td><td class="tok-crit">'+fmt(w.avg)+'</td>'+cell(w.dmg/w.price,best)+cell(w.avg/w.price,bestCrit)+'</tr>').join("");
- $("tokenExpected").innerHTML=st.map(w=>{const shots=Math.floor(tokens/w.price);return '<tr><td>'+w.name+'</td><td>'+fmt(shots)+'</td><td>'+fmt(shots*w.dmg)+'</td><td class="tok-crit">'+fmt(shots*w.avg)+'</td></tr>'}).join("");
- $("tokenNeeded").innerHTML=st.map(w=>'<tr><td>'+w.name+'</td><td>'+fmt(Math.ceil(target/w.dmg)*w.price)+'</td><td class="tok-crit">'+fmt(Math.ceil(target/w.avg)*w.price)+'</td></tr>').join("");
+ const bestCrit=Math.max.apply(null,st.map(w=>w.avg/w.price));
+ $("tokCards").innerHTML=st.map(w=>{
+  const perToken=w.avg/w.price,best=Math.abs(perToken-bestCrit)<1e-9;
+  const shots=Math.floor(tokens/w.price);
+  const needed=target>0?Math.ceil(target/w.avg)*w.price:0;
+  const width=Math.max(4,Math.round(perToken/bestCrit*100));
+  return '<article class="tok-card'+(best?" best":"")+'">'+
+   '<div class="tok-card-head"><span class="tok-wicon weapon-'+TOKEN_ICON_CLASS[w.key]+'"></span><div><b>'+w.name+'</b><small>'+w.price+' '+plural(w.price,"жетон","жетона","жетонов")+' за удар · крит '+(w.chance*100).toFixed(0)+'% / +'+fmt(w.bonus)+'</small></div></div>'+
+   '<div class="tok-card-big">'+fmtD(perToken)+'</div><div class="tok-card-unit">урона за жетон</div>'+
+   '<div class="tok-card-bar"><i style="width:'+width+'%"></i></div>'+
+   '<div class="tok-card-rows">'+
+     '<div><span>'+fmt(tokens)+' '+plural(tokens,"жетон","жетона","жетонов")+'</span><b>'+fmt(shots)+' '+plural(shots,"удар","удара","ударов")+'</b></div>'+
+     '<div><span>это урона</span><b>'+fmt(shots*w.avg)+'</b></div>'+
+     '<div class="acc"><span>на '+fmt(target)+' урона нужно</span><b>'+fmt(needed)+' '+plural(needed,"жетон","жетона","жетонов")+'</b></div>'+
+   '</div></article>';
+ }).join("");
 }
 function openTokens(){$("tokensModal").classList.add("show");$("tokensModal").setAttribute("aria-hidden","false");renderTokens()}
 function closeTokens(){$("tokensModal").classList.remove("show");$("tokensModal").setAttribute("aria-hidden","true")}
@@ -323,10 +369,13 @@ function announceResults(r){
 
 document.addEventListener("click",e=>{
  const gt=e.target.closest("#gearToggle");if(gt){const open=gt.closest(".equipment-section").classList.toggle("gear-open");gt.setAttribute("aria-expanded",open);return}
+ /* зум дерева талантов кнопками и вписать в окно */
+ const zoom=e.target.closest("[data-tree-zoom]");if(zoom){zoomTree(Number(zoom.dataset.treeZoom)>0?1.18:1/1.18);return}
+ if(e.target.closest("[data-tree-fit]")){resetTreeTransform();hideTalentTip();return}
  const closeDetail=e.target.closest("[data-close-talent-detail]");if(closeDetail){talentDetailOpen=false;renderTalents();return}
  const up=e.target.closest("[data-talent-up]");if(up){changeTalent(up.dataset.talentUp,1);return}
  const branch=e.target.closest("[data-talent-branch]");if(branch){currentTalentBranch=branch.dataset.talentBranch;selectedTalentCode=null;talentDetailOpen=false;renderTalents();resetTreeTransform();return}
- const select=e.target.closest("[data-select-talent]");if(select){selectedTalentCode=select.dataset.selectTalent;talentDetailOpen=true;renderTalents();return}
+ const select=e.target.closest("[data-select-talent]");if(select){hideTalentTip();selectedTalentCode=select.dataset.selectTalent;talentDetailOpen=true;renderTalents();return}
  const down=e.target.closest("[data-talent-down]");if(down){changeTalent(down.dataset.talentDown,-1);return}
  if(e.target.closest("#openTalents")){openTalents();return}
  if(e.target.closest("[data-reset-talents]")){resetTalents();return}
@@ -342,6 +391,12 @@ document.addEventListener("click",e=>{
  if(e.target.closest("#cmpClear")){cmpBuild=null;saveCompare();renderCompare();return}
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(talentDetailOpen){talentDetailOpen=false;renderTalents()}else if($("compareModal").classList.contains("show")){closeCompare()}else if($("tokensModal").classList.contains("show")){closeTokens()}else if($("gearInfoModal").classList.contains("show")){closeGearInfo()}else closeTalents()}});
+/* подсказка к узлу дерева: появляется при наведении, исчезает при уходе курсора */
+document.addEventListener("mouseover",e=>{const n=e.target.closest&&e.target.closest(".talent-node-game");if(!n||!$("talentModal").classList.contains("show"))return;showTalentTip(n.dataset.selectTalent,n)});
+document.addEventListener("mouseout",e=>{if(e.target.closest&&e.target.closest(".talent-node-game"))hideTalentTip()});
+/* при перетаскивании и зуме подсказка уезжает от узла — прячем */
+document.addEventListener("wheel",()=>hideTalentTip(),{passive:true});
+document.addEventListener("touchstart",()=>hideTalentTip(),{passive:true});
 document.addEventListener("change",e=>{const i=e.target;if(!i.matches("[data-type]"))return;const s=i.dataset.type==="set"?state.sets:state.items,n=Number(i.dataset.index);i.checked?s.add(n):s.delete(n);saveState();render()});
 document.addEventListener("click",e=>{const b=e.target.closest("[data-step]");if(!b)return;const input=$(b.dataset.step),dir=Number(b.dataset.dir)||0,min=Number(input.min)||0,max=Number(input.max)||999;input.value=Math.min(max,Math.max(min,(Number(input.value)||0)+dir));saveState();calc()});
 $("selectAllEquipment").addEventListener("change",e=>{state.sets.clear();state.items.clear();if(e.target.checked){SETS.forEach((_,i)=>state.sets.add(i));ITEMS.forEach((_,i)=>state.items.add(i))}saveState();render()});
