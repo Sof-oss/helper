@@ -85,7 +85,8 @@
    Панель ввода компактная: иконка + подпись + узкое поле; ниже три карточки
    оружия с полоской выгоды. Самое выгодное оружие — рамкой и зелёной полоской. */
 .tokens-body{padding:18px 20px 22px}
-.tok-inputs{display:inline-flex;align-items:center;border:1px solid #1d3a4f;border-radius:12px;
+/* панель ввода по центру окна */
+.tok-inputs{display:flex;width:max-content;max-width:100%;margin:16px auto 0;align-items:center;border:1px solid #1d3a4f;border-radius:12px;
   background:linear-gradient(180deg,#0a1a26,#081420);box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
 .tok-inp{display:flex;align-items:center;gap:10px;padding:9px 14px}
 .tok-inp-ic{width:19px;height:19px;flex:0 0 19px;color:#54bfff;display:grid;place-items:center}
@@ -99,7 +100,7 @@
 .tok-inp input:focus{outline:none;border-color:#54bfff;box-shadow:0 0 0 3px rgba(84,191,255,.2)}
 .tok-inp:last-of-type input{width:10.5ch}
 .tok-inp-sep{width:1px;align-self:stretch;background:#1a3244;margin:6px 0}
-.tok-hint{margin:8px 0 0;font-size:11.5px;color:#6f8496}
+.tok-hint{margin:10px 0 0;font-size:11.5px;color:#6f8496;text-align:center}
 
 .tok-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}
 .tok-card{border:1px solid #17364b;border-radius:12px;background:linear-gradient(180deg,#0a1a27,#081420);padding:14px 16px 15px;min-width:0}
@@ -126,7 +127,7 @@
 }
 @media(max-width:650px){
   .tokens-body{padding:14px 12px 18px}
-  .tok-inputs{display:flex;flex-direction:column;align-items:stretch;width:100%}
+  .tok-inputs{display:flex;flex-direction:column;align-items:stretch;width:100%;margin-top:12px}
   .tok-inp{justify-content:space-between}
   .tok-inp input,.tok-inp:last-of-type input{width:11ch}
   .tok-inp-sep{width:auto;height:1px;margin:0 12px}

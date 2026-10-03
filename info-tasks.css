@@ -5,19 +5,15 @@
 .res-exp{--c:#54bfff}.res-bul{--c:#ffb74d}.res-rep{--c:#26c6da}.res-en{--c:#ff6b6f}.res-tok{--c:#9fdc9f}
 .tasks-mobile{display:none}
 
-/* десктоп: матрица этап × ресурс × локация */
-.data-table.tasks-matrix th,.data-table.tasks-matrix td{text-align:center;padding:6px 10px}
-.data-table.tasks-matrix thead th{font-size:11.5px;letter-spacing:.5px;text-transform:uppercase;font-weight:700;border-bottom:1px solid #23475f}
-.data-table.tasks-matrix td{font-weight:600;border-top:1px solid #12222f}
-.data-table.tasks-matrix tbody th{font-size:12.5px;font-weight:600;color:#cbd9e5;text-transform:none;letter-spacing:0;border-bottom:0;border-top:1px solid #12222f}
-.data-table.tasks-matrix th.task-res{text-align:left;white-space:nowrap}
-.data-table.tasks-matrix th.task-stage{width:130px;line-height:1.35;color:#eef4fa;text-align:center;vertical-align:middle;border-right:1px solid #142735;background:rgba(255,255,255,.025)}
-.data-table.tasks-matrix .task-first>*{border-top-color:#2a4a62}
+/* ПК: ресурсы строками, локации колонками — все локации видны сразу */
+.tasks-pick{margin:0 0 12px}
+.data-table.tasks-loc{table-layout:auto}
+.data-table.tasks-loc th,.data-table.tasks-loc td{padding:8px 10px;text-align:center;white-space:nowrap}
+.data-table.tasks-loc thead th{font-size:11.5px;letter-spacing:.4px;text-transform:uppercase;font-weight:700;color:#8fb3cc;border-bottom:1px solid #23475f}
+.data-table.tasks-loc tbody th{width:170px;text-align:left;font-size:12.5px;font-weight:600;color:#cbd9e5;text-transform:none;letter-spacing:0;border-top:1px solid #12222f}
+.data-table.tasks-loc tbody td{font-weight:600;border-top:1px solid #12222f;font-variant-numeric:tabular-nums}
+.data-table.tasks-loc tbody tr:hover td{background:rgba(84,191,255,.06)}
 .task-res i{display:inline-block;width:8px;height:8px;margin-right:8px;border-radius:50%;background:var(--c);box-shadow:0 0 6px var(--c)}
-.task-s1>td,.task-s1>.task-res{background:rgba(159,220,159,.045)}
-.task-reward>td,.task-reward>.task-res,.task-reward>.task-stage{background:rgba(255,183,77,.10)!important}
-.task-total>td,.task-total>.task-res,.task-total>.task-stage{background:rgba(84,191,255,.10)!important}
-.task-gain>td,.task-gain>.task-res,.task-gain>.task-stage{background:rgba(39,219,136,.08)!important}
 
 /* телефон: одна локация + сводка */
 .task-sub{margin:14px 0 8px;color:#8196a9;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}

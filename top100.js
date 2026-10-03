@@ -96,11 +96,22 @@ function top100TableMarkup(tab){
  return '<div class="data-wrap top100-scroll" style="--accent:'+tab.accent+'"><table class="data-table top100-table'+(tab.sortLevel?" top100-sortable":"")+'"><thead><tr><th>#</th><th>Ник</th>'+levelTh+'<th>'+tab.metric+'</th></tr></thead><tbody>'+body+'</tbody></table></div>';
 }
 
-function renderFactions(){
+/* в свёрнутом виде (телефон) заголовок фильтра показывает, что выбрано */
+function factionCounts(){
  const rows=currentTab().data(),count={};
  rows.forEach(r=>{const f=factionOf(r[0]),k=f?f.key:NO_FACTION;count[k]=(count[k]||0)+1});
+ return{rows:rows.length,count:count};
+}
+function renderFactionSummary(){
+ const el=$("top100FactionSummary");if(!el)return;
+ const{rows,count}=factionCounts(),cur=FACTIONS.find(f=>f.key===top100Faction);
+ el.textContent=cur?cur.label+' '+(count[cur.key]||0):(top100Faction===NO_FACTION?"Прочие "+(count[NO_FACTION]||0):"Все "+rows);
+}
+function renderFactions(){
+ const{rows,count}=factionCounts();
  const chip=(key,label,color,n)=>'<button type="button" class="t100-chip'+(top100Faction===key?" active":"")+'" data-t100-faction="'+key+'" style="--f:'+color+'" aria-pressed="'+(top100Faction===key)+'"><i></i>'+label+'<small>'+n+'</small></button>';
- $("top100Factions").innerHTML=chip("","Все","#54bfff",rows.length)+FACTIONS.map(f=>chip(f.key,f.label,f.color,count[f.key]||0)).join("")+chip(NO_FACTION,"Прочие","#8196a9",count[NO_FACTION]||0);
+ $("top100Factions").innerHTML=chip("","Все","#54bfff",rows)+FACTIONS.map(f=>chip(f.key,f.label,f.color,count[f.key]||0)).join("")+chip(NO_FACTION,"Прочие","#8196a9",count[NO_FACTION]||0);
+ renderFactionSummary();
 }
 
 function renderTop100Tabs(){
@@ -112,7 +123,9 @@ function renderTop100Table(){$("top100TableWrap").innerHTML=top100TableMarkup(cu
 function ensureShell(){
  if($("top100Search"))return;
  $("top100Tabs").insertAdjacentHTML("afterend",
-  '<div class="t100-tools"><label class="t100-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="top100Search" type="search" placeholder="Поиск по нику" autocomplete="off" aria-label="Поиск по нику"></label><div class="t100-factions" id="top100Factions"></div></div>');
+  '<div class="t100-tools"><label class="t100-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="top100Search" type="search" placeholder="Поиск по нику" autocomplete="off" aria-label="Поиск по нику"></label>'
+  +'<button type="button" class="t100-factions-toggle" id="top100FactionsToggle" aria-expanded="false" aria-controls="top100Factions">Отряды: <b id="top100FactionSummary">Все</b><svg class="t100-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>'
+  +'<div class="t100-factions" id="top100Factions"></div></div>');
  $("top100Search").addEventListener("input",e=>{top100Query=e.target.value;renderTop100Table()});
 }
 function renderTop100(){ensureShell();renderTop100Tabs();renderFactions();renderTop100Table()}
@@ -126,11 +139,21 @@ function toggleLevelSort(refocus){
 document.addEventListener("click",e=>{
  const sort=e.target.closest("[data-top100-sort]");
  if(sort){toggleLevelSort(false);return}
+ /* на телефоне список отрядов открывается по кнопке */
+ const toggle=e.target.closest("#top100FactionsToggle");
+ if(toggle){
+  const list=$("top100Factions"),open=list&&list.classList.toggle("open");
+  toggle.setAttribute("aria-expanded",open?"true":"false");
+  return;
+ }
  const chip=e.target.closest("[data-t100-faction]");
  if(chip){
   const v=chip.dataset.t100Faction;
   top100Faction=v&&top100Faction===v?"":v;
   renderFactions();renderTop100Table();
+  /* после выбора отряда список прячется, чтобы сразу был виден рейтинг */
+  const list=$("top100Factions"),btn=$("top100FactionsToggle");
+  if(list&&window.matchMedia&&window.matchMedia("(max-width:760px)").matches){list.classList.remove("open");if(btn)btn.setAttribute("aria-expanded","false")}
   return;
  }
  const btn=e.target.closest("[data-top100-tab]");

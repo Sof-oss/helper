@@ -54,3 +54,31 @@
 
 /* чипы отрядов: цель для пальца выше */
 @media(max-width:760px){.t100-chip{height:36px}}
+
+/* ===== Телефон: разгружаем верх страницы =====
+   Вкладки — одна прокручиваемая строка, список отрядов прячется под кнопку,
+   описание и примечание к дате скрыты: рейтинг виден сразу, без полутысячи пикселей кнопок */
+.t100-factions-toggle{display:none}
+@media(max-width:760px){
+  /* панель может «раздуться» из-за однострочных вкладок — фиксируем ширину по экрану */
+  .top100-content{width:100%}
+  .top100-panel .info-lead{display:none}
+  .top100-meta-note{display:none}
+  .top100-meta{margin-bottom:10px}
+  .top100-updated{border:0;background:none;box-shadow:none;padding:0;font-size:12px}
+  .top100-updated svg{width:15px;height:15px;flex-basis:15px}
+  .top100-updated b{font-size:13px}
+  .top100-panel .top100-tabs{flex-wrap:nowrap;overflow-x:auto;gap:6px;margin:0 0 10px;padding-bottom:2px;
+    scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch}
+  .top100-panel .top100-tabs::-webkit-scrollbar{display:none}
+  .top100-panel .top100-tab{flex:0 0 auto}
+  .t100-tools{flex-direction:column;align-items:stretch;gap:8px;margin-bottom:10px}
+  .t100-search{flex:1 1 auto;max-width:none}
+  .t100-factions-toggle{display:flex;align-items:center;gap:8px;width:100%;height:40px;padding:0 12px;
+    border:1px solid #1f3d54;border-radius:10px;background:#0a1a27;color:#cbd9e5;font:inherit;font-size:13px;cursor:pointer}
+  .t100-factions-toggle b{color:#eef4fa;font-weight:600}
+  .t100-chev{width:16px;height:16px;margin-left:auto;fill:none;stroke:#7c93a6;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+  .t100-factions-toggle[aria-expanded="true"] .t100-chev{transform:rotate(180deg)}
+  .t100-factions{display:none}
+  .t100-factions.open{display:flex;flex-wrap:wrap;gap:6px}
+}

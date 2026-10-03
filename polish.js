@@ -95,9 +95,9 @@ function giCard(x,icon){
  const chips=GEAR_EXTRA.filter(k=>x[k]).map(k=>'<span class="gi-chip">'+GEAR_BONUS_LABELS[k]+' <b>'+giVal(k,x[k])+'</b></span>').join("");
  return '<div class="gi-card '+fam+'"><div class="gi-head">'+icon+'<b>'+x.name+'</b></div>'+rows+(chips?'<div class="gi-chips">'+chips+'</div>':"")+'</div>';
 }
-function giSection(title,icon,list,note){
+function giSection(title,icon,list){
  if(!list.length)return "";
- return '<div class="gi-section">'+icon+title+' <b>'+list.length+'</b>'+(note?' <small>'+note+'</small>':"")+'</div><div class="gi-grid">'+list.map(x=>giCard(x,icon)).join("")+'</div>';
+ return '<div class="gi-section">'+icon+title+' <b>'+list.length+'</b></div><div class="gi-grid">'+list.map(x=>giCard(x,icon)).join("")+'</div>';
 }
 function giTotal(count){
  const sum=gearTotalItem(),pill=(k,v)=>'<span class="gi-pill">'+GEAR_BONUS_LABELS[k]+' <b>'+giVal(k,v)+'</b></span>';
@@ -114,8 +114,8 @@ window.renderGearInfo=function(){
   +'<div class="gi-tools"><div class="gi-filters" role="group" aria-label="Фильтр снаряжения">'
   +btn("all","Все "+counts.all)+btn("free",GI_NAMES.free+" "+counts.free)+btn("paid","За жетоны "+counts.paid)
   +'</div><p class="gi-note">Полоски — вклад в урон: шкала общая для комплектов и вещей, длина полоски показывает, сколько даёт предмет</p></div>'
-  +giSection("Комплекты",GI_ICON_SET,sets,"покупаются все, бонусы складываются")
-  +giSection("Одиночные вещи",GI_ICON_ITEM,items,"докупаются отдельно, дают заметно меньше")
+  +giSection("Комплекты",GI_ICON_SET,sets)
+  +giSection("Одиночные вещи",GI_ICON_ITEM,items)
   /* сумма идёт в общем потоке внизу списка, а не прилипает к окну */
   +giTotal(all.length)
   +'</div>';
