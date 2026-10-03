@@ -9,48 +9,61 @@
    data-theme ставится на <html> скриптом в <head> (до первой отрисовки),
    чтобы не мигало; выбор хранится в localStorage ключом zoneTheme. */
 :root{
-  --accent:#54bfff;
-  --accent-2:#a8e0ff;
-  --accent-ink:#04121d;
+  --accent:#57c4f0;
+  --accent-2:#b6e7ff;
+  --accent-ink:#041420;
   --r-lg:14px;
   --r-md:10px;
   --sh-1:0 1px 2px rgba(0,0,0,.5);
   --sh-2:0 14px 34px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05);
-  --glass:rgba(6,14,21,.55);
-  --glass-line:rgba(120,190,255,.14);
+  --glass:rgba(10,18,26,.26);          /* прозрачность шапки: как в iOS, фото просвечивает */
+  --glass-line:rgba(255,255,255,.09);
   --tabbar-h:58px;
 }
-:root[data-theme="merc"]{--accent:#ffb74d;--accent-2:#ffd9a1;--accent-ink:#1d1204;--glass-line:rgba(255,183,77,.16)}
-:root[data-theme="dolg"]{--accent:#ff6b6f;--accent-2:#ffb3b5;--accent-ink:#1d0506;--glass-line:rgba(255,107,111,.16)}
-:root[data-theme="svoboda"]{--accent:#9fdc9f;--accent-2:#d6f5d6;--accent-ink:#08170a;--glass-line:rgba(159,220,159,.16)}
-:root[data-theme="science"]{--accent:#54bfff;--accent-2:#a8e0ff;--accent-ink:#04121d;--glass-line:rgba(84,191,255,.16)}
-:root[data-theme="winx"]{--accent:#c9a6ff;--accent-2:#e3d4ff;--accent-ink:#120a1f;--glass-line:rgba(201,166,255,.16)}
+/* цвета группировок сняты с эмблем (вики S.T.A.L.K.E.R.) и осветлены под тёмный интерфейс */
+:root[data-theme="merc"]{--accent:#5f8ac9;--accent-2:#aec8ec;--accent-ink:#070d18;--glass-line:rgba(160,190,235,.16)}
+:root[data-theme="dolg"]{--accent:#d9483f;--accent-2:#f0a09a;--accent-ink:#1a0606;--glass-line:rgba(240,140,135,.18)}
+:root[data-theme="svoboda"]{--accent:#4fb058;--accent-2:#a9e0ad;--accent-ink:#061506;--glass-line:rgba(150,220,155,.16)}
+:root[data-theme="science"]{--accent:#57c4f0;--accent-2:#b6e7ff;--accent-ink:#041420;--glass-line:rgba(140,215,255,.16)}
+:root[data-theme="monolith"]{--accent:#d9a52c;--accent-2:#b98ae0;--accent-ink:#1a1205;--glass-line:rgba(225,190,120,.18)}
 :root{color-scheme:dark}
 
-/* ---------- 2. Атмосфера: медленный дрейф свечения поверх фона ---------- */
+/* ---------- 2. Атмосфера: медленный дрейф свечения поверх фона ----------
+   Слой работает в режиме screen, поэтому на тёмном фото видно мягкую дымку:
+   лазурь темы, тёплый янтарь и фиолетовый отсвет, как у Монолита.
+   Цикл 45 с и ход ~7% ширины — движение заметно глазом, но не отвлекает. */
 body::after{
-  content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;filter:blur(14px);
+  content:"";position:fixed;inset:-30%;z-index:-1;pointer-events:none;
+  filter:blur(42px);mix-blend-mode:screen;
   background:
-    radial-gradient(38% 28% at 28% 18%,color-mix(in srgb,var(--accent) 12%,transparent),transparent 70%),
-    radial-gradient(32% 24% at 76% 62%,rgba(255,183,77,.07),transparent 72%);
-  animation:zone-drift 90s ease-in-out infinite alternate;
+    radial-gradient(38% 30% at 24% 20%,color-mix(in srgb,var(--accent) 46%,transparent),transparent 70%),
+    radial-gradient(34% 26% at 80% 68%,rgba(214,161,44,.36),transparent 72%),
+    radial-gradient(26% 20% at 58% 30%,rgba(185,138,224,.24),transparent 76%);
+  animation:zone-drift 35s ease-in-out infinite alternate;
 }
-@keyframes zone-drift{to{transform:translate3d(-3%,2%,0) scale(1.06)}}
+@keyframes zone-drift{
+  from{transform:translate3d(0,0,0) scale(1);opacity:.7}
+  55%{opacity:1}
+  to{transform:translate3d(-8%,6%,0) scale(1.14);opacity:.95}
+}
 
-/* ---------- 3. Шапка: стекло, липкость, тень при скролле ---------- */
+/* ---------- 3. Шапка: стекло, липкость, тень при скролле ----------
+   Прозрачность как в iOS: тонкая вуаль + сильный блюр с насыщением,
+   фото просвечивает; читаемость держат тень текста и волосяная граница. */
 .site-header{
   position:sticky;top:0;z-index:40;
-  background:linear-gradient(180deg,var(--glass),color-mix(in srgb,var(--glass) 65%,transparent));
-  -webkit-backdrop-filter:blur(12px) saturate(140%);
-  backdrop-filter:blur(12px) saturate(140%);
+  background:linear-gradient(180deg,var(--glass),color-mix(in srgb,var(--glass) 78%,transparent));
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  backdrop-filter:blur(24px) saturate(180%);
   border-bottom:1px solid var(--glass-line);
   transition:box-shadow .2s ease,background .2s ease;
 }
-.site-header.scrolled{box-shadow:0 12px 34px rgba(0,0,0,.55)}
+.site-header.scrolled{box-shadow:0 12px 34px rgba(0,0,0,.5)}
+.main-nav a{text-shadow:0 1px 6px rgba(0,0,0,.7)}
+.logo-title{text-shadow:1px 1px 0 #04090e,0 0 14px color-mix(in srgb,var(--accent) 45%,transparent)}
 .main-nav a.active{color:color-mix(in srgb,var(--accent) 30%,#ffffff)}
 .main-nav a.active:after{background:var(--accent);box-shadow:0 0 10px var(--accent)}
 .rad-logo{color:var(--accent-2);filter:drop-shadow(0 0 6px var(--accent))}
-.logo-title{text-shadow:1px 1px 0 #04090e,0 0 14px color-mix(in srgb,var(--accent) 45%,transparent)}
 :where(button,input,a,summary):focus-visible{outline-color:var(--accent)}
 
 /* ---------- 4. Переключатель тем ---------- */
@@ -63,9 +76,9 @@ body::after{
 /* ---------- 5. Цифры-герои ---------- */
 .page .damage-card strong,.dmg-main strong{
   font-family:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace;
-  font-size:clamp(30px,5.6vw,44px);font-weight:700;line-height:1.02;letter-spacing:-.02em;
+  font-size:clamp(27px,2.4vw + 8px,36px);font-weight:700;line-height:1.05;letter-spacing:-.02em;
   font-variant-numeric:tabular-nums;
-  text-shadow:0 0 22px color-mix(in srgb,var(--accent) 45%,transparent);
+  text-shadow:0 0 20px color-mix(in srgb,var(--accent) 40%,transparent);
 }
 .first-hit{font-variant-numeric:tabular-nums;opacity:.9}
 .dmg-main{display:flex;flex-direction:column;gap:2px}
@@ -78,7 +91,10 @@ body::after{
 .side-btn:hover,.tokens-btn:hover,.cmp-btn:hover{transform:translateY(-1px);box-shadow:0 0 18px color-mix(in srgb,var(--accent) 30%,transparent)}
 .side-btn:active,.tokens-btn:active,.cmp-btn:active{transform:translateY(0)}
 
-/* ---------- 7. Нижнее меню на телефоне ---------- */
+/* ---------- 7. Нижнее меню на телефоне ----------
+   Разметка лежит прямо в HTML (её не создаёт скрипт), поэтому меню видно
+   с первой отрисовки и оно не «моргает» при переходах. Без backdrop-filter:
+   именно он давал кадр полной прозрачности при загрузке страницы. */
 .tabbar{display:none}
 @media(max-width:760px){
   .main-nav{display:none}                 /* верхний ряд заменяет нижнее меню */
@@ -89,9 +105,9 @@ body::after{
     display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:60;
     height:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px));
     padding-bottom:env(safe-area-inset-bottom,0px);
-    background:linear-gradient(180deg,rgba(5,12,18,.82),rgba(4,10,16,.96));
-    -webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);
+    background:linear-gradient(180deg,rgba(6,13,20,.94),rgba(4,9,14,.99));
     border-top:1px solid var(--glass-line);
+    box-shadow:0 -10px 24px rgba(0,0,0,.45);
   }
   .tabbar a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
     color:#8fa3b4;text-decoration:none;font-size:10.5px;font-weight:600;padding-top:6px;line-height:1.1}
@@ -99,6 +115,8 @@ body::after{
   .tabbar a .nav-icon{width:22px;height:22px;flex:0 0 22px}
   .tabbar a.active{color:color-mix(in srgb,var(--accent) 25%,#ffffff)}
   .tabbar a.active .nav-icon{filter:drop-shadow(0 0 7px var(--accent))}
+  .tabbar a.active:after{content:"";position:absolute;top:0;width:28px;height:2px;border-radius:2px;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  .tabbar a{position:relative}
 }
 
 /* ---------- 8. Дельты рейтинга ---------- */
@@ -122,11 +140,16 @@ body::after{
 .top100-updated{border-color:color-mix(in srgb,var(--accent) 45%,#2e6384)}
 .top100-updated svg{stroke:var(--accent)}
 
-/* ---------- 9. View Transitions ---------- */
+/* ---------- 9. View Transitions ----------
+   Кроссфейдит только сама таблица: корень страницы не анимируем, иначе
+   на время перехода мигали шапка и нижнее меню. */
 #top100TableWrap{view-transition-name:leaderboard}
 #infoGroups{view-transition-name:infogroups}
+::view-transition-old(root){animation:none;opacity:0}
+::view-transition-new(root){animation:none;opacity:1}
 ::view-transition-old(leaderboard),::view-transition-new(leaderboard),
 ::view-transition-old(infogroups),::view-transition-new(infogroups){animation-duration:.22s;animation-timing-function:cubic-bezier(.2,.7,.3,1)}
+::view-transition-group(leaderboard),::view-transition-group(infogroups){animation-duration:.22s}
 
 /* ---------- 10. Уважение к настройкам системы ---------- */
 @media(prefers-reduced-motion:reduce){

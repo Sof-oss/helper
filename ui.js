@@ -45,11 +45,11 @@ window.__roll = function (el, text) {
   if (!d.documentElement || typeof d.createElement !== "function" || !d.body) return;
 
   var THEMES = [
-    { key: "merc", label: "Наёмник", color: "#ffb74d", tint: "#0a0d13" },
-    { key: "dolg", label: "Д.О.Л.Г", color: "#ff6b6f", tint: "#0a0b0f" },
-    { key: "svoboda", label: "Свобода", color: "#9fdc9f", tint: "#070f0c" },
-    { key: "science", label: "Учёные", color: "#54bfff", tint: "#050f16" },
-    { key: "winx", label: "WINX", color: "#c9a6ff", tint: "#0a0813" }
+    { key: "merc", label: "Наёмники", color: "#5f8ac9", tint: "#070d18" },
+    { key: "dolg", label: "Долг", color: "#d9483f", tint: "#120607" },
+    { key: "svoboda", label: "Свобода", color: "#4fb058", tint: "#06120a" },
+    { key: "science", label: "Учёные", color: "#57c4f0", tint: "#04121c" },
+    { key: "monolith", label: "Монолит", color: "#d9a52c", tint: "#120d05" }
   ];
   var THEME_KEY = "zoneTheme";
   var saved = null;

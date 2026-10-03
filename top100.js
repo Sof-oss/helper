@@ -15,13 +15,17 @@ const TOP100_TABS=[
  {key:"defense",label:"Защита лагеря",metric:"Защита лагеря",data:()=>window.TOP100_DEFENSE,accent:"#54bfff"}
 ];
 
-/* отряды определяются по тегу в нике (ё = е, регистр не важен, «Cвобода» с латинской C тоже) */
+/* отряды определяются по тегу в нике (ё = е, регистр не важен, «Cвобода» с латинской C тоже).
+   Цвета группировок сняты с их эмблем (вики S.T.A.L.K.E.R.) и осветлены под тёмный интерфейс:
+   наёмники — сталь/тёмно-синий, долг — красный щит, свобода — зелёный, учёные — лазурь,
+   монолит — янтарная нашивка. WINX — местная группировка сервера. */
 const FACTIONS=[
- {key:"merc",label:"Наёмник",re:/наемник/,color:"#ffb74d"},
- {key:"dolg",label:"Д.О.Л.Г",re:/д\s*\.\s*о\s*\.\s*л\s*\.\s*г/,color:"#ff6b6f"},
- {key:"svoboda",label:"Свобода",re:/[сc]вобода/,color:"#9fdc9f"},
- {key:"science",label:"Учёные",re:/ученые/,color:"#54bfff"},
- {key:"winx",label:"WINX",re:/winx/,color:"#c9a6ff"}
+ {key:"merc",label:"Наёмник",re:/наемник/,color:"#5f8ac9"},
+ {key:"dolg",label:"Д.О.Л.Г",re:/д\s*\.\s*о\s*\.\s*л\s*\.\s*г/,color:"#d9483f"},
+ {key:"svoboda",label:"Свобода",re:/[сc]вобода/,color:"#4fb058"},
+ {key:"science",label:"Учёные",re:/ученые/,color:"#57c4f0"},
+ {key:"monolith",label:"Монолит",re:/монолит/,color:"#d9a52c"},
+ {key:"winx",label:"WINX",re:/winx/,color:"#b98ae0"}
 ];
 const norm=s=>String(s).toLowerCase().replace(/ё/g,"е");
 const factionOf=nick=>{const n=norm(nick);return FACTIONS.find(f=>f.re.test(n))||null};
