@@ -69,7 +69,7 @@
 </aside>
 <main class="content">
 <noscript><section class="result-panel placeholder-panel"><p>Калькулятор считает урон оружия за жетоны и бесплатных ударов с учётом уровня, снаряжения и талантов. Для работы нужен включённый JavaScript.</p></section></noscript>
-<div class="result-title"><svg class="ic target-icon" aria-hidden="true"><use href="#i-target"/></svg><h1>Результат расчёта</h1></div>
+<div class="result-title"><svg class="ic target-icon" aria-hidden="true"><use href="#i-target"/></svg><h1>Калькулятор урона</h1></div>
 <section class="result-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-sword"/></svg></span><b>Урон (оружие за жетоны)</b><button type="button" id="openTokens" class="tokens-btn">Расчёт по жетонам</button></div><div class="damage-grid" id="paidCards"></div><p class="damage-footnote">* Без учёта базового шанса критического удара и базовой прибавки критического урона</p></section>
 <section class="result-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-sword"/></svg></span><b>Урон (бесплатные удары)</b></div><div class="damage-grid" id="freeCards"></div><p class="damage-footnote">В скобках <span class="first-hit">зелёным</span> — урон первого бесплатного удара с бонусом от таланта «Засада»</p></section>
 <section class="result-panel extra-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></span><b>Дополнительные характеристики</b></div><div class="extra-grid"><div><i class="delta" id="deltaNoCooldown"></i><span><svg class="ic" aria-hidden="true"><use href="#i-sword"/></svg></span><small>Шанс удара без отката</small><strong id="noCooldown">0%</strong></div><div><i class="delta" id="deltaCooldown"></i><span><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg></span><small>Сокращение отката</small><strong id="cooldown">0%</strong></div><div><i class="delta" id="deltaFirstFreeHit"></i><span><svg class="ic" aria-hidden="true"><use href="#i-spark"/></svg></span><small>Урон первого бесплатного удара</small><strong id="firstFreeHit">+0%</strong></div></div></section>
@@ -148,6 +148,7 @@
   </section>
 </div>
 <div id="toast" class="toast" role="status" aria-live="polite">В разработке</div>
+<div id="resultsLive" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <!-- подпись автора -->
 <footer class="site-footer"><span>© by Sof</span></footer>

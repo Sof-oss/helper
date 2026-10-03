@@ -23,7 +23,7 @@ const TALENT_ASSETS={TALENT_0001:"TALENT_0001-sfcxbYqa.webp",TALENT_0002:"TALENT
 const $=id=>document.getElementById(id),STORAGE_KEY="gameHelperState",MAX_TALENT_POINTS=TALENTS.length*5;
 const cap=k=>k[0].toUpperCase()+k.slice(1);
 
-function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify({sets:[...state.sets],items:[...state.items],level:$("level").value,talents:state.talents}))}
+function saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({sets:[...state.sets],items:[...state.items],level:$("level").value,talents:state.talents}))}catch{}}
 function loadState(){try{const data=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");if(!data)return;state.sets.clear();state.items.clear();state.talents={};(Array.isArray(data.sets)?data.sets:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<SETS.length).forEach(i=>state.sets.add(i));(Array.isArray(data.items)?data.items:[]).filter(i=>Number.isInteger(i)&&i>=0&&i<ITEMS.length).forEach(i=>state.items.add(i));if(data.level!==undefined)$("level").value=data.level;if(data.talents&&typeof data.talents==="object")Object.entries(data.talents).forEach(([id,v])=>{if(TALENTS.some(t=>t[0]===id))state.talents[id]=Math.max(0,Math.min(5,Number(v)||0))})}catch{}}
 const num=id=>Math.max(0,Number($(id).value)||0),fmt=n=>Math.round(n).toLocaleString("ru-RU"),fmtD=n=>n.toLocaleString("ru-RU",{minimumFractionDigits:1,maximumFractionDigits:1}),talentRank=code=>state.talents[code]||0,talentDef=code=>TALENTS.find(t=>t[0]===code);
 function canUpgrade(t){return talentRank(t[0])<5&&t[9].every(req=>talentRank(req)>=5)}
@@ -77,14 +77,14 @@ function totals(){
  state.sets.forEach(i=>addBonuses(SETS[i]));
  state.items.forEach(i=>addBonuses(ITEMS[i]));
  const t=talentTotals();keys.forEach(k=>total[k]+=t.total[k]);
- return{total,critChance:critChance+t.critChance,critDamage,critGaussChance,critGrenadeChance,critGaussDamage:critGaussDamage+t.critDamageByWeapon.gauss,critGrenadeDamage:critGrenadeDamage+t.critDamageByWeapon.grenade,critGlDamageTal:t.critDamageByWeapon.gl,noCooldown:noCooldown+t.noCooldown,cooldown:cooldown+t.cooldown};
+ return{total,critChance:critChance+t.critChance,critDamage,critGaussChance,critGrenadeChance,critGaussDamage:critGaussDamage+t.critDamageByWeapon.gauss,critGrenadeDamage:critGrenadeDamage+t.critDamageByWeapon.grenade,critGlDamageTal:t.critDamageByWeapon.gl,noCooldown:noCooldown+t.noCooldown,cooldown:cooldown+t.cooldown,firstFreeHit:t.firstFreeHit,talentTotal:t.total};
 }
-function results(lvl){
- const level=Math.max(1,Math.min(100,lvl===undefined?num("level"):lvl)),base=baseDamageByLevel(level),T=totals(),r={};
+function results(lvl,pre){
+ const level=Math.max(1,Math.min(100,lvl===undefined?num("level"):lvl)),base=baseDamageByLevel(level),T=pre||totals(),r={};
  keys.forEach(k=>r[k]=base[k]+T.total[k]);
  r.critGrenade=T.critChance+T.critGrenadeChance;r.critGl=T.critChance;r.critGauss=T.critChance+T.critGaussChance;
  r.critDmgGrenade=T.critDamage+T.critGrenadeDamage;r.critDmgGl=T.critDamage+T.critGlDamageTal;r.critDmgGauss=T.critDamage+T.critGaussDamage;
- r.noCooldown=T.noCooldown;r.cooldown=T.cooldown;r.firstFreeHit=talentTotals().firstFreeHit;
+ r.noCooldown=T.noCooldown;r.cooldown=T.cooldown;r.firstFreeHit=T.firstFreeHit;
  return r;
 }
 
@@ -102,8 +102,18 @@ function changeTalent(code,dir){
  saveState();render();
 }
 
-let currentTalentBranch="free_hits",selectedTalentCode=null,talentDetailOpen=false;
+let currentTalentBranch="free_hits",selectedTalentCode=null,talentDetailOpen=false,detailWasOpen=false;
+/* renderTalents пересоздаёт кнопки, поэтому запоминаем, где стоял фокус, и возвращаем его на такую же кнопку */
+const FOCUS_ATTRS=["data-talent-up","data-talent-down","data-select-talent","data-talent-branch","data-reset-talents"];
+function focusKey(){
+ const a=document.activeElement;
+ if(!a||!a.closest||!a.closest("#talentModal"))return null;
+ for(const at of FOCUS_ATTRS)if(a.hasAttribute(at)){const v=a.getAttribute(at);return"["+at+(v?'="'+v+'"':"")+"]"}
+ return null;
+}
+function setDetailInert(on){["#talentSidebar",".talent-flow-wrap",".talent-game-header"].forEach(s=>{const el=document.querySelector("#talentModal "+s);if(el)el.inert=on})}
 function renderTalents(){
+ const keep=focusKey();
  const branches=[{code:"free_hits",name:"Боевая подготовка",desc:"Ветка бесплатных ударов по боссам"},{code:"paid_hits",name:"Арсенал",desc:"Ветка платных ударов по боссам"}],branch=branches.find(b=>b.code===currentTalentBranch)||branches[0],talents=TALENTS.filter(t=>t[1]===branch.code);
  if(selectedTalentCode&&!talents.some(t=>t[0]===selectedTalentCode)){selectedTalentCode=null;talentDetailOpen=false}
  const pathSet=selectedTalentCode?talentAncestors(selectedTalentCode):new Set();
@@ -116,11 +126,20 @@ function renderTalents(){
  const last=lastTalentChange&&lastTalentChange.length?'<div class="talent-last"><small>Последнее изменение</small><div class="talent-last-list">'+lastTalentChange.map(c=>'<span class="'+(c.v>0?"up":"down")+'">'+c.l+' <b>'+fmtDelta(c.v,c.p)+'</b></span>').join("")+'</div></div>':"";
  /* кнопки в .talent-side-footer, на телефоне он липнет ко дну панели (styles.css) */
  $("talentSidebar").innerHTML='<div class="talent-side-title"><span>Таланты</span><b>'+spent+' / '+MAX_TALENT_POINTS+'</b></div><div class="talent-gauge" style="--pct:'+pct+'"><div class="talent-gauge-ticks"></div><div class="talent-gauge-value"><b>'+pct+'</b><small>%</small></div></div><div class="talent-side-stats"><div><b>'+Math.max(0,MAX_TALENT_POINTS-spent)+'</b><small>свободно</small></div><div><b>'+spent+'</b><small>распределено</small></div></div>'+last+'<div class="talent-branch-tabs">'+branches.map(b=>'<button type="button" class="'+(b.code===currentTalentBranch?"active":"")+'" data-talent-branch="'+b.code+'">'+b.name+'</button>').join("")+'</div><div class="talent-branch-description"><b>'+branch.name+'</b><span>'+branch.desc+'</span></div><div class="talent-side-hint">Нажми на узел дерева, чтобы открыть его описание и прокачку</div><div class="talent-side-footer"><button type="button" class="talent-hide" data-reset-talents '+(spent?"":"disabled")+'>↻ Сбросить таланты</button><button type="button" class="talent-hide" data-close-talents>← Скрыть</button></div>';
- const detailOverlay=$("talentDetailOverlay");
- if(talentDetailOpen&&selectedTalentCode){detailOverlay.innerHTML='<div class="talent-detail-backdrop" data-close-talent-detail></div><div class="talent-detail-modal">'+renderTalentDetails(talentDef(selectedTalentCode))+'</div>';detailOverlay.classList.add("show")}
+ const detailOverlay=$("talentDetailOverlay"),detailOn=talentDetailOpen&&!!selectedTalentCode;
+ if(detailOn){const dt=talentDef(selectedTalentCode);detailOverlay.innerHTML='<div class="talent-detail-backdrop" data-close-talent-detail></div><div class="talent-detail-modal" role="dialog" aria-modal="true" aria-label="'+dt[2].replace(/"/g,"&quot;")+'" tabindex="-1">'+renderTalentDetails(dt)+'</div>';detailOverlay.classList.add("show")}
  else{detailOverlay.classList.remove("show");detailOverlay.innerHTML=""}
  $("modalSpentPoints").textContent=spent;$("modalMaxPoints").textContent=MAX_TALENT_POINTS;$("talentPointsBadge").textContent=spent+" / "+MAX_TALENT_POINTS;$("talentSummary").textContent=spent?"Распределено "+spent+" очков":"Очки не распределены";
  applyTreeTransform();
+ /* фокус: при открытии подробностей уходит в них, при закрытии возвращается на талант, при перерисовке остаётся на своей кнопке */
+ if($("talentModal").classList.contains("show")){
+  const box=detailOverlay.querySelector(".talent-detail-modal");
+  setDetailInert(detailOn);
+  if(detailOn&&!detailWasOpen)box.focus({preventScroll:true});
+  else if(!detailOn&&detailWasOpen){const n=document.querySelector('#talentFlow [data-select-talent="'+selectedTalentCode+'"]');if(n)n.focus({preventScroll:true})}
+  else if(keep){const el=document.querySelector("#talentModal "+keep);if(el&&!el.disabled)el.focus({preventScroll:true});else if(box)box.focus({preventScroll:true})}
+ }
+ detailWasOpen=detailOn;
 }
 function openTalents(){lastTalentChange=null;$("talentModal").classList.add("show");$("talentModal").setAttribute("aria-hidden","false");renderTalents();resetTreeTransform()}
 function closeTalents(){$("talentModal").classList.remove("show");$("talentModal").setAttribute("aria-hidden","true");talentDetailOpen=false}
@@ -177,7 +196,7 @@ function optionMarkup(arr,set,type){return arr.map((x,i)=>'<label class="option"
 function set(id,v){$(id).textContent=v}
 function calc(){
  const level=Math.max(1,Math.min(100,num("level")));$("level").value=level;
- const T=totals(),tal=talentTotals().total,base=baseDamageByLevel(level),baseFlat=baseDamageByLevel(MIN_LEVEL),r=results();
+ const T=totals(),tal=T.talentTotal,base=baseDamageByLevel(level),baseFlat=baseDamageByLevel(MIN_LEVEL),r=results(undefined,T);
  keys.forEach(k=>{const K=cap(k);set("base"+K,fmt(baseFlat[k]));set("level"+K,fmt(base[k]-baseFlat[k]));set("gear"+K,fmt(T.total[k]-tal[k]));set("talentOut"+K,fmt(tal[k]));set("result"+K,fmt(r[k]))});
  /* первый бесплатный удар: итоговый урон плюс процентный бонус таланта */
  ["knife","pistol","auto"].forEach(k=>set("first"+cap(k),"("+fmt(r[k]*(1+r.firstFreeHit))+")"));
@@ -187,6 +206,7 @@ function calc(){
   keys.forEach(k=>pulse("delta"+cap(k),r[k]-prevResults[k]));
   pulse("deltaNoCooldown",r.noCooldown-prevResults.noCooldown,true);pulse("deltaCooldown",r.cooldown-prevResults.cooldown,true);pulse("deltaFirstFreeHit",r.firstFreeHit-prevResults.firstFreeHit,true);
  }
+ announceResults(r);
  prevResults=r;
 }
 function render(){$("sets").innerHTML=optionMarkup(SETS,state.sets,"set");$("items").innerHTML=optionMarkup(ITEMS,state.items,"item");$("selectAllEquipment").checked=state.sets.size===SETS.length&&state.items.size===ITEMS.length;renderTalents();calc()}
@@ -259,6 +279,42 @@ function loadCmpFromInput(){
 function fallbackCopy(s){const a=document.createElement("textarea");a.value=s;a.style.cssText="position:fixed;opacity:0";document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand("copy")}catch{}a.remove();return ok}
 function copyText(s){return navigator.clipboard&&window.isSecureContext?navigator.clipboard.writeText(s).then(()=>true,()=>fallbackCopy(s)):Promise.resolve(fallbackCopy(s))}
 function shareBuild(){copyText(location.href.split("#")[0]+"#"+buildHash()).then(ok=>showToast(ok?"Ссылка скопирована":"Не удалось скопировать"))}
+
+/* ===== Окна и озвучка =====
+   Пока окно открыто, страница под ним inert: Tab не уходит за диалог, скринридер не читает фон.
+   Фокус идёт в окно и возвращается на кнопку, которой его открыли. Следим за классом .show, поэтому функции открытия и закрытия окон не трогаем */
+const openedModals=new Map();
+function setPageInert(on){document.querySelectorAll(".site-header,.page,.site-footer").forEach(el=>{el.inert=on})}
+function modalShown(m){
+ if(openedModals.has(m))return;
+ const a=document.activeElement;
+ openedModals.set(m,a&&a!==document.body?a:null);
+ setPageInert(true);
+ m.querySelector(".talent-dialog").focus({preventScroll:true});
+}
+function modalHidden(m){
+ if(!openedModals.has(m))return;
+ const opener=openedModals.get(m);
+ openedModals.delete(m);
+ if(!openedModals.size)setPageInert(false);
+ if(m.id==="talentModal"){setDetailInert(false);detailWasOpen=false}
+ if(opener&&opener.isConnected)opener.focus({preventScroll:true});
+}
+["talentModal","gearInfoModal","tokensModal","compareModal"].forEach(id=>{
+ const m=$(id);
+ m.querySelector(".talent-dialog").tabIndex=-1;
+ new MutationObserver(()=>m.classList.contains("show")?modalShown(m):modalHidden(m)).observe(m,{attributes:true,attributeFilter:["class"]});
+});
+
+/* итоги расчёта для скринридера: одной фразой и с паузой, чтобы набор уровня по цифре не читался на каждую */
+let liveTimer=0,liveText="",liveReady=false;
+function announceResults(r){
+ const text="Урон за жетоны: граната "+fmt(r.grenade)+", гранатомёт "+fmt(r.gl)+", гаусс "+fmt(r.gauss)+". Бесплатные удары: нож "+fmt(r.knife)+", пистолет "+fmt(r.pistol)+", автомат "+fmt(r.auto)+".";
+ clearTimeout(liveTimer);
+ if(!liveReady){liveReady=true;liveText=text;return} /* первый расчёт при загрузке не озвучиваем */
+ if(text===liveText)return;
+ liveTimer=setTimeout(()=>{liveText=text;$("resultsLive").textContent=text},800);
+}
 
 document.addEventListener("click",e=>{
  const closeDetail=e.target.closest("[data-close-talent-detail]");if(closeDetail){talentDetailOpen=false;renderTalents();return}
