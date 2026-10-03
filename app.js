@@ -53,7 +53,35 @@ function talentAncestors(code){const seen=new Set();const walk=c=>{if(seen.has(c
 /* масштаб и сдвиг дерева талантов */
 const treeT={s:1,x:0,y:0};
 function clampTreeScale(s){return Math.min(2.5,Math.max(.5,s))}
-function applyTreeTransform(){const c=document.querySelector(".talent-flow-canvas");if(c)c.style.transform="translate("+treeT.x+"px,"+treeT.y+"px) scale("+treeT.s+")"}
+/* Дерево нельзя утащить за пределы окна: если холст больше видимой области, его края
+   не заходят внутрь (окно всегда заполнено), если меньше — холст целиком остаётся в окне.
+   Считаем по фактическим прямоугольникам: у холста transform-origin 0 0, поэтому смена
+   масштаба не двигает его левый верхний угол, а сдвиг — просто прибавка к координатам.
+   Проверка стоит в applyTreeTransform, поэтому работает и для мыши, и для тача,
+   и для колеса, и для кнопок зума */
+const treeApplied={x:0,y:0,s:1,ready:false};
+function clampTreeTranslate(){
+ const wrap=document.querySelector(".talent-flow-wrap"),canvas=document.querySelector(".talent-flow-canvas");
+ if(!wrap||!canvas||!treeApplied.ready)return;
+ const wr=wrap.getBoundingClientRect(),cr=canvas.getBoundingClientRect();
+ if(!wr.width||!wr.height)return;
+ const k=treeT.s/treeApplied.s,nw=cr.width*k,nh=cr.height*k;
+ const dx=treeT.x-treeApplied.x,dy=treeT.y-treeApplied.y;
+ /* холст больше окна — обязан его перекрывать, меньше — обязан помещаться целиком */
+ const limits=(viewStart,viewEnd,start,size)=>size>=viewEnd-viewStart
+  ?[viewEnd-size-start,viewStart-start]
+  :[viewStart-start,viewEnd-size-start];
+ const bx=limits(wr.left,wr.right,cr.left,nw),by=limits(wr.top,wr.bottom,cr.top,nh);
+ const cx=bx[0]>bx[1]?(bx[0]+bx[1])/2:Math.min(bx[1],Math.max(bx[0],dx));
+ const cy=by[0]>by[1]?(by[0]+by[1])/2:Math.min(by[1],Math.max(by[0],dy));
+ treeT.x=treeApplied.x+cx;treeT.y=treeApplied.y+cy;
+}
+function applyTreeTransform(){
+ clampTreeTranslate();
+ const c=document.querySelector(".talent-flow-canvas");
+ if(c)c.style.transform="translate("+treeT.x+"px,"+treeT.y+"px) scale("+treeT.s+")";
+ treeApplied.x=treeT.x;treeApplied.y=treeT.y;treeApplied.s=treeT.s;treeApplied.ready=true;
+}
 /* вписать дерево в окно и отцентровать (offsetLeft/Top не учитывают transform) */
 function resetTreeTransform(){
  const wrap=document.querySelector(".talent-flow-wrap"),canvas=document.querySelector(".talent-flow-canvas");
@@ -404,16 +432,18 @@ $("level").addEventListener("input",()=>{saveState();calc()});
 $("resetAll").onclick=()=>{if(!confirm("Точно сбросить весь прогресс — уровень, снаряжение и все очки талантов?"))return;state.sets.clear();state.items.clear();state.talents={};lastTalentChange=null;$("level").value=1;saveState();render()};
 
 /* pinch-zoom и сдвиг дерева (тач) */
+/* у события может не быть элемента в target (например, синтетическое событие на document) */
+const hitTarget=(e,sel)=>{const t=e.target;return t&&typeof t.closest==="function"?t.closest(sel):null};
 const distTouch=(a,b)=>Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
 const midTouch=(a,b)=>({x:(a.clientX+b.clientX)/2,y:(a.clientY+b.clientY)/2});
 let touchState=null;
 document.addEventListener("touchstart",e=>{
- const wrap=e.target.closest(".talent-flow-wrap");if(!wrap)return;
+ const wrap=hitTarget(e,".talent-flow-wrap");if(!wrap)return;
  if(e.touches.length===1)touchState={mode:"pan",lastX:e.touches[0].clientX,lastY:e.touches[0].clientY};
  else if(e.touches.length===2)touchState={mode:"pinch",lastDist:distTouch(e.touches[0],e.touches[1])};
 },{passive:true});
 document.addEventListener("touchmove",e=>{
- if(!touchState)return;const wrap=e.target.closest(".talent-flow-wrap");if(!wrap)return;
+ if(!touchState)return;const wrap=hitTarget(e,".talent-flow-wrap");if(!wrap)return;
  if(touchState.mode==="pan"&&e.touches.length===1){
   const dx=e.touches[0].clientX-touchState.lastX,dy=e.touches[0].clientY-touchState.lastY;
   treeT.x+=dx;treeT.y+=dy;touchState.lastX=e.touches[0].clientX;touchState.lastY=e.touches[0].clientY;
@@ -427,7 +457,7 @@ document.addEventListener("touchmove",e=>{
  }
 },{passive:false});
 document.addEventListener("touchend",e=>{
- const wrap=e.target.closest(".talent-flow-wrap");
+ const wrap=hitTarget(e,".talent-flow-wrap");
  if(wrap&&e.touches.length===1)touchState={mode:"pan",lastX:e.touches[0].clientX,lastY:e.touches[0].clientY};
  else touchState=null;
 });
@@ -435,7 +465,7 @@ document.addEventListener("touchend",e=>{
 /* сдвиг мышью, зум колесом */
 let dragState=null;
 document.addEventListener("mousedown",e=>{
- const wrap=e.target.closest(".talent-flow-wrap");if(!wrap||e.target.closest(".talent-node-game"))return;
+ const wrap=hitTarget(e,".talent-flow-wrap");if(!wrap||hitTarget(e,".talent-node-game"))return;
  dragState={x:e.clientX,y:e.clientY};wrap.style.cursor="grabbing";
 });
 document.addEventListener("mousemove",e=>{
@@ -445,7 +475,7 @@ document.addEventListener("mousemove",e=>{
 });
 document.addEventListener("mouseup",()=>{if(dragState){dragState=null;const wrap=document.querySelector(".talent-flow-wrap");if(wrap)wrap.style.cursor="grab"}});
 document.addEventListener("wheel",e=>{
- const wrap=e.target.closest(".talent-flow-wrap");if(!wrap)return;
+ const wrap=hitTarget(e,".talent-flow-wrap");if(!wrap)return;
  e.preventDefault();const rect=wrap.getBoundingClientRect();
  if(e.ctrlKey){
   const canvasX=(e.clientX-rect.left-treeT.x)/treeT.s,canvasY=(e.clientY-rect.top-treeT.y)/treeT.s;
