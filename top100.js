@@ -1,6 +1,7 @@
 const $=id=>document.getElementById(id);
 const fmt=n=>Math.round(n).toLocaleString("ru-RU");
 const TOP100_TAB_KEY="gameHelperTop100Tab";
+const TOP100_PERIOD_KEY="gameHelperTop100Period";
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 
 /* разделы рейтинга: ключ, вкладка, подпись колонки, данные, цвет.
@@ -41,6 +42,24 @@ const currentTab=()=>TOP100_TABS.find(t=>t.key===currentTop100Tab)||TOP100_TABS[
 /* сортировка по уровню (только для вкладок с sortLevel), поиск и фильтр по отряду (общие для всех вкладок) */
 let levelSortDesc=false,deltaSortDesc=false,top100Query="",top100Faction="";
 
+/* период изменений: список отдаёт top100-data.js (TOP100_PERIODS), выбор помним между визитами.
+   Если выбранного периода в данных нет (например, пока не накопилась история), берём первый */
+let top100Period="last";
+try{top100Period=localStorage.getItem(TOP100_PERIOD_KEY)||"last"}catch{}
+const periodList=()=>Array.isArray(window.TOP100_PERIODS)?window.TOP100_PERIODS:[];
+const currentPeriod=()=>{const l=periodList();return l.find(p=>p.key===top100Period)||l[0]||null};
+/* изменения выбранного периода; со старым top100-data.js (без периодов) работают прежние TOP100_DELTA / TOP100_RANK */
+function periodChanges(){
+ const p=currentPeriod(),all=window.TOP100_CHANGES;
+ if(p&&all&&all[p.key])return all[p.key];
+ return{delta:window.TOP100_DELTA,rank:window.TOP100_RANK};
+}
+/* «за неделю», «с прошлого обновления» — для подсказок у стрелок */
+function periodPhrase(){
+ const p=currentPeriod();
+ return p?p.label.charAt(0).toLowerCase()+p.label.slice(1):"с прошлого обновления";
+}
+
 /* ☢ вместо медалей для 1–3 мест, цвет по месту */
 function rankCell(rank){
  if(rank>3)return '<span class="top100-rank-num">'+rank+'</span>';
@@ -48,18 +67,18 @@ function rankCell(rank){
 }
 const dotMarkup=(f,cls)=>f?'<i class="'+cls+'" style="--f:'+f.color+'" title="'+f.label+'"></i>':"";
 
-/* изменение места с прошлого обновления (top100-data.js -> TOP100_RANK): данных может не быть */
+/* изменение места за выбранный период (TOP100_CHANGES -> rank): данных может не быть */
 function rankMoveMarkup(nick,tabKey){
- const d=window.TOP100_RANK&&window.TOP100_RANK[tabKey];
+ const r=periodChanges().rank,d=r&&r[tabKey];
  if(!d||!(nick in d))return "";
  const v=d[nick];
- if(v===null)return '<i class="t100-move new" title="Впервые в списке">new</i>';
+ if(v===null)return '<i class="t100-move new" title="Не было в списке ('+periodPhrase()+')">new</i>';
  if(!v)return "";
- return '<i class="t100-move '+(v>0?"up":"down")+'" title="Место с прошлого обновления: '+(v>0?"+":"")+v+'">'+(v>0?"▲":"▼")+Math.abs(v)+'</i>';
+ return '<i class="t100-move '+(v>0?"up":"down")+'" title="Место ('+periodPhrase()+'): '+(v>0?"+":"")+v+'">'+(v>0?"▲":"▼")+Math.abs(v)+'</i>';
 }
-/* прирост метрики с прошлого обновления (TOP100_DELTA) */
+/* прирост метрики за выбранный период (TOP100_CHANGES -> delta) */
 function metricDeltaMarkup(nick,tabKey){
- const d=window.TOP100_DELTA&&window.TOP100_DELTA[tabKey];
+ const r=periodChanges().delta,d=r&&r[tabKey];
  if(!d||!(nick in d))return "";
  const v=d[nick];
  if(v===null||v===undefined)return "";
@@ -88,8 +107,8 @@ function top100Entries(tab){
 function top100TableMarkup(tab){
  const entries=top100Entries(tab);
  const sorted=!!tab.sortLevel&&levelSortDesc;
- /* сортировка по приросту работает там, где у раздела есть данные TOP100_DELTA; нет прироста = 0 */
- const deltaMap=window.TOP100_DELTA&&window.TOP100_DELTA[tab.key];
+ /* сортировка по приросту работает там, где у раздела есть данные за выбранный период; нет прироста = 0 */
+ const pd=periodChanges().delta,deltaMap=pd&&pd[tab.key];
  const hasDelta=!!deltaMap&&Object.keys(deltaMap).length>0;
  const deltaSorted=hasDelta&&deltaSortDesc;
  if(sorted)entries.sort((a,b)=>b.row[1]-a.row[1]||a.rank-b.rank);
@@ -127,16 +146,32 @@ function renderTop100Tabs(){
 }
 function renderTop100Table(){$("top100TableWrap").innerHTML=top100TableMarkup(currentTab())}
 
-/* поиск и фильтр по отрядам вставляются между вкладками и таблицей один раз, top100.html менять не нужно */
+/* кнопки периодов и подпись, за какие именно даты показаны изменения.
+   Без периодов в данных (первый запуск, старый top100-data.js) блок скрыт */
+function renderPeriod(){
+ const box=$("top100Period"),btns=$("top100PeriodBtns"),range=$("top100PeriodRange");
+ if(!box||!btns||!range)return;
+ const list=periodList(),cur=currentPeriod();
+ box.hidden=!cur;
+ if(!cur)return;
+ btns.innerHTML=list.map(p=>'<button type="button" class="t100-pbtn'+(p===cur?" active":"")+'" data-t100-period="'+esc(p.key)+'" aria-pressed="'+(p===cur)+'">'+esc(p.label)+'</button>').join("");
+ const to=window.TOP100_UPDATED?String(window.TOP100_UPDATED).slice(0,16):"";
+ range.innerHTML=cur.from
+  ?'Показаны изменения с <b>'+esc(cur.from)+'</b>'+(to?' по <b>'+esc(to)+'</b>':"")+(cur.partial?'<small>Данных за полный период пока нет: считаем с самой ранней сохранённой даты</small>':"")
+  :'Показаны изменения <b>'+esc(cur.label.toLowerCase())+'</b>';
+}
+
+/* поиск, период и фильтр по отрядам вставляются между вкладками и таблицей один раз, top100.html менять не нужно */
 function ensureShell(){
  if($("top100Search"))return;
  $("top100Tabs").insertAdjacentHTML("afterend",
-  '<div class="t100-tools"><label class="t100-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="top100Search" type="search" placeholder="Поиск по нику" autocomplete="off" aria-label="Поиск по нику"></label>'
+  '<div class="t100-period" id="top100Period" role="group" aria-label="За какой период показывать изменения" hidden><span class="t100-period-title">Изменения:</span><div class="t100-period-btns" id="top100PeriodBtns"></div><p class="t100-period-range" id="top100PeriodRange" aria-live="polite"></p></div>'
+  +'<div class="t100-tools"><label class="t100-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="top100Search" type="search" placeholder="Поиск по нику" autocomplete="off" aria-label="Поиск по нику"></label>'
   +'<button type="button" class="t100-factions-toggle" id="top100FactionsToggle" aria-expanded="false" aria-controls="top100Factions">Отряды: <b id="top100FactionSummary">Все</b><svg class="t100-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>'
   +'<div class="t100-factions" id="top100Factions"></div></div>');
  $("top100Search").addEventListener("input",e=>{top100Query=e.target.value;renderTop100Table()});
 }
-function renderTop100(){ensureShell();renderTop100Tabs();renderFactions();renderTop100Table()}
+function renderTop100(){ensureShell();renderTop100Tabs();renderPeriod();renderFactions();renderTop100Table()}
 
 function toggleSort(kind,refocus){
  if(kind==="delta"){deltaSortDesc=!deltaSortDesc;levelSortDesc=false}
@@ -148,6 +183,16 @@ function toggleSort(kind,refocus){
 document.addEventListener("click",e=>{
  const sort=e.target.closest("[data-top100-sort]");
  if(sort){toggleSort(sort.dataset.top100Sort,false);return}
+ /* смена периода: пересчитываются стрелки и прирост, вкладка, поиск и фильтр остаются */
+ const per=e.target.closest("[data-t100-period]");
+ if(per){
+  top100Period=per.dataset.t100Period;
+  try{localStorage.setItem(TOP100_PERIOD_KEY,top100Period)}catch{}
+  renderPeriod();renderTop100Table();
+  const again=document.querySelector('[data-t100-period="'+top100Period+'"]');
+  if(again)again.focus();
+  return;
+ }
  /* на телефоне список отрядов открывается по кнопке */
  const toggle=e.target.closest("#top100FactionsToggle");
  if(toggle){

@@ -4,12 +4,15 @@
  * Запуск: node build-top100.js [папка_с_csv] [путь_к_top100-data.js]
  * По умолчанию CSV берутся из ./top100, результат пишется в ./top100-data.js
  *
- * Кроме самих данных скрипт считает изменения с прошлого обновления:
- *  1. TOP100_DELTA — прирост метрики;
- *  2. TOP100_RANK  — изменение места.
- * Оба считаются по снимку прошлого запуска top100/history/<дата_время>.json,
- * который скрипт складывает сам (ник -> [место, значение]).
- * Если CSV не изменились с прошлого запуска, новый снимок не создаётся и сравнение идёт с тем, что было до него.
+ * Кроме самих данных скрипт считает изменения за несколько периодов (TOP100_PERIODS / TOP100_CHANGES):
+ *  1. delta — прирост метрики;
+ *  2. rank  — изменение места.
+ * Периоды: с прошлого обновления, за 24 часа, за неделю, за месяц.
+ * Считается по снимкам прошлых запусков top100/history/<дата_время>.json,
+ * которые скрипт складывает сам (ник -> [место, значение]).
+ * Для периода берётся самый свежий снимок, которому уже не меньше нужного срока.
+ * Если истории не хватает, берём самый ранний снимок и помечаем период как неполный.
+ * Если CSV не изменились с прошлого запуска, новый снимок не создаётся.
  * Оба объекта: ник -> число (+ вверх, − вниз), null — новый в списке, нет ключа — данных нет. */
 const fs = require("fs");
 const path = require("path");
@@ -84,22 +87,45 @@ const outputFile = process.argv[3] || path.join(process.cwd(), "top100-data.js")
 const historyDir = path.join(inputDir, "history");
 
 /* ---------- дата сборки по Москве ---------- */
+const MSK = 3 * 3600 * 1000;   // Москва без перехода на летнее время
+const DAY = 864e5;
+const nowMs = Date.now();
 const p = Object.fromEntries(new Intl.DateTimeFormat("ru-RU", {
   timeZone: "Europe/Moscow", day: "2-digit", month: "2-digit", year: "numeric",
   hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
-}).formatToParts(new Date()).map(x => [x.type, x.value]));
+}).formatToParts(new Date(nowMs)).map(x => [x.type, x.value]));
 const stamp = `${p.day}.${p.month}.${p.year} ${p.hour}:${p.minute}:${p.second}`;
 const snapId = `${p.year}-${p.month}-${p.day}_${p.hour}-${p.minute}-${p.second}`;   // имя снимка этого запуска
-const KEEP_SNAPSHOTS = 50;                                                           // старше удаляем (в git они остаются)
+const KEEP_SNAPSHOTS = 50;   // последние столько храним всегда
+const KEEP_DAYS = 40;        // и всё, что моложе: этого хватает на период «месяц» (в git старое остаётся)
 
 /* ---------- снимки запусков ----------
-   Новые: 2026-10-04_12-30-17.json. Старые недельные (2026-W40.json) тоже читаем, они считаются самыми давними */
+   Новые: 2026-10-04_12-30-17.json (время по Москве).
+   Старые недельные (2026-W40.json) тоже читаем, они считаются самыми давними */
 function readSnapshots() {
   if (!fs.existsSync(historyDir)) return [];
   const files = fs.readdirSync(historyDir).filter(f => /^(\d{4}-W\d{2}|\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})\.json$/.test(f));
   const weekly = files.filter(f => /-W\d{2}\.json$/.test(f)).sort();
   const timed = files.filter(f => !/-W\d{2}\.json$/.test(f)).sort();
   return weekly.concat(timed).map(f => ({ id: f.replace(".json", ""), data: JSON.parse(fs.readFileSync(path.join(historyDir, f), "utf8")) }));
+}
+
+/* момент снимка в мс по его имени; недельный снимок считаем понедельником той недели */
+function snapTime(id) {
+  let m = id.match(/^(\d{4})-(\d{2})-(\d{2})_(\d{2})-(\d{2})-(\d{2})$/);
+  if (m) return Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]) - MSK;
+  m = id.match(/^(\d{4})-W(\d{2})$/);
+  const jan4 = new Date(Date.UTC(+m[1], 0, 4));
+  const week1 = jan4.getTime() - ((jan4.getUTCDay() || 7) - 1) * DAY;
+  return week1 + (+m[2] - 1) * 7 * DAY - MSK;
+}
+
+/* дата для подписи на сайте: ДД.ММ.ГГГГ ЧЧ:ММ (у недельного снимка времени нет, только дата) */
+function fmtTime(id) {
+  const d = new Date(snapTime(id) + MSK);
+  const z = n => String(n).padStart(2, "0");
+  const date = `${z(d.getUTCDate())}.${z(d.getUTCMonth() + 1)}.${d.getUTCFullYear()}`;
+  return /-W\d{2}$/.test(id) ? date : `${date} ${z(d.getUTCHours())}:${z(d.getUTCMinutes())}`;
 }
 
 /* старые снимки хранили только место числом, новые — [место, значение] */
@@ -124,17 +150,13 @@ function sameData(old, now) {
 /* ---------- данные ---------- */
 const blocks = [];
 const csvDeltas = {};
-const metricDeltas = {};
-const rankDeltas = {};
 const snapshot = {};
-let csvDeltaCategories = 0;
 const current = {};   // ключ -> ник -> {rank, value}
 
 for (const { file, varName, key } of SOURCES) {
   const filePath = path.join(inputDir, file);
   if (!fs.existsSync(filePath)) throw new Error("Не найден файл: " + filePath);
-  const { rows, metricDelta, hasDeltaColumn } = csvToRows(filePath);
-  if (hasDeltaColumn) csvDeltaCategories++;
+  const { rows, metricDelta } = csvToRows(filePath);
   csvDeltas[key] = metricDelta;
   current[key] = {};
   snapshot[key] = {};
@@ -146,53 +168,86 @@ for (const { file, varName, key } of SOURCES) {
   blocks.push(`window.${varName}=[\n${rows.map(r => JSON.stringify(r)).join(",\n")}\n];`);
 }
 
-/* сравниваем со снимком прошлого запуска; если данные не менялись, берём тот, что был до него */
+/* если данные не менялись, последний снимок равен текущим данным и базой быть не может */
 const snaps = readSnapshots();
 const latest = snaps[snaps.length - 1] || null;
 const unchanged = !!latest && sameData(latest.data, snapshot);
 const previous = unchanged ? (snaps[snaps.length - 2] || null) : latest;
-let rankChanges = 0;
-const deltaSource = {};   // для лога: откуда взяты приросты по разделу
+const older = (unchanged ? snaps.slice(0, -1) : snaps).slice().sort((a, b) => snapTime(a.id) - snapTime(b.id));
 
-for (const { key } of SOURCES) {
-  const prev = (previous && previous.data && previous.data[key]) || null;
-  const prevHasValues = !!prev && Object.values(prev).some(v => Array.isArray(v));
-  const rankMoves = {};
-  const valueMoves = {};
-
-  for (const nick of Object.keys(current[key])) {
-    const now = current[key][nick];
-    if (prev) {
+/* сравнение раздела со снимком base: изменение места и прирост значения.
+   useCsv — разрешить запасной прирост из CSV, когда в снимке нет значений (только для «с прошлого обновления») */
+function compareWith(base, key, useCsv) {
+  const prev = (base && base.data && base.data[key]) || null;
+  const hasValues = !!prev && Object.values(prev).some(v => Array.isArray(v));
+  const rank = {};
+  const delta = {};
+  let moves = 0;
+  let source = "нет данных";
+  if (prev) {
+    for (const nick of Object.keys(current[key])) {
+      const now = current[key][nick];
       const was = prev[nick] === undefined ? undefined : readEntry(prev[nick]);
-      if (!was) rankMoves[nick] = null;                              // новичок в списке
-      else if (was.rank !== now.rank) { rankMoves[nick] = was.rank - now.rank; rankChanges++; }
-      if (prevHasValues && was && was.value !== undefined) valueMoves[nick] = now.value - was.value;
+      if (!was) rank[nick] = null;                                   // новичок в списке
+      else if (was.rank !== now.rank) { rank[nick] = was.rank - now.rank; moves++; }
+      if (hasValues && was && was.value !== undefined) delta[nick] = now.value - was.value;
     }
   }
-
-  if (prevHasValues) {
-    metricDeltas[key] = valueMoves;
-    deltaSource[key] = "снимок";
-  } else if (TRUSTED_CSV_DELTA.has(key)) {
-    metricDeltas[key] = csvDeltas[key];
-    deltaSource[key] = "csv";
-  } else {
-    metricDeltas[key] = {};
-    deltaSource[key] = "нет данных";
-  }
-  if (previous) rankDeltas[key] = rankMoves;
+  if (hasValues) { source = "снимок"; return { rank, delta, moves, source }; }
+  if (useCsv && TRUSTED_CSV_DELTA.has(key)) return { rank, delta: csvDeltas[key], moves, source: "csv" };
+  return { rank, delta: {}, moves, source };
 }
 
 /* нули не пишем: отсутствие ключа = «без изменений» */
-const compact = obj => {
+const compactMap = map => {
   const out = {};
-  for (const key of Object.keys(obj)) {
-    const map = {};
-    for (const nick of Object.keys(obj[key])) if (obj[key][nick] !== 0) map[nick] = obj[key][nick];
-    out[key] = map;
-  }
+  for (const nick of Object.keys(map)) if (map[nick] !== 0) out[nick] = map[nick];
   return out;
 };
+
+/* ---------- периоды ----------
+   last — с прошлого обновления, остальные — за срок ms.
+   Период, у которого база совпала с уже добавленным, пропускаем: кнопка была бы дублем */
+const PERIODS = [
+  { key: "last", label: "С прошлого обновления" },
+  { key: "d1", label: "За 24 часа", ms: DAY },
+  { key: "d7", label: "За неделю", ms: 7 * DAY },
+  { key: "d30", label: "За месяц", ms: 30 * DAY },
+];
+
+const periods = [];
+const changes = {};
+const usedBases = new Set();
+
+for (const per of PERIODS) {
+  let base = null, partial = false;
+  if (per.key === "last") base = previous;
+  else if (older.length) {
+    const target = nowMs - per.ms;
+    for (const sn of older) if (snapTime(sn.id) <= target) base = sn;   // самый свежий из достаточно старых
+    if (!base) { base = older[0]; partial = true; }                      // истории не хватает
+  }
+  if (base && usedBases.has(base.id)) continue;
+
+  const delta = {}, rank = {};
+  let moves = 0;
+  const src = [];
+  for (const { key } of SOURCES) {
+    const r = compareWith(base, key, per.key === "last");
+    delta[key] = compactMap(r.delta);
+    rank[key] = compactMap(r.rank);
+    moves += r.moves;
+    src.push(key + "=" + r.source);
+  }
+  /* без базы период бывает только у «с прошлого обновления»: тогда в нём одни приросты репутации из CSV */
+  if (!base && !Object.values(delta).some(m => Object.keys(m).length)) continue;
+
+  if (base) usedBases.add(base.id);
+  periods.push({ key: per.key, label: per.label, from: base ? fmtTime(base.id) : null, partial });
+  changes[per.key] = { delta, rank };
+  console.log(`Период «${per.label}»:`, base ? "с " + base.id : "по данным игры", partial ? "(неполный)" : "",
+    "| смен мест:", moves, "| приросты:", src.join(", "));
+}
 
 /* складываем снимок этого запуска (если данные те же, что в последнем снимке, не плодим дубли).
    Каждая запись в одну строку, чтобы git-diff читался */
@@ -203,26 +258,26 @@ if (!unchanged) {
     Object.keys(snapshot[k]).map(n => `  ${JSON.stringify(n)}: ${JSON.stringify(snapshot[k][n])}`).join(",\n") +
     "\n }").join(",\n") + "\n}\n";
   fs.writeFileSync(path.join(historyDir, snapId + ".json"), snapText);
-  /* храним последние KEEP_SNAPSHOTS снимков */
+  /* чистим только то, что и за пределами последних KEEP_SNAPSHOTS, и старше KEEP_DAYS */
   const all = readSnapshots();
-  all.slice(0, Math.max(0, all.length - KEEP_SNAPSHOTS)).forEach(sn => fs.unlinkSync(path.join(historyDir, sn.id + ".json")));
+  const cutoff = nowMs - KEEP_DAYS * DAY;
+  all.slice(0, Math.max(0, all.length - KEEP_SNAPSHOTS))
+    .filter(sn => snapTime(sn.id) < cutoff)
+    .forEach(sn => fs.unlinkSync(path.join(historyDir, sn.id + ".json")));
 }
 
 const header = "/* Топ-100: [ник, уровень, значение, покинул отряд (0/1)[, место]]. Место = индекс+1, если не указано пятым элементом */\n";
 const notes =
-  "/* TOP100_DELTA — прирост метрики с прошлого обновления (по снимку), null — не было данных */\n" +
-  "/* TOP100_RANK  — изменение места с прошлого обновления: + поднялся, − опустился, null — новичок */\n";
+  "/* TOP100_PERIODS — периоды изменений для переключателя: ключ, подпись, с какого момента считаем, неполный ли период */\n" +
+  "/* TOP100_CHANGES — по ключу периода: delta (прирост метрики) и rank (изменение места: + поднялся, − опустился, null — новичок) */\n";
 fs.writeFileSync(outputFile,
   header +
   `window.TOP100_UPDATED=${JSON.stringify(stamp)};\n` +
   notes +
-  `window.TOP100_DELTA=${JSON.stringify(compact(metricDeltas))};\n` +
-  `window.TOP100_RANK=${JSON.stringify(compact(rankDeltas))};\n` +
+  `window.TOP100_PERIODS=${JSON.stringify(periods)};\n` +
+  `window.TOP100_CHANGES={\n${periods.map(per => ` ${JSON.stringify(per.key)}:${JSON.stringify(changes[per.key])}`).join(",\n")}\n};\n` +
   `window.TOP100_HISTORY=${JSON.stringify({ id: unchanged && latest ? latest.id : snapId, from: previous ? previous.id : null })}\n` +
   blocks.join("\n") + "\n");
-console.log("Готово:", outputFile, "| дата:", stamp,
-  "| сравнение с:", previous ? previous.id : "нет",
-  "| смен мест:", rankChanges);
-console.log("Приросты по разделам:", Object.entries(deltaSource).map(([k, v]) => k + "=" + v).join(", "));
+console.log("Готово:", outputFile, "| дата:", stamp, "| периодов:", periods.map(per => per.key).join(", ") || "нет");
 if (unchanged) console.log("Данные не изменились с прошлого запуска, новый снимок не добавлен.");
 if (!previous) console.log("Прошлого снимка нет: стрелки появятся после следующего обновления с новыми данными.");

@@ -82,3 +82,20 @@
   .t100-factions{display:none}
   .t100-factions.open{display:flex;flex-wrap:wrap;gap:6px}
 }
+
+/* ===== Период изменений (Топ-100): кнопки и подпись с датами ===== */
+.t100-period{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:0 0 12px}
+.t100-period[hidden]{display:none}
+.t100-period-title{color:#9db2c4;font-size:12.5px;font-weight:600}
+.t100-period-btns{display:flex;flex-wrap:wrap;gap:6px}
+.t100-pbtn{height:30px;padding:0 12px;border:1px solid #1f3d54;border-radius:16px;background:#0a1a27;color:#a9bbc9;font:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.t100-pbtn:hover{background:#0e2334;color:#d5e1ea}
+.t100-pbtn:focus-visible{outline:2px solid #54bfff;outline-offset:2px}
+.t100-pbtn.active{border-color:#54bfff;background:rgba(84,191,255,.16);color:#eef4fa}
+.t100-period-range{flex:1 0 100%;margin:0;color:#a9c4d9;font-size:12.5px;line-height:1.4}
+.t100-period-range b{color:#f2f8fd;font-weight:700;font-variant-numeric:tabular-nums}
+.t100-period-range small{display:block;margin-top:2px;color:#8aa0b2;font-size:11.5px;font-style:italic}
+@media(max-width:760px){
+  .t100-pbtn{height:36px}
+  .t100-period{margin-bottom:10px}
+}
