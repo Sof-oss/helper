@@ -637,3 +637,12 @@ input[type=checkbox]{accent-color:var(--accent)}
   .top100-table td:nth-child(4){font-size:14px}
   .site-footer span{font-size:12px}
 }
+
+/* ---------- Эмблемы группировок в переключателе тем: полноцветные шевроны без плашки ---------- */
+.tp-badge,.ti-badge{background:none;box-shadow:none;clip-path:none;border-radius:0;border:0}
+.tp-badge{width:36px;height:36px}
+.ti-badge{width:42px;height:42px;flex-basis:42px}
+.tp-badge svg,.ti-badge svg{width:100%;height:100%;fill:none;stroke:none;overflow:visible;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
+.theme-item .ti-badge svg{transition:transform .2s ease,filter .2s ease}
+.theme-item:hover .ti-badge svg,.theme-item[aria-selected="true"] .ti-badge svg{transform:scale(1.06);filter:drop-shadow(0 2px 3px rgba(0,0,0,.6)) drop-shadow(0 0 6px color-mix(in srgb,var(--t) 60%,transparent))}
+@media(max-width:760px){.tp-badge{width:32px;height:32px}}
