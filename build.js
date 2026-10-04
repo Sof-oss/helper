@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 "use strict";
 /* Сборка для деплоя: исходники из корня -> ./dist
+ * 0. Общие куски (partials/header.html, partials/footer.html) подставляются вместо <!-- @include имя -->,
+ *    в шапке помечается активный пункт меню: так меню правится в одном месте, а не в каждой странице.
  * 1. Таблицы «Информации» и «Топ-100» дописываются прямо в HTML: их видят поисковики и те, у кого выключен JS.
  *    Разметку рисуют те же info.js / info-tasks.js / top100.js, что работают в браузере, поэтому она совпадает.
  * 2. Стили страницы склеиваются в один файл (bundle-*.css), css и js сжимаются esbuild.
@@ -23,7 +25,7 @@ const OUT = path.join(ROOT, "dist");
 
 /* в dist не попадает служебное и исходники сборки (CSV рейтинга нужны только для build-top100.js) */
 const SKIP = new Set([
-  ".git", ".github", ".gitignore", "dist", "node_modules", "top100",
+  ".git", ".github", ".gitignore", "dist", "node_modules", "top100", "partials",
   "README.md", "build.js", "build-top100.js", "build-top100.bat", "package.json", "package-lock.json"
 ]);
 
@@ -37,6 +39,32 @@ fs.mkdirSync(OUT);
 for (const name of fs.readdirSync(ROOT)) {
   if (SKIP.has(name)) continue;
   fs.cpSync(path.join(ROOT, name), path.join(OUT, name), { recursive: true, filter: src => !SKIP_PATHS.has(rel(src)) });
+}
+
+/* ---------- общие куски страниц ----------
+   <!-- @include header active="/calculator" --> -> partials/header.html; ссылки с href="/calculator" получают
+   class="active" и aria-current="page". Без active (страница 404) ничего не подсвечивается.
+   Неизвестный кусок или active без пункта меню роняют сборку, чтобы не выпустить страницу без шапки */
+const INCLUDE = /<!--\s*@include\s+([\w-]+)(?:\s+active="([^"]*)")?\s*-->\n?/g;
+const partial = name => {
+  const file = path.join(ROOT, "partials", name + ".html");
+  if (!fs.existsSync(file)) throw new Error("Нет файла partials/" + name + ".html");
+  return fs.readFileSync(file, "utf8");
+};
+function applyIncludes(html, from) {
+  return html.replace(INCLUDE, (m, name, active) => {
+    let part = partial(name);
+    if (active !== undefined) {
+      const link = '<a href="' + active + '"';
+      if (!part.includes(link)) throw new Error(from + ": в partials/" + name + ".html нет пункта меню " + active);
+      part = part.split(link).join('<a class="active" href="' + active + '" aria-current="page"');
+    }
+    return part.endsWith("\n") ? part : part + "\n";
+  });
+}
+for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
+  const file = path.join(OUT, name);
+  fs.writeFileSync(file, applyIncludes(fs.readFileSync(file, "utf8"), name));
 }
 
 /* ---------- пререндер ---------- */
@@ -185,12 +213,16 @@ function top100Date() {
 function pageDeps(page) {
   const html = fs.readFileSync(path.join(ROOT, page), "utf8");
   const deps = [...html.matchAll(/(?:href|src)="\/?([^":?#]+\.(?:css|js))"/g)].map(m => m[1]).filter(f => fs.existsSync(path.join(ROOT, f)));
-  return [page, ...new Set(deps)];
+  /* меню и подвал из partials тоже влияют на дату страницы */
+  const parts = [...html.matchAll(/<!--\s*@include\s+([\w-]+)/g)].map(m => "partials/" + m[1] + ".html").filter(f => fs.existsSync(path.join(ROOT, f)));
+  return [page, ...new Set([...deps, ...parts])];
 }
 const smSrc = path.join(ROOT, "sitemap.xml");
 if (fs.existsSync(smSrc)) {
   const sm = fs.readFileSync(smSrc, "utf8").replace(/<url><loc>([^<]+)<\/loc>(?:<lastmod>[^<]*<\/lastmod>)?<\/url>/g, (m, loc) => {
-    const page = new URL(loc).pathname.replace(/^\//, "") || "index.html";
+    /* адреса в sitemap без .html (/calculator), файл страницы — calculator.html */
+    const slug = new URL(loc).pathname.replace(/^\//, "");
+    const page = !slug ? "index.html" : slug.endsWith(".html") ? slug : slug + ".html";
     if (!fs.existsSync(path.join(ROOT, page))) return m;
     const date = (page === "top100.html" && top100Date()) || gitDate(pageDeps(page));
     return "<url><loc>" + loc + "</loc><lastmod>" + date + "</lastmod></url>";

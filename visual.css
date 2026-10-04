@@ -302,7 +302,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 .top100-table-wrap tbody td{height:44px;box-sizing:border-box}
 @media (max-width:600px){
   .top100-rank-in:has(.top100-medal) .top100-rank-num{display:none}
-  .top100-tabs{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent);padding-right:24px}
 }
 
 /* 8. Гайды: заглушка шире и заметнее */

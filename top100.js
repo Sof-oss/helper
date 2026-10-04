@@ -141,8 +141,30 @@ function renderFactions(){
  renderFactionSummary();
 }
 
+let tabsRendered=false;
 function renderTop100Tabs(){
  $("top100Tabs").innerHTML=TOP100_TABS.map(t=>'<button type="button" class="top100-tab'+(t.key===currentTop100Tab?" active":"")+'" data-top100-tab="'+t.key+'" style="--accent:'+t.accent+'">'+t.label+'</button>').join("");
+ /* при загрузке активная вкладка сразу на месте, при смене раздела — плавно */
+ centerActiveTab(tabsRendered);tabsRendered=true;
+}
+/* вкладки на телефоне идут одной строкой: показываем, что строку можно прокрутить, и держим активную на виду.
+   В пререндере (build.js) у элементов нет размеров — тогда ничего не делаем */
+function updateTabsFade(){
+ const t=$("top100Tabs");
+ if(!t||typeof t.scrollWidth!=="number")return;
+ const max=t.scrollWidth-t.clientWidth;
+ t.classList.toggle("fade-l",t.scrollLeft>2);
+ t.classList.toggle("fade-r",max>2&&t.scrollLeft<max-2);
+}
+function centerActiveTab(smooth){
+ const t=$("top100Tabs");
+ if(!t||typeof t.scrollWidth!=="number")return;
+ const a=t.querySelector(".top100-tab.active");
+ if(a&&t.scrollWidth>t.clientWidth){
+  const left=t.scrollLeft+a.getBoundingClientRect().left-t.getBoundingClientRect().left-(t.clientWidth-a.offsetWidth)/2;
+  if(smooth&&t.scrollTo)t.scrollTo({left,behavior:"smooth"});else t.scrollLeft=left;
+ }
+ updateTabsFade();
 }
 function renderTop100Table(){$("top100TableWrap").innerHTML=top100TableMarkup(currentTab())}
 
@@ -234,3 +256,10 @@ const updatedEl=$("top100Updated");
 if(updatedEl&&window.TOP100_UPDATED)updatedEl.textContent=window.TOP100_UPDATED;
 
 renderTop100();
+{
+ const t=$("top100Tabs");
+ if(t&&typeof window.addEventListener==="function"){
+  t.addEventListener("scroll",updateTabsFade,{passive:true});
+  window.addEventListener("resize",updateTabsFade);
+ }
+}

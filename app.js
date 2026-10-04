@@ -194,7 +194,8 @@ function renderTalents(){
 }
 function openTalents(){lastTalentChange=null;$("talentModal").classList.add("show");$("talentModal").setAttribute("aria-hidden","false");renderTalents();resetTreeTransform()}
 function closeTalents(){$("talentModal").classList.remove("show");$("talentModal").setAttribute("aria-hidden","true");talentDetailOpen=false}
-function resetTalents(){if(!spentTalentPoints())return;if(!confirm("Сбросить все очки талантов? Уровень и снаряжение останутся без изменений."))return;state.talents={};selectedTalentCode=null;talentDetailOpen=false;lastTalentChange=null;saveState();render()}
+function resetTalents(){if(!spentTalentPoints())return;askConfirm({title:"Сбросить таланты?",text:"Все очки талантов вернутся в запас. Уровень и снаряжение останутся без изменений.",ok:"Сбросить таланты"}).then(yes=>{if(yes)doResetTalents()})}
+function doResetTalents(){state.talents={};selectedTalentCode=null;talentDetailOpen=false;lastTalentChange=null;saveState();render()}
 
 /* бонусы всех комплектов и вещей для справки */
 const GEAR_BONUS_LABELS={knife:"Нож",pistol:"Пистолет",auto:"Автомат",grenade:"Граната",gl:"Гранатомёт",gauss:"Гаусс",critChance:"Шанс крита (общий)",critDamage:"Урон крита (общий)",critGaussChance:"Шанс крита (гаусс)",critGrenadeChance:"Шанс крита (граната)",critGaussDamage:"Урон крита (гаусс)",critGrenadeDamage:"Урон крита (граната)",freeNoCooldown:"Шанс удара без отката",cooldown:"Сокращение отката"};
@@ -394,6 +395,33 @@ function modalHidden(m){
  new MutationObserver(()=>m.classList.contains("show")?modalShown(m):modalHidden(m)).observe(m,{attributes:true,attributeFilter:["class"]});
 });
 
+/* подтверждение в стиле сайта вместо confirm(): askConfirm({title,text,ok}) -> Promise<boolean>.
+   Окно встаёт поверх открытых окон (например, древа талантов), всё под ним становится недоступным,
+   фокус сразу на «Отмена», после закрытия возвращается на кнопку, с которой спросили */
+let confirmResolve=null,confirmOpener=null,confirmInerted=[];
+const confirmOpen=()=>$("confirmModal").classList.contains("show");
+function askConfirm({title,text,ok}){
+ if(confirmResolve)closeConfirm(false);
+ const m=$("confirmModal");
+ $("confirmTitle").textContent=title;$("confirmText").textContent=text;$("confirmYes").textContent=ok||"Да";
+ const a=document.activeElement;confirmOpener=a&&a!==document.body?a:null;
+ confirmInerted=[...document.querySelectorAll(".site-header,.tabbar,.page,.site-footer,.talent-modal.show")].filter(el=>el!==m&&!el.inert);
+ confirmInerted.forEach(el=>{el.inert=true});
+ m.classList.add("show");m.setAttribute("aria-hidden","false");
+ $("confirmNo").focus({preventScroll:true});
+ return new Promise(res=>{confirmResolve=res});
+}
+function closeConfirm(answer){
+ const m=$("confirmModal");if(!confirmOpen())return;
+ m.classList.remove("show");m.setAttribute("aria-hidden","true");
+ confirmInerted.forEach(el=>{el.inert=false});confirmInerted=[];
+ const res=confirmResolve,opener=confirmOpener;confirmResolve=null;confirmOpener=null;
+ if(res)res(answer);
+ /* фокус возвращаем после перерисовки: кнопка могла смениться, тогда фокус уходит в открытое окно */
+ setTimeout(()=>{if(opener&&opener.isConnected){opener.focus({preventScroll:true});return}const d=document.querySelector(".talent-modal.show .talent-dialog");if(d)d.focus({preventScroll:true})},0);
+}
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-confirm]");if(b){e.stopPropagation();closeConfirm(b.dataset.confirm==="yes")}},true);
+
 /* итоги расчёта для скринридера: одной фразой и с паузой, чтобы набор уровня по цифре не читался на каждую */
 let liveTimer=0,liveText="",liveReady=false;
 function announceResults(r){
@@ -425,7 +453,7 @@ document.addEventListener("click",e=>{
  if(e.target.closest("#cmpLoad")){loadCmpFromInput();return}
  if(e.target.closest("#cmpClear")){cmpBuild=null;saveCompare();renderCompare();return}
 });
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(talentDetailOpen){talentDetailOpen=false;renderTalents()}else if($("compareModal").classList.contains("show")){closeCompare()}else if($("tokensModal").classList.contains("show")){closeTokens()}else if($("gearInfoModal").classList.contains("show")){closeGearInfo()}else closeTalents()}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(confirmOpen()){closeConfirm(false)}else if(talentDetailOpen){talentDetailOpen=false;renderTalents()}else if($("compareModal").classList.contains("show")){closeCompare()}else if($("tokensModal").classList.contains("show")){closeTokens()}else if($("gearInfoModal").classList.contains("show")){closeGearInfo()}else closeTalents()}});
 /* подсказка к узлу дерева: появляется при наведении, исчезает при уходе курсора */
 document.addEventListener("mouseover",e=>{const n=e.target.closest&&e.target.closest(".talent-node-game");if(!n||!$("talentModal").classList.contains("show"))return;showTalentTip(n.dataset.selectTalent,n)});
 document.addEventListener("mouseout",e=>{if(e.target.closest&&e.target.closest(".talent-node-game"))hideTalentTip()});
@@ -433,7 +461,7 @@ document.addEventListener("change",e=>{const i=e.target;if(!i.matches("[data-typ
 document.addEventListener("click",e=>{const b=e.target.closest("[data-step]");if(!b)return;const input=$(b.dataset.step),dir=Number(b.dataset.dir)||0,min=Number(input.min)||0,max=Number(input.max)||999;input.value=Math.min(max,Math.max(min,(Number(input.value)||0)+dir));saveState();calc()});
 $("selectAllEquipment").addEventListener("change",e=>{state.sets.clear();state.items.clear();if(e.target.checked){SETS.forEach((_,i)=>state.sets.add(i));ITEMS.forEach((_,i)=>state.items.add(i))}saveState();render()});
 $("level").addEventListener("input",()=>{saveState();calc()});
-$("resetAll").onclick=()=>{if(!confirm("Точно сбросить весь прогресс — уровень, снаряжение и все очки талантов?"))return;state.sets.clear();state.items.clear();state.talents={};lastTalentChange=null;$("level").value=1;saveState();render()};
+$("resetAll").onclick=()=>askConfirm({title:"Сбросить всё?",text:"Уровень, снаряжение и все очки талантов вернутся к началу. Отменить это действие нельзя.",ok:"Сбросить всё"}).then(yes=>{if(!yes)return;state.sets.clear();state.items.clear();state.talents={};lastTalentChange=null;$("level").value=1;saveState();render()});
 
 ["tokenCount","tokenTarget"].forEach(id=>$(id).addEventListener("input",()=>{saveTokens();renderTokens()}));
 renderCards();loadState();loadTokens();

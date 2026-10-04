@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -7,18 +7,20 @@
 <script>/* тема до первой отрисовки, чтобы не мигало */(function(){try{var t=localStorage.getItem("zoneTheme");if(t)document.documentElement.dataset.theme=t}catch(e){}})();</script>
 <title>Сердце Зоны — Калькулятор урона</title>
 <meta name="description" content="Калькулятор урона для игры «Сердце Зоны»: оружие, снаряжение и таланты.">
-<link rel="canonical" href="https://heart-of-the-zone.ru/calculator.html">
+<link rel="canonical" href="https://heart-of-the-zone.ru/calculator">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Сердце Зоны">
 <meta property="og:title" content="Сердце Зоны — Калькулятор урона">
-<meta property="og:description" content="Калькулятор урона и справочные таблицы по уровням для игры «Сердце Зоны».">
-<meta property="og:url" content="https://heart-of-the-zone.ru/calculator.html">
+<meta property="og:description" content="Урон оружия за жетоны и бесплатных ударов с учётом уровня, снаряжения и талантов. Расчёт жетонов на нужный урон и сравнение билдов для игры «Сердце Зоны».">
+<meta property="og:url" content="https://heart-of-the-zone.ru/calculator">
 <meta property="og:image" content="https://heart-of-the-zone.ru/assets/preview.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="628">
 <meta property="og:image:alt" content="Сердце Зоны — Калькулятор урона">
 <meta property="og:locale" content="ru_RU">
 <meta name="twitter:card" content="summary_large_image">
+<!-- структурированные данные для поисковиков: хлебные крошки и само приложение-калькулятор -->
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://heart-of-the-zone.ru/"}, {"@type": "ListItem", "position": 2, "name": "Калькулятор урона", "item": "https://heart-of-the-zone.ru/calculator"}]}, {"@type": "WebApplication", "name": "Калькулятор урона — Сердце Зоны", "url": "https://heart-of-the-zone.ru/calculator", "description": "Урон оружия за жетоны и бесплатных ударов в игре «Сердце Зоны» с учётом уровня, снаряжения и талантов: дерево талантов, расчёт жетонов на нужный урон, сравнение билдов по ссылке.", "applicationCategory": "GameApplication", "operatingSystem": "Any", "browserRequirements": "Requires JavaScript", "inLanguage": "ru-RU", "isAccessibleForFree": true, "image": "https://heart-of-the-zone.ru/assets/preview.jpg", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "RUB"}, "isPartOf": {"@type": "WebSite", "name": "Сердце Зоны", "url": "https://heart-of-the-zone.ru/"}}]}</script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -46,25 +48,12 @@
 <symbol id="i-info" viewBox="0 0 24 24"><path d="M12 2.8 20 7.4v9.2l-8 4.6-8-4.6V7.4z"/><path d="M12 11v5.2M12 7.9v.01"/></symbol>
 <symbol id="i-clock" viewBox="0 0 24 24"><path d="M6.5 3.2h11M6.5 20.8h11"/><path d="M8 3.2c0 4.2 4 5.6 4 8.8s-4 4.6-4 8.8M16 3.2c0 4.2-4 5.6-4 8.8s4 4.6 4 8.8"/><path d="M9.6 18.6 12 16.4l2.4 2.2z"/></symbol>
 </defs></svg>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="logo" href="/"><span class="rad-logo" aria-hidden="true"><svg viewBox="0 0 64 64"><path class="rl-heart" d="M32 58C13.5 45.5 4 35.6 4 23.6 4 14 11.2 7 20 7c5.3 0 9.6 2.7 12 6.8C34.4 9.7 38.7 7 44 7c8.8 0 16 7 16 16.6C60 35.6 50.5 45.5 32 58Z"/><g class="rl-tre"><circle cx="32" cy="28.5" r="3.6"/><path d="M28.90 23.13L24.25 15.08A15.5 15.5 0 0 1 39.75 15.08L35.10 23.13A6.2 6.2 0 0 0 28.90 23.13ZM38.20 28.50L47.50 28.50A15.5 15.5 0 0 1 39.75 41.92L35.10 33.87A6.2 6.2 0 0 0 38.20 28.50ZM28.90 33.87L24.25 41.92A15.5 15.5 0 0 1 16.50 28.50L25.80 28.50A6.2 6.2 0 0 0 28.90 33.87Z"/></g></svg></span><div class="logo-copy"><div class="logo-title">Сердце Зоны</div></div></a>
-    <nav class="main-nav">
-      <a href="/"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 20.2h19"/><path d="M4.5 20.2v-5.6a7.5 7.5 0 0 1 15 0v5.6"/><path d="M9.6 20.2v-4a2.4 2.4 0 0 1 4.8 0v4"/><path d="M16.2 8.5 18.4 4.2"/><circle cx="18.7" cy="3.6" r="1.1" fill="currentColor" stroke="none"/></g></svg>Главная</a>
-      <a href="info.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="2.5" width="13" height="19" rx="2.2"/><rect x="8" y="5.4" width="8" height="7.6" rx=".8"/><path d="m9.5 10.9 1.7-2.1 1.4 1.3 1.9-2.5"/><path d="M8.8 16.4h.01M12 16.4h.01M15.2 16.4h.01" stroke-width="2.3"/><path d="M9 19h6"/></g></svg>Информация</a>
-      <a href="top100.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7.6 2.8h8.8l-2.9 6h-3z"/><circle cx="12" cy="14.8" r="5.9"/><path d="m12 11.6 1 2 2.2.3-1.6 1.5.4 2.2-2-1.1-2 1.1.4-2.2-1.6-1.5 2.2-.3z" fill="currentColor" stroke="none"/></g></svg>Топ-100</a>
-      <a class="active" href="calculator.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.8 8.4V3.8h4.6M15.6 3.8h4.6v4.6M20.2 15.6v4.6h-4.6M8.4 20.2H3.8v-4.6"/><circle cx="12" cy="12" r="4.3"/><path d="M12 6.2v2.4M12 15.4v2.4M6.2 12h2.4M15.4 12h2.4"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></g></svg>Калькулятор урона</a>
-      <a href="guides.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6.2 9 4l6 2.2L20.5 4v13.8L15 20l-6-2.2L3.5 20z"/><path d="M9 4v13.8M15 6.2V20"/><path d="m16.7 9.6 2.1 2.1M18.8 9.6l-2.1 2.1"/></g></svg>Гайды</a>
-    </nav>
-    <!-- <a class="header-promo" href="https://vk.com/app54612839#ref_user_id=672" target="_blank" rel="noopener" aria-label="Регистрация — начни свой путь сталкера"><img src="assets/promo-banner.webp" alt="Начни свой путь сталкера — регистрация" width="1672" height="610" loading="eager"></a> -->
-  </div>
-</header>
+<!-- @include header active="/calculator" -->
 
-<nav class="tabbar" aria-label="Разделы"><a href="/"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 20.2h19"/><path d="M4.5 20.2v-5.6a7.5 7.5 0 0 1 15 0v5.6"/><path d="M9.6 20.2v-4a2.4 2.4 0 0 1 4.8 0v4"/><path d="M16.2 8.5 18.4 4.2"/><circle cx="18.7" cy="3.6" r="1.1" fill="currentColor" stroke="none"/></g></svg><span>Главная</span></a><a href="info.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="2.5" width="13" height="19" rx="2.2"/><rect x="8" y="5.4" width="8" height="7.6" rx=".8"/><path d="m9.5 10.9 1.7-2.1 1.4 1.3 1.9-2.5"/><path d="M8.8 16.4h.01M12 16.4h.01M15.2 16.4h.01" stroke-width="2.3"/><path d="M9 19h6"/></g></svg><span>Инфо</span></a><a href="top100.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7.6 2.8h8.8l-2.9 6h-3z"/><circle cx="12" cy="14.8" r="5.9"/><path d="m12 11.6 1 2 2.2.3-1.6 1.5.4 2.2-2-1.1-2 1.1.4-2.2-1.6-1.5 2.2-.3z" fill="currentColor" stroke="none"/></g></svg><span>Топ-100</span></a><a href="calculator.html" class="active" aria-current="page"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.8 8.4V3.8h4.6M15.6 3.8h4.6v4.6M20.2 15.6v4.6h-4.6M8.4 20.2H3.8v-4.6"/><circle cx="12" cy="12" r="4.3"/><path d="M12 6.2v2.4M12 15.4v2.4M6.2 12h2.4M15.4 12h2.4"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></g></svg><span>Калькулятор</span></a><a href="guides.html"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6.2 9 4l6 2.2L20.5 4v13.8L15 20l-6-2.2L3.5 20z"/><path d="M9 4v13.8M15 6.2V20"/><path d="m16.7 9.6 2.1 2.1M18.8 9.6l-2.1 2.1"/></g></svg><span>Гайды</span></a></nav>
 
 <div class="page">
 <aside class="sidebar">
-<section class="side-section level-section"><div class="side-title"><svg class="person-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2.6c-3.3 0-5.6 2.7-5.6 6.2v2.3c0 1.2.6 2.3 1.6 3l-2.1 1.3C4.1 16.3 3.4 18.2 3.4 21.4h17.2c0-3.2-.7-5.1-2.5-6l-2.1-1.3c1-.7 1.6-1.8 1.6-3V8.8c0-3.5-2.3-6.2-5.6-6.2zM9.3 10.6c.5-1.7 1.5-2.6 2.7-2.6s2.2.9 2.7 2.6v.6c0 1.5-1.2 2.7-2.7 2.7s-2.7-1.2-2.7-2.7z"/></svg><b>Уровень персонажа</b></div><div class="level-row"><button type="button" data-step="level" data-dir="-1">−</button><input id="level" type="number" min="1" max="100" value="1"><button type="button" data-step="level" data-dir="1">+</button></div></section>
+<section class="side-section level-section"><div class="side-title"><svg class="person-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2.6c-3.3 0-5.6 2.7-5.6 6.2v2.3c0 1.2.6 2.3 1.6 3l-2.1 1.3C4.1 16.3 3.4 18.2 3.4 21.4h17.2c0-3.2-.7-5.1-2.5-6l-2.1-1.3c1-.7 1.6-1.8 1.6-3V8.8c0-3.5-2.3-6.2-5.6-6.2zM9.3 10.6c.5-1.7 1.5-2.6 2.7-2.6s2.2.9 2.7 2.6v.6c0 1.5-1.2 2.7-2.7 2.7s-2.7-1.2-2.7-2.7z"/></svg><b>Уровень персонажа</b></div><div class="level-row"><button type="button" data-step="level" data-dir="-1">−</button><input id="level" type="number" aria-label="Уровень персонажа" min="1" max="100" value="1"><button type="button" data-step="level" data-dir="1">+</button></div></section>
 <section class="side-section talent-launcher"><div class="side-title"><span><svg class="ic" aria-hidden="true"><use href="#i-tree"/></svg></span><b>Таланты</b></div><button type="button" id="openTalents" class="talent-open"><span><svg class="ic" aria-hidden="true"><use href="#i-rank"/></svg></span><span>Открыть древо талантов</span><b id="talentPointsBadge">0 / 135</b></button><div class="talent-summary" id="talentSummary">Очки не распределены</div></section>
 <section class="side-section equipment-section"><div class="side-title"><span class="clothes-icon" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-mask"/></svg></span><b>Комплекты</b><button type="button" id="openGearInfo" class="gear-info-btn" aria-label="Бонусы снаряжения" title="Бонусы снаряжения"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg></button></div><button type="button" id="gearToggle" class="gear-toggle" aria-expanded="false" aria-controls="sets items"></button><div id="sets" class="options"></div><div class="items-divider"><span>•</span><b>Одиночные вещи</b></div><div id="items" class="options"></div></section>
 <div class="side-actions">
@@ -140,9 +129,25 @@
       </header>
       <div class="gear-info-body cmp-body">
         <div class="cmp-tools">
-          <input id="cmpInput" type="text" placeholder="Вставьте ссылку на билд" autocomplete="off"><button type="button" class="cmp-btn" id="cmpLoad">Сравнить</button><button type="button" class="cmp-btn" id="cmpClear">Убрать</button>
+          <input id="cmpInput" type="text" aria-label="Ссылка на чужой билд" placeholder="Вставьте ссылку на билд" autocomplete="off"><button type="button" class="cmp-btn" id="cmpLoad">Сравнить</button><button type="button" class="cmp-btn" id="cmpClear">Убрать</button>
         </div>
         <div id="compareBody"></div>
+      </div>
+    </div>
+  </section>
+</div>
+<!-- окно подтверждения вместо стандартного confirm(): открывается поверх любого окна, текст задаёт askConfirm() в app.js -->
+<div id="confirmModal" class="talent-modal gear-info-modal confirm-modal" aria-hidden="true">
+  <div class="talent-backdrop" data-confirm="no"></div>
+  <section class="talent-dialog gear-info-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+    <div class="talent-game-window gear-info-window confirm-window">
+      <header class="talent-game-header">
+        <div><h2 id="confirmTitle">Подтверждение</h2></div>
+        <div class="talent-game-actions"><button type="button" class="talent-icon-button" data-confirm="no" aria-label="Отмена">×</button></div>
+      </header>
+      <div class="gear-info-body confirm-body">
+        <p id="confirmText" class="confirm-text"></p>
+        <div class="confirm-actions"><button type="button" class="cmp-btn" data-confirm="no" id="confirmNo">Отмена</button><button type="button" class="cmp-btn confirm-danger" data-confirm="yes" id="confirmYes">Сбросить</button></div>
       </div>
     </div>
   </section>
@@ -150,7 +155,6 @@
 <div id="toast" class="toast" role="status" aria-live="polite">В разработке</div>
 <div id="resultsLive" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
 
-<!-- подпись автора -->
-<footer class="site-footer"><span>© by Sof</span></footer>
+<!-- @include footer -->
 
 <script src="ui.js"></script><script src="talents.js"></script><script src="app.js"></script><script src="polish.js"></script><script src="nav.js"></script></body></html>

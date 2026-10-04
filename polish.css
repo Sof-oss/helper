@@ -318,3 +318,17 @@
   .gi-total-row{grid-template-columns:1fr;gap:5px}
   .gi-total-row>small{padding-top:0}
 }
+
+/* окно подтверждения сброса (вместо стандартного confirm): поверх остальных окон, компактное */
+.confirm-modal{z-index:2100}
+.confirm-modal .confirm-window{width:min(440px,92vw);height:auto;max-height:86vh}
+.confirm-modal .confirm-body{gap:16px;padding:18px 20px 20px}
+.confirm-text{margin:0;color:#c3d4e2;font-size:14px;line-height:1.5}
+.confirm-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.confirm-actions .cmp-btn{height:40px;min-width:110px}
+.confirm-actions .cmp-btn.confirm-danger{border-color:#7a2f35;background:linear-gradient(180deg,#4a171c,#2a0d10);color:#ffd9dc}
+.confirm-actions .cmp-btn.confirm-danger:hover:not(:disabled){background:linear-gradient(180deg,#5c1d23,#341013);border-color:#c2444e}
+@media(max-width:760px){
+  .confirm-modal .talent-dialog{align-items:center;padding:0 4vw}
+  .confirm-actions .cmp-btn{flex:1 1 0}
+}
