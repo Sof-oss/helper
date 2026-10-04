@@ -158,7 +158,6 @@ input[type="text"]:focus,input[type="search"]:focus,input[type="number"]:focus,.
 .ti-badge svg{width:17px;height:17px;fill:none;stroke:#f2f8fd;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .ti-text{display:flex;flex-direction:column;gap:1px;min-width:0;line-height:1.25}
 .ti-text b{font-size:13px;font-weight:600;color:#f2f8fd}
-.ti-text small{font-size:11px;color:color-mix(in srgb,var(--t) 78%,#cfe0ec)}
 /* выбранная тема просто подсвечивается — без галочек */
 .theme-item[aria-selected="true"] .ti-text b{color:#fff}
 @media(max-width:760px){
@@ -450,7 +449,6 @@ body::after{
   clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
 .ti-badge svg{width:19px;height:19px;stroke:#0a0c0e;stroke-width:2}
 .ti-text b{font-family:var(--f-display);font-weight:500;font-size:16px;letter-spacing:.06em;text-transform:uppercase;color:#fff}
-.ti-text small{font-size:11.5px;color:color-mix(in srgb,var(--t) 55%,#e8edf0);opacity:.9}
 .ti-check{width:20px;height:20px;margin-left:auto;fill:none;stroke:var(--t);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.6);transition:.2s}
 .theme-item[aria-selected="true"] .ti-check{opacity:1;transform:none;filter:drop-shadow(0 0 6px var(--t))}
 
@@ -572,7 +570,7 @@ input[type=checkbox]{accent-color:var(--accent)}
   background:radial-gradient(circle,var(--accent) 0 5px,transparent 6px),conic-gradient(from 0deg,color-mix(in srgb,var(--accent) 35%,transparent),transparent 30%);
   animation:radarSpin 3.2s linear infinite}
 @keyframes radarSpin{to{transform:rotate(360deg)}}
-.site-footer span{font-size:15px;opacity:.9;color:color-mix(in srgb,var(--accent) 70%,#fff)}
+.site-footer span{font-size:14px;opacity:.38;color:#9aa6b0}
 @media(max-width:1000px){
   .site-header{height:auto}
   .tabbar{background:linear-gradient(180deg,rgba(9,11,14,.92),rgba(5,7,9,.97));border-top:1px solid var(--line);
@@ -609,3 +607,5 @@ input[type=checkbox]{accent-color:var(--accent)}
 .t100-pbtn.active{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,transparent)}
 @media(max-width:760px){.section-heading,.side-title{font-size:14.5px;letter-spacing:.06em}}
 .talent-side-title,.talent-side-title b,.talent-game-header h2{font-family:var(--f-display);font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+/* значок «Комплекты» окрашен в цвет темы, как остальные заголовки */
+.side-title .clothes-icon{filter:none}

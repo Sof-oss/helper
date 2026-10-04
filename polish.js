@@ -4,11 +4,11 @@
 "use strict";
 const $=id=>document.getElementById(id);
 
-/* Значки снаряжения: стопка слоёв — комплекты, футболка — одиночные вещи.
+/* Значки снаряжения: противогаз — комплекты, разгрузка — одиночные вещи.
    Одни и те же в списке снаряжения и в окне «Бонусы снаряжения» */
 const svgIcon=(paths,extra)=>'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"'+(extra||"")+'>'+paths+'</svg>';
-const ICON_SET=svgIcon('<path d="M12 3.5 20.5 8 12 12.5 3.5 8z"/><path d="M3.5 12 12 16.5 20.5 12M3.5 16 12 20.5 20.5 16"/>');
-const ICON_ITEM=svgIcon('<path d="M8 4 4.5 6.3l1.9 3.2L8 8.6V20h8V8.6l1.6.9 1.9-3.2L16 4c-.7 1.2-2.2 1.9-4 1.9S8.7 5.2 8 4Z"/>');
+const ICON_SET=svgIcon('<path d="M12 3.4c-3.6 0-6 2.5-6 6.3 0 2.7 1.1 4.9 2.9 6.3l1 3.2h4.2l1-3.2c1.8-1.4 2.9-3.6 2.9-6.3 0-3.8-2.4-6.3-6-6.3z"/><circle cx="9.3" cy="9.7" r="1.8"/><circle cx="14.7" cy="9.7" r="1.8"/><path d="M10.4 14.6h3.2M9.9 19.2v1.9h4.2v-1.9M6.3 12.4l-2.6 1M17.7 12.4l2.6 1"/>');
+const ICON_ITEM=svgIcon('<path d="M8.6 3.4 6 5v4.4L4.5 11v9.6h15V11L18 9.4V5l-2.6-1.6C14.9 5.5 13.6 7 12 7s-2.9-1.5-3.4-3.6z"/><path d="M12 7v13.6M7 13.6h3M14 13.6h3M7 16.8h3M14 16.8h3"/>');
 
 /* --- полоса: база / уровень / снаряжение / таланты --- */
 const PARTS=["base","level","gear","talentOut"];
@@ -37,7 +37,7 @@ function chip(label){
  if(x.critChance||x.critDamage||x.critGaussChance||x.critGrenadeChance||x.critGaussDamage||x.critGrenadeDamage)ex.push("крит");
  if(x.cooldown||x.freeNoCooldown)ex.push("откат");
  label.querySelector("span").innerHTML="<b>"+x.name+"</b><small>+"+arr.join(" / +")+(ex.length?" · "+ex.join(", "):"")+"</small>";
- /* значок как в окне бонусов: стопка слоёв у комплектов, футболка у одиночных вещей;
+ /* значок как в окне бонусов: противогаз у комплектов, разгрузка у одиночных вещей;
     цвет значка по-прежнему показывает, к какому оружию бонусы */
  label.insertAdjacentHTML("afterbegin",(inp.dataset.type==="set"?ICON_SET:ICON_ITEM).replace('class="ic"','class="ic opt-ic"'));
  label.classList.add(free?"opt-free":"opt-paid");
@@ -79,8 +79,8 @@ if(dov){
 }
 
 /* --- окно «Бонусы снаряжения» ---
-   Подменяет renderGearInfo из app.js: две группы со своей иконкой (комплекты — стопка,
-   вещи — футболка), внутри карточки три строки по оружию с полоской вклада, шкала общая
+   Подменяет renderGearInfo из app.js: две группы со своей иконкой (комплекты — противогаз,
+   вещи — разгрузка), внутри карточки три строки по оружию с полоской вклада, шкала общая
    для комплектов и вещей; крит и откат — чипами; сумма — плотными плитками.
    openGearInfo() вызывает renderGearInfo по имени, поэтому подмена подхватывается сама */
 /* семейства: имена совпадают с классами карточек в polish.css (.gi-card.free / .gi-card.paid),
