@@ -39,7 +39,7 @@ try{const saved=localStorage.getItem(TOP100_TAB_KEY);if(TOP100_TABS.some(t=>t.ke
 const currentTab=()=>TOP100_TABS.find(t=>t.key===currentTop100Tab)||TOP100_TABS[0];
 
 /* сортировка по уровню (только для вкладок с sortLevel), поиск и фильтр по отряду (общие для всех вкладок) */
-let levelSortDesc=false,top100Query="",top100Faction="";
+let levelSortDesc=false,deltaSortDesc=false,top100Query="",top100Faction="";
 
 /* ☢ вместо медалей для 1–3 мест, цвет по месту */
 function rankCell(rank){
@@ -88,12 +88,20 @@ function top100Entries(tab){
 function top100TableMarkup(tab){
  const entries=top100Entries(tab);
  const sorted=!!tab.sortLevel&&levelSortDesc;
+ /* сортировка по приросту работает там, где у раздела есть данные TOP100_DELTA; нет прироста = 0 */
+ const deltaMap=window.TOP100_DELTA&&window.TOP100_DELTA[tab.key];
+ const hasDelta=!!deltaMap&&Object.keys(deltaMap).length>0;
+ const deltaSorted=hasDelta&&deltaSortDesc;
  if(sorted)entries.sort((a,b)=>b.row[1]-a.row[1]||a.rank-b.rank);
+ else if(deltaSorted)entries.sort((a,b)=>(deltaMap[b.row[0]]||0)-(deltaMap[a.row[0]]||0)||a.rank-b.rank);
+ const metricTh=hasDelta
+  ?'<th class="top100-sort'+(deltaSorted?" active":"")+'" data-top100-sort="delta" role="button" tabindex="0" aria-pressed="'+deltaSorted+'" title="Сортировать по приросту">'+tab.metric+'<i aria-hidden="true">▼</i></th>'
+  :'<th>'+tab.metric+'</th>';
  const levelTh=tab.sortLevel
   ?'<th class="top100-sort'+(sorted?" active":"")+'" data-top100-sort="level" role="button" tabindex="0" aria-pressed="'+sorted+'" title="Сортировать по уровню">Ур.<i aria-hidden="true">▼</i></th>'
   :'<th>Ур.</th>';
- const body=entries.length?entries.map(e=>top100RowMarkup(e.row,e.rank,sorted,tab.key)).join(""):'<tr class="t100-empty"><td colspan="4">Никого не нашли. Попробуй другой ник или сбрось фильтр</td></tr>';
- return '<div class="data-wrap top100-scroll" style="--accent:'+tab.accent+'"><table class="data-table top100-table'+(tab.sortLevel?" top100-sortable":"")+'"><thead><tr><th>#</th><th>Ник</th>'+levelTh+'<th>'+tab.metric+'</th></tr></thead><tbody>'+body+'</tbody></table></div>';
+ const body=entries.length?entries.map(e=>top100RowMarkup(e.row,e.rank,sorted||deltaSorted,tab.key)).join(""):'<tr class="t100-empty"><td colspan="4">Никого не нашли. Попробуй другой ник или сбрось фильтр</td></tr>';
+ return '<div class="data-wrap top100-scroll" style="--accent:'+tab.accent+'"><table class="data-table top100-table'+(tab.sortLevel?" top100-sortable":"")+'"><thead><tr><th>#</th><th>Ник</th>'+levelTh+metricTh+'</tr></thead><tbody>'+body+'</tbody></table></div>';
 }
 
 /* в свёрнутом виде (телефон) заголовок фильтра показывает, что выбрано */
@@ -130,15 +138,16 @@ function ensureShell(){
 }
 function renderTop100(){ensureShell();renderTop100Tabs();renderFactions();renderTop100Table()}
 
-function toggleLevelSort(refocus){
- levelSortDesc=!levelSortDesc;
+function toggleSort(kind,refocus){
+ if(kind==="delta"){deltaSortDesc=!deltaSortDesc;levelSortDesc=false}
+ else{levelSortDesc=!levelSortDesc;deltaSortDesc=false}
  renderTop100Table();
- if(refocus){const th=document.querySelector("[data-top100-sort]");if(th)th.focus()}
+ if(refocus){const th=document.querySelector('[data-top100-sort="'+kind+'"]');if(th)th.focus()}
 }
 
 document.addEventListener("click",e=>{
  const sort=e.target.closest("[data-top100-sort]");
- if(sort){toggleLevelSort(false);return}
+ if(sort){toggleSort(sort.dataset.top100Sort,false);return}
  /* на телефоне список отрядов открывается по кнопке */
  const toggle=e.target.closest("#top100FactionsToggle");
  if(toggle){
@@ -161,7 +170,7 @@ document.addEventListener("click",e=>{
  /* смена раздела проходит через View Transition, если браузер умеет */
  const swap=()=>{
   currentTop100Tab=btn.dataset.top100Tab;
-  levelSortDesc=false; // сортировка не переносится на другую вкладку
+  levelSortDesc=false;deltaSortDesc=false; // сортировка не переносится на другую вкладку
   try{localStorage.setItem(TOP100_TAB_KEY,currentTop100Tab)}catch{}
   renderTop100();
  };
@@ -172,7 +181,7 @@ document.addEventListener("keydown",e=>{
  const sort=e.target.closest&&e.target.closest("[data-top100-sort]");
  if(!sort)return;
  e.preventDefault();
- toggleLevelSort(true);
+ toggleSort(sort.dataset.top100Sort,true);
 });
 
 /* дату отдаёт top100-data.js, в разметке только заглушка */
