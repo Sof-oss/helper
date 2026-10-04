@@ -240,8 +240,14 @@ input[type="text"]:focus,input[type="search"]:focus,input[type="number"]:focus,.
 @view-transition{navigation:auto}
 .site-header{view-transition-name:app-header}
 .tabbar{view-transition-name:app-tabbar}
-::view-transition-old(app-header),::view-transition-new(app-header),
-::view-transition-old(app-tabbar),::view-transition-new(app-tabbar){animation-duration:.18s}
+::view-transition-old(app-header),::view-transition-new(app-header){animation-duration:.18s}
+/* нижнее меню не растворяется (полупрозрачные снимки старой и новой панели давали мигание
+   на телефонах): старый снимок скрыт, новая панель сразу на месте */
+::view-transition-group(app-tabbar),::view-transition-new(app-tabbar){animation:none}
+::view-transition-old(app-tabbar){display:none}
+/* шапка и нижнее меню поверх анимированных таблиц (#infoGroups, #top100TableWrap):
+   иначе снимки таблиц на миг перекрывали панель */
+::view-transition-group(app-header),::view-transition-group(app-tabbar){z-index:100}
 ::view-transition-old(root),::view-transition-new(root){animation:none}
 #top100TableWrap{view-transition-name:leaderboard}
 #infoGroups{view-transition-name:infogroups}
@@ -573,8 +579,8 @@ input[type=checkbox]{accent-color:var(--accent)}
 .site-footer span{font-size:14px;opacity:.38;color:#9aa6b0}
 @media(max-width:1000px){
   .site-header{height:auto}
-  .tabbar{background:linear-gradient(180deg,rgba(9,11,14,.92),rgba(5,7,9,.97));border-top:1px solid var(--line);
-    -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+  /* без backdrop-filter: размытие под фиксированной панелью перерисовывалось при переходах и мигало */
+  .tabbar{background:linear-gradient(180deg,rgba(9,11,14,.97),rgba(5,7,9,.99));border-top:1px solid var(--line)}
   .tabbar a span{font-family:var(--f-display);font-weight:500;letter-spacing:.06em;text-transform:uppercase;font-size:10.5px}
   .tabbar a.active:after{width:36px;height:3px;border-radius:0}
 }
@@ -609,3 +615,6 @@ input[type=checkbox]{accent-color:var(--accent)}
 .talent-side-title,.talent-side-title b,.talent-game-header h2{font-family:var(--f-display);font-weight:500;letter-spacing:.06em;text-transform:uppercase}
 /* значок «Комплекты» окрашен в цвет темы, как остальные заголовки */
 .side-title .clothes-icon{filter:none}
+/* без синей вспышки системной подсветки касания на телефонах; отклик — лёгкое затемнение пункта */
+.tabbar a,.main-nav a,.logo{-webkit-tap-highlight-color:transparent}
+.tabbar a:active{background:rgba(255,255,255,.04)}
