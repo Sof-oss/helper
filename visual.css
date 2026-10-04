@@ -638,11 +638,14 @@ input[type=checkbox]{accent-color:var(--accent)}
   .site-footer span{font-size:12px}
 }
 
-/* ---------- Эмблемы группировок в переключателе тем: полноцветные шевроны без плашки ---------- */
-.tp-badge,.ti-badge{background:none;box-shadow:none;clip-path:none;border-radius:0;border:0}
-.tp-badge{width:36px;height:36px}
-.ti-badge{width:42px;height:42px;flex-basis:42px}
-.tp-badge svg,.ti-badge svg{width:100%;height:100%;fill:none;stroke:none;overflow:visible;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
-.theme-item .ti-badge svg{transition:transform .2s ease,filter .2s ease}
-.theme-item:hover .ti-badge svg,.theme-item[aria-selected="true"] .ti-badge svg{transform:scale(1.06);filter:drop-shadow(0 2px 3px rgba(0,0,0,.6)) drop-shadow(0 0 6px color-mix(in srgb,var(--t) 60%,transparent))}
-@media(max-width:760px){.tp-badge{width:32px;height:32px}}
+/* ---------- Значки группировок: минималистичные силуэты на тёмной плитке ----------
+   В списке — силуэт цвета группировки, у выбранной темы и на кнопке в шапке плитка залита цветом */
+.tp-badge,.ti-badge{clip-path:none;border:0;border-radius:8px;
+  background:color-mix(in srgb,var(--t) 14%,#101317);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--t) 45%,transparent);transition:background .2s ease}
+.tp-badge{width:34px;height:34px;background:var(--t);box-shadow:none}
+.ti-badge{width:38px;height:38px;flex-basis:38px}
+.tp-badge svg,.ti-badge svg{width:20px;height:20px;fill:var(--t);stroke:none;transition:fill .2s ease}
+.ti-badge svg{width:22px;height:22px}
+.tp-badge svg,.theme-item[aria-selected="true"] .ti-badge svg{fill:#0d1014}
+.theme-item[aria-selected="true"] .ti-badge{background:var(--t);box-shadow:none}
+@media(max-width:760px){.tp-badge{width:30px;height:30px}.tp-badge svg{width:18px;height:18px}}
