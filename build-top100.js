@@ -5,9 +5,10 @@
  * По умолчанию CSV берутся из ./top100, результат пишется в ./top100-data.js
  *
  * Кроме самих данных скрипт собирает недельные изменения:
- *  1. TOP100_DELTA — прирост метрики за неделю (только там, где игра отдаёт колонку «Δ …»);
- *  2. TOP100_RANK  — изменение места: сравниваем с прошлым снимком
- *                    top100/history/<год-Wнеделя>.json, который скрипт складывает сам.
+ *  1. TOP100_DELTA — прирост метрики за неделю;
+ *  2. TOP100_RANK  — изменение места.
+ * Оба считаются по снимку прошлой недели top100/history/<год-Wнеделя>.json,
+ * который скрипт складывает сам (ник -> [место, значение]).
  * Оба объекта: ник -> число (+ вверх, − вниз), null — новый в списке, нет ключа — данных нет. */
 const fs = require("fs");
 const path = require("path");
@@ -36,24 +37,28 @@ function parseCsv(text) {
 
 const INACTIVE_MARK = "📡";
 
-/* число из выгрузки: «1 839», «217 843», «+5 482» (обычные и неразрывные пробелы) */
+/* число из выгрузки: «1 839», «217 843», «+5 482» (обычные и неразрывные пробелы).
+   Прочерк и пустое поле дают NaN, дальше такие значения пропускаем */
 const toNumber = v => Number(String(v).replace(/[\s\u00A0\u202F]/g, ""));
 
+/* Колонка «Δ» в выгрузках игры считается за разный срок: у репутации за последнее обновление,
+   у боссов за несколько. Верим ей только там, где проверено, и только пока нет своего снимка со значениями */
+const TRUSTED_CSV_DELTA = new Set(["reputation"]);
+
 /* колонки: 0 место, 1 ник, 2 уровень, 3 значение, дальше «Δ Ур.» и «Δ <метрика>».
-   Если место пропущено, настоящее сохраняем пятым элементом, чтобы нижние не сдвигались.
-   Если в выгрузке есть колонка изменения метрики, её значения возвращаем отдельно. */
+   Если место пропущено, настоящее сохраняем пятым элементом, чтобы нижние не сдвигались. */
 function csvToRows(filePath) {
   const table = parseCsv(fs.readFileSync(filePath, "utf8"));
   const head = (table[0] || []).map(h => h.trim());
-  const rows = table.slice(1); // без заголовка
+  const rows = table.slice(1);
   const metricDeltaIdx = head.length > 4 && /^Δ/i.test(head[head.length - 1]) ? head.length - 1 : -1;
   const metricDelta = {};
   const parsed = rows.map(([rank, nick, level, value, ...rest], i) => {
     const inactive = nick.startsWith(INACTIVE_MARK) ? 1 : 0;
     const cleanNick = inactive ? nick.slice(INACTIVE_MARK.length) : nick;
     if (metricDeltaIdx > 0) {
-      const raw = rest[metricDeltaIdx - 4];
-      if (raw !== undefined && String(raw).trim() !== "") metricDelta[cleanNick] = toNumber(raw);
+      const n = toNumber(rest[metricDeltaIdx - 4]);
+      if (Number.isFinite(n)) metricDelta[cleanNick] = n;
     }
     const row = [cleanNick, toNumber(level), toNumber(value), inactive];
     if (toNumber(rank) !== i + 1) row.push(toNumber(rank));
@@ -77,7 +82,7 @@ const inputDir = process.argv[2] || path.join(__dirname, "top100");
 const outputFile = process.argv[3] || path.join(process.cwd(), "top100-data.js");
 const historyDir = path.join(inputDir, "history");
 
-/* ---------- снимки по неделям (для изменения мест) ---------- */
+/* ---------- снимки по неделям ---------- */
 /* ключ недели по Москве вида 2026-W40, неделя начинается с понедельника */
 function weekKey(date) {
   const msk = new Date(date.toLocaleString("en-US", { timeZone: "Europe/Moscow" }));
@@ -98,39 +103,69 @@ function readSnapshots() {
     .map(f => ({ week: f.replace(".json", ""), data: JSON.parse(fs.readFileSync(path.join(historyDir, f), "utf8")) }));
 }
 
+/* старые снимки хранили только место числом, новые — [место, значение] */
+function readEntry(v) {
+  if (Array.isArray(v)) return { rank: v[0], value: v[1] };
+  return { rank: v, value: undefined };
+}
+
 /* ---------- данные ---------- */
 const blocks = [];
+const csvDeltas = {};
 const metricDeltas = {};
 const rankDeltas = {};
 const snapshot = {};
 let csvDeltaCategories = 0;
+const current = {};   // ключ -> ник -> {rank, value}
 
 for (const { file, varName, key } of SOURCES) {
   const filePath = path.join(inputDir, file);
   if (!fs.existsSync(filePath)) throw new Error("Не найден файл: " + filePath);
   const { rows, metricDelta, hasDeltaColumn } = csvToRows(filePath);
   if (hasDeltaColumn) csvDeltaCategories++;
-  metricDeltas[key] = metricDelta;
-  const ranks = {};
-  rows.forEach((r, i) => { ranks[r[0]] = r[4] || i + 1; });   // ник -> место
-  snapshot[key] = ranks;
+  csvDeltas[key] = metricDelta;
+  current[key] = {};
+  snapshot[key] = {};
+  rows.forEach((r, i) => {
+    const rank = r[4] || i + 1;
+    current[key][r[0]] = { rank, value: r[2] };
+    snapshot[key][r[0]] = [rank, r[2]];
+  });
   blocks.push(`window.${varName}=[\n${rows.map(r => JSON.stringify(r)).join(",\n")}\n];`);
 }
 
-/* изменение места считаем от ближайшего снимка предыдущей недели */
+/* сравниваем с ближайшим снимком предыдущей недели */
 const previous = readSnapshots().filter(s => s.week < thisWeek).pop() || null;
 let rankChanges = 0;
-if (previous) {
-  for (const { key } of SOURCES) {
-    const prev = (previous.data && previous.data[key]) || {};
-    const rankMoves = {};
-    for (const nick of Object.keys(snapshot[key])) {
-      const was = prev[nick];
-      if (was === undefined) rankMoves[nick] = null;                 // новичок в списке
-      else if (was !== snapshot[key][nick]) { rankMoves[nick] = was - snapshot[key][nick]; rankChanges++; }
+const deltaSource = {};   // для лога: откуда взяты приросты по разделу
+
+for (const { key } of SOURCES) {
+  const prev = (previous && previous.data && previous.data[key]) || null;
+  const prevHasValues = !!prev && Object.values(prev).some(v => Array.isArray(v));
+  const rankMoves = {};
+  const valueMoves = {};
+
+  for (const nick of Object.keys(current[key])) {
+    const now = current[key][nick];
+    if (prev) {
+      const was = prev[nick] === undefined ? undefined : readEntry(prev[nick]);
+      if (!was) rankMoves[nick] = null;                              // новичок в списке
+      else if (was.rank !== now.rank) { rankMoves[nick] = was.rank - now.rank; rankChanges++; }
+      if (prevHasValues && was && was.value !== undefined) valueMoves[nick] = now.value - was.value;
     }
-    rankDeltas[key] = rankMoves;
   }
+
+  if (prevHasValues) {
+    metricDeltas[key] = valueMoves;
+    deltaSource[key] = "снимок";
+  } else if (TRUSTED_CSV_DELTA.has(key)) {
+    metricDeltas[key] = csvDeltas[key];
+    deltaSource[key] = "csv";
+  } else {
+    metricDeltas[key] = {};
+    deltaSource[key] = "нет данных";
+  }
+  if (previous) rankDeltas[key] = rankMoves;
 }
 
 /* нули не пишем: отсутствие ключа = «без изменений» */
@@ -145,11 +180,15 @@ const compact = obj => {
 };
 
 /* складываем снимок текущей недели (повторный запуск в ту же неделю перезаписывает).
-   Формат с отступами — чтобы в git было видно, кто куда сдвинулся */
+   Каждая запись в одну строку, чтобы git-diff читался */
 fs.mkdirSync(historyDir, { recursive: true });
-fs.writeFileSync(path.join(historyDir, thisWeek + ".json"), JSON.stringify(snapshot, null, 1) + "\n");
+const snapText = "{\n" + Object.keys(snapshot).map(k =>
+  ` ${JSON.stringify(k)}: {\n` +
+  Object.keys(snapshot[k]).map(n => `  ${JSON.stringify(n)}: ${JSON.stringify(snapshot[k][n])}`).join(",\n") +
+  "\n }").join(",\n") + "\n}\n";
+fs.writeFileSync(path.join(historyDir, thisWeek + ".json"), snapText);
 
-/* дата сборки по Москве, ДД.ММ.ГГГГ ЧЧ:ММ:СС. Хранится в data-файле, чтобы шла вместе с данными */
+/* дата сборки по Москве, ДД.ММ.ГГГГ ЧЧ:ММ:СС */
 const p = Object.fromEntries(new Intl.DateTimeFormat("ru-RU", {
   timeZone: "Europe/Moscow", day: "2-digit", month: "2-digit", year: "numeric",
   hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
@@ -158,7 +197,7 @@ const stamp = `${p.day}.${p.month}.${p.year} ${p.hour}:${p.minute}:${p.second}`;
 
 const header = "/* Топ-100: [ник, уровень, значение, покинул отряд (0/1)[, место]]. Место = индекс+1, если не указано пятым элементом */\n";
 const notes =
-  "/* TOP100_DELTA — прирост метрики за неделю (из колонки «Δ …» выгрузки), null — не было данных */\n" +
+  "/* TOP100_DELTA — прирост метрики к прошлой неделе (по снимку), null — не было данных */\n" +
   "/* TOP100_RANK  — изменение места к прошлой неделе: + поднялся, − опустился, null — новичок */\n";
 fs.writeFileSync(outputFile,
   header +
@@ -169,6 +208,7 @@ fs.writeFileSync(outputFile,
   `window.TOP100_HISTORY=${JSON.stringify({ week: thisWeek, from: previous ? previous.week : null })}\n` +
   blocks.join("\n") + "\n");
 console.log("Готово:", outputFile, "| дата:", stamp,
-  "| колонка Δ есть в", csvDeltaCategories + "/" + SOURCES.length, "разделах",
   "| прошлый снимок:", previous ? previous.week : "нет",
   "| смен мест:", rankChanges);
+console.log("Приросты по разделам:", Object.entries(deltaSource).map(([k, v]) => k + "=" + v).join(", "));
+if (!previous) console.log("Прошлой недели в history нет: стрелки мест появятся после следующего запуска в новую неделю.");
