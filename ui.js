@@ -73,6 +73,8 @@ window.__roll = function (el, text) {
       tgl.style.setProperty("--t2", t.color2 || t.color);
       var badge = tgl.querySelector(".tp-badge svg");
       if (badge) badge.innerHTML = t.symbol;
+      var nm = tgl.querySelector(".tp-name");
+      if (nm) nm.textContent = t.label;
       tgl.setAttribute("title", "Тема: " + t.label);
       tgl.setAttribute("aria-label", "Тема интерфейса: " + t.label + ". Нажмите, чтобы выбрать другую");
     }
@@ -98,6 +100,7 @@ window.__roll = function (el, text) {
     toggle.setAttribute("aria-controls", "themeList");
     toggle.setAttribute("aria-label", "Выбрать тему интерфейса");
     toggle.innerHTML = '<span class="tp-badge"><svg viewBox="0 0 24 24" aria-hidden="true"></svg></span>'
+      + '<span class="tp-text"><small>Группировка</small><b class="tp-name"></b></span>'
       + '<svg class="tp-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
     box.appendChild(toggle);
 
@@ -106,7 +109,7 @@ window.__roll = function (el, text) {
     list.id = "themeList";
     list.setAttribute("role", "listbox");
     list.setAttribute("aria-label", "Темы интерфейса");
-    list.innerHTML = '<div class="tl-head"><i></i>Тема интерфейса</div>';
+    list.innerHTML = '<div class="tl-head"><i></i>Выбор группировки<span>5</span></div>';
     THEMES.forEach(function (t) {
       var b = d.createElement("button");
       b.type = "button";
@@ -115,8 +118,9 @@ window.__roll = function (el, text) {
       b.setAttribute("role", "option");
       b.style.setProperty("--t", t.color);
       b.style.setProperty("--t2", t.color2 || t.color);
-      b.innerHTML = '<span class="ti-badge"><svg viewBox="0 0 24 24" aria-hidden="true">' + t.symbol + "</svg></span>"
-        + '<span class="ti-text"><b>' + t.label + "</b><small>" + t.tone + "</small></span>";
+      b.innerHTML = '<span class="ti-thumb" aria-hidden="true"></span><span class="ti-badge"><svg viewBox="0 0 24 24" aria-hidden="true">' + t.symbol + "</svg></span>"
+        + '<span class="ti-text"><b>' + t.label + "</b><small>" + t.tone + "</small></span>"
+        + '<svg class="ti-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.2 4.2L19 7"/></svg>';
       list.appendChild(b);
     });
     box.appendChild(list);
@@ -128,7 +132,11 @@ window.__roll = function (el, text) {
     toggle.addEventListener("click", function () { setOpen(!box.classList.contains("open")); });
     box.addEventListener("click", function (e) {
       var b = e.target.closest("[data-theme-btn]");
-      if (b) { applyTheme(b.dataset.themeBtn); setOpen(false); }
+      if (b) {
+        var key = b.dataset.themeBtn;
+        setOpen(false);
+        if (key !== current) window.__vt(function () { applyTheme(key); });
+      }
     });
     d.addEventListener("click", function (e) { if (!box.contains(e.target)) setOpen(false); });
     d.addEventListener("keydown", function (e) { if (e.key === "Escape") setOpen(false); });

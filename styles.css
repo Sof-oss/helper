@@ -3,9 +3,9 @@
 html{background:#060d13}
 html,body{margin:0;min-height:100%;color:#dce7f2;font-family:"Segoe UI",Arial,sans-serif;overflow-x:hidden}body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;font-size:14px}
 /* размер фона по ширине экрана, границы те же, что у preload в <head> */
-:root{--bg-img:url("assets/bg-zone.webp")}
-@media(max-width:1366px){:root{--bg-img:url("assets/bg-zone-1280.webp")}}
-@media(max-width:760px){:root{--bg-img:url("assets/bg-zone-m.webp")}}
+:root{--bg-img:url("assets/bg-merc.webp")}:root[data-theme="merc"]{--bg-img:url("assets/bg-merc.webp")}:root[data-theme="dolg"]{--bg-img:url("assets/bg-dolg.webp")}:root[data-theme="svoboda"]{--bg-img:url("assets/bg-svoboda.webp")}:root[data-theme="science"]{--bg-img:url("assets/bg-science.webp")}:root[data-theme="monolith"]{--bg-img:url("assets/bg-monolith.webp")}
+@media(max-width:1366px){:root{--bg-img:url("assets/bg-merc-1280.webp")}:root[data-theme="merc"]{--bg-img:url("assets/bg-merc-1280.webp")}:root[data-theme="dolg"]{--bg-img:url("assets/bg-dolg-1280.webp")}:root[data-theme="svoboda"]{--bg-img:url("assets/bg-svoboda-1280.webp")}:root[data-theme="science"]{--bg-img:url("assets/bg-science-1280.webp")}:root[data-theme="monolith"]{--bg-img:url("assets/bg-monolith-1280.webp")}}
+@media(max-width:760px){:root{--bg-img:url("assets/bg-merc-m.webp")}:root[data-theme="merc"]{--bg-img:url("assets/bg-merc-m.webp")}:root[data-theme="dolg"]{--bg-img:url("assets/bg-dolg-m.webp")}:root[data-theme="svoboda"]{--bg-img:url("assets/bg-svoboda-m.webp")}:root[data-theme="science"]{--bg-img:url("assets/bg-science-m.webp")}:root[data-theme="monolith"]{--bg-img:url("assets/bg-monolith-m.webp")}}
 /* фон закреплён за окном, а не за страницей: слой фиксированной высоты в экран, поэтому картинка одинаковая на всех страницах
    и не растягивается, не едет при прокрутке и не прыгает при смене высоты контента (вкладки, поиск, фильтры).
    100lvh — чтобы на телефоне фон не дёргался, когда браузер прячет адресную строку; 100vh — запасной вариант.
@@ -271,7 +271,7 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 /* Боковая панель талантов */
 .talent-game-sidebar{flex:0 0 320px;width:320px;height:100%;padding:16px 14px;z-index:2;background-color:rgba(11,12,13,.72);border-right:1px solid rgba(72,78,84,.5);background-image:linear-gradient(rgba(72,78,84,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(72,78,84,.12) 1px,transparent 1px);background-size:12px 12px;overflow:auto}
 .talent-side-title{display:flex;justify-content:space-between;align-items:center;font-family:"Rubik Dirt","Segoe UI",sans-serif;font-size:22px;margin-bottom:10px}
-.talent-side-title b{font:600 13px "Segoe UI";color:#aaa}
+.talent-side-title b{font:600 13px "Segoe UI",Arial,sans-serif;color:#aaa}
 /* круговой индикатор очков талантов */
 .talent-gauge{position:relative;width:118px;height:118px;margin:2px auto 16px}
 .talent-gauge-ticks{position:absolute;inset:-6px;border-radius:50%;background:repeating-conic-gradient(rgba(222,222,216,.55) 0deg 1.4deg,transparent 1.4deg 15deg);-webkit-mask-image:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 calc(100% - 5px));mask-image:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 calc(100% - 5px))}
@@ -363,7 +363,7 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .talent-node-game.on-path:not(.selected){box-shadow:inset 0 0 0 1px rgba(0,0,0,.36),0 0 14px rgba(84,191,255,.4)}
 .talent-node-art{position:absolute;inset:0;display:grid;place-items:center;font-size:40px;color:#ddd;background:#111;overflow:hidden}
 .talent-node-art img{display:block;width:100%;height:100%;object-fit:cover}
-.talent-node-rank{position:absolute;right:5px;bottom:3px;color:#fff;text-shadow:0 1px 0 #000,1px 0 #000,-1px 0 #000;font:600 13px/1 "Segoe UI";z-index:1}
+.talent-node-rank{position:absolute;right:5px;bottom:3px;color:#fff;text-shadow:0 1px 0 #000,1px 0 #000,-1px 0 #000;font:600 13px/1 "Segoe UI",Arial,sans-serif;z-index:1}
 
 /* бонусы снаряжения, жетоны */
 .gear-info-window{width:min(760px,92vw);height:auto;max-height:86vh}
