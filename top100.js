@@ -48,16 +48,16 @@ function rankCell(rank){
 }
 const dotMarkup=(f,cls)=>f?'<i class="'+cls+'" style="--f:'+f.color+'" title="'+f.label+'"></i>':"";
 
-/* изменение места к прошлой неделе (top100-data.js -> TOP100_RANK): данных может не быть */
+/* изменение места с прошлого обновления (top100-data.js -> TOP100_RANK): данных может не быть */
 function rankMoveMarkup(nick,tabKey){
  const d=window.TOP100_RANK&&window.TOP100_RANK[tabKey];
  if(!d||!(nick in d))return "";
  const v=d[nick];
  if(v===null)return '<i class="t100-move new" title="Впервые в списке">new</i>';
  if(!v)return "";
- return '<i class="t100-move '+(v>0?"up":"down")+'" title="Место за неделю: '+(v>0?"+":"")+v+'">'+(v>0?"▲":"▼")+Math.abs(v)+'</i>';
+ return '<i class="t100-move '+(v>0?"up":"down")+'" title="Место с прошлого обновления: '+(v>0?"+":"")+v+'">'+(v>0?"▲":"▼")+Math.abs(v)+'</i>';
 }
-/* прирост метрики за неделю (TOP100_DELTA, есть только там, где игра отдаёт колонку «Δ …») */
+/* прирост метрики с прошлого обновления (TOP100_DELTA) */
 function metricDeltaMarkup(nick,tabKey){
  const d=window.TOP100_DELTA&&window.TOP100_DELTA[tabKey];
  if(!d||!(nick in d))return "";

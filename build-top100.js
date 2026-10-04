@@ -4,11 +4,12 @@
  * Запуск: node build-top100.js [папка_с_csv] [путь_к_top100-data.js]
  * По умолчанию CSV берутся из ./top100, результат пишется в ./top100-data.js
  *
- * Кроме самих данных скрипт собирает недельные изменения:
- *  1. TOP100_DELTA — прирост метрики за неделю;
+ * Кроме самих данных скрипт считает изменения с прошлого обновления:
+ *  1. TOP100_DELTA — прирост метрики;
  *  2. TOP100_RANK  — изменение места.
- * Оба считаются по снимку прошлой недели top100/history/<год-Wнеделя>.json,
+ * Оба считаются по снимку прошлого запуска top100/history/<дата_время>.json,
  * который скрипт складывает сам (ник -> [место, значение]).
+ * Если CSV не изменились с прошлого запуска, новый снимок не создаётся и сравнение идёт с тем, что было до него.
  * Оба объекта: ник -> число (+ вверх, − вниз), null — новый в списке, нет ключа — данных нет. */
 const fs = require("fs");
 const path = require("path");
@@ -82,31 +83,42 @@ const inputDir = process.argv[2] || path.join(__dirname, "top100");
 const outputFile = process.argv[3] || path.join(process.cwd(), "top100-data.js");
 const historyDir = path.join(inputDir, "history");
 
-/* ---------- снимки по неделям ---------- */
-/* ключ недели по Москве вида 2026-W40, неделя начинается с понедельника */
-function weekKey(date) {
-  const msk = new Date(date.toLocaleString("en-US", { timeZone: "Europe/Moscow" }));
-  const d = new Date(Date.UTC(msk.getFullYear(), msk.getMonth(), msk.getDate()));
-  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7) + 3); // четверг этой недели
-  const firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
-  firstThursday.setUTCDate(firstThursday.getUTCDate() - ((firstThursday.getUTCDay() + 6) % 7) + 3);
-  const week = 1 + Math.round((d - firstThursday) / (7 * 24 * 3600 * 1000));
-  return d.getUTCFullYear() + "-W" + String(week).padStart(2, "0");
-}
-const thisWeek = weekKey(new Date());
+/* ---------- дата сборки по Москве ---------- */
+const p = Object.fromEntries(new Intl.DateTimeFormat("ru-RU", {
+  timeZone: "Europe/Moscow", day: "2-digit", month: "2-digit", year: "numeric",
+  hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
+}).formatToParts(new Date()).map(x => [x.type, x.value]));
+const stamp = `${p.day}.${p.month}.${p.year} ${p.hour}:${p.minute}:${p.second}`;
+const snapId = `${p.year}-${p.month}-${p.day}_${p.hour}-${p.minute}-${p.second}`;   // имя снимка этого запуска
+const KEEP_SNAPSHOTS = 50;                                                           // старше удаляем (в git они остаются)
 
+/* ---------- снимки запусков ----------
+   Новые: 2026-10-04_12-30-17.json. Старые недельные (2026-W40.json) тоже читаем, они считаются самыми давними */
 function readSnapshots() {
   if (!fs.existsSync(historyDir)) return [];
-  return fs.readdirSync(historyDir)
-    .filter(f => /^\d{4}-W\d{2}\.json$/.test(f))
-    .sort()
-    .map(f => ({ week: f.replace(".json", ""), data: JSON.parse(fs.readFileSync(path.join(historyDir, f), "utf8")) }));
+  const files = fs.readdirSync(historyDir).filter(f => /^(\d{4}-W\d{2}|\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})\.json$/.test(f));
+  const weekly = files.filter(f => /-W\d{2}\.json$/.test(f)).sort();
+  const timed = files.filter(f => !/-W\d{2}\.json$/.test(f)).sort();
+  return weekly.concat(timed).map(f => ({ id: f.replace(".json", ""), data: JSON.parse(fs.readFileSync(path.join(historyDir, f), "utf8")) }));
 }
 
 /* старые снимки хранили только место числом, новые — [место, значение] */
 function readEntry(v) {
   if (Array.isArray(v)) return { rank: v[0], value: v[1] };
   return { rank: v, value: undefined };
+}
+
+/* данные снимка совпадают с текущими (старый формат без значений за совпадение не считаем) */
+function sameData(old, now) {
+  const keys = Object.keys(now);
+  if (!old || Object.keys(old).length !== keys.length) return false;
+  return keys.every(k => {
+    const a = old[k], b = now[k];
+    if (!a) return false;
+    const nicks = Object.keys(b);
+    if (Object.keys(a).length !== nicks.length) return false;
+    return nicks.every(n => Array.isArray(a[n]) && a[n][0] === b[n][0] && a[n][1] === b[n][1]);
+  });
 }
 
 /* ---------- данные ---------- */
@@ -134,8 +146,11 @@ for (const { file, varName, key } of SOURCES) {
   blocks.push(`window.${varName}=[\n${rows.map(r => JSON.stringify(r)).join(",\n")}\n];`);
 }
 
-/* сравниваем с ближайшим снимком предыдущей недели */
-const previous = readSnapshots().filter(s => s.week < thisWeek).pop() || null;
+/* сравниваем со снимком прошлого запуска; если данные не менялись, берём тот, что был до него */
+const snaps = readSnapshots();
+const latest = snaps[snaps.length - 1] || null;
+const unchanged = !!latest && sameData(latest.data, snapshot);
+const previous = unchanged ? (snaps[snaps.length - 2] || null) : latest;
 let rankChanges = 0;
 const deltaSource = {};   // для лога: откуда взяты приросты по разделу
 
@@ -179,36 +194,35 @@ const compact = obj => {
   return out;
 };
 
-/* складываем снимок текущей недели (повторный запуск в ту же неделю перезаписывает).
+/* складываем снимок этого запуска (если данные те же, что в последнем снимке, не плодим дубли).
    Каждая запись в одну строку, чтобы git-diff читался */
 fs.mkdirSync(historyDir, { recursive: true });
-const snapText = "{\n" + Object.keys(snapshot).map(k =>
-  ` ${JSON.stringify(k)}: {\n` +
-  Object.keys(snapshot[k]).map(n => `  ${JSON.stringify(n)}: ${JSON.stringify(snapshot[k][n])}`).join(",\n") +
-  "\n }").join(",\n") + "\n}\n";
-fs.writeFileSync(path.join(historyDir, thisWeek + ".json"), snapText);
-
-/* дата сборки по Москве, ДД.ММ.ГГГГ ЧЧ:ММ:СС */
-const p = Object.fromEntries(new Intl.DateTimeFormat("ru-RU", {
-  timeZone: "Europe/Moscow", day: "2-digit", month: "2-digit", year: "numeric",
-  hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
-}).formatToParts(new Date()).map(x => [x.type, x.value]));
-const stamp = `${p.day}.${p.month}.${p.year} ${p.hour}:${p.minute}:${p.second}`;
+if (!unchanged) {
+  const snapText = "{\n" + Object.keys(snapshot).map(k =>
+    ` ${JSON.stringify(k)}: {\n` +
+    Object.keys(snapshot[k]).map(n => `  ${JSON.stringify(n)}: ${JSON.stringify(snapshot[k][n])}`).join(",\n") +
+    "\n }").join(",\n") + "\n}\n";
+  fs.writeFileSync(path.join(historyDir, snapId + ".json"), snapText);
+  /* храним последние KEEP_SNAPSHOTS снимков */
+  const all = readSnapshots();
+  all.slice(0, Math.max(0, all.length - KEEP_SNAPSHOTS)).forEach(sn => fs.unlinkSync(path.join(historyDir, sn.id + ".json")));
+}
 
 const header = "/* Топ-100: [ник, уровень, значение, покинул отряд (0/1)[, место]]. Место = индекс+1, если не указано пятым элементом */\n";
 const notes =
-  "/* TOP100_DELTA — прирост метрики к прошлой неделе (по снимку), null — не было данных */\n" +
-  "/* TOP100_RANK  — изменение места к прошлой неделе: + поднялся, − опустился, null — новичок */\n";
+  "/* TOP100_DELTA — прирост метрики с прошлого обновления (по снимку), null — не было данных */\n" +
+  "/* TOP100_RANK  — изменение места с прошлого обновления: + поднялся, − опустился, null — новичок */\n";
 fs.writeFileSync(outputFile,
   header +
   `window.TOP100_UPDATED=${JSON.stringify(stamp)};\n` +
   notes +
   `window.TOP100_DELTA=${JSON.stringify(compact(metricDeltas))};\n` +
   `window.TOP100_RANK=${JSON.stringify(compact(rankDeltas))};\n` +
-  `window.TOP100_HISTORY=${JSON.stringify({ week: thisWeek, from: previous ? previous.week : null })}\n` +
+  `window.TOP100_HISTORY=${JSON.stringify({ id: unchanged && latest ? latest.id : snapId, from: previous ? previous.id : null })}\n` +
   blocks.join("\n") + "\n");
 console.log("Готово:", outputFile, "| дата:", stamp,
-  "| прошлый снимок:", previous ? previous.week : "нет",
+  "| сравнение с:", previous ? previous.id : "нет",
   "| смен мест:", rankChanges);
 console.log("Приросты по разделам:", Object.entries(deltaSource).map(([k, v]) => k + "=" + v).join(", "));
-if (!previous) console.log("Прошлой недели в history нет: стрелки мест появятся после следующего запуска в новую неделю.");
+if (unchanged) console.log("Данные не изменились с прошлого запуска, новый снимок не добавлен.");
+if (!previous) console.log("Прошлого снимка нет: стрелки появятся после следующего обновления с новыми данными.");
