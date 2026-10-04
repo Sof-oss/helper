@@ -1,0 +1,11 @@
+{
+  "name": "heart-of-the-zone",
+  "private": true,
+  "description": "Сайт-помощник для игры «Сердце Зоны». Сборка: npm install, затем node build.js",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.0"
+  }
+}

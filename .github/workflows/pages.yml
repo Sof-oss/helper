@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # вся история: build.js берёт даты коммитов для lastmod в sitemap.xml
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -31,6 +33,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci   # esbuild для сжатия css и js
 
       - name: Build
         run: node build.js

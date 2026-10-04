@@ -11,14 +11,12 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<!-- шрифт для подписи внизу (.site-footer) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- свои шрифты (assets/fonts, @font-face в styles.css); Oswald нужен сразу — заголовки и меню -->
+<link rel="preload" href="/assets/fonts/oswald-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/styles.css">
 <link rel="stylesheet" href="/notfound.css">
-<link rel="stylesheet" href="visual.css">
+<link rel="stylesheet" href="/visual.css">
 </head>
 <body>
 <header class="site-header">
@@ -54,4 +52,4 @@
 <!-- подпись автора -->
 <footer class="site-footer"><span>© by Sof</span></footer>
 
-<script src="ui.js"></script><script src="/nav.js"></script></body></html>
+<script src="/ui.js"></script><script src="/nav.js"></script></body></html>
