@@ -618,3 +618,22 @@ input[type=checkbox]{accent-color:var(--accent)}
 /* без синей вспышки системной подсветки касания на телефонах; отклик — лёгкое затемнение пункта */
 .tabbar a,.main-nav a,.logo{-webkit-tap-highlight-color:transparent}
 .tabbar a:active{background:rgba(255,255,255,.04)}
+
+/* ---------- Топ-100 на телефоне: заголовки помещаются, цифры не у края ---------- */
+@media(max-width:760px){
+  .top100-table thead th{font-size:11px;letter-spacing:.05em;line-height:1.15;white-space:normal;overflow-wrap:normal;word-break:normal;vertical-align:middle;padding-top:9px;padding-bottom:9px}
+  .top100-table th:first-child,.top100-table td:first-child{padding-left:10px}
+  .top100-table th:last-child,.top100-table td:last-child{padding-right:12px}
+  .top100-table .top100-sort{white-space:nowrap}
+  .top100-table .top100-sort i{margin-left:2px;font-size:8px}
+  .top100-table th:nth-child(4),.top100-table td:nth-child(4){width:118px}
+}
+@media(max-width:430px){
+  .top100-table th:nth-child(1),.top100-table td:nth-child(1){width:36px}
+  .top100-table th:nth-child(3),.top100-table td:nth-child(3),
+  .top100-table.top100-sortable th:nth-child(3),.top100-table.top100-sortable td:nth-child(3){width:44px}
+  .top100-table th:nth-child(4),.top100-table td:nth-child(4){width:104px}
+  .top100-table thead th{font-size:10.5px;letter-spacing:.04em}
+  .top100-table td:nth-child(4){font-size:14px}
+  .site-footer span{font-size:12px}
+}
