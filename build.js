@@ -3,6 +3,7 @@
 /* Сборка для деплоя: исходники из корня -> ./dist
  * 0. Общие куски (partials/header.html, partials/footer.html) подставляются вместо <!-- @include имя -->,
  *    в шапке помечается активный пункт меню: так меню правится в одном месте, а не в каждой странице.
+ * 0б. 3D главной (src/home-3d.js + three.js) собирается esbuild в один файл home-3d.js.
  * 1. Таблицы «Информации» и «Топ-100» дописываются прямо в HTML: их видят поисковики и те, у кого выключен JS.
  *    Разметку рисуют те же info.js / info-tasks.js / top100.js, что работают в браузере, поэтому она совпадает.
  * 2. Стили страницы склеиваются в один файл (bundle-*.css), css и js сжимаются esbuild.
@@ -25,7 +26,7 @@ const OUT = path.join(ROOT, "dist");
 
 /* в dist не попадает служебное и исходники сборки (CSV рейтинга нужны только для build-top100.js) */
 const SKIP = new Set([
-  ".git", ".github", ".gitignore", "dist", "node_modules", "top100", "partials",
+  ".git", ".github", ".gitignore", "dist", "node_modules", "top100", "partials", "src",
   "README.md", "build.js", "build-top100.js", "build-top100.bat", "package.json", "package-lock.json"
 ]);
 
@@ -39,6 +40,20 @@ fs.mkdirSync(OUT);
 for (const name of fs.readdirSync(ROOT)) {
   if (SKIP.has(name)) continue;
   fs.cpSync(path.join(ROOT, name), path.join(OUT, name), { recursive: true, filter: src => !SKIP_PATHS.has(rel(src)) });
+}
+
+/* ---------- 3D главной ----------
+   src/home-3d.js и всё, что он импортирует (включая three.js из node_modules), склеиваются в dist/home-3d.js;
+   из three.js попадает только используемое. Без esbuild 3D не собирается: главная работает с обычным фоном */
+if (esbuild) {
+  const r = esbuild.buildSync({
+    entryPoints: [path.join(ROOT, "src", "home-3d.js")], outfile: path.join(OUT, "home-3d.js"),
+    bundle: true, format: "esm", minify: true, target: "es2020", legalComments: "none", charset: "utf8", metafile: true
+  });
+  const size = Object.values(r.metafile.outputs)[0].bytes;
+  console.log("3D главной: home-3d.js " + (size / 1024).toFixed(0) + " КБ");
+} else {
+  console.warn("Предупреждение: без esbuild 3D главной не собран");
 }
 
 /* ---------- общие куски страниц ----------
@@ -145,10 +160,10 @@ bundledCss.forEach(f => fs.rmSync(path.join(OUT, f)));
    имена верхнего уровня, поэтому app.js / polish.js / talents.js продолжают видеть друг друга */
 if (esbuild) {
   let saved = 0;
-  for (const name of fs.readdirSync(OUT).filter(f => /\.(css|js)$/.test(f))) {
+  for (const name of fs.readdirSync(OUT).filter(f => /\.(css|js)$/.test(f) && f !== "home-3d.js")) {
     const file = path.join(OUT, name);
     const src = fs.readFileSync(file, "utf8");
-    const out = esbuild.transformSync(src, { loader: name.endsWith(".css") ? "css" : "js", minify: true, legalComments: "none", charset: "utf8" }).code;
+    const out = esbuild.transformSync(src, { loader: name.endsWith(".css") ? "css" : "js", minify: true, target: name.endsWith(".css") ? ["chrome100", "safari15", "firefox100"] : "es2020", legalComments: "none", charset: "utf8" }).code;
     saved += src.length - out.length;
     fs.writeFileSync(file, out);
   }

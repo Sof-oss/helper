@@ -648,3 +648,60 @@ input[type=checkbox]{accent-color:var(--accent)}
 .tp-badge svg,.theme-item[aria-selected="true"] .ti-badge svg{fill:#0d1014}
 .theme-item[aria-selected="true"] .ti-badge{background:var(--t);box-shadow:none}
 @media(max-width:760px){.tp-badge{width:30px;height:30px}.tp-badge svg{width:18px;height:18px}}
+
+/* ---------- 11. Анимированные иконки меню и плиток ----------
+   При наведении (на телефоне — при нажатии) иконка оживает: на «Главной» антенна ловит сигнал,
+   ПДА включается, у медали вспыхивает звезда, прицел сводится, карта разворачивается.
+   Иконка текущей страницы в нижнем меню телефона один раз оживает при открытии страницы.
+   В покое иконки выглядят как раньше: дополнительные детали (волны сигнала, лучи) скрыты */
+.nav-icon *,.home-card-icon svg *{transform-box:view-box}
+.ic-sig,.ic-rays{opacity:0}
+.ic-chart{stroke-dasharray:10}
+.ic-x{stroke-dasharray:10}
+
+:is(.main-nav a:hover,.main-nav a:focus-visible,.tabbar a:active,.tabbar a.active,.home-card:hover,.home-card:focus-visible){
+  /* Главная */
+  & .ic-ant{transform-origin:16.2px 8.5px;animation:ic-ant .8s ease-in-out}
+  & .ic-tip{animation:ic-blink .8s steps(1,end)}
+  & .ic-sig{animation:ic-sig .9s ease-out}
+  & .ic-sig2{animation-delay:.15s}
+  /* ПДА */
+  & .ic-screen{animation:ic-screen .9s linear forwards}
+  & .ic-chart{animation:ic-draw .6s .3s ease-out backwards}
+  & .ic-btn{transform-origin:center;animation:ic-btn .35s .35s ease-out backwards}
+  & .ic-b2{animation-delay:.45s}
+  & .ic-b3{animation-delay:.55s}
+  /* Топ-100 */
+  & .ic-swing{transform-origin:12px 8.8px;animation:ic-swing .9s cubic-bezier(.3,.6,.4,1)}
+  & .ic-star{transform-origin:12px 14.8px;animation:ic-star .7s .1s cubic-bezier(.3,1.6,.5,1)}
+  & .ic-rays{animation:ic-rays .6s .2s ease-out}
+  /* Калькулятор */
+  & .ic-corners{transform-origin:12px 12px;animation:ic-aim .7s cubic-bezier(.5,0,.3,1)}
+  & .ic-ticks{transform-origin:12px 12px;animation:ic-ticks .7s cubic-bezier(.5,0,.3,1)}
+  & .ic-ring{transform-origin:12px 12px;animation:ic-ring .7s ease-out}
+  & .ic-dot{transform-origin:12px 12px;animation:ic-dot .7s .35s ease-out}
+  /* Гайды */
+  & .ic-map{transform-origin:3.5px 12px;animation:ic-unfold .6s cubic-bezier(.2,.8,.3,1)}
+  & .ic-x{animation:ic-draw .45s .45s ease-out backwards}
+}
+/* в нижнем меню иконка текущей страницы оживает один раз, а не при каждом касании (там — :active) */
+.tabbar a.active .ic-screen{animation-fill-mode:none}
+
+@keyframes ic-ant{0%,100%{transform:none}20%{transform:rotate(-14deg)}45%{transform:rotate(9deg)}70%{transform:rotate(-4deg)}}
+@keyframes ic-blink{0%,30%,60%{opacity:1}15%,45%,75%{opacity:.2}}
+@keyframes ic-sig{0%{opacity:0;transform:translateX(-1px)}30%{opacity:1}100%{opacity:0;transform:translateX(1.5px)}}
+@keyframes ic-screen{0%{fill:currentColor;fill-opacity:0}12%{fill-opacity:.55}18%{fill-opacity:.05}28%{fill-opacity:.4}36%{fill-opacity:.15}100%{fill:currentColor;fill-opacity:.2}}
+@keyframes ic-draw{from{stroke-dashoffset:10}to{stroke-dashoffset:0}}
+@keyframes ic-btn{0%{opacity:.2;stroke-width:1.2}60%{stroke-width:3.4}100%{opacity:1}}
+@keyframes ic-swing{0%,100%{transform:none}20%{transform:rotate(14deg)}45%{transform:rotate(-9deg)}70%{transform:rotate(4deg)}}
+@keyframes ic-star{0%{transform:none}50%{transform:scale(1.55) rotate(72deg);filter:drop-shadow(0 0 3px currentColor)}100%{transform:rotate(72deg)}}
+@keyframes ic-rays{0%{opacity:0;transform:scale(.8)}40%{opacity:1}100%{opacity:0;transform:scale(1.15)}}
+@keyframes ic-aim{0%,100%{transform:none}45%{transform:scale(.72)}60%{transform:scale(.78)}}
+@keyframes ic-ticks{0%,100%{transform:none}45%{transform:rotate(45deg) scale(.85)}60%{transform:rotate(45deg) scale(.9)}}
+@keyframes ic-ring{0%,100%{transform:none}45%{transform:scale(1.18)}}
+@keyframes ic-dot{0%,100%{transform:none}40%{transform:scale(2.1);fill:#ff5a4f}}
+@keyframes ic-unfold{0%{transform:scaleX(.25) skewY(8deg);opacity:.4}60%{transform:scaleX(1.06)}100%{transform:none}}
+
+@media(prefers-reduced-motion:reduce){
+  .nav-icon *,.home-card-icon svg *{animation:none!important}
+}
