@@ -178,14 +178,28 @@ function renderPeriod(){
  range.innerHTML=cur.from
   ?'Показаны изменения с <b>'+esc(cur.from)+'</b>'+(to?' по <b>'+esc(to)+'</b>':"")+(cur.partial?'<small>Данных за полный период пока нет: считаем с самой ранней сохранённой даты</small>':"")
   :'Показаны изменения <b>'+esc(cur.label.toLowerCase())+'</b>';
+ /* коротко: «05.10 15:20 → 19:29», полная фраза — в подсказке и для экранного диктора */
+ const full=range.textContent;
+ range.title=full;range.setAttribute("aria-label",full);
+ if(cur.from){
+  const f=shortStamp(cur.from),t=to?shortStamp(to):null;
+  range.innerHTML=(t&&f.day===t.day?esc(f.day)+' <b>'+esc(f.time)+'</b> → <b>'+esc(t.time)+'</b>'
+   :'<b>'+esc(f.day+" "+f.time)+'</b>'+(t?' → <b>'+esc(t.day+" "+t.time)+'</b>':""))
+   +(cur.partial?'<i class="t100-partial" aria-hidden="true">*</i>':"");
+ }else range.innerHTML='<b>'+esc(cur.label)+'</b>';
+}
+/* «05.10.2026 15:20(:52)» → {day:"05.10", time:"15:20"} */
+function shortStamp(s){
+ const m=String(s).match(/^(\d\d\.\d\d)\.\d{4}\s+(\d\d:\d\d)/);
+ return m?{day:m[1],time:m[2]}:{day:String(s),time:""};
 }
 
 /* поиск, период и фильтр по отрядам вставляются между вкладками и таблицей один раз, top100.html менять не нужно */
 function ensureShell(){
  if($("top100Search"))return;
  $("top100Tabs").insertAdjacentHTML("afterend",
-  '<div class="t100-period" id="top100Period" role="group" aria-label="За какой период показывать изменения" hidden><span class="t100-period-title">Изменения:</span><div class="t100-period-btns" id="top100PeriodBtns"></div><p class="t100-period-range" id="top100PeriodRange" aria-live="polite"></p></div>'
-  +'<div class="t100-tools"><label class="t100-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="top100Search" type="search" placeholder="Поиск по нику" autocomplete="off" aria-label="Поиск по нику"></label>'
+  '<div class="t100-tools"><div class="t100-period" id="top100Period" role="group" aria-label="За какой период показывать изменения" hidden><span class="t100-period-title">Изменения</span><div class="t100-period-btns" id="top100PeriodBtns"></div><p class="t100-period-range" id="top100PeriodRange" aria-live="polite"></p></div>'
+  +'<label class="t100-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="top100Search" type="search" placeholder="Поиск по нику" autocomplete="off" aria-label="Поиск по нику"></label>'
   +'<button type="button" class="t100-factions-toggle" id="top100FactionsToggle" aria-expanded="false" aria-controls="top100Factions">Отряды: <b id="top100FactionSummary">Все</b><svg class="t100-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>'
   +'<div class="t100-factions" id="top100Factions"></div></div>');
  $("top100Search").addEventListener("input",e=>{top100Query=e.target.value;renderTop100Table()});
@@ -250,7 +264,12 @@ document.addEventListener("keydown",e=>{
 
 /* дату отдаёт top100-data.js, в разметке только заглушка */
 const updatedEl=$("top100Updated");
-if(updatedEl&&window.TOP100_UPDATED)updatedEl.textContent=window.TOP100_UPDATED;
+if(updatedEl&&window.TOP100_UPDATED){
+ /* в шапке коротко «05.10 19:29», полная дата — в подсказке */
+ const st=shortStamp(window.TOP100_UPDATED),box=$("top100UpdatedBox");
+ updatedEl.textContent=st.time?st.day+" "+st.time:window.TOP100_UPDATED;
+ if(box)box.title="Обновлено: "+window.TOP100_UPDATED+" (МСК)";
+}
 
 renderTop100();
 {
