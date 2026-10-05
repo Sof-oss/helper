@@ -679,3 +679,30 @@ input[type=checkbox]{accent-color:var(--accent)}
   .home-content:has(.home-note) .home-hero{margin-top:auto}
   .home-note{margin-top:auto;padding-top:36px}
 }
+
+/* ---------- 15. Планшеты (761–1100px, iPad в портрете) ---------- */
+@media(min-width:761px) and (max-width:1100px){
+  /* шапка: логотип в одну строку, меню без иконок, чтобы влез переключатель группировок */
+  .header-inner{gap:12px}
+  .logo{width:auto;gap:9px;flex-shrink:0}
+  .rad-logo,.rad-logo svg{width:34px;height:34px}
+  .logo-title{font-size:22px;white-space:nowrap}
+  .main-nav a{padding:0 8px;font-size:13px;letter-spacing:.05em}
+  .main-nav{margin-left:auto}
+  .main-nav a .nav-icon{display:none}
+  /* калькулятор: компактнее карточки урона, разбивка 2×2 */
+  .damage-grid{gap:12px}
+  .damage-card{padding:14px;grid-template-columns:48px minmax(0,1fr);column-gap:10px}
+  .weapon-icon{width:48px;height:48px}
+  .damage-card h3,.page .damage-card h3{font-size:15px;letter-spacing:.04em;overflow-wrap:anywhere}
+  .damage-card strong,.page .damage-card strong,.dmg-main strong{font-size:32px}
+  .breakdown{grid-template-columns:1fr 1fr}
+  .side-actions .side-btn{font-size:12px;letter-spacing:.02em;padding:0 4px;gap:5px;white-space:nowrap}
+}
+/* узкий планшет: карточки урона в столбик, разбивка в строку */
+@media(min-width:761px) and (max-width:900px){
+  .damage-grid{grid-template-columns:1fr}
+  .damage-card{min-height:auto}
+  .breakdown{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .extra-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
