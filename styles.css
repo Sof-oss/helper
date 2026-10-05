@@ -240,6 +240,8 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
 .toast::before{content:"☢";display:block;margin:0 auto 12px;font-size:58px;line-height:1;color:#c8d21f;text-shadow:0 0 8px #c8d21f66,2px 2px 0 #151a0a}
 .toast::after{content:"";position:absolute;inset:7px;border:1px solid #2c3b40;pointer-events:none}
 .toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.toast.ok::before,.toast.err::before{content:"";width:84px;height:84px;margin-bottom:10px;background:url("assets/toast-ok.svg") center/contain no-repeat;filter:drop-shadow(0 0 10px #c8d21f55)}
+.toast.err::before{background-image:url("assets/toast-err.svg");filter:drop-shadow(0 0 10px #e8613c55)}
 
 /* ===== Окна (таланты, снаряжение, жетоны) ===== */
 .talent-modal{position:fixed;inset:0;display:none;z-index:2000}
@@ -409,6 +411,7 @@ svg.target-icon{width:39px;height:39px;flex:0 0 39px}
   .damage-grid{grid-template-columns:1fr}
   .toast{min-width:0;width:calc(100% - 40px);padding:22px 24px 25px;font-size:20px}
   .toast::before{font-size:50px}
+  .toast.ok::before,.toast.err::before{width:72px;height:72px}
   .info-content{padding:10px}
   /* вкладки «Информации»: показываем один из трёх блоков (info.js, data-active на #infoGroups) */
   #infoTabs{display:flex}

@@ -282,7 +282,7 @@ function calc(){
  prevResults=r;
 }
 function render(){$("sets").innerHTML=optionMarkup(SETS,state.sets,"set");$("items").innerHTML=optionMarkup(ITEMS,state.items,"item");$("selectAllEquipment").checked=state.sets.size===SETS.length&&state.items.size===ITEMS.length;renderTalents();$("gearToggle").textContent="Снаряжение: выбрано "+(state.sets.size+state.items.size)+" из "+(SETS.length+ITEMS.length);calc()}
-function showToast(text){const t=$("toast");t.textContent=text||"В разработке";t.classList.add("show");clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>t.classList.remove("show"),1800)}
+function showToast(text,kind){const t=$("toast");t.textContent=text||"В разработке";t.classList.remove("ok","err");if(kind)t.classList.add(kind);t.classList.add("show");clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>t.classList.remove("show"),1800)}
 
 /* билд в ссылке: уровень, снаряжение и таланты после # */
 const toBits=s=>[...s].reduce((a,i)=>a|1<<i,0);
@@ -367,7 +367,7 @@ function loadCmpFromInput(){
 }
 function fallbackCopy(s){const a=document.createElement("textarea");a.value=s;a.style.cssText="position:fixed;opacity:0";document.body.appendChild(a);a.select();let ok=false;try{ok=document.execCommand("copy")}catch{}a.remove();return ok}
 function copyText(s){return navigator.clipboard&&window.isSecureContext?navigator.clipboard.writeText(s).then(()=>true,()=>fallbackCopy(s)):Promise.resolve(fallbackCopy(s))}
-function shareBuild(){copyText(location.href.split("#")[0]+"#"+buildHash()).then(ok=>showToast(ok?"Ссылка скопирована":"Не удалось скопировать"))}
+function shareBuild(){copyText(location.href.split("#")[0]+"#"+buildHash()).then(ok=>showToast(ok?"Ссылка скопирована":"Не удалось скопировать",ok?"ok":"err"))}
 
 /* ===== Окна и озвучка =====
    Пока окно открыто, страница под ним inert: Tab не уходит за диалог, скринридер не читает фон.
