@@ -139,7 +139,18 @@ window.__roll = function (el, text) {
       box.classList.toggle("open", open);
       toggle.setAttribute("aria-expanded", String(open));
     };
-    toggle.addEventListener("click", function () { setOpen(!box.classList.contains("open")); });
+    /* пока переключатель ни разу не открывали, он мягко пульсирует, чтобы было видно, что это кнопка */
+    var HINT_KEY = "zoneThemeHintSeen";
+    var hintSeen = false;
+    try { hintSeen = localStorage.getItem(HINT_KEY) === "1"; } catch (e) {}
+    if (!hintSeen) box.classList.add("hint");
+    toggle.addEventListener("click", function () {
+      setOpen(!box.classList.contains("open"));
+      if (box.classList.contains("hint")) {
+        box.classList.remove("hint");
+        try { localStorage.setItem(HINT_KEY, "1"); } catch (e) {}
+      }
+    });
     box.addEventListener("click", function (e) {
       var b = e.target.closest("[data-theme-btn]");
       if (b) {
