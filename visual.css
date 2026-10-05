@@ -655,21 +655,20 @@ input[type=checkbox]{accent-color:var(--accent)}
 
 
 /* ---------- 14. Пометка «неофициальный фан-сайт» на главной ----------
-   Курсивная строка под карточками, по бокам тонкие линии цвета темы; ссылка ведёт на игру во ВКонтакте */
-.home-note{display:flex;align-items:center;justify-content:center;gap:16px;max-width:900px;margin:40px auto 0;padding:0 12px;
-  font-size:14.5px;line-height:1.5;color:#b9c4cc;text-align:center;text-shadow:0 1px 8px rgba(0,0,0,.85)}
-.home-note::before,.home-note::after{content:"";flex:1 1 40px;max-width:110px;height:1px;
-  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--accent) 70%,transparent))}
-.home-note::after{background:linear-gradient(270deg,transparent,color-mix(in srgb,var(--accent) 70%,transparent))}
-.home-note>span{flex:0 1 auto}
-@media(min-width:761px){.home-note{width:100%}.home-note>span{white-space:nowrap}}
-.home-note i{font-style:italic;letter-spacing:.01em}
-.home-note a{display:inline-flex;align-items:center;gap:4px;margin-left:4px;white-space:nowrap;color:var(--accent-2);text-decoration:none;
-  border-bottom:1px dashed color-mix(in srgb,var(--accent) 60%,transparent);transition:color .2s ease,border-color .2s ease}
-.home-note a:hover,.home-note a:focus-visible{color:#fff;border-bottom-color:var(--accent)}
-.home-note svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-@media(max-width:760px){
-  .home-note{margin-top:28px;font-size:13.5px}
-  .home-note a{margin-left:0}
-  .home-note::before,.home-note::after{display:none}
-}
+   Мелкая приглушённая строка под карточками, проявляется при наведении. Рядом «Правовая информация» —
+   <details>: по клику под строкой раскрывается оговорка о правообладателях */
+.home-note{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:2px 8px;max-width:640px;margin:36px auto 0;padding:0 12px;
+  font-size:12.5px;line-height:1.5;color:#9aa6b0;text-align:center;opacity:.55;transition:opacity .25s ease}
+.home-note:hover,.home-note:focus-within,.home-note:has(details[open]){opacity:.9}
+.home-note p{margin:0}
+.home-note i{font-style:italic}
+.home-note>p>span{margin-left:8px;opacity:.7}
+.home-note a{display:inline-flex;align-items:center;gap:2px;color:inherit;text-decoration:none;border-bottom:1px dotted currentColor;transition:color .2s ease}
+.home-note a:hover,.home-note a:focus-visible{color:var(--accent-2)}
+.home-note a svg{width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.home-note details{display:contents}
+.home-note summary{list-style:none;cursor:pointer;border-bottom:1px dotted currentColor;transition:color .2s ease}
+.home-note summary::-webkit-details-marker{display:none}
+.home-note summary:hover,.home-note summary:focus-visible{color:var(--accent-2)}
+.home-note details>p{flex:1 0 100%;margin:8px 0 0;font-size:11.5px;line-height:1.55;text-wrap:pretty}
+@media(max-width:760px){.home-note{margin-top:26px;font-size:12px;flex-direction:column;align-items:center}.home-note>p>span{display:none}.home-note details>p{font-size:11px}}
