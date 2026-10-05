@@ -108,7 +108,16 @@ function readSnapshots() {
   const files = fs.readdirSync(historyDir).filter(f => /^(\d{4}-W\d{2}|\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})\.json$/.test(f));
   const weekly = files.filter(f => /-W\d{2}\.json$/.test(f)).sort();
   const timed = files.filter(f => !/-W\d{2}\.json$/.test(f)).sort();
-  return weekly.concat(timed).map(f => ({ id: f.replace(".json", ""), data: JSON.parse(fs.readFileSync(path.join(historyDir, f), "utf8")) }));
+  const load = f => ({ id: f.replace(".json", ""), data: JSON.parse(fs.readFileSync(path.join(historyDir, f), "utf8")) });
+  const timedSnaps = timed.map(load);
+  /* недельный снимок, у которого есть копия с точным временем (переименованный файл забыли удалить), пропускаем:
+     иначе он попадает в историю дважды и под неверной датой (понедельник недели) */
+  const weeklySnaps = weekly.map(load).filter(w => {
+    const dup = timedSnaps.some(t => sameData(t.data, w.data));
+    if (dup) console.warn("Пропущен " + w.id + ".json: те же данные есть в снимке с точным временем, этот файл можно удалить");
+    return !dup;
+  });
+  return weeklySnaps.concat(timedSnaps);
 }
 
 /* момент снимка в мс по его имени; недельный снимок считаем понедельником той недели */
