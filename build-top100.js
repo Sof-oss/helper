@@ -96,10 +96,13 @@ function readPlayers(filePath) {
 
 /* раздел: игроки по убыванию значения, при равенстве — в порядке общей выгрузки (по репутации).
    Строка: [ник, уровень, значение, давно не заходил (0/1)] */
+/* в разделе только первые TOP_N: в CSV теперь все игроки (fetch-players.js), на сайт идёт топ по каждому показателю */
+const TOP_N = Number(process.env.TOP_N) || 100;
 function sectionRows(players, column) {
   return players
-    .filter(pl => Number.isFinite(pl.values[column]))
+    .filter(pl => Number.isFinite(pl.values[column]) && pl.values[column] > 0)
     .sort((a, b) => b.values[column] - a.values[column] || a.order - b.order)
+    .slice(0, TOP_N)
     .map(pl => [pl.nick, pl.level, pl.values[column], pl.inactive]);
 }
 
@@ -247,8 +250,10 @@ for (const { column, varName, key } of SOURCES) {
 let factionColors = {};
 if (fs.existsSync(factionsFile)) factionColors = JSON.parse(fs.readFileSync(factionsFile, "utf8"));
 else factionColors = { ...DEFAULT_FACTION_COLORS };
+/* группировки считаем только по игрокам, попавшим хотя бы в один раздел рейтинга */
+const shown = new Set(Object.values(current).flatMap(sec => Object.keys(sec)));
 const groupCount = {};
-players.forEach(pl => { if (pl.group) groupCount[pl.group] = (groupCount[pl.group] || 0) + 1; });
+players.forEach(pl => { if (pl.group && shown.has(pl.nick)) groupCount[pl.group] = (groupCount[pl.group] || 0) + 1; });
 const groupsNow = Object.keys(groupCount).sort((a, b) => groupCount[b] - groupCount[a] || a.localeCompare(b, "ru"));
 const added = [];
 for (const g of groupsNow) {
@@ -261,7 +266,7 @@ if (added.length || !fs.existsSync(factionsFile)) {
 if (added.length) console.log("Новые группировки:", added.map(g => g + " " + factionColors[g]).join(", "));
 const factionsOut = groupsNow.map(g => ({ name: g, color: factionColors[g] }));
 const groupOfNick = {};
-players.forEach(pl => { if (pl.group) groupOfNick[pl.nick] = pl.group; });
+players.forEach(pl => { if (pl.group && shown.has(pl.nick)) groupOfNick[pl.nick] = pl.group; });
 
 /* если данные не менялись, последний снимок равен текущим данным и базой быть не может */
 const snaps = readSnapshots();
