@@ -9,8 +9,11 @@
 const root = document.documentElement;
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const conn = navigator.connection || {};
-/* совсем слабое железо (2 ядра или ≤2 ГБ памяти), включённая экономия трафика или медленная сеть (2G/3G) */
-const weak = (navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory || 8) <= 2
+/* Apple (iPhone, iPad, Mac на Safari и любом браузере на iOS/iPadOS — там все браузеры на движке Safari)
+   ради защиты от слежки занижает число ядер в navigator.hardwareConcurrency, поэтому этому числу там не верим.
+   Остальным: совсем слабое железо (2 ядра или ≤2 ГБ памяти), экономия трафика или медленная сеть (2G/3G) */
+const apple = /iP(hone|ad|od)|Macintosh/.test(navigator.userAgent) && !/Android/.test(navigator.userAgent);
+const weak = (!apple && (navigator.hardwareConcurrency || 8) <= 2) || (navigator.deviceMemory || 8) <= 2
   || conn.saveData === true || /2g|3g/.test(conn.effectiveType || "");
 const hasGL = (() => {
   try {
