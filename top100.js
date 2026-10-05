@@ -129,7 +129,7 @@ function renderFactionSummary(){
 function renderFactions(){
  const{rows,count}=factionCounts();
  const chip=(key,label,color,n)=>'<button type="button" class="t100-chip'+(top100Faction===key?" active":"")+'" data-t100-faction="'+escAttr(key)+'" style="--f:'+escAttr(color)+'" aria-pressed="'+(top100Faction===key)+'"><i></i>'+esc(label)+'<small>'+n+'</small></button>';
- $("top100Factions").innerHTML=chip("","Все","#54bfff",rows)+FACTIONS.map(f=>chip(f.key,f.label,f.color,count[f.key]||0)).join("")+chip(NO_FACTION,"Прочие","#8196a9",count[NO_FACTION]||0);
+ $("top100Factions").innerHTML=chip("","Все","#54bfff",rows)+FACTIONS.map((f,i)=>({f:f,i:i,n:count[f.key]||0})).sort((a,b)=>b.n-a.n||a.i-b.i).map(x=>chip(x.f.key,x.f.label,x.f.color,x.n)).join("")+chip(NO_FACTION,"Прочие","#8196a9",count[NO_FACTION]||0);
  renderFactionSummary();
 }
 
