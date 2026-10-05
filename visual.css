@@ -735,3 +735,16 @@ input[type=checkbox]{accent-color:var(--accent)}
   .tp-badge svg{width:17px;height:17px}
 }
 @media(prefers-reduced-motion:reduce){.theme-pick-toggle,.tp-text,.tp-chev{transition:none}}
+
+/* ---------- 13. Значки-шевроны группировок ----------
+   Нашивка сама по себе плашка: убираем фон и рамку у значка, цвета берутся из SVG.
+   Выбранная тема и кнопка в шапке подсвечиваются свечением цвета группировки */
+.tp-badge,.ti-badge,.theme-item[aria-selected="true"] .ti-badge{background:none;box-shadow:none;border:0;border-radius:0;clip-path:none;overflow:visible}
+.tp-badge svg,.ti-badge svg,.theme-item[aria-selected="true"] .ti-badge svg{fill:none;stroke:none;width:100%;height:100%;overflow:visible}
+.tp-badge{width:28px;height:32px;flex:0 0 28px}
+.ti-badge{width:36px;height:40px;flex:0 0 36px}
+.ti-badge svg{transition:transform .2s ease,filter .2s ease}
+.theme-item:hover .ti-badge svg{transform:scale(1.06)}
+.theme-item[aria-selected="true"] .ti-badge svg,.tp-badge svg{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--t) 60%,transparent))}
+@media(max-width:760px){.tp-badge{width:26px;height:30px;flex-basis:26px}.tp-badge svg{width:100%;height:100%}}
+@media(prefers-reduced-motion:reduce){.ti-badge svg{transition:none}}
