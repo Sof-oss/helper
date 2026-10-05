@@ -31,7 +31,7 @@ html.intro-pending body{overflow:hidden}
 .zone-intro-skip:hover{border-color:var(--accent);color:#fff}
 .zone-intro.flying .zone-intro-skip{opacity:0;transition:opacity .3s}
 
-/* логотип в шапке «принимает» прилетевшее сердце */
+/* логотип в шапке «принимает» прилетевшую маску */
 @keyframes intro-land{0%{transform:scale(1.35);filter:drop-shadow(0 0 18px var(--accent))}100%{transform:none}}
 .rad-logo.intro-land{animation:intro-land .8s cubic-bezier(.2,.8,.3,1)}
 
