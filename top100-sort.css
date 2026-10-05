@@ -45,11 +45,9 @@
 .top100-updated{display:inline-flex;align-items:center;gap:8px;margin:0;padding:7px 14px 7px 11px;border:1px solid #2e6384;background:linear-gradient(135deg,rgba(84,191,255,.18),rgba(84,191,255,.06));box-shadow:0 0 14px rgba(84,191,255,.16);color:#a9c4d9;font-size:13px;font-weight:600;line-height:1}
 .top100-updated svg{width:17px;height:17px;flex:0 0 17px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .top100-updated b{color:#f2f8fd;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.2px}
-.top100-meta-note{color:#9db2c4;font-size:12.5px;font-style:italic;line-height:1.4}
 @media(max-width:430px){
   .top100-updated{font-size:12px;padding:6px 12px 6px 9px}
   .top100-updated b{font-size:13px}
-  .top100-meta-note{font-size:12px}
 }
 
 /* чипы отрядов: цель для пальца выше */
@@ -57,13 +55,12 @@
 
 /* ===== Телефон: разгружаем верх страницы =====
    Вкладки — одна прокручиваемая строка, список отрядов прячется под кнопку,
-   описание и примечание к дате скрыты: рейтинг виден сразу, без полутысячи пикселей кнопок */
+   описание скрыто: рейтинг виден сразу, без полутысячи пикселей кнопок */
 .t100-factions-toggle{display:none}
 @media(max-width:760px){
   /* панель может «раздуться» из-за однострочных вкладок — фиксируем ширину по экрану */
   .top100-content{width:100%}
   .top100-panel .info-lead{display:none}
-  .top100-meta-note{display:none}
   .top100-meta{margin-bottom:10px}
   .top100-updated{border:0;background:none;box-shadow:none;padding:0;font-size:12px}
   .top100-updated svg{width:15px;height:15px;flex-basis:15px}
