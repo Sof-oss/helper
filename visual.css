@@ -19,8 +19,6 @@
   --panel-2:#0a121b;
   --panel-line:#1b2c3d;
   --wash:rgba(95,138,201,.13);
-  --r-lg:14px;
-  --r-md:10px;
   --sh-1:0 1px 2px rgba(0,0,0,.5);
   --sh-2:0 14px 34px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05);
   --glass:rgba(10,18,26,.04);          /* почти без вуали: фото видно как есть */
@@ -30,43 +28,32 @@
 /* цвета группировок сняты с эмблем (вики S.T.A.L.K.E.R.) и осветлены под тёмный интерфейс:
    accent — основной тон нашивки, accent-3 — второй цвет с той же эмблемы;
    panel/panel-2/wash — в какую сторону уходит вся тёмная часть интерфейса */
-:root[data-theme="merc"]{--accent:#5f8ac9;--accent-2:#aec8ec;--accent-3:#9fb3c8;--accent-ink:#070d18;--glass-line:rgba(160,190,235,.18);
-  --panel:#0d1824;--panel-2:#0a121b;--panel-line:#1b2c3d;--wash:rgba(95,138,201,.13)}
-:root[data-theme="dolg"]{--accent:#d9483f;--accent-2:#f0a09a;--accent-3:#d9b558;--accent-ink:#1a0606;--glass-line:rgba(240,140,135,.2);
-  --panel:#1d1011;--panel-2:#150b0c;--panel-line:#3a2020;--wash:rgba(217,72,63,.16)}
-:root[data-theme="svoboda"]{--accent:#4fb058;--accent-2:#a9e0ad;--accent-3:#5b9bd5;--accent-ink:#061506;--glass-line:rgba(150,220,155,.18);
-  --panel:#0d1c12;--panel-2:#09150d;--panel-line:#1d3a24;--wash:rgba(79,176,88,.15)}
-:root[data-theme="science"]{--accent:#57c4f0;--accent-2:#b6e7ff;--accent-3:#e0574f;--accent-ink:#041420;--glass-line:rgba(140,215,255,.18);
-  --panel:#0a1a27;--panel-2:#081420;--panel-line:#142b3b;--wash:rgba(87,196,240,.12)}
-:root[data-theme="monolith"]{--accent:#d9a52c;--accent-2:#f2d68a;--accent-3:#b98ae0;--accent-ink:#1a1205;--glass-line:rgba(225,190,120,.2);
-  --panel:#1c1608;--panel-2:#140f06;--panel-line:#3b2f14;--wash:rgba(217,165,44,.15)}
+:root[data-theme="merc"]{--accent:#5f8ac9;--accent-2:#aec8ec;--accent-3:#9fb3c8;--accent-ink:#070d18;--glass-line:rgba(160,190,235,.18);--wash:rgba(95,138,201,.13)}
+:root[data-theme="dolg"]{--accent:#d9483f;--accent-2:#f0a09a;--accent-3:#d9b558;--accent-ink:#1a0606;--glass-line:rgba(240,140,135,.2);--wash:rgba(217,72,63,.16)}
+:root[data-theme="svoboda"]{--accent:#4fb058;--accent-2:#a9e0ad;--accent-3:#5b9bd5;--accent-ink:#061506;--glass-line:rgba(150,220,155,.18);--wash:rgba(79,176,88,.15)}
+:root[data-theme="science"]{--accent:#57c4f0;--accent-2:#b6e7ff;--accent-3:#e0574f;--accent-ink:#041420;--glass-line:rgba(140,215,255,.18);--wash:rgba(87,196,240,.12)}
+:root[data-theme="monolith"]{--accent:#d9a52c;--accent-2:#f2d68a;--accent-3:#b98ae0;--accent-ink:#1a1205;--glass-line:rgba(225,190,120,.2);--wash:rgba(217,165,44,.15)}
 :root{color-scheme:dark}
 
 /* ---------- 2. Второй цвет темы в интерфейсе ----------
    Раньше красный у учёных жил во вспышках аномалии; теперь он виден в
    двухцветных точках переключателя, во второй полосе подчёркивания и в
    светодиоде у плашки «онлайн-помощник Зоны». */
-.theme-pick{margin-left:auto}
 
 /* ---------- 2б. Тема окрашивает поверхности ----------
    Панели, карточки, кнопки, шапки таблиц и поля берут тон темы, поэтому смена
    темы меняет весь интерфейс, а не только мелкие акценты. */
 /* подложка темы: body::before занят фотографией Зоны (styles.css), поэтому
    подсветка живёт в body::after — он рисуется поверх фото, но под содержимым */
-body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
-  background:radial-gradient(1200px 560px at 50% -8%,var(--wash),transparent 70%),
-             radial-gradient(1000px 520px at 50% 108%,color-mix(in srgb,var(--accent-3) 10%,transparent),transparent 72%)}
-.result-panel,.damage-card,.info-group,.top100-scroll,.top100-panel,.gear-toggle,.option,
-.gi-card,.tok-card,.cmp-card,.home-card,.task-tiles>div,.cmp-table th,.talent-game-window{
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none}
+.result-panel,.damage-card,.info-group,.top100-scroll,.top100-panel,.gear-toggle,.option,.gi-card,.tok-card,.cmp-card,.home-card,.cmp-table th,.talent-game-window{
   border-color:color-mix(in srgb,var(--accent) 22%,var(--panel-line));
   background-color:var(--panel);
   background-image:linear-gradient(180deg,color-mix(in srgb,var(--accent) 9%,var(--panel)),var(--panel-2))}
-.damage-card{background-image:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,var(--panel)),var(--panel-2))}
 .option{background-image:linear-gradient(180deg,color-mix(in srgb,var(--accent) 7%,var(--panel)),var(--panel-2))}
 .option:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--panel-line));background-image:linear-gradient(180deg,color-mix(in srgb,var(--accent) 14%,var(--panel)),var(--panel-2))}
 .option:has(input:checked){border-color:var(--accent);
-  background-image:linear-gradient(135deg,color-mix(in srgb,var(--accent) 30%,var(--panel)),color-mix(in srgb,var(--accent) 10%,var(--panel-2)));
-  box-shadow:0 0 12px color-mix(in srgb,var(--accent) 30%,transparent)}
+  background-image:linear-gradient(135deg,color-mix(in srgb,var(--accent) 30%,var(--panel)),color-mix(in srgb,var(--accent) 10%,var(--panel-2)))}
 .side-btn,.tokens-btn,.cmp-btn,.gear-info-btn{color:#f2f8fd;
   border-color:color-mix(in srgb,var(--accent) 50%,#1d3a4f);
   background-image:linear-gradient(180deg,color-mix(in srgb,var(--accent) 32%,var(--panel)),color-mix(in srgb,var(--accent) 12%,var(--panel-2)))}
@@ -89,8 +76,6 @@ input[type="text"]:focus,input[type="search"]:focus,input[type="number"]:focus,.
 .info-group-title,.section-heading{border-left-color:var(--accent)}
 .info-group-title b,.section-heading b{color:#f4f9ff}
 .info-led,.tl-head i{background:var(--accent);box-shadow:0 0 8px var(--accent)}
-.site-footer span{color:color-mix(in srgb,var(--accent) 80%,var(--accent-3))}
-.brand-chip,.home-eyebrow{color:color-mix(in srgb,var(--accent) 78%,#fff)}
 
 /* ---------- 3. Шапка: чистое стекло ----------
    Вуаль 4 %, блюр 2 px: фото проступает почти как есть. Замер: отличие шапки
@@ -99,72 +84,113 @@ input[type="text"]:focus,input[type="search"]:focus,input[type="number"]:focus,.
    тень текста, волосяная граница и блик по верхней кромке. */
 .site-header{
   position:sticky;top:0;z-index:40;
-  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0) 65%),var(--glass);
-  -webkit-backdrop-filter:blur(2px) saturate(160%) brightness(1.08);
-  backdrop-filter:blur(2px) saturate(160%) brightness(1.08);
-  border-bottom:1px solid var(--glass-line);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
   transition:box-shadow .2s ease,background .2s ease;
 }
-.site-header.scrolled{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0) 65%),rgba(10,18,26,.14);
+.site-header.scrolled{
   box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 12px 34px rgba(0,0,0,.4)}
 .main-nav a{text-shadow:0 1px 7px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.6)}
-.logo-title{text-shadow:1px 1px 0 #04090e,0 0 14px color-mix(in srgb,var(--accent) 45%,transparent)}
-.main-nav a.active{color:color-mix(in srgb,var(--accent) 30%,#ffffff)}
-.main-nav a.active:after{background:linear-gradient(90deg,var(--accent),var(--accent-3));box-shadow:0 0 10px var(--accent)}
 .rad-logo{color:var(--accent-2);filter:drop-shadow(0 0 6px var(--accent))}
 :where(button,input,a,summary):focus-visible{outline-color:var(--accent)}
 
-/* ---------- 4. Переключатель тем ----------
-   В свёрнутом виде — значок текущей группировки, по клику раскрывается список
-   тем: каждая строка окрашена в цвета своей группировки, сверху — предупреждающая
-   полоса и светодиод, как на снаряжении Зоны. */
+/* ---------- 4. Переключатель группировок — вся его стилизация собрана здесь ----------
+   В свёрнутом виде — только значок-шеврон. При наведении, фокусе с клавиатуры или открытом списке кнопка
+   выезжает влево и показывает «Группировка» и название; место в шапке не меняется.
+   Список — строки с фоном-миниатюрой группировки, выбранная подсвечена цветом темы.
+   Значки — шевроны-нашивки (SVG в ui.js) со своими цветами, поэтому фон и рамку у значка не рисуем */
 .theme-pick{position:relative;margin-left:auto}
-.theme-pick-toggle{display:flex;align-items:center;gap:9px;height:38px;padding:0 11px 0 6px;
-  border:1px solid #24384a;border-radius:999px;background:linear-gradient(180deg,rgba(12,22,32,.92),rgba(6,12,18,.94));
-  color:#cfe0ec;cursor:pointer;transition:border-color .18s ease,box-shadow .18s ease}
-.theme-pick-toggle:hover{border-color:color-mix(in srgb,var(--t,#57c4f0) 55%,#24384a);
-  box-shadow:0 0 14px color-mix(in srgb,var(--t,#57c4f0) 26%,transparent)}
-.tp-badge{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;
-  background:radial-gradient(circle at 34% 28%,color-mix(in srgb,var(--t,#57c4f0) 78%,#0a1119),#0a1119 80%);
-  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--t2,#e0574f) 55%,transparent),0 0 10px color-mix(in srgb,var(--t,#57c4f0) 32%,transparent)}
-.tp-badge svg{width:15px;height:15px;fill:none;stroke:#07101a;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.tp-chev{width:14px;height:14px;fill:none;stroke:#8ea3b5;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .18s ease}
+.theme-pick-toggle{display:flex;align-items:center;border:1px solid #24384a;background:linear-gradient(180deg,rgba(12,22,32,.92),rgba(6,12,18,.94))}
+.tp-badge{display:grid;place-items:center;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
+.tp-badge svg{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .theme-pick.open .tp-chev{transform:rotate(180deg)}
 .theme-pick.open .theme-pick-toggle{border-color:color-mix(in srgb,var(--t,#57c4f0) 60%,#24384a)}
+.theme-list{position:absolute;right:0;z-index:60;opacity:0;transform:translateY(-6px) scale(.985);pointer-events:none;transition:opacity .18s ease,transform .18s ease}
+.theme-pick.open .theme-list{opacity:1;transform:none;pointer-events:auto}
+.theme-list::before{content:"";position:absolute;left:10px;right:10px;top:0;height:4px;border-radius:0 0 3px 3px;background:repeating-linear-gradient(45deg,rgba(255,196,64,.55) 0 5px,transparent 5px 10px);opacity:.5}
+.tl-head{display:flex;align-items:center;gap:8px;text-transform:uppercase}
+.tl-head i{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.theme-item{display:flex;align-items:center;width:100%;text-align:left}
+.ti-badge{display:grid;place-items:center;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--t2) 50%,transparent)}
+.ti-badge svg{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.ti-text{display:flex;flex-direction:column;gap:1px;min-width:0;line-height:1.25}
+.theme-item[aria-selected="true"] .ti-text b{color:#fff}
+.theme-pick-toggle{border-radius:var(--r-md);border:1px solid color-mix(in srgb,var(--t,#5f8ac9) 45%,rgba(255,255,255,.08));background:linear-gradient(180deg,color-mix(in srgb,var(--t,#5f8ac9) 16%,#0d1115),#080a0d);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 6px 16px rgba(0,0,0,.35);color:var(--ink);cursor:pointer}
+.theme-pick-toggle:hover{border-color:color-mix(in srgb,var(--t) 75%,transparent);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 3px color-mix(in srgb,var(--t) 16%,transparent),0 6px 16px rgba(0,0,0,.35)}
+.tp-badge svg{stroke:#0a0c0e;stroke-width:2}
+.tp-text{flex-direction:column;line-height:1.05;text-align:left}
+.tp-text small{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+.tp-text b{font-family:var(--f-display);font-weight:500;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:#fff;margin-top:3px}
+.tp-chev{width:14px;height:14px;fill:none;stroke:var(--ink-2);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s}
+.theme-list{width:340px;top:calc(100% + 12px);padding:10px;border-radius:var(--r-lg);border:1px solid var(--line);background:var(--brackets),linear-gradient(180deg,rgba(14,17,21,.97),rgba(8,10,13,.98));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 24px 60px rgba(0,0,0,.6)}
+.theme-list::before{display:none}
+.tl-head{justify-content:flex-start;font-family:var(--f-display);font-weight:500;font-size:12px;letter-spacing:.2em;color:var(--ink-2);padding:4px 6px 12px}
+.tl-head span{margin-left:auto;font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.05em;color:var(--ink-3);border:1px solid rgba(255,255,255,.1);padding:2px 6px;border-radius:3px}
+.tl-head span::before{content:"ДОСТУПНО: "}
+.theme-item{position:relative;overflow:hidden;isolation:isolate;height:62px;margin-bottom:6px;padding:0 14px 0 12px;gap:12px;border:1px solid rgba(255,255,255,.07);border-radius:var(--r-md);background:#0a0c0f;color:var(--ink);cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s}
+.theme-item:last-child{margin-bottom:0}
+.theme-item::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0;background:var(--t);opacity:1;z-index:2}
+.ti-thumb{position:absolute;inset:0;z-index:-1;background-size:cover;background-position:center;opacity:.55;filter:saturate(.9);transition:opacity .25s,transform .4s ease}
+.ti-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,9,11,.96) 20%,rgba(7,9,11,.55) 65%,rgba(7,9,11,.25))}
+.theme-item[data-theme-btn="merc"] .ti-thumb{background-image:url("assets/bg-merc-thumb.webp")}
+.theme-item[data-theme-btn="dolg"] .ti-thumb{background-image:url("assets/bg-dolg-thumb.webp")}
+.theme-item[data-theme-btn="svoboda"] .ti-thumb{background-image:url("assets/bg-svoboda-thumb.webp")}
+.theme-item[data-theme-btn="science"] .ti-thumb{background-image:url("assets/bg-science-thumb.webp")}
+.theme-item[data-theme-btn="monolith"] .ti-thumb{background-image:url("assets/bg-monolith-thumb.webp")}
+.theme-item:hover{transform:none;border-color:color-mix(in srgb,var(--t) 55%,transparent);background:#0a0c0f}
+.theme-item:hover .ti-thumb{opacity:.85;transform:scale(1.04)}
+.theme-item[aria-selected="true"]{border-color:var(--t);background:#0a0c0f;box-shadow:0 0 0 1px color-mix(in srgb,var(--t) 40%,transparent),0 0 22px color-mix(in srgb,var(--t) 25%,transparent)}
+.theme-item[aria-selected="true"] .ti-thumb{opacity:.9}
+.ti-badge{border-radius:4px;background:linear-gradient(145deg,var(--t),color-mix(in srgb,var(--t) 50%,#000));border:0;clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px);flex-basis:38px}
+.ti-badge svg{stroke:#0a0c0e;stroke-width:2}
+.ti-text b{font-family:var(--f-display);font-weight:500;font-size:16px;letter-spacing:.06em;text-transform:uppercase;color:#fff}
+.ti-check{width:20px;height:20px;margin-left:auto;fill:none;stroke:var(--t);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.6);transition:.2s}
+.theme-item[aria-selected="true"] .ti-check{opacity:1;transform:none;filter:drop-shadow(0 0 6px var(--t))}
+@media (max-width:760px){
+  .theme-list{width:min(330px,calc(100vw - 16px))}
+}
+.tp-badge,.ti-badge{clip-path:none;border:0;border-radius:8px;background:color-mix(in srgb,var(--t) 14%,#101317);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--t) 45%,transparent);transition:background .2s ease}
+.tp-badge{background:var(--t);box-shadow:none;border-radius:7px}
+.tp-badge svg,.ti-badge svg{width:20px;height:20px;fill:var(--t);stroke:none;transition:fill .2s ease}
+.ti-badge svg{width:22px;height:22px}
+.tp-badge svg,.theme-item[aria-selected="true"] .ti-badge svg{fill:#0d1014}
+.theme-item[aria-selected="true"] .ti-badge{background:var(--t);box-shadow:none}
+.theme-pick{width:38px;height:38px;flex:0 0 38px}
+.theme-pick-toggle{position:absolute;top:0;right:0;z-index:2;height:38px;padding:0 4px;gap:0;white-space:nowrap;transition:padding .28s ease,border-color .2s ease,box-shadow .2s ease}
+.tp-badge svg{width:17px;height:17px}
+.tp-text,.tp-chev{max-width:0;opacity:0;overflow:hidden;margin-left:0;transition:max-width .3s ease,opacity .2s ease,margin-left .3s ease}
+.tp-text{display:flex}
+.theme-pick.open .theme-pick-toggle,.theme-pick-toggle:focus-visible{padding:0 10px 0 4px}
+.theme-pick.open .tp-text,.theme-pick-toggle:focus-visible .tp-text{max-width:170px;opacity:1;margin-left:9px}
+.theme-pick.open .tp-chev,.theme-pick-toggle:focus-visible .tp-chev{max-width:14px;opacity:1;margin-left:8px;flex:0 0 14px}
+@media (hover:hover){
+  .theme-pick-toggle:hover{padding:0 10px 0 4px}
+  .theme-pick-toggle:hover .tp-text{max-width:170px;opacity:1;margin-left:9px}
+  .theme-pick-toggle:hover .tp-chev{max-width:14px;opacity:1;margin-left:8px;flex:0 0 14px}
+}
+@media (max-width:760px){
+  .theme-pick{width:36px;height:36px;flex-basis:36px}
+  .theme-pick-toggle,.theme-pick.open .theme-pick-toggle{height:36px;padding:0 3px}
+  .tp-text,.tp-chev{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .theme-pick-toggle,.tp-text,.tp-chev{transition:none}
+}
+.tp-badge,.ti-badge,.theme-item[aria-selected="true"] .ti-badge{background:none;box-shadow:none;border:0;border-radius:0;clip-path:none;overflow:visible}
+.tp-badge svg,.ti-badge svg,.theme-item[aria-selected="true"] .ti-badge svg{fill:none;stroke:none;width:100%;height:100%;overflow:visible}
+.tp-badge{width:28px;height:32px;flex:0 0 28px}
+.ti-badge{width:36px;height:40px;flex:0 0 36px}
+.ti-badge svg{transition:transform .2s ease,filter .2s ease}
+.theme-item:hover .ti-badge svg{transform:scale(1.06)}
+.theme-item[aria-selected="true"] .ti-badge svg,.tp-badge svg{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--t) 60%,transparent))}
+@media (max-width:760px){
+  .tp-badge{width:26px;height:30px;flex-basis:26px}
+  .tp-badge svg{width:100%;height:100%}
+}
+@media (prefers-reduced-motion:reduce){
+  .ti-badge svg{transition:none}
+}
 
 /* раскрывающийся список тем */
-.theme-list{position:absolute;top:calc(100% + 10px);right:0;z-index:60;width:min(286px,calc(100vw - 20px));padding:8px;
-  border:1px solid #2a3f52;border-radius:12px;background:linear-gradient(180deg,rgba(16,24,32,.99),rgba(8,14,20,.99));
-  box-shadow:0 22px 48px rgba(0,0,0,.66),inset 0 1px 0 rgba(255,255,255,.05);
-  opacity:0;transform:translateY(-6px) scale(.985);pointer-events:none;transition:opacity .18s ease,transform .18s ease}
-.theme-pick.open .theme-list{opacity:1;transform:none;pointer-events:auto}
-.theme-list::before{content:"";position:absolute;left:10px;right:10px;top:0;height:4px;border-radius:0 0 3px 3px;
-  background:repeating-linear-gradient(45deg,rgba(255,196,64,.55) 0 5px,transparent 5px 10px);opacity:.5}
-.tl-head{display:flex;align-items:center;gap:8px;padding:9px 8px 10px;font-size:10.5px;font-weight:700;
-  letter-spacing:1.2px;text-transform:uppercase;color:#8ea3b5}
-.tl-head i{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
-.theme-item{position:relative;display:flex;align-items:center;gap:10px;width:100%;margin-bottom:3px;padding:8px 9px 8px 12px;
-  border:1px solid transparent;border-radius:9px;background:transparent;color:#dbe6ef;text-align:left;cursor:pointer;
-  transition:background .15s ease,border-color .15s ease,transform .15s ease}
-.theme-item::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:3px;background:var(--t);opacity:.8}
-.theme-item:hover{background:linear-gradient(90deg,color-mix(in srgb,var(--t) 26%,transparent),rgba(10,17,25,.5));transform:translateX(2px)}
-.theme-item[aria-selected="true"]{border-color:color-mix(in srgb,var(--t) 60%,transparent);
-  background:linear-gradient(90deg,color-mix(in srgb,var(--t) 32%,transparent),rgba(10,17,25,.55));
-  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--t) 20%,transparent)}
-.ti-badge{display:grid;place-items:center;width:28px;height:28px;flex:0 0 28px;border-radius:8px;
-  background:linear-gradient(180deg,color-mix(in srgb,var(--t) 58%,#0b1219),color-mix(in srgb,var(--t) 20%,#0b1219));
-  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--t2) 50%,transparent)}
-.ti-badge svg{width:17px;height:17px;fill:none;stroke:#f2f8fd;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.ti-text{display:flex;flex-direction:column;gap:1px;min-width:0;line-height:1.25}
-.ti-text b{font-size:13px;font-weight:600;color:#f2f8fd}
 /* выбранная тема просто подсвечивается — без галочек */
-.theme-item[aria-selected="true"] .ti-text b{color:#fff}
-@media(max-width:760px){
-  .theme-pick-toggle{height:34px;padding:0 9px 0 5px;gap:7px}
-  .tp-badge{width:24px;height:24px}
-  .theme-list{width:min(268px,calc(100vw - 16px))}
-}
 
 /* ---------- 5. Цифры-герои ---------- */
 .page .damage-card strong,.dmg-main strong{
@@ -178,11 +204,9 @@ input[type="text"]:focus,input[type="search"]:focus,input[type="number"]:focus,.
 
 /* ---------- 6. Глубина интерфейса ---------- */
 .result-panel,.sidebar,.top100-panel{border-radius:var(--r-lg);box-shadow:var(--sh-2)}
-.home-card{border-radius:var(--r-lg);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
-.home-card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent) 40%,#1a3346);box-shadow:0 18px 40px rgba(0,0,0,.5)}
+.home-card:hover{box-shadow:0 18px 40px rgba(0,0,0,.5)}
 .side-btn,.tokens-btn,.cmp-btn,.talent-open,.gear-toggle{transition:transform .12s ease,box-shadow .18s ease,border-color .18s ease}
-.side-btn:hover,.tokens-btn:hover,.cmp-btn:hover{transform:translateY(-1px);box-shadow:0 0 18px color-mix(in srgb,var(--accent) 30%,transparent)}
-.side-btn:active,.tokens-btn:active,.cmp-btn:active{transform:translateY(0)}
+.side-btn:hover,.tokens-btn:hover,.cmp-btn:hover{transform:translateY(-1px)}
 
 /* ---------- 7. Нижнее меню на телефоне ----------
    Разметка лежит прямо в HTML (её не создаёт скрипт), поэтому меню видно
@@ -191,7 +215,6 @@ input[type="text"]:focus,input[type="search"]:focus,input[type="number"]:focus,.
 .tabbar{display:none}
 @media(max-width:760px){
   .main-nav{display:none}                 /* верхний ряд заменяет нижнее меню */
-  .site-header{min-height:64px}
   .header-inner{min-height:64px;flex-wrap:nowrap;padding:8px 12px}
   body{padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px))}
   .tabbar{
@@ -226,10 +249,8 @@ input[type="text"]:focus,input[type="search"]:focus,input[type="number"]:focus,.
 @media(max-width:430px){.t100-delta{font-size:10.5px}.t100-move{font-size:10px}}
 
 /* ---------- 8б. Акцент темы в мелких деталях ---------- */
-.home-eyebrow{color:color-mix(in srgb,var(--accent) 75%,#ffffff)}
 .home-eyebrow i{background:var(--accent-3);box-shadow:0 0 8px var(--accent-3)}
 .section-heading span .ic,.section-heading .ic{color:var(--accent)}
-.site-footer span{color:color-mix(in srgb,var(--accent) 80%,var(--accent-3))}
 .top100-updated{border-color:color-mix(in srgb,var(--accent) 45%,#2e6384)}
 .top100-updated svg{stroke:var(--accent)}
 
@@ -258,13 +279,11 @@ input[type="text"]:focus,input[type="search"]:focus,input[type="number"]:focus,.
 /* ---------- 10. Уважение к настройкам системы ---------- */
 @media(prefers-reduced-motion:reduce){
   .home-card,.side-btn,.tokens-btn,.cmp-btn,.theme-pick *{transition:none}
-  .home-card:hover{transform:none}
   ::view-transition-old(leaderboard),::view-transition-new(leaderboard),
   ::view-transition-old(infogroups),::view-transition-new(infogroups),
   ::view-transition-old(app-header),::view-transition-new(app-header),
   ::view-transition-old(app-tabbar),::view-transition-new(app-tabbar){animation:none}
 }
-
 
 /* ===== Визуальные доработки (бывший improve.css) ===== */
 
@@ -272,23 +291,18 @@ input[type="text"]:focus,input[type="search"]:focus,input[type="number"]:focus,.
 html,body,.info-table{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
 
 /* 2. Заголовки страниц читаются на светлом небе фона */
-.result-title h1{text-shadow:0 2px 12px rgba(0,0,0,.85),0 1px 3px rgba(0,0,0,.9)}
 .result-title svg{filter:drop-shadow(0 2px 6px rgba(0,0,0,.8))}
 
 /* 3. Подпись в футере была почти невидимой */
-.site-footer span{opacity:.85;font-size:14px}
 
 /* 4. Доступность: видимый фокус при навигации с клавиатуры */
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #5aaeff;outline-offset:2px;border-radius:6px}
 
 /* 5. Главная: описание карточек контрастнее, карточка «Скоро» визуально неактивна */
-.home-card small{color:#a3b5c6}
 .home-card:has(.home-card-badge){opacity:.72}
 .home-card:has(.home-card-badge):hover{opacity:1}
 @media (min-width:1000px){
   .home-content{display:flex;flex-direction:column;justify-content:center}
-  .home-hero h1{font-size:56px}
-  .home-hero p{font-size:15px}
 }
 
 /* 6. Калькулятор: список снаряжения обрезался без признаков прокрутки */
@@ -305,12 +319,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 }
 
 /* 8. Гайды: заглушка шире и заметнее */
-.placeholder-panel{max-width:640px;margin-inline:auto;text-align:center;padding:28px 24px}
+.placeholder-panel{max-width:640px;margin-inline:auto;text-align:center}
 
 /* 9. Информация: панель не «прыгает» по ширине при переключении вкладок */
 .info-content{width:100%;box-sizing:border-box}
 .info-content:has(.placeholder-panel){max-width:680px}
-
 
 /* ============================================================================
    РЕДИЗАЙН «ПДА СТАЛКЕРА»
@@ -407,58 +420,6 @@ body::after{
 .main-nav a.active:before{content:"";position:absolute;inset:14px 4px;border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);
   background:color-mix(in srgb,var(--accent) 9%,transparent);border-radius:3px;z-index:-1}
 
-/* ---------- R4. Переключатель группировок ---------- */
-.theme-pick-toggle{height:44px;padding:0 12px 0 6px;gap:10px;border-radius:var(--r-md);
-  border:1px solid color-mix(in srgb,var(--t,#5f8ac9) 45%,rgba(255,255,255,.08));
-  background:linear-gradient(180deg,color-mix(in srgb,var(--t,#5f8ac9) 16%,#0d1115),#080a0d);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 6px 16px rgba(0,0,0,.35);color:var(--ink);cursor:pointer}
-.theme-pick-toggle:hover{border-color:color-mix(in srgb,var(--t) 75%,transparent);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 3px color-mix(in srgb,var(--t) 16%,transparent),0 6px 16px rgba(0,0,0,.35)}
-.tp-badge{width:32px;height:32px;border-radius:4px;
-  background:linear-gradient(145deg,var(--t),color-mix(in srgb,var(--t) 55%,#000));
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.18),0 0 12px color-mix(in srgb,var(--t) 45%,transparent);
-  clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
-.tp-badge svg{width:18px;height:18px;stroke:#0a0c0e;stroke-width:2}
-.tp-text{display:flex;flex-direction:column;line-height:1.05;text-align:left}
-.tp-text small{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
-.tp-text b{font-family:var(--f-display);font-weight:500;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:#fff;margin-top:3px}
-.tp-chev{width:14px;height:14px;fill:none;stroke:var(--ink-2);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s}
-.theme-list{width:340px;top:calc(100% + 12px);padding:10px;border-radius:var(--r-lg);
-  border:1px solid var(--line);
-  background:var(--brackets),linear-gradient(180deg,rgba(14,17,21,.97),rgba(8,10,13,.98));
-  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-  box-shadow:0 24px 60px rgba(0,0,0,.6)}
-.theme-list::before{display:none}
-.tl-head{justify-content:flex-start;font-family:var(--f-display);font-weight:500;font-size:12px;letter-spacing:.2em;color:var(--ink-2);padding:4px 6px 12px}
-.tl-head span{margin-left:auto;font-family:ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.05em;color:var(--ink-3);
-  border:1px solid rgba(255,255,255,.1);padding:2px 6px;border-radius:3px}
-.tl-head span::before{content:"ДОСТУПНО: "}
-.theme-item{position:relative;overflow:hidden;isolation:isolate;height:62px;margin-bottom:6px;padding:0 14px 0 12px;gap:12px;
-  border:1px solid rgba(255,255,255,.07);border-radius:var(--r-md);background:#0a0c0f;color:var(--ink);cursor:pointer;
-  transition:border-color .2s,transform .2s,box-shadow .2s}
-.theme-item:last-child{margin-bottom:0}
-.theme-item::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:0;background:var(--t);opacity:1;z-index:2}
-.ti-thumb{position:absolute;inset:0;z-index:-1;background-size:cover;background-position:center;opacity:.55;filter:saturate(.9);
-  transition:opacity .25s,transform .4s ease}
-.ti-thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,9,11,.96) 20%,rgba(7,9,11,.55) 65%,rgba(7,9,11,.25))}
-.theme-item[data-theme-btn="merc"] .ti-thumb{background-image:url("assets/bg-merc-thumb.webp")}
-.theme-item[data-theme-btn="dolg"] .ti-thumb{background-image:url("assets/bg-dolg-thumb.webp")}
-.theme-item[data-theme-btn="svoboda"] .ti-thumb{background-image:url("assets/bg-svoboda-thumb.webp")}
-.theme-item[data-theme-btn="science"] .ti-thumb{background-image:url("assets/bg-science-thumb.webp")}
-.theme-item[data-theme-btn="monolith"] .ti-thumb{background-image:url("assets/bg-monolith-thumb.webp")}
-.theme-item:hover{transform:none;border-color:color-mix(in srgb,var(--t) 55%,transparent);background:#0a0c0f}
-.theme-item:hover .ti-thumb{opacity:.85;transform:scale(1.04)}
-.theme-item[aria-selected="true"]{border-color:var(--t);background:#0a0c0f;
-  box-shadow:0 0 0 1px color-mix(in srgb,var(--t) 40%,transparent),0 0 22px color-mix(in srgb,var(--t) 25%,transparent)}
-.theme-item[aria-selected="true"] .ti-thumb{opacity:.9}
-.ti-badge{width:34px;height:34px;flex-basis:34px;border-radius:4px;
-  background:linear-gradient(145deg,var(--t),color-mix(in srgb,var(--t) 50%,#000));border:0;
-  clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
-.ti-badge svg{width:19px;height:19px;stroke:#0a0c0e;stroke-width:2}
-.ti-text b{font-family:var(--f-display);font-weight:500;font-size:16px;letter-spacing:.06em;text-transform:uppercase;color:#fff}
-.ti-check{width:20px;height:20px;margin-left:auto;fill:none;stroke:var(--t);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.6);transition:.2s}
-.theme-item[aria-selected="true"] .ti-check{opacity:1;transform:none;filter:drop-shadow(0 0 6px var(--t))}
-
 /* ---------- R5. Заголовки страниц ---------- */
 .result-title{gap:16px;padding:10px 4px 18px}
 .result-title svg,.result-title .target-icon{width:44px;height:44px;padding:9px;box-sizing:border-box;color:var(--accent);
@@ -487,7 +448,7 @@ body::after{
 .items-divider b{font-family:var(--f-display);font-weight:500;letter-spacing:.1em;text-transform:uppercase}
 
 /* ---------- R7. Карточки, поля, кнопки ---------- */
-.damage-card,.info-group,.gi-card,.tok-card,.cmp-card,.task-tiles>div{border-radius:var(--r-md);
+.damage-card,.info-group,.gi-card,.tok-card,.cmp-card{border-radius:var(--r-md);
   border-color:color-mix(in srgb,var(--accent) 18%,rgba(255,255,255,.06))}
 .damage-card{background-image:
   linear-gradient(135deg,color-mix(in srgb,var(--accent) 10%,rgba(14,18,22,.95)),rgba(8,10,13,.96));
@@ -592,10 +553,6 @@ input[type=checkbox]{accent-color:var(--accent)}
   .site-header{min-height:60px}
   .rad-logo,.rad-logo svg{width:32px;height:32px}
   .logo-title{font-size:21px}
-  .tp-text{display:none}
-  .theme-pick-toggle{height:40px;padding:0 9px 0 5px;gap:7px}
-  .tp-badge{width:28px;height:28px}
-  .theme-list{width:min(330px,calc(100vw - 16px))}
   .result-title{padding:6px 2px 12px;gap:12px}
   .result-title svg,.result-title .target-icon{width:38px;height:38px;padding:8px}
   .result-title h1{font-size:26px}
@@ -638,18 +595,6 @@ input[type=checkbox]{accent-color:var(--accent)}
   .top100-table td:nth-child(4){font-size:14px}
   .site-footer span{font-size:12px}
 }
-
-/* ---------- Значки группировок: минималистичные силуэты на тёмной плитке ----------
-   В списке — силуэт цвета группировки, у выбранной темы и на кнопке в шапке плитка залита цветом */
-.tp-badge,.ti-badge{clip-path:none;border:0;border-radius:8px;
-  background:color-mix(in srgb,var(--t) 14%,#101317);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--t) 45%,transparent);transition:background .2s ease}
-.tp-badge{width:34px;height:34px;background:var(--t);box-shadow:none}
-.ti-badge{width:38px;height:38px;flex-basis:38px}
-.tp-badge svg,.ti-badge svg{width:20px;height:20px;fill:var(--t);stroke:none;transition:fill .2s ease}
-.ti-badge svg{width:22px;height:22px}
-.tp-badge svg,.theme-item[aria-selected="true"] .ti-badge svg{fill:#0d1014}
-.theme-item[aria-selected="true"] .ti-badge{background:var(--t);box-shadow:none}
-@media(max-width:760px){.tp-badge{width:30px;height:30px}.tp-badge svg{width:18px;height:18px}}
 
 /* ---------- 11. Анимированные иконки меню и плиток ----------
    При наведении (на телефоне — при нажатии) иконка оживает: на «Главной» антенна ловит сигнал,
@@ -708,43 +653,23 @@ input[type=checkbox]{accent-color:var(--accent)}
   .nav-icon *,.home-card-icon svg *{animation:none!important}
 }
 
-/* ---------- 12. Компактный переключатель группировок ----------
-   В свёрнутом виде — только значок. При наведении (или фокусе с клавиатуры, или открытом списке)
-   кнопка выезжает влево и показывает «Группировка» и название; место в шапке при этом не меняется */
-.theme-pick{width:38px;height:38px;flex:0 0 38px}
-.theme-pick-toggle{position:absolute;top:0;right:0;z-index:2;height:38px;padding:0 4px;gap:0;white-space:nowrap;
-  transition:padding .28s ease,border-color .2s ease,box-shadow .2s ease}
-.tp-badge{width:28px;height:28px;border-radius:7px;flex:0 0 28px}
-.tp-badge svg{width:17px;height:17px}
-.tp-text,.tp-chev{max-width:0;opacity:0;overflow:hidden;margin-left:0;
-  transition:max-width .3s ease,opacity .2s ease,margin-left .3s ease}
-.tp-text{display:flex}
-.theme-pick.open .theme-pick-toggle,.theme-pick-toggle:focus-visible{padding:0 10px 0 4px}
-.theme-pick.open .tp-text,.theme-pick-toggle:focus-visible .tp-text{max-width:170px;opacity:1;margin-left:9px}
-.theme-pick.open .tp-chev,.theme-pick-toggle:focus-visible .tp-chev{max-width:14px;opacity:1;margin-left:8px;flex:0 0 14px}
-@media(hover:hover){
-  .theme-pick-toggle:hover{padding:0 10px 0 4px}
-  .theme-pick-toggle:hover .tp-text{max-width:170px;opacity:1;margin-left:9px}
-  .theme-pick-toggle:hover .tp-chev{max-width:14px;opacity:1;margin-left:8px;flex:0 0 14px}
-}
-@media(max-width:760px){
-  .theme-pick{width:36px;height:36px;flex-basis:36px}
-  .theme-pick-toggle,.theme-pick.open .theme-pick-toggle{height:36px;padding:0 3px}
-  .tp-text,.tp-chev{display:none}
-  .tp-badge{width:28px;height:28px}
-  .tp-badge svg{width:17px;height:17px}
-}
-@media(prefers-reduced-motion:reduce){.theme-pick-toggle,.tp-text,.tp-chev{transition:none}}
 
-/* ---------- 13. Значки-шевроны группировок ----------
-   Нашивка сама по себе плашка: убираем фон и рамку у значка, цвета берутся из SVG.
-   Выбранная тема и кнопка в шапке подсвечиваются свечением цвета группировки */
-.tp-badge,.ti-badge,.theme-item[aria-selected="true"] .ti-badge{background:none;box-shadow:none;border:0;border-radius:0;clip-path:none;overflow:visible}
-.tp-badge svg,.ti-badge svg,.theme-item[aria-selected="true"] .ti-badge svg{fill:none;stroke:none;width:100%;height:100%;overflow:visible}
-.tp-badge{width:28px;height:32px;flex:0 0 28px}
-.ti-badge{width:36px;height:40px;flex:0 0 36px}
-.ti-badge svg{transition:transform .2s ease,filter .2s ease}
-.theme-item:hover .ti-badge svg{transform:scale(1.06)}
-.theme-item[aria-selected="true"] .ti-badge svg,.tp-badge svg{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--t) 60%,transparent))}
-@media(max-width:760px){.tp-badge{width:26px;height:30px;flex-basis:26px}.tp-badge svg{width:100%;height:100%}}
-@media(prefers-reduced-motion:reduce){.ti-badge svg{transition:none}}
+/* ---------- 14. Пометка «неофициальный фан-сайт» на главной ----------
+   Курсивная строка под карточками, по бокам тонкие линии цвета темы; ссылка ведёт на игру во ВКонтакте */
+.home-note{display:flex;align-items:center;justify-content:center;gap:16px;max-width:900px;margin:40px auto 0;padding:0 12px;
+  font-size:14.5px;line-height:1.5;color:#b9c4cc;text-align:center;text-shadow:0 1px 8px rgba(0,0,0,.85)}
+.home-note::before,.home-note::after{content:"";flex:1 1 40px;max-width:110px;height:1px;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--accent) 70%,transparent))}
+.home-note::after{background:linear-gradient(270deg,transparent,color-mix(in srgb,var(--accent) 70%,transparent))}
+.home-note>span{flex:0 1 auto}
+@media(min-width:761px){.home-note{width:100%}.home-note>span{white-space:nowrap}}
+.home-note i{font-style:italic;letter-spacing:.01em}
+.home-note a{display:inline-flex;align-items:center;gap:4px;margin-left:4px;white-space:nowrap;color:var(--accent-2);text-decoration:none;
+  border-bottom:1px dashed color-mix(in srgb,var(--accent) 60%,transparent);transition:color .2s ease,border-color .2s ease}
+.home-note a:hover,.home-note a:focus-visible{color:#fff;border-bottom-color:var(--accent)}
+.home-note svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:760px){
+  .home-note{margin-top:28px;font-size:13.5px}
+  .home-note a{margin-left:0}
+  .home-note::before,.home-note::after{display:none}
+}

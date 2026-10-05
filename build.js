@@ -3,7 +3,7 @@
 /* Сборка для деплоя: исходники из корня -> ./dist
  * 0. Общие куски (partials/header.html, partials/footer.html) подставляются вместо <!-- @include имя -->,
  *    в шапке помечается активный пункт меню: так меню правится в одном месте, а не в каждой странице.
- * 0б. 3D главной (src/home-3d.js + three.js) собирается esbuild в один файл home-3d.js.
+ * 0б. 3D главной (src/home-3d.js + three.js) собирается esbuild: маленький home-3d.js и догружаемые части в dist/3d/.
  * 1. Таблицы «Информации» и «Топ-100» дописываются прямо в HTML: их видят поисковики и те, у кого выключен JS.
  *    Разметку рисуют те же info.js / info-tasks.js / top100.js, что работают в браузере, поэтому она совпадает.
  * 2. Стили страницы склеиваются в один файл (bundle-*.css), css и js сжимаются esbuild.
@@ -43,15 +43,16 @@ for (const name of fs.readdirSync(ROOT)) {
 }
 
 /* ---------- 3D главной ----------
-   src/home-3d.js и всё, что он импортирует (включая three.js из node_modules), склеиваются в dist/home-3d.js;
-   из three.js попадает только используемое. Без esbuild 3D не собирается: главная работает с обычным фоном */
+   src/home-3d.js — маленький загрузчик; заставка (zone-intro.js), живой фон (zone-bg.js) и общий кусок three.js
+   собираются в отдельные файлы dist/3d/*-<хэш>.js и скачиваются только когда нужны. Хэш в имени — защита от старого кэша.
+   Из three.js попадает только используемое. Без esbuild 3D не собирается: главная работает с обычным фоном */
 if (esbuild) {
   const r = esbuild.buildSync({
-    entryPoints: [path.join(ROOT, "src", "home-3d.js")], outfile: path.join(OUT, "home-3d.js"),
-    bundle: true, format: "esm", minify: true, target: "es2020", legalComments: "none", charset: "utf8", metafile: true
+    entryPoints: [path.join(ROOT, "src", "home-3d.js")], outdir: OUT, entryNames: "[name]", chunkNames: "3d/[name]-[hash]",
+    bundle: true, splitting: true, format: "esm", minify: true, target: "es2020", legalComments: "none", charset: "utf8", metafile: true
   });
-  const size = Object.values(r.metafile.outputs)[0].bytes;
-  console.log("3D главной: home-3d.js " + (size / 1024).toFixed(0) + " КБ");
+  const parts = Object.entries(r.metafile.outputs).map(([f, o]) => path.basename(f).replace(/-[A-Z0-9]{8}\.js$/, ".js").replace(/^chunk\.js$/, "three.js (общий)") + " " + (o.bytes / 1024).toFixed(0) + " КБ");
+  console.log("3D главной: " + parts.join(", "));
 } else {
   console.warn("Предупреждение: без esbuild 3D главной не собран");
 }
