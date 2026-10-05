@@ -1,8 +1,15 @@
 #!/usr/bin/env node
 "use strict";
-/* CSV из выгрузок рейтинга -> top100-data.js
+/* Общая выгрузка рейтинга (один CSV) -> top100-data.js
  * Запуск: node build-top100.js [папка_с_csv] [путь_к_top100-data.js]
- * По умолчанию CSV берутся из ./top100, результат пишется в ./top100-data.js
+ * По умолчанию CSV берётся из ./top100/heart-of-the-zone-top100-all.csv, результат пишется в ./top100-data.js
+ *
+ * В CSV одна строка на игрока и все показатели сразу (разделитель «;» или «,», определяется сам).
+ * Каждый раздел рейтинга получается сортировкой этих игроков по своей колонке.
+ * Группировка берётся из колонки «Группировка» (а не из ника), «—» = без группировки.
+ * Цвета группировок хранятся в top100/factions.json: новая группировка получает свой цвет автоматически
+ * и сохраняет его между обновлениями. На сайт уходят только группировки, которые есть в текущем рейтинге,
+ * поэтому плашка пропавшей группировки исчезает сама.
  *
  * Кроме самих данных скрипт считает изменения за несколько периодов (TOP100_PERIODS / TOP100_CHANGES):
  *  1. delta — прирост метрики;
@@ -12,13 +19,13 @@
  * которые скрипт складывает сам (ник -> [место, значение]).
  * Для периода берётся самый свежий снимок, которому уже не меньше нужного срока.
  * Если истории не хватает, берём самый ранний снимок и помечаем период как неполный.
- * Если CSV не изменились с прошлого запуска, новый снимок не создаётся.
+ * Если CSV не изменился с прошлого запуска, новый снимок не создаётся.
  * Оба объекта: ник -> число (+ вверх, − вниз), null — новый в списке, нет ключа — данных нет. */
 const fs = require("fs");
 const path = require("path");
 
-/* парсер CSV: кавычки, "" внутри поля, CRLF/LF, переносы в кавычках */
-function parseCsv(text) {
+/* парсер CSV (sep — разделитель): кавычки, "" внутри поля, CRLF/LF, переносы в кавычках */
+function parseCsv(text, sep) {
   text = text.replace(/^\uFEFF/, "");
   const rows = [];
   let row = [], field = "", inQuotes = false;
@@ -30,7 +37,7 @@ function parseCsv(text) {
         else inQuotes = false;
       } else field += c;
     } else if (c === '"') inQuotes = true;
-    else if (c === ",") { row.push(field); field = ""; }
+    else if (c === sep) { row.push(field); field = ""; }
     else if (c === "\r") { /* игнор */ }
     else if (c === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
     else field += c;
@@ -39,52 +46,109 @@ function parseCsv(text) {
   return rows.filter(r => !(r.length === 1 && r[0] === ""));
 }
 
-const INACTIVE_MARK = "📡";
-
-/* число из выгрузки: «1 839», «217 843», «+5 482» (обычные и неразрывные пробелы).
-   Прочерк и пустое поле дают NaN, дальше такие значения пропускаем */
+/* число из выгрузки: «1 839», «217 843» (обычные и неразрывные пробелы).
+   Прочерк и пустое поле дают NaN */
 const toNumber = v => Number(String(v).replace(/[\s\u00A0\u202F]/g, ""));
 
-/* Колонка «Δ» в выгрузках игры считается за разный срок: у репутации за последнее обновление,
-   у боссов за несколько. Верим ей только там, где проверено, и только пока нет своего снимка со значениями */
-const TRUSTED_CSV_DELTA = new Set(["reputation"]);
+const CSV_FILE = "heart-of-the-zone-top100-all.csv";
+const NO_GROUP = new Set(["", "—", "-", "–"]);
 
-/* колонки: 0 место, 1 ник, 2 уровень, 3 значение, дальше «Δ Ур.» и «Δ <метрика>».
-   Если место пропущено, настоящее сохраняем пятым элементом, чтобы нижние не сдвигались. */
-function csvToRows(filePath) {
-  const table = parseCsv(fs.readFileSync(filePath, "utf8"));
-  const head = (table[0] || []).map(h => h.trim());
-  const rows = table.slice(1);
-  const metricDeltaIdx = head.length > 4 && /^Δ/i.test(head[head.length - 1]) ? head.length - 1 : -1;
-  const metricDelta = {};
-  const parsed = rows.map(([rank, nick, level, value, ...rest], i) => {
-    const inactive = nick.startsWith(INACTIVE_MARK) ? 1 : 0;
-    const cleanNick = inactive ? nick.slice(INACTIVE_MARK.length) : nick;
-    if (metricDeltaIdx > 0) {
-      const n = toNumber(rest[metricDeltaIdx - 4]);
-      if (Number.isFinite(n)) metricDelta[cleanNick] = n;
-    }
-    const row = [cleanNick, toNumber(level), toNumber(value), inactive];
-    if (toNumber(rank) !== i + 1) row.push(toNumber(rank));
-    return row;
-  });
-  return { rows: parsed, metricDelta, hasDeltaColumn: metricDeltaIdx > 0 };
-}
-
+/* разделы рейтинга: колонка общего CSV -> переменная в top100-data.js */
 const SOURCES = [
-  { file: "heart-of-the-zone-top100-talents.csv", varName: "TOP100_TALENTS", key: "talents" },
-  { file: "heart-of-the-zone-top100-camp_defenses.csv", varName: "TOP100_DEFENSE", key: "defense" },
-  { file: "heart-of-the-zone-top100-expeditions.csv", varName: "TOP100_EXPEDITIONS", key: "expeditions" },
-  { file: "heart-of-the-zone-top100-collections.csv", varName: "TOP100_COLLECTIONS", key: "collections" },
-  { file: "heart-of-the-zone-top100-stashes.csv", varName: "TOP100_STASHES", key: "stashes" },
-  { file: "heart-of-the-zone-top100-reputation.csv", varName: "TOP100_REPUTATION", key: "reputation" },
-  { file: "heart-of-the-zone-top100-bosses.csv", varName: "TOP100_BOSSES", key: "bosses" },
+  { column: "Таланты", varName: "TOP100_TALENTS", key: "talents" },
+  { column: "Защищено лагерей", varName: "TOP100_DEFENSE", key: "defense" },
+  { column: "Завершено экспедиций", varName: "TOP100_EXPEDITIONS", key: "expeditions" },
+  { column: "Собрано коллекций", varName: "TOP100_COLLECTIONS", key: "collections" },
+  { column: "Собрано тайников", varName: "TOP100_STASHES", key: "stashes" },
+  { column: "Репутация", varName: "TOP100_REPUTATION", key: "reputation" },
+  { column: "Убито боссов", varName: "TOP100_BOSSES", key: "bosses" },
 ];
 
-/* CSV лежат в top100/ рядом со скриптом */
+/* общий CSV -> игроки {nick, level, group, inactive, order, values{колонка: число}} */
+function readPlayers(filePath) {
+  const text = fs.readFileSync(filePath, "utf8").replace(/^\uFEFF/, "");
+  const firstLine = text.split(/\r?\n/, 1)[0];
+  const sep = (firstLine.match(/;/g) || []).length >= (firstLine.match(/,/g) || []).length ? ";" : ",";
+  const table = parseCsv(text, sep);
+  const head = (table[0] || []).map(h => h.trim());
+  const col = name => {
+    const i = head.findIndex(h => h.toLowerCase() === name.toLowerCase());
+    if (i < 0) throw new Error(`В ${path.basename(filePath)} нет колонки «${name}». Колонки: ${head.join(", ")}`);
+    return i;
+  };
+  const iRank = col("№"), iNick = col("Ник"), iLevel = col("Уровень"), iGroup = col("Группировка"), iOff = col("Нет сигнала");
+  const metricIdx = Object.fromEntries(SOURCES.map(s => [s.column, col(s.column)]));
+  return table.slice(1).filter(r => r.length > 1 && String(r[iNick] || "").trim()).map((r, i) => {
+    const group = String(r[iGroup] || "").trim();
+    const values = {};
+    for (const c of Object.keys(metricIdx)) values[c] = toNumber(r[metricIdx[c]]);
+    const order = toNumber(r[iRank]);
+    return {
+      nick: r[iNick],
+      level: toNumber(r[iLevel]),
+      group: NO_GROUP.has(group) ? "" : group,
+      inactive: /^(да|yes|1|true|\+)$/i.test(String(r[iOff] || "").trim()) ? 1 : 0,
+      order: Number.isFinite(order) ? order : i + 1,
+      values,
+    };
+  });
+}
+
+/* раздел: игроки по убыванию значения, при равенстве — в порядке общей выгрузки (по репутации).
+   Строка: [ник, уровень, значение, давно не заходил (0/1)] */
+function sectionRows(players, column) {
+  return players
+    .filter(pl => Number.isFinite(pl.values[column]))
+    .sort((a, b) => b.values[column] - a.values[column] || a.order - b.order)
+    .map(pl => [pl.nick, pl.level, pl.values[column], pl.inactive]);
+}
+
+/* ---------- цвета группировок ----------
+   top100/factions.json: {"Группировка": "#rrggbb"}. Цвета можно править руками, скрипт их не трогает.
+   Новой группировке подбирается оттенок, максимально далёкий от уже занятых */
+const hexToHue = hex => {
+  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
+  if (!m) return null;
+  const [r, g, b] = m.slice(1).map(x => parseInt(x, 16) / 255);
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  if (!d) return null;
+  let h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return (h * 60 + 360) % 360;
+};
+function hslToHex(h, s, l) {
+  s /= 100; l /= 100;
+  const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l);
+  const f = n => Math.round(255 * (l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1)))).toString(16).padStart(2, "0");
+  return "#" + f(0) + f(8) + f(4);
+}
+function pickColor(used) {
+  const hues = used.map(hexToHue).filter(h => h !== null);
+  const dist = (a, b) => Math.min(Math.abs(a - b), 360 - Math.abs(a - b));
+  let best = 0, bestD = -1;
+  for (let h = 0; h < 360; h += 5) {
+    const d = hues.length ? Math.min(...hues.map(x => dist(x, h))) : 360;
+    if (d > bestD) { bestD = d; best = h; }
+  }
+  /* когда оттенков много и они близки, чередуем яркость, чтобы соседние всё равно различались */
+  const l = bestD < 20 && hues.length % 2 ? 72 : 62;
+  return hslToHex(best, 62, l);
+}
+/* стартовые цвета: сняты с эмблем (вики S.T.A.L.K.E.R.) и осветлены под тёмный интерфейс */
+const DEFAULT_FACTION_COLORS = {
+  "Наёмники": "#5f8ac9",
+  "Долг": "#d9483f",
+  "Свобода": "#4fb058",
+  "Учёные": "#57c4f0",
+  "Монолит": "#d9a52c",
+  "Вольные сталкеры": "#e0c94d",
+  "Winx club": "#b98ae0",
+};
+
+/* CSV лежит в top100/ рядом со скриптом */
 const inputDir = process.argv[2] || path.join(__dirname, "top100");
 const outputFile = process.argv[3] || path.join(process.cwd(), "top100-data.js");
 const historyDir = path.join(inputDir, "history");
+const factionsFile = path.join(inputDir, "factions.json");
 
 /* ---------- дата сборки по Москве ---------- */
 const MSK = 3 * 3600 * 1000;   // Москва без перехода на летнее время
@@ -158,25 +222,46 @@ function sameData(old, now) {
 }
 
 /* ---------- данные ---------- */
+const csvPath = path.join(inputDir, CSV_FILE);
+if (!fs.existsSync(csvPath)) throw new Error("Не найден файл: " + csvPath);
+const players = readPlayers(csvPath);
+if (!players.length) throw new Error("В " + CSV_FILE + " нет ни одного игрока");
+
 const blocks = [];
-const csvDeltas = {};
 const snapshot = {};
 const current = {};   // ключ -> ник -> {rank, value}
 
-for (const { file, varName, key } of SOURCES) {
-  const filePath = path.join(inputDir, file);
-  if (!fs.existsSync(filePath)) throw new Error("Не найден файл: " + filePath);
-  const { rows, metricDelta } = csvToRows(filePath);
-  csvDeltas[key] = metricDelta;
+for (const { column, varName, key } of SOURCES) {
+  const rows = sectionRows(players, column);
   current[key] = {};
   snapshot[key] = {};
   rows.forEach((r, i) => {
-    const rank = r[4] || i + 1;
-    current[key][r[0]] = { rank, value: r[2] };
-    snapshot[key][r[0]] = [rank, r[2]];
+    current[key][r[0]] = { rank: i + 1, value: r[2] };
+    snapshot[key][r[0]] = [i + 1, r[2]];
   });
   blocks.push(`window.${varName}=[\n${rows.map(r => JSON.stringify(r)).join(",\n")}\n];`);
 }
+
+/* группировки: цвет из factions.json, новым — новый цвет (файл дописывается).
+   В данные сайта идут только группировки текущего рейтинга, по числу игроков */
+let factionColors = {};
+if (fs.existsSync(factionsFile)) factionColors = JSON.parse(fs.readFileSync(factionsFile, "utf8"));
+else factionColors = { ...DEFAULT_FACTION_COLORS };
+const groupCount = {};
+players.forEach(pl => { if (pl.group) groupCount[pl.group] = (groupCount[pl.group] || 0) + 1; });
+const groupsNow = Object.keys(groupCount).sort((a, b) => groupCount[b] - groupCount[a] || a.localeCompare(b, "ru"));
+const added = [];
+for (const g of groupsNow) {
+  if (!factionColors[g]) { factionColors[g] = pickColor(Object.values(factionColors)); added.push(g); }
+}
+if (added.length || !fs.existsSync(factionsFile)) {
+  fs.mkdirSync(inputDir, { recursive: true });
+  fs.writeFileSync(factionsFile, "{\n" + Object.keys(factionColors).map(g => `  ${JSON.stringify(g)}: ${JSON.stringify(factionColors[g])}`).join(",\n") + "\n}\n");
+}
+if (added.length) console.log("Новые группировки:", added.map(g => g + " " + factionColors[g]).join(", "));
+const factionsOut = groupsNow.map(g => ({ name: g, color: factionColors[g] }));
+const groupOfNick = {};
+players.forEach(pl => { if (pl.group) groupOfNick[pl.nick] = pl.group; });
 
 /* если данные не менялись, последний снимок равен текущим данным и базой быть не может */
 const snaps = readSnapshots();
@@ -189,23 +274,8 @@ const stamp = fmtStamp(dataMs);
 const previous = unchanged ? (snaps[snaps.length - 2] || null) : latest;
 const older = (unchanged ? snaps.slice(0, -1) : snaps).slice().sort((a, b) => snapTime(a.id) - snapTime(b.id));
 
-/* раздел не изменился ни в одной строке, хотя остальные обновились, — скорее всего, его CSV забыли выгрузить заново */
-if (!unchanged && latest) {
-  const same = SOURCES.filter(({ key }) => {
-    const a = latest.data[key], b = snapshot[key];
-    if (!a) return false;
-    const nicks = Object.keys(b);
-    return Object.keys(a).length === nicks.length && nicks.every(n => Array.isArray(a[n]) && a[n][0] === b[n][0] && a[n][1] === b[n][1]);
-  });
-  if (same.length && same.length < SOURCES.length) {
-    console.warn("\n⚠ ВНИМАНИЕ: не изменились с прошлого обновления: " + same.map(x => x.file).join(", "));
-    console.warn("  Остальные разделы обновились. Проверьте, что эти CSV выгружены заново и лежат в папке top100 под этими именами.\n");
-  }
-}
-
-/* сравнение раздела со снимком base: изменение места и прирост значения.
-   useCsv — разрешить запасной прирост из CSV, когда в снимке нет значений (только для «с прошлого обновления») */
-function compareWith(base, key, useCsv) {
+/* сравнение раздела со снимком base: изменение места и прирост значения */
+function compareWith(base, key) {
   const prev = (base && base.data && base.data[key]) || null;
   const hasValues = !!prev && Object.values(prev).some(v => Array.isArray(v));
   const rank = {};
@@ -221,9 +291,8 @@ function compareWith(base, key, useCsv) {
       if (hasValues && was && was.value !== undefined) delta[nick] = now.value - was.value;
     }
   }
-  if (hasValues) { source = "снимок"; return { rank, delta, moves, source }; }
-  if (useCsv && TRUSTED_CSV_DELTA.has(key)) return { rank, delta: csvDeltas[key], moves, source: "csv" };
-  return { rank, delta: {}, moves, source };
+  if (hasValues) source = "снимок";
+  return { rank, delta: hasValues ? delta : {}, moves, source };
 }
 
 /* нули не пишем: отсутствие ключа = «без изменений» */
@@ -261,19 +330,19 @@ for (const per of PERIODS) {
   let moves = 0;
   const src = [];
   for (const { key } of SOURCES) {
-    const r = compareWith(base, key, per.key === "last");
+    const r = compareWith(base, key);
     delta[key] = compactMap(r.delta);
     rank[key] = compactMap(r.rank);
     moves += r.moves;
     src.push(key + "=" + r.source);
   }
-  /* без базы период бывает только у «с прошлого обновления»: тогда в нём одни приросты репутации из CSV */
-  if (!base && !Object.values(delta).some(m => Object.keys(m).length)) continue;
+  /* без снимка сравнивать не с чем */
+  if (!base) continue;
 
   if (base) usedBases.add(base.id);
   periods.push({ key: per.key, label: per.label, from: base ? fmtTime(base.id) : null, partial });
   changes[per.key] = { delta, rank };
-  console.log(`Период «${per.label}»:`, base ? "с " + base.id : "по данным игры", partial ? "(неполный)" : "",
+  console.log(`Период «${per.label}»:`, "с " + base.id, partial ? "(неполный)" : "",
     "| смен мест:", moves, "| приросты:", src.join(", "));
 }
 
@@ -294,16 +363,19 @@ if (!unchanged) {
     .forEach(sn => fs.unlinkSync(path.join(historyDir, sn.id + ".json")));
 }
 
-const header = "/* Топ-100: [ник, уровень, значение, покинул отряд (0/1)[, место]]. Место = индекс+1, если не указано пятым элементом */\n";
+const header = "/* Топ-100: [ник, уровень, значение, давно не заходил (0/1)]. Место = индекс+1 */\n";
 const notes =
   "/* TOP100_PERIODS — периоды изменений для переключателя: ключ, подпись, с какого момента считаем, неполный ли период */\n" +
-  "/* TOP100_CHANGES — по ключу периода: delta (прирост метрики) и rank (изменение места: + поднялся, − опустился, null — новичок) */\n";
+  "/* TOP100_CHANGES — по ключу периода: delta (прирост метрики) и rank (изменение места: + поднялся, − опустился, null — новичок) */\n" +
+  "/* TOP100_FACTIONS — группировки текущего рейтинга с цветами (из top100/factions.json), TOP100_GROUPS — ник -> группировка */\n";
 fs.writeFileSync(outputFile,
   header +
   `window.TOP100_UPDATED=${JSON.stringify(stamp)};\n` +
   notes +
   `window.TOP100_PERIODS=${JSON.stringify(periods)};\n` +
   `window.TOP100_CHANGES={\n${periods.map(per => ` ${JSON.stringify(per.key)}:${JSON.stringify(changes[per.key])}`).join(",\n")}\n};\n` +
+  `window.TOP100_FACTIONS=${JSON.stringify(factionsOut)};\n` +
+  `window.TOP100_GROUPS=${JSON.stringify(groupOfNick)};\n` +
   `window.TOP100_HISTORY=${JSON.stringify({ id: unchanged && latest ? latest.id : snapId, from: previous ? previous.id : null })}\n` +
   blocks.join("\n") + "\n");
 console.log("Готово:", outputFile, "| дата:", stamp, "| периодов:", periods.map(per => per.key).join(", ") || "нет");

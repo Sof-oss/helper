@@ -3,6 +3,7 @@ const fmt=n=>Math.round(n).toLocaleString("ru-RU");
 const TOP100_TAB_KEY="gameHelperTop100Tab";
 const TOP100_PERIOD_KEY="gameHelperTop100Period";
 const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const escAttr=s=>esc(s).replace(/"/g,"&quot;");
 
 /* разделы рейтинга: ключ, вкладка, подпись колонки, данные, цвет.
    Порядок = порядок вкладок. sortLevel: клик по «Ур.» сортирует по уровню (повторный клик сбрасывает) */
@@ -16,24 +17,15 @@ const TOP100_TABS=[
  {key:"defense",label:"Защита лагеря",metric:"Защита лагеря",data:()=>window.TOP100_DEFENSE,accent:"#54bfff"}
 ];
 
-/* отряды определяются по тегу в нике (ё = е, регистр не важен, «Cвобода» с латинской C тоже).
-   Цвета группировок сняты с их эмблем (вики S.T.A.L.K.E.R.) и осветлены под тёмный интерфейс:
-   наёмники — сталь/тёмно-синий, долг — красный щит, свобода — зелёный, учёные — лазурь,
-   монолит — янтарная нашивка. WINX — местная группировка сервера. */
-const FACTIONS=[
- {key:"merc",label:"Наёмник",re:/наемник/,color:"#5f8ac9"},
- {key:"dolg",label:"Д.О.Л.Г",re:/д\s*\.\s*о\s*\.\s*л\s*\.\s*г/,color:"#d9483f"},
- {key:"svoboda",label:"Свобода",re:/[сc]вобода/,color:"#4fb058"},
- {key:"science",label:"Учёные",re:/ученые/,color:"#57c4f0"},
- {key:"monolith",label:"Монолит",re:/монолит/,color:"#d9a52c"},
- /* «[Вольный сталкер]» — тег одиночек: жёлтый знак радиации на нашивке.
-    Скобка в шаблоне обязательна, иначе под правило попадает «Д.О.Л.Г Вольный стрелок» */
- {key:"volny",label:"Вольный сталкер",re:/\[\s*вольн/i,color:"#e0c94d"},
- {key:"winx",label:"WINX",re:/winx/,color:"#b98ae0"}
-];
+/* группировки приходят из общей выгрузки (top100-data.js, собирает build-top100.js):
+   TOP100_FACTIONS — группировки текущего рейтинга с цветами, TOP100_GROUPS — ник -> группировка.
+   Новая группировка в рейтинге сама получает плашку и цвет, пропавшая — исчезает */
+const FACTIONS=(Array.isArray(window.TOP100_FACTIONS)?window.TOP100_FACTIONS:[]).map(f=>({key:f.name,label:f.name,color:f.color}));
+const FACTION_BY_KEY=new Map(FACTIONS.map(f=>[f.key,f]));
+const GROUPS=window.TOP100_GROUPS||{};
 const norm=s=>String(s).toLowerCase().replace(/ё/g,"е");
-const factionOf=nick=>{const n=norm(nick);return FACTIONS.find(f=>f.re.test(n))||null};
-const NO_FACTION="none";
+const factionOf=nick=>FACTION_BY_KEY.get(GROUPS[nick])||null;
+const NO_FACTION="—"; // «—» в выгрузке = без группировки, своей группировкой быть не может
 
 let currentTop100Tab=TOP100_TABS[0].key;
 try{const saved=localStorage.getItem(TOP100_TAB_KEY);if(TOP100_TABS.some(t=>t.key===saved))currentTop100Tab=saved}catch{}
@@ -65,7 +57,7 @@ function rankCell(rank){
  if(rank>3)return '<span class="top100-rank-num">'+rank+'</span>';
  return '<span class="top100-medal top100-medal-'+rank+'" title="'+rank+' место">☢</span><span class="top100-rank-num">'+rank+'</span>';
 }
-const dotMarkup=(f,cls)=>f?'<i class="'+cls+'" style="--f:'+f.color+'" title="'+f.label+'"></i>':"";
+const dotMarkup=(f,cls)=>f?'<i class="'+cls+'" style="--f:'+escAttr(f.color)+'" title="'+escAttr(f.label)+'"></i>':"";
 
 /* изменение места за выбранный период (TOP100_CHANGES -> rank): данных может не быть */
 function rankMoveMarkup(nick,tabKey){
@@ -136,7 +128,7 @@ function renderFactionSummary(){
 }
 function renderFactions(){
  const{rows,count}=factionCounts();
- const chip=(key,label,color,n)=>'<button type="button" class="t100-chip'+(top100Faction===key?" active":"")+'" data-t100-faction="'+key+'" style="--f:'+color+'" aria-pressed="'+(top100Faction===key)+'"><i></i>'+label+'<small>'+n+'</small></button>';
+ const chip=(key,label,color,n)=>'<button type="button" class="t100-chip'+(top100Faction===key?" active":"")+'" data-t100-faction="'+escAttr(key)+'" style="--f:'+escAttr(color)+'" aria-pressed="'+(top100Faction===key)+'"><i></i>'+esc(label)+'<small>'+n+'</small></button>';
  $("top100Factions").innerHTML=chip("","Все","#54bfff",rows)+FACTIONS.map(f=>chip(f.key,f.label,f.color,count[f.key]||0)).join("")+chip(NO_FACTION,"Прочие","#8196a9",count[NO_FACTION]||0);
  renderFactionSummary();
 }
