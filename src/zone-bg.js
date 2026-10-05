@@ -18,18 +18,13 @@ float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<OCT;i++){v+=a*noise(p);p=p*2.03+
 `;
 
 export function startBackground() {
-  const dlog = window.__z3d || (() => {});
   const canvas = document.createElement("canvas");
   canvas.className = "zone-bg";
   canvas.setAttribute("aria-hidden", "true");
   let renderer;
   try {
     renderer = new WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: "low-power" });
-  } catch (e) { dlog("WebGLRenderer FAIL", String(e)); return null; }
-  try {
-    const gl = renderer.getContext(), ri = gl.getExtension("WEBGL_debug_renderer_info");
-    dlog("gl", typeof WebGL2RenderingContext !== "undefined" && gl instanceof WebGL2RenderingContext ? "webgl2" : "webgl1", ri ? gl.getParameter(ri.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER), "maxTex", gl.getParameter(gl.MAX_TEXTURE_SIZE), "highp", (gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT) || {}).precision);
-  } catch (e) { dlog("gl info fail", String(e)); }
+  } catch (e) { return null; }
   renderer.outputColorSpace = LinearSRGBColorSpace; // цвета как в CSS, без пересчёта
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 1.5));
   document.body.prepend(canvas);
@@ -204,10 +199,8 @@ export function startBackground() {
   /* ---------- фон темы и смена группировки (плавно) ---------- */
   let fade = null;
   function loadBg(url, first) {
-    dlog("loadBg", url || "NO URL (--bg-img)");
     if (!url) return;
     loader.load(url, tex => {
-      dlog("texture ok", tex.image && (tex.image.width + "x" + tex.image.height));
       prepTex(tex);
       imgAspect = tex.image.width / tex.image.height;
       if (first || !photoMat.uniforms.map.value) {
@@ -217,7 +210,7 @@ export function startBackground() {
         photoMat.uniforms.map2.value = tex; fitPhoto();
         fade = { t0: performance.now(), tex };
       }
-    }, undefined, err => dlog("TEXTURE FAIL", url, String(err && (err.message || err.type || err))));
+    });
   }
   loadBg(theme.bg, true);
   new MutationObserver(() => requestAnimationFrame(() => {
@@ -333,22 +326,7 @@ export function startBackground() {
   }
   raf = requestAnimationFrame(frame);
 
-  /* диагностика: раз в 2 с — кадры, видимость холста и цвет пикселя в центре */
-  if (window.__z3d && /[?&]debug3d/.test(location.search)) {
-    let frames = 0, n = 0; const ren = renderer.render.bind(renderer);
-    renderer.render = (s, c) => { ren(s, c); frames++;
-      if (frames % 120 === 1) { try { const gl = renderer.getContext(), px = new Uint8Array(4);
-        gl.readPixels(gl.drawingBufferWidth >> 1, gl.drawingBufferHeight >> 1, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
-        dlog("center px", Array.from(px).join(","), "glErr", gl.getError(), "lost", gl.isContextLost()); } catch (e) { dlog("readPixels fail", String(e)); } } };
-    const iv = setInterval(() => {
-      const cs = getComputedStyle(canvas), r = canvas.getBoundingClientRect();
-      const top = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
-      dlog("frames", frames, "class", canvas.className, "opacity", cs.opacity, "z", cs.zIndex, "rect", Math.round(r.width) + "x" + Math.round(r.height), "buf", canvas.width + "x" + canvas.height, "inDOM", canvas.isConnected, "center el", top ? top.tagName + "." + top.className : "-");
-      if (++n >= 8) clearInterval(iv);
-    }, 2000);
-  }
-
   /* потеря контекста (бывает на телефонах): прячем холст, остаётся CSS-фон */
-  canvas.addEventListener("webglcontextlost", e => { dlog("CONTEXT LOST"); e.preventDefault(); cancelAnimationFrame(raf); canvas.classList.remove("on"); });
+  canvas.addEventListener("webglcontextlost", e => { e.preventDefault(); cancelAnimationFrame(raf); canvas.classList.remove("on"); });
   return { canvas, spawnAnomaly: () => spawnAnomaly(performance.now()) };
 }
