@@ -730,3 +730,12 @@ input[type=checkbox]{accent-color:var(--accent)}
   .theme-pick-toggle::after{transition:none}
   .theme-pick.hint .theme-pick-toggle::before{animation:none}
 }
+
+/* Топ-100 на телефоне: изменение места (▲1 / NEW) под номером, а не сбоку — иначе в узкой колонке
+   оно наезжало на точку отряда и ник */
+@media(max-width:600px){
+  .top100-table th:nth-child(1),.top100-table td:nth-child(1){width:44px}
+  .top100-rank-in{flex-direction:column;align-items:flex-start;justify-content:center;gap:1px}
+  .top100-rank-in .t100-move{margin-top:0;line-height:1.1}
+  .top100-rank-in .t100-move.new{letter-spacing:.2px}
+}
