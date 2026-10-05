@@ -90,11 +90,12 @@ const historyDir = path.join(inputDir, "history");
 const MSK = 3 * 3600 * 1000;   // Москва без перехода на летнее время
 const DAY = 864e5;
 const nowMs = Date.now();
-const p = Object.fromEntries(new Intl.DateTimeFormat("ru-RU", {
+const mskParts = ms => Object.fromEntries(new Intl.DateTimeFormat("ru-RU", {
   timeZone: "Europe/Moscow", day: "2-digit", month: "2-digit", year: "numeric",
   hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
-}).formatToParts(new Date(nowMs)).map(x => [x.type, x.value]));
-const stamp = `${p.day}.${p.month}.${p.year} ${p.hour}:${p.minute}:${p.second}`;
+}).formatToParts(new Date(ms)).map(x => [x.type, x.value]));
+const fmtStamp = ms => { const q = mskParts(ms); return `${q.day}.${q.month}.${q.year} ${q.hour}:${q.minute}:${q.second}`; };
+const p = mskParts(nowMs);
 const snapId = `${p.year}-${p.month}-${p.day}_${p.hour}-${p.minute}-${p.second}`;   // имя снимка этого запуска
 const KEEP_SNAPSHOTS = 50;   // последние столько храним всегда
 const KEEP_DAYS = 40;        // и всё, что моложе: этого хватает на период «месяц» (в git старое остаётся)
@@ -172,8 +173,26 @@ for (const { file, varName, key } of SOURCES) {
 const snaps = readSnapshots();
 const latest = snaps[snaps.length - 1] || null;
 const unchanged = !!latest && sameData(latest.data, snapshot);
+/* момент, к которому относятся данные: если CSV не менялись, это время последнего снимка, а не время запуска.
+   Иначе повторный запуск сдвигал бы «Обновлено» и периоды, хотя рейтинг тот же */
+const dataMs = unchanged ? snapTime(latest.id) : nowMs;
+const stamp = fmtStamp(dataMs);
 const previous = unchanged ? (snaps[snaps.length - 2] || null) : latest;
 const older = (unchanged ? snaps.slice(0, -1) : snaps).slice().sort((a, b) => snapTime(a.id) - snapTime(b.id));
+
+/* раздел не изменился ни в одной строке, хотя остальные обновились, — скорее всего, его CSV забыли выгрузить заново */
+if (!unchanged && latest) {
+  const same = SOURCES.filter(({ key }) => {
+    const a = latest.data[key], b = snapshot[key];
+    if (!a) return false;
+    const nicks = Object.keys(b);
+    return Object.keys(a).length === nicks.length && nicks.every(n => Array.isArray(a[n]) && a[n][0] === b[n][0] && a[n][1] === b[n][1]);
+  });
+  if (same.length && same.length < SOURCES.length) {
+    console.warn("\n⚠ ВНИМАНИЕ: не изменились с прошлого обновления: " + same.map(x => x.file).join(", "));
+    console.warn("  Остальные разделы обновились. Проверьте, что эти CSV выгружены заново и лежат в папке top100 под этими именами.\n");
+  }
+}
 
 /* сравнение раздела со снимком base: изменение места и прирост значения.
    useCsv — разрешить запасной прирост из CSV, когда в снимке нет значений (только для «с прошлого обновления») */
@@ -223,7 +242,7 @@ for (const per of PERIODS) {
   let base = null, partial = false;
   if (per.key === "last") base = previous;
   else if (older.length) {
-    const target = nowMs - per.ms;
+    const target = dataMs - per.ms;
     for (const sn of older) if (snapTime(sn.id) <= target) base = sn;   // самый свежий из достаточно старых
     if (!base) { base = older[0]; partial = true; }                      // истории не хватает
   }

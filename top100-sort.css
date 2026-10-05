@@ -107,3 +107,6 @@
   .t100-pbtn{height:36px}
   .t100-period{margin-bottom:10px}
 }
+
+/* один период: кнопку выбора и «Изменения:» скрываем (атрибут hidden ставит top100.js) */
+.t100-period [hidden]{display:none!important}

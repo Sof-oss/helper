@@ -176,6 +176,11 @@ function renderPeriod(){
  const list=periodList(),cur=currentPeriod();
  box.hidden=!cur;
  if(!cur)return;
+ /* один период — выбирать не из чего: кнопку и «Изменения:» не показываем, остаётся только подпись с датами */
+ const single=list.length<2;
+ btns.hidden=single;
+ const title=box.querySelector(".t100-period-title");if(title)title.hidden=single;
+ box.classList.toggle("single",single);
  btns.innerHTML=list.map(p=>'<button type="button" class="t100-pbtn'+(p===cur?" active":"")+'" data-t100-period="'+esc(p.key)+'" aria-pressed="'+(p===cur)+'">'+esc(p.label)+'</button>').join("");
  const to=window.TOP100_UPDATED?String(window.TOP100_UPDATED).slice(0,16):"";
  range.innerHTML=cur.from
