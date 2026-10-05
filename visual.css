@@ -673,3 +673,9 @@ input[type=checkbox]{accent-color:var(--accent)}
 .home-note summary:hover,.home-note summary:focus-visible{color:var(--accent-2)}
 .home-note details>p{flex:1 0 100%;margin:8px 0 0;font-size:11.5px;line-height:1.55;text-wrap:pretty}
 @media(max-width:760px){.home-note{margin-top:26px;font-size:12px;flex-direction:column;align-items:center}.home-note>p>span:last-child{display:none}.home-note details>p{font-size:11px}}
+/* на широком экране строка прижата к низу, над подписью автора; карточки остаются в центре свободного места */
+@media(min-width:1000px){
+  .home-content:has(.home-note){padding-bottom:10px}
+  .home-content:has(.home-note) .home-hero{margin-top:auto}
+  .home-note{margin-top:auto;padding-top:36px}
+}
