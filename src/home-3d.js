@@ -6,6 +6,25 @@
    — фон стартует, когда страница уже загрузилась и браузер свободен, чтобы не мешать первой отрисовке.
    three.js — общий кусок, браузер скачивает его один раз и берёт из кэша.
    При «Уменьшить движение» в системе или без WebGL ничего не запускается — остаётся обычный сайт */
+/* диагностика: откройте главную с ?debug3d — поверх страницы появится журнал запуска 3D (для отладки на iPhone/iPad) */
+const DBG = /[?&]debug3d/.test(location.search);
+const dlog = window.__z3d = (...a) => {
+  if (!DBG) return;
+  let box = document.getElementById("z3d-log");
+  if (!box) {
+    box = document.createElement("pre"); box.id = "z3d-log";
+    box.style.cssText = "position:fixed;left:6px;right:6px;bottom:6px;max-height:55vh;overflow:auto;z-index:99999;margin:0;padding:8px;background:rgba(0,0,0,.85);color:#9f9;font:11px/1.35 monospace;white-space:pre-wrap;pointer-events:auto;border:1px solid #3a3";
+    (document.body || document.documentElement).appendChild(box);
+  }
+  box.textContent += (performance.now() / 1000).toFixed(2) + "s " + a.map(x => typeof x === "string" ? x : JSON.stringify(x)).join(" ") + "\n";
+};
+if (DBG) {
+  addEventListener("error", e => dlog("JS ERROR", e.message, (e.filename || "").split("/").pop() + ":" + e.lineno));
+  addEventListener("unhandledrejection", e => dlog("PROMISE ERROR", String(e.reason && (e.reason.stack || e.reason))));
+  const ce = console.error, cw = console.warn;
+  console.error = (...a) => { dlog("console.error", a.map(String).join(" ").slice(0, 600)); ce.apply(console, a); };
+  console.warn = (...a) => { dlog("console.warn", a.map(String).join(" ").slice(0, 600)); cw.apply(console, a); };
+}
 const root = document.documentElement;
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const conn = navigator.connection || {};
@@ -31,6 +50,8 @@ const whenIdle = () => new Promise(ok => {
 });
 
 async function main() {
+  dlog("ua", navigator.userAgent);
+  dlog("reduce", reduce, "hasGL", hasGL, "weak", weak, "apple", apple, "cores", navigator.hardwareConcurrency, "mem", navigator.deviceMemory, "ric", typeof window.requestIdleCallback, "size", innerWidth + "x" + innerHeight, "dpr", devicePixelRatio);
   if (reduce || !hasGL) return unblock();
   const introWanted = () => root.classList.contains("intro-pending") && !window.__introSkip;
   if (introWanted()) {
@@ -38,9 +59,13 @@ async function main() {
     /* пока качалась заставка, мог сработать запасной таймер в <head> (3 с) — тогда страница уже открыта, заставку не показываем */
     if (introWanted()) await runIntro(); else unblock();
   } else unblock();
-  if (weak) return;
+  dlog("intro done");
+  if (weak) return dlog("STOP: weak");
   await whenIdle();
+  dlog("idle -> import zone-bg");
   const { startBackground } = await import("./zone-bg.js");
-  startBackground();
+  dlog("zone-bg loaded");
+  const r = startBackground();
+  dlog("startBackground ->", r ? "ok" : "null");
 }
-main().catch(e => { console.warn("3D главной не запустилось", e); unblock(); });
+main().catch(e => { dlog("MAIN FAIL", String(e && (e.stack || e))); console.warn("3D главной не запустилось", e); unblock(); });
