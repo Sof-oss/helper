@@ -229,12 +229,43 @@ export function startBackground() {
     if (e.pointerType !== "mouse") return;
     target.set(e.clientX / W * 2 - 1, e.clientY / H * 2 - 1); lastInput = performance.now();
   }, { passive: true });
+  /* наклон планшета/телефона. В альбомной ориентации оси beta/gamma меняются местами — поворачиваем их по углу экрана */
   let base = null;
-  window.addEventListener("deviceorientation", e => {
+  const cl = v => Math.max(-1, Math.min(1, v));
+  const angle = () => (screen.orientation && screen.orientation.angle) || window.orientation || 0;
+  function onTilt(e) {
     if (e.gamma == null || e.beta == null) return;
-    if (!base) base = { b: e.beta, g: e.gamma };
-    const cl = v => Math.max(-1, Math.min(1, v));
-    target.set(cl((e.gamma - base.g) / 20), cl((e.beta - base.b) / 20)); lastInput = performance.now();
+    const a = ((angle() % 360) + 360) % 360;
+    const x = a === 90 ? e.beta : a === 270 ? -e.beta : a === 180 ? -e.gamma : e.gamma;
+    const y = a === 90 ? -e.gamma : a === 270 ? e.gamma : a === 180 ? -e.beta : e.beta;
+    if (!base) base = { x, y };
+    target.set(cl((x - base.x) / 20), cl((y - base.y) / 20)); lastInput = performance.now();
+  }
+  const resetBase = () => { base = null; };
+  window.addEventListener("orientationchange", resetBase);
+  if (screen.orientation) screen.orientation.addEventListener("change", resetBase);
+  /* iOS/iPadOS (Safari 13+) не присылает наклон без разрешения, а спросить его можно только по нажатию.
+     Поэтому на iPhone/iPad просим при первом касании страницы (или заставки); на Android события идут сразу */
+  const DOE = window.DeviceOrientationEvent;
+  if (DOE && typeof DOE.requestPermission === "function") {
+    let busy = false;
+    const stop = () => { window.removeEventListener("touchend", ask, true); window.removeEventListener("click", ask, true); };
+    const ask = () => {
+      if (busy) return; busy = true;
+      DOE.requestPermission().then(r => {
+        stop();                                                        // ответ получен — больше не спрашиваем
+        if (r === "granted") window.addEventListener("deviceorientation", onTilt, { passive: true });
+      }).catch(() => { busy = false; });                               // касание не засчиталось (например, прокрутка) — спросим при следующем
+    };
+    window.addEventListener("touchend", ask, true); window.addEventListener("click", ask, true);
+  } else window.addEventListener("deviceorientation", onTilt, { passive: true });
+  /* пока наклона нет (не разрешили или нет датчика) — фон чуть следует за пальцем при прокрутке */
+  let touch0 = null;
+  window.addEventListener("touchstart", e => { const t = e.touches[0]; touch0 = { x: t.clientX, y: t.clientY, tx: target.x, ty: target.y }; }, { passive: true });
+  window.addEventListener("touchmove", e => {
+    if (!touch0 || base) return;
+    const t = e.touches[0];
+    target.set(cl(touch0.tx + (t.clientX - touch0.x) / W * 1.5), cl(touch0.ty + (t.clientY - touch0.y) / H * 1.5)); lastInput = performance.now();
   }, { passive: true });
 
   /* ---------- аномалия: раз в 7–14 секунд в случайном месте ---------- */
@@ -259,7 +290,8 @@ export function startBackground() {
     U.time.value = time;
     /* без движения мыши сцена сама еле заметно «дышит» */
     const idle = now - lastInput > 4000;
-    const tx = idle ? Math.sin(time * .13) * .35 : target.x, ty = idle ? Math.sin(time * .09) * .25 : target.y;
+    const amp = isMobile ? 1.8 : 1;                    // без мыши фон «дышит» заметнее
+    const tx = idle ? Math.sin(time * .13) * .35 * amp : target.x, ty = idle ? Math.sin(time * .09) * .25 * amp : target.y;
     cur.x += (tx - cur.x) * .04; cur.y += (ty - cur.y) * .04;
     camera.rotation.set(-cur.y * .028, -cur.x * .04, 0);
     camera.position.set(cur.x * .45, -cur.y * .28, 0);
