@@ -274,7 +274,7 @@ function renderCard(){
  document.getElementById("pcBody").innerHTML=
   '<header class="pc-head'+(emb?" has-bg":"")+'"'+bg+'>'
   +'<div class="pc-head-strip"><span>ПДА // Личное дело <b><span class="pc-no">№</span>'+esc(String(cur).padStart(6,"0"))+'</b></span>'
-  +'<span class="pc-signal'+(p.off?" off":"")+'"><i></i>'+(p.off?"Сигнал потерян":"Сигнал активен")+'</span></div>'
+  +'<span class="pc-signal'+(p.off?" off":"")+'"><i></i><span>'+(p.off?"Сигнал потерян":"Сигнал активен")+'</span></span></div>'
   +'<div class="pc-head-main"><div class="pc-patch">'+patchSvg(p.g,color,p.n)+'</div><div class="pc-head-text">'
   +'<span class="pc-callsign">Позывной</span><h2 id="pcTitle">'+esc(p.n)+'</h2>'
   +'<dl class="pc-dossier">'+row("Группировка",'<span class="pc-faction"><i></i>'+(p.g?esc(p.g):"Одиночка")+'</span>')+row("Звание",esc(titleOf(p.l)))+row("Уровень","<b>"+p.l+"</b>")
