@@ -868,3 +868,27 @@ input[type=checkbox]{accent-color:var(--accent)}
   .info-group{padding:14px 10px 12px}
   .info-table thead th{font-size:10.5px}
 }
+
+/* ---------- кнопка «Бонусы» у раздела «Комплекты» и кнопка снаряжения на телефоне: заметнее ---------- */
+.side-title .gear-info-btn{position:relative;width:auto;height:30px;flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;padding:0 13px 0 10px;border-radius:999px;
+  border:1px solid color-mix(in srgb,var(--accent) 85%,#fff);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 75%,#fff 8%),color-mix(in srgb,var(--accent) 55%,#05090f));
+  color:#fff;font-size:12px;letter-spacing:.08em;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent),0 0 16px color-mix(in srgb,var(--accent) 40%,transparent),inset 0 1px 0 rgba(255,255,255,.25)}
+.side-title .gear-info-btn span{width:auto;height:auto;display:inline;background:none;border:0;box-shadow:none;font:inherit;color:inherit;text-align:left;line-height:1}
+.side-title .gear-info-btn .ic{width:15px;height:15px;color:#fff}
+.side-title .gear-info-btn::after{content:"";position:absolute;inset:-4px;border-radius:inherit;border:1px solid var(--accent);opacity:0;pointer-events:none;animation:gi-ping 2.8s ease-out infinite}
+.side-title .gear-info-btn:hover{transform:translateY(-1px);border-color:#fff;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 28%,transparent),0 0 24px color-mix(in srgb,var(--accent) 60%,transparent),inset 0 1px 0 rgba(255,255,255,.3)}
+.side-title .gear-info-btn:hover::after{animation:none}
+@keyframes gi-ping{0%{opacity:.7;transform:scale(1)}70%,100%{opacity:0;transform:scale(1.18)}}
+@media(prefers-reduced-motion:reduce){.side-title .gear-info-btn::after{animation:none}}
+@media(max-width:760px){
+  .side-title .gear-info-btn{width:auto;height:34px;flex-basis:auto}
+  .gear-toggle{position:relative;height:46px;padding:0 40px 0 14px;text-align:left;font-family:var(--f-display);font-weight:500;letter-spacing:.06em;text-transform:uppercase;font-size:13px;color:#fff;
+    border:1px solid color-mix(in srgb,var(--accent) 70%,#1d3a4f);border-left:3px solid var(--accent);
+    background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 24%,#0a1420),#0a1420 80%)!important;
+    box-shadow:0 0 14px color-mix(in srgb,var(--accent) 22%,transparent)}
+  .gear-toggle::after{content:"";position:absolute;right:16px;top:50%;width:8px;height:8px;margin-top:-6px;border-right:2px solid var(--accent-2);border-bottom:2px solid var(--accent-2);transform:rotate(45deg);transition:transform .2s,margin-top .2s}
+  .gear-toggle[aria-expanded="true"]::after{transform:rotate(-135deg);margin-top:-1px}
+}
