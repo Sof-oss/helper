@@ -16,6 +16,10 @@
   const esc = window.GuideMD.esc;
   const images = []; /* {name, blob, url} */
   let built = false, widget = null, sending = false;
+  /* номер черновика: повторная отправка того же гайда (двойной клик, повтор после ошибки сети)
+     не создаст второй pull request — Worker узнает его по этому номеру */
+  const newSid = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+  let sid = newSid();
 
   const ico = d => '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="' + d + '" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const TOOLS = [
@@ -58,9 +62,9 @@
     const title = $("gfTitle"), author = $("gfAuthor"), text = $("gfText"), preview = $("gfPreview");
 
     /* черновик */
-    try { const d = JSON.parse(localStorage.getItem(DRAFT) || "null"); if (d) { title.value = d.title || ""; author.value = d.author || ""; text.value = d.text || ""; } } catch (e) {}
+    try { const d = JSON.parse(localStorage.getItem(DRAFT) || "null"); if (d) { title.value = d.title || ""; author.value = d.author || ""; text.value = d.text || ""; if (/^[a-z0-9]{8,20}$/.test(d.sid || "")) sid = d.sid; } } catch (e) {}
     let saveT = 0;
-    const save = () => { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(DRAFT, JSON.stringify({ title: title.value, author: author.value, text: text.value })); } catch (e) {} }, 400); };
+    const save = () => { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(DRAFT, JSON.stringify({ title: title.value, author: author.value, text: text.value, sid })); } catch (e) {} }, 400); };
     const count = () => { $("gfCount").textContent = text.value.length.toLocaleString("ru-RU") + " / " + LIM.text.toLocaleString("ru-RU"); };
     [title, author, text].forEach(el => el.addEventListener("input", () => { save(); count(); setStatus(""); }));
     count();
@@ -168,12 +172,22 @@
       $("gfSubmit").disabled = true;
       setStatus("Отправляю…");
       try {
-        const payload = { title: t, author: a, text: body, website: $("gfWebsite").value, token, images: [] };
+        const payload = { id: sid, title: t, author: a, text: body, website: $("gfWebsite").value, token, images: [] };
         for (const im of used) payload.images.push({ name: im.name, data: await toBase64(im.blob) });
-        const r = await fetch(cfg.endpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
-        const res = await r.json().catch(() => ({}));
+        let r = null, res = {};
+        try {
+          r = await fetch(cfg.endpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+          res = await r.json().catch(() => ({}));
+        } catch (e) {
+          /* ответ потерялся (обрыв связи и т. п.), но гайд мог дойти — спрашиваем по номеру черновика */
+          setStatus("Проверяю, дошёл ли гайд…");
+          if (!(await arrived())) throw new Error("Связь оборвалась, гайд не дошёл. Попробуйте отправить ещё раз");
+          r = { ok: true }; res = { ok: true };
+        }
         if (!r.ok || !res.ok) throw new Error(res.error || "Сервер не принял гайд (" + r.status + ")");
         try { localStorage.removeItem(DRAFT); } catch (e) {}
+        clearTimeout(saveT);
+        sid = newSid();
         images.splice(0).forEach(im => URL.revokeObjectURL(im.url));
         root.innerHTML = '<div class="gf-done">' + ico("M5 12.5l4.5 4.5L19 7.5") + "<h2>Гайд отправлен!</h2><p>Спасибо, " + esc(a) + "! Гайд «" + esc(t) + "» появится в этом разделе с вашей подписью, когда его проверят.</p>" +
           '<button type="button" class="guide-send-btn" id="gfAgain">Написать ещё один</button></div>';
@@ -190,6 +204,19 @@
     });
     $("gfClose").addEventListener("click", () => close());
     drawImages();
+  }
+
+  /* дошёл ли гайд с текущим номером черновика: несколько попыток с паузой */
+  async function arrived() {
+    for (let i = 0; i < 4; i++) {
+      await new Promise(ok => setTimeout(ok, 2500));
+      try {
+        const r = await fetch(cfg.endpoint + (cfg.endpoint.includes("?") ? "&" : "?") + "check=" + sid, { cache: "no-store" });
+        const j = await r.json();
+        if (j.ok) return !!j.slug;
+      } catch (e) {}
+    }
+    return false;
   }
 
   function setStatus(msg, bad) {

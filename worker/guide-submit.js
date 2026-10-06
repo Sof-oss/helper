@@ -19,7 +19,7 @@ export default {
     const origin = req.headers.get("Origin") || "";
     const cors = {
       "Access-Control-Allow-Origin": origins.includes(origin) ? origin : origins[0],
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
       "Access-Control-Max-Age": "86400",
       "Vary": "Origin"
@@ -28,6 +28,13 @@ export default {
     const bad = (msg, status = 400) => reply(status, { ok: false, error: msg });
 
     if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
+    /* GET ?check=<номер черновика>: дошёл ли гайд. Форма спрашивает, если ответ на отправку потерялся в сети */
+    const check = new URL(req.url).searchParams.get("check");
+    if (req.method === "GET" && check) {
+      if (!/^[a-z0-9]{8,20}$/.test(check)) return bad("Неправильный номер");
+      try { return reply(200, { ok: true, slug: await findGuideBranch(env, check.slice(0, 6)) }); }
+      catch (e) { return bad("GitHub не ответил", 502); }
+    }
     if (req.method !== "POST") return bad("Нужен POST", 405);
     if (!origins.includes(origin)) return bad("Отправка возможна только с сайта", 403);
     if (+(req.headers.get("Content-Length") || 0) > 16 * 1024 * 1024) return bad("Слишком большой гайд", 413);
@@ -58,24 +65,29 @@ export default {
     for (const im of imgs) {
       if (!im || !IMG_NAME.test(im.name) || names.has(im.name) || typeof im.data !== "string") return bad("Неправильная картинка");
       names.add(im.name);
-      let bin;
-      try { bin = atob(im.data); } catch (e) { return bad(im.name + ": повреждённый файл"); }
-      if (bin.length > LIM.imgBytes) return bad(im.name + ": картинка больше 2 МБ");
-      total += bin.length;
-      /* тип по содержимому файла, а не по имени */
-      const sig = bin.slice(0, 12);
+      /* целиком картинку не раскодируем: на бесплатном тарифе у Worker'а всего 10 мс процессорного времени.
+         Размер считается по длине base64, тип — по первым байтам файла (а не по имени) */
+      const size = Math.floor(im.data.length * 3 / 4);
+      if (size > LIM.imgBytes) return bad(im.name + ": картинка больше 2 МБ");
+      total += size;
+      let sig;
+      try { sig = atob(im.data.slice(0, 16)); } catch (e) { return bad(im.name + ": повреждённый файл"); }
       const kind = sig.startsWith("\x89PNG") ? "png" : sig.startsWith("\xff\xd8\xff") ? "jpg" : sig.startsWith("RIFF") && sig.slice(8, 12) === "WEBP" ? "webp" : "";
       if (kind !== im.name.split(".").pop()) return bad(im.name + ": это не картинка PNG, JPG или WebP");
     }
     if (total > LIM.total) return bad("Картинки вместе больше 10 МБ");
 
-    /* адрес гайда: транслит заголовка + случайный хвост, чтобы не совпасть с уже существующим */
-    const slug = translit(title).slice(0, 60).replace(/-+$/, "") + "-" + Math.random().toString(36).slice(2, 6);
+    /* адрес гайда: транслит заголовка + хвост из номера черновика (форма присылает его в id).
+       По хвосту узнаётся повторная отправка того же гайда: второй pull request не создаётся */
+    const sid = /^[a-z0-9]{8,20}$/.test(d.id || "") ? d.id : Math.random().toString(36).slice(2, 12).padEnd(8, "0");
+    const slug = translit(title).slice(0, 60).replace(/-+$/, "") + "-" + sid.slice(0, 6);
     const date = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10); /* по Москве */
     const yaml = s => /^[\s"'#|>&*!%@`{[-]|:\s|\s#/.test(s) ? '"' + s.replace(/"/g, "'") + '"' : s;
     const md = "---\ntitle: " + yaml(title) + "\nauthor: " + yaml(author) + "\ndate: " + date + "\n---\n\n" + text + "\n";
 
     try {
+      const dup = await findGuideBranch(env, sid.slice(0, 6));
+      if (dup) return reply(200, { ok: true, slug: dup, duplicate: true });
       const pr = await openPullRequest(env, slug, title, author, md, imgs);
       return reply(200, { ok: true, slug, pr: pr.number });
     } catch (e) {
@@ -85,9 +97,9 @@ export default {
   }
 };
 
-async function openPullRequest(env, slug, title, author, md, imgs) {
-  const repo = env.GITHUB_REPO || "Sof-oss/helper", base = env.GITHUB_BRANCH || "main";
-  const gh = async (method, url, body) => {
+function github(env) {
+  const repo = env.GITHUB_REPO || "Sof-oss/helper";
+  return async (method, url, body) => {
     const r = await fetch("https://api.github.com/repos/" + repo + url, {
       method,
       headers: { "Authorization": "Bearer " + env.GITHUB_TOKEN, "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "heart-of-the-zone-guides", "Content-Type": "application/json" },
@@ -97,6 +109,18 @@ async function openPullRequest(env, slug, title, author, md, imgs) {
     if (!r.ok) throw new Error(method + " " + url + " -> " + r.status + " " + (j.message || ""));
     return j;
   };
+}
+
+/* ветка guide/…-<хвост> уже есть — этот гайд уже прислали */
+async function findGuideBranch(env, tail) {
+  const refs = await github(env)("GET", "/git/matching-refs/heads/guide/");
+  const hit = (Array.isArray(refs) ? refs : []).find(r => r.ref.endsWith("-" + tail));
+  return hit ? hit.ref.replace("refs/heads/guide/", "") : null;
+}
+
+async function openPullRequest(env, slug, title, author, md, imgs) {
+  const base = env.GITHUB_BRANCH || "main";
+  const gh = github(env);
   const dir = "guides/" + slug + "/";
   const ref = await gh("GET", "/git/ref/heads/" + base);
   const head = await gh("GET", "/git/commits/" + ref.object.sha);
