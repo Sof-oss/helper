@@ -97,7 +97,7 @@ const authorMarkup = g => !g.author ? "" : g.authorId
   ? '<a href="/top100#p=' + g.authorId + '" title="Карточка игрока в Топ-100">' + esc(g.author) + "</a>"
   : "<b>" + esc(g.author) + "</b>";
 function guidesListMarkup() {
-  if (!guides.length) return '<p class="guides-empty">Пока здесь нет ни одного гайда. Напишите первый — расскажите, как пройти локацию, собрать билд или выбить босса.</p>';
+  if (!guides.length) return '<p class="guides-empty">Пока здесь нет ни одного гайда, будьте первым!</p>';
   return guides.map(g => '<a class="guide-card" href="/guide/' + g.slug + '">' +
     (g.cover ? '<span class="guide-card-img"><img src="' + esc(g.cover) + '" alt="" loading="lazy" decoding="async"></span>' : '<span class="guide-card-img guide-card-noimg" aria-hidden="true"></span>') +
     '<span class="guide-card-body"><b>' + esc(g.title) + "</b>" +
