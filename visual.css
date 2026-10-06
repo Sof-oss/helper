@@ -33,6 +33,8 @@
 :root[data-theme="svoboda"]{--accent:#4fb058;--accent-2:#a9e0ad;--accent-3:#5b9bd5;--accent-ink:#061506;--glass-line:rgba(150,220,155,.18);--wash:rgba(79,176,88,.15)}
 :root[data-theme="science"]{--accent:#57c4f0;--accent-2:#b6e7ff;--accent-3:#e0574f;--accent-ink:#041420;--glass-line:rgba(140,215,255,.18);--wash:rgba(87,196,240,.12)}
 :root[data-theme="monolith"]{--accent:#d9a52c;--accent-2:#f2d68a;--accent-3:#b98ae0;--accent-ink:#1a1205;--glass-line:rgba(225,190,120,.2);--wash:rgba(217,165,44,.15)}
+:root[data-theme="rassvet"]{--accent:#3d7bf0;--accent-2:#9fd0f0;--accent-3:#f3a536;--accent-ink:#06121f;--glass-line:rgba(140,195,240,.2);--wash:rgba(61,123,240,.15)}
+:root[data-theme="loners"]{--accent:#e0b83a;--accent-2:#f2e4a0;--accent-3:#a07a4c;--accent-ink:#1a1505;--glass-line:rgba(225,195,120,.2);--wash:rgba(224,184,58,.14)}
 :root{color-scheme:dark}
 
 /* ---------- 2. Второй цвет темы в интерфейсе ----------
@@ -135,6 +137,8 @@ input[type="text"]:focus,input[type="search"]:focus,input[type="number"]:focus,.
 .theme-item[data-theme-btn="svoboda"] .ti-thumb{background-image:url("assets/bg-svoboda-thumb.webp")}
 .theme-item[data-theme-btn="science"] .ti-thumb{background-image:url("assets/bg-science-thumb.webp")}
 .theme-item[data-theme-btn="monolith"] .ti-thumb{background-image:url("assets/bg-monolith-thumb.webp")}
+.theme-item[data-theme-btn="rassvet"] .ti-thumb{background-image:url("assets/bg-rassvet-thumb.webp")}
+.theme-item[data-theme-btn="loners"] .ti-thumb{background-image:url("assets/bg-loners-thumb.webp")}
 .theme-item:hover{transform:none;border-color:color-mix(in srgb,var(--t) 55%,transparent);background:#0a0c0f}
 .theme-item:hover .ti-thumb{opacity:.85;transform:scale(1.04)}
 .theme-item[aria-pressed="true"]{border-color:var(--t);background:#0a0c0f;box-shadow:0 0 0 1px color-mix(in srgb,var(--t) 40%,transparent),0 0 22px color-mix(in srgb,var(--t) 25%,transparent)}
@@ -367,6 +371,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 :root[data-theme="svoboda"]{--panel:#0b130e;--panel-2:#070c09;--panel-line:#1e3324;--bg-dim:.58}
 :root[data-theme="science"]{--panel:#08121a;--panel-2:#060d13;--panel-line:#14303f;--bg-dim:.34}
 :root[data-theme="monolith"]{--panel:#141007;--panel-2:#0d0a05;--panel-line:#3a2f15;--bg-dim:.5}
+:root[data-theme="rassvet"]{--panel:#0a111a;--panel-2:#070b11;--panel-line:#1d3047;--bg-dim:.42}
+:root[data-theme="loners"]{--panel:#13100b;--panel-2:#0c0a07;--panel-line:#3a2f22;--bg-dim:.45}
 
 html,body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--ink)}
 body{font-size:14.5px}

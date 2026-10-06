@@ -26,7 +26,7 @@ const fmt = n => Number(n || 0).toLocaleString("ru-RU").replace(/\u202f|\u00a0/g
 const tabsSrc = fs.readFileSync(path.join(ROOT, "top100.js"), "utf8");
 const TABS = [...tabsSrc.matchAll(/key:"(\w+)",label:"([^"]+)"[^}]*?accent:"(#[0-9a-fA-F]+)"/g)].map(m => ({ key: m[1], label: m[2], accent: m[3] }));
 const uiSrc = fs.readFileSync(path.join(ROOT, "ui.js"), "utf8");
-const GLYPHS = Object.fromEntries([...uiSrc.matchAll(/^\s*(merc|dolg|svoboda|science|monolith): '(.*)',?\s*$/gm)].map(m => [m[1], m[2]]));
+const GLYPHS = Object.fromEntries([...uiSrc.matchAll(/^\s*(merc|dolg|svoboda|science|monolith|rassvet|loners): '(.*)',?\s*$/gm)].map(m => [m[1], m[2]]));
 const FACTION_KEY = Object.fromEntries([...uiSrc.matchAll(/\{ key: "(\w+)", label: "([^"]+)"/g)].map(m => [m[2], m[1]]));
 /* звания — как в player-card.js */
 const TITLES = [[30, "Легенда"], [25, "Мастер"], [20, "Ветеран"], [10, "Опытный"], [0, "Новичок"]];
