@@ -145,7 +145,7 @@ function open(id,opts){
   cur=id;
   document.getElementById("pcShare").hidden=!id;
   if(!id){
-   body.innerHTML='<div class="pc-empty"><b>Карточки игроков</b><p>Найдите любого из '+fmt(Object.keys(data.players).length)+' игроков по нику: показатели, места во всех рейтингах, прирост и история группировок.</p></div>';
+   body.innerHTML='<div class="pc-empty"><b>Карточки игроков</b><p>Найдите любого игрока по нику: показатели, места во всех рейтингах, прирост и история группировок.</p></div>';
    const inp=document.getElementById("pcSearch");inp.focus();return;
   }
   document.getElementById("pcSearch").value="";
@@ -190,12 +190,6 @@ function bigChart(pts,color,label){
 const metricIndex=k=>k==="level"?-1:data.metrics.indexOf(k)>=0?data.metrics.indexOf(k):-2;
 const metaOf=k=>k==="level"?{label:"Уровень",accent:"#e7f0f8"}:TAB[k]||{label:k,accent:"#54bfff"};
 const cur_=(p,mi)=>mi<0?p.l:p.v[mi];
-/* сколько игроков в каждом рейтинге (у кого показатель больше нуля) */
-let totalsCache=null;
-function rankTotals(){
- if(!totalsCache){const all=Object.values(data.players);totalsCache=data.metrics.map((k,i)=>all.filter(x=>x.v[i]>0).length)}
- return totalsCache;
-}
 function renderCard(){
  const p=data.players[cur];if(!p)return;
  const M=data.metrics,last=data.dates.length-1;
@@ -203,7 +197,6 @@ function renderCard(){
  if(!pers.some(x=>x.key===period))period=pers.length?pers[0].key:null;
  const per=PERIODS.find(x=>x.key===period),bi=per?baseIndex(per):null;
  const color=factionColor(p.g);
- const totals=rankTotals();
 
  const delta=mi=>{
   if(bi===null)return null;
@@ -217,7 +210,7 @@ function renderCard(){
  const tiles=order.map(k=>{
   const mi=metricIndex(k),t=metaOf(k),rank=mi>=0?p.r[mi]:null;
   return'<button type="button" class="pc-tile'+(k===metric?" active":"")+'" data-pc-metric="'+k+'" aria-pressed="'+(k===metric)+'" style="--c:'+t.accent+'">'
-   +'<span class="pc-tile-top"><span class="pc-tile-lbl">'+esc(t.label)+'</span>'+(rank?'<span class="pc-rank'+(rank<=100?" top":"")+'" title="Место среди '+fmt(totals[mi])+' игроков">#'+fmt(rank)+'</span>':"")+'</span>'
+   +'<span class="pc-tile-top"><span class="pc-tile-lbl">'+esc(t.label)+'</span>'+(rank?'<span class="pc-rank'+(rank<=100?" top":"")+'" title="Место в рейтинге">#'+fmt(rank)+'</span>':"")+'</span>'
    +'<b>'+fmt(cur_(p,mi))+'</b>'+deltaMarkup(delta(mi))+spark(series(p,mi),t.accent)+'</button>';
  }).join("");
 
@@ -228,7 +221,7 @@ function renderCard(){
  if(pts.length>1){const days=(pts[pts.length-1][0]-pts[0][0])/DAY;if(days>=1)perDay='<span>В среднем <b>'+signed(Math.round((pts[pts.length-1][1]-pts[0][1])/days))+'</b> в сутки</span>'}
  const rank=mi>=0?p.r[mi]:null;
  const chart='<section class="pc-section pc-chart-box" style="--c:'+t.accent+'"><div class="pc-sec-head"><h3>'+esc(t.label)+'</h3><div class="pc-chart-meta">'
-  +(mi<0?'':rank?'<span>Место <b>'+fmt(rank)+'</b> из '+fmt(totals[mi])+(rank<=100?' · в топ-100':"")+'</span>':'<span>Не в рейтинге</span>')+perDay+'</div></div>'+bigChart(pts,t.accent,t.label)+'</section>';
+  +(mi<0?'':rank?'<span>Место <b>'+fmt(rank)+'</b>'+(rank<=100?' · в топ-100':"")+'</span>':'<span>Не в рейтинге</span>')+perDay+'</div></div>'+bigChart(pts,t.accent,t.label)+'</section>';
 
  /* боссы */
  let bosses="";
