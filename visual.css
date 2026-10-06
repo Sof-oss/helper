@@ -815,3 +815,56 @@ input[type=checkbox]{accent-color:var(--accent)}
   .news-tag{flex:0 0 auto}
   .news-toggle{margin-left:22px}
 }
+
+/* ---------- Информация: «Прогресс по уровням» — оформление таблиц ---------- */
+.info-groups{gap:14px}
+.info-group{position:relative;overflow:visible;padding:16px 16px 14px}
+.info-group::before{content:"";position:absolute;inset:0 0 auto;height:2px;border-radius:inherit;background:linear-gradient(90deg,transparent,var(--grp),transparent);opacity:.7}
+.info-group .info-led{background:var(--grp);box-shadow:0 0 8px var(--grp)}
+.info-group-title{margin-bottom:12px}
+.info-subcols{gap:12px}
+.info-subcols>.info-table{border-radius:6px;background:rgba(0,0,0,.18);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--grp) 10%,transparent)}
+.info-group>.info-table{border-radius:6px;background:rgba(0,0,0,.18);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--grp) 10%,transparent)}
+
+.info-table thead th{background:color-mix(in srgb,var(--grp) 14%,#080a0d)!important;color:color-mix(in srgb,var(--grp) 55%,#e6eef5)!important;
+  border-bottom:1px solid color-mix(in srgb,var(--grp) 40%,transparent)!important;font-size:11.5px;padding:9px 6px}
+.info-table td{padding:6px;border-top-color:rgba(255,255,255,.04)!important}
+.info-table tbody tr:nth-child(even):not(.info-milestone) td{background:rgba(255,255,255,.022)}
+.info-table tbody tr:hover td{background:color-mix(in srgb,var(--grp) 10%,transparent)!important}
+
+/* номер уровня — плашкой */
+.info-lv{display:inline-block;min-width:30px;padding:1px 6px;border-radius:3px;font-variant-numeric:tabular-nums;color:color-mix(in srgb,var(--grp) 70%,#fff)}
+
+/* каждый 10-й уровень: ровная полоса на всю строку, а не градиент в каждой ячейке */
+.info-table tbody tr.info-milestone td{background:color-mix(in srgb,var(--grp) 13%,transparent)!important;color:#fff!important;font-weight:700;
+  border-top:1px solid color-mix(in srgb,var(--grp) 35%,transparent)!important;border-bottom:1px solid color-mix(in srgb,var(--grp) 35%,transparent)}
+.info-table tbody tr.info-milestone .info-lv{background:var(--grp);color:#0b0d10;font-weight:800}
+
+/* полученные уровни: приглушены, галочка слева от номера */
+.info-table tbody tr.info-done td{color:color-mix(in srgb,#eef4fa 50%,transparent)!important}
+.info-table tbody tr.info-done td:first-child::before{left:6px;top:50%;transform:translateY(-50%);color:var(--grp)}
+.info-table tbody tr.info-done .info-lv{color:var(--grp)}
+.info-table tbody tr.info-done.info-milestone .info-lv{color:#0b0d10}
+/* текущий уровень: яркая строка с меткой */
+.info-table tbody tr.info-current td{background:color-mix(in srgb,var(--grp) 24%,#0b0d10)!important;color:#fff!important;
+  border-top:1px solid var(--grp)!important;border-bottom:1px solid var(--grp)!important}
+.info-table tbody tr.info-current td:first-child{box-shadow:inset 3px 0 0 var(--grp)}
+.info-table tbody tr.info-current .info-lv{background:var(--grp);color:#0b0d10;font-weight:800;box-shadow:0 0 10px color-mix(in srgb,var(--grp) 60%,transparent)}
+
+/* карточка прогресса над таблицей */
+.info-progress-line{display:block;margin:0 0 12px;padding:10px 12px 9px;border-radius:6px;
+  border:1px solid color-mix(in srgb,var(--grp) 32%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--grp) 11%,transparent),color-mix(in srgb,var(--grp) 4%,transparent))}
+.ipl-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 12px}
+.ipl-sub{margin-top:6px;font-size:11.5px;color:#9fb0be}
+.ipl-sub b{color:#fff}
+.info-progress-done{font-size:13px}
+.info-bar{position:relative;height:6px;margin-top:8px;border-radius:3px;background:rgba(255,255,255,.07);overflow:hidden}
+.info-bar i{position:absolute;inset:0 auto 0 0;min-width:4px;border-radius:inherit;background:linear-gradient(90deg,color-mix(in srgb,var(--grp) 55%,transparent),var(--grp));box-shadow:0 0 10px color-mix(in srgb,var(--grp) 55%,transparent)}
+.info-jump{height:24px;padding:0 10px;border:1px solid color-mix(in srgb,var(--grp) 45%,transparent);border-radius:3px;background:color-mix(in srgb,var(--grp) 10%,transparent);
+  color:color-mix(in srgb,var(--grp) 60%,#fff);font:inherit;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.info-jump::after{content:" ↓"}
+.info-jump:hover,.info-jump:focus-visible{background:color-mix(in srgb,var(--grp) 22%,transparent);color:#fff;outline:none}
+@media(max-width:760px){
+  .info-group{padding:14px 10px 12px}
+  .info-table thead th{font-size:10.5px}
+}

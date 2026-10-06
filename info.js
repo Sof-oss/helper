@@ -23,7 +23,7 @@ function infoTableMarkup(rows,headers,reached){
   if(lvl%INFO_MILESTONE_STEP===0)cls.push("info-milestone");
   if(lvl<=r)cls.push("info-done");
   if(lvl===r)cls.push("info-current");
-  return '<tr'+(cls.length?' class="'+cls.join(" ")+'"':"")+(lvl===r?' title="Ваш уровень из калькулятора"':"")+'><td>'+lvl+'</td><td>'+fmt(step)+'</td><td>'+fmt(totalSum)+'</td></tr>';
+  return '<tr'+(cls.length?' class="'+cls.join(" ")+'"':"")+(lvl===r?' title="Ваш уровень из калькулятора"':"")+'><td><span class="info-lv">'+lvl+'</span></td><td>'+fmt(step)+'</td><td>'+fmt(totalSum)+'</td></tr>';
  }).join("")+'</tbody></table>';
 }
 
@@ -42,8 +42,14 @@ function readCalcProgress(){
 /* строка «получено / осталось» над таблицей */
 function infoProgressMarkup(rows,reached,unit,doneLabel){
  if(!reached)return "";
- const last=rows[rows.length-1],cur=rows[reached-1],left=last[2]-cur[2];
- return '<div class="info-progress-line"><span class="info-progress-done">'+doneLabel+'</span>'+(left>0?'<span>до '+last[0]+' ур.: <b>'+fmt(left)+'</b> '+unit+'</span>':'<span class="info-progress-max">максимум</span>')+'</div>';
+ const last=rows[rows.length-1],cur=rows[reached-1],left=last[2]-cur[2],pct=Math.min(100,cur[2]/last[2]*100);
+ const pctTxt=pct>0&&pct<1?"<1":String(Math.floor(pct));
+ return '<div class="info-progress-line">'
+  +'<div class="ipl-row"><span class="info-progress-done">'+doneLabel+'</span>'
+  +(left>0?'<button type="button" class="info-jump" data-info-jump>К текущему уровню</button>':'<span class="info-progress-max">максимум</span>')+'</div>'
+  +'<div class="info-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+Math.floor(pct)+'"><i style="width:'+pct.toFixed(2)+'%"></i></div>'
+  +'<div class="ipl-row ipl-sub"><span>Пройдено <b>'+pctTxt+'%</b> '+unit+'</span>'+(left>0?'<span>до '+last[0]+' ур.: <b>'+fmt(left)+'</b></span>':'')+'</div>'
+  +'</div>';
 }
 function infoProgressNoteMarkup(p){
  if(!p||(!p.level&&!p.talents))return '<span class="info-progress-hint"><i aria-hidden="true"></i>Укажите уровень персонажа и вложите таланты в <a href="/calculator">калькуляторе</a> — полученные уровни отметятся в таблицах</span>';
@@ -84,6 +90,13 @@ function renderInfo(){
 window.addEventListener&&window.addEventListener("storage",e=>{if(e.key===CALC_STATE_KEY)renderInfo()});
 window.addEventListener&&window.addEventListener("pageshow",e=>{if(e.persisted)renderInfo()});
 
+/* «К текущему уровню»: прокрутка таблицы группы к строке игрока */
+document.addEventListener("click",e=>{
+ const j=e.target.closest("[data-info-jump]");
+ if(!j)return;
+ const row=j.closest(".info-group")&&j.closest(".info-group").querySelector("tr.info-current");
+ if(row)row.scrollIntoView({block:"center",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+});
 document.addEventListener("click",e=>{
  const btn=e.target.closest("[data-info-tab]");
  if(!btn)return;
