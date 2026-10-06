@@ -13,6 +13,7 @@
  * 3б. Гайды из guides/<адрес>/index.md (Markdown, см. guide-md.js) становятся страницами /guide/<адрес>,
  *     список гайдов дописывается в guides.html, картинки гайдов копируются в dist/guide-img/<адрес>/.
  * 4. В sitemap.xml дописывается lastmod: дата последнего коммита страницы и её css/js, у Топ-100 — время выгрузки рейтинга.
+ * 5. После сборки build-previews.js делает ссылки на карточки игроков /p/<id> с картинкой «Личное дело» (npm run build — оба шага).
  * Запуск: npm install (один раз, ставит esbuild), затем node build.js. Без esbuild сборка не идёт: калькулятор собирается им */
 const fs = require("fs");
 const path = require("path");
@@ -40,7 +41,7 @@ const MODULES = {
 const SKIP = new Set([
   ".git", ".github", ".gitignore", "dist", "node_modules", "top100", "partials", "src",
   "guides", "yandex", "README.md", "build.js", "build-top100.js", "build-players.js", "build-top100.bat", "package.json", "package-lock.json",
-  "fetch-players.js", "update-top100.bat",
+  "fetch-players.js", "update-top100.bat", "build-previews.js", "previews",
   ...Object.values(MODULES).flat().filter(f => !f.startsWith("src/"))
 ]);
 

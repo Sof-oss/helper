@@ -1,0 +1,90 @@
+<!doctype html>
+<!-- Шаблон картинки-превью «Личное дело сталкера» 1200×630 для ссылок на карточки игроков.
+     Его открывает build-previews.js в Chrome, вызывает render(данные) и делает снимок. На сайт не попадает -->
+<html lang="ru"><head><meta charset="utf-8">
+<style>
+@font-face{font-family:"Oswald";src:url("../assets/fonts/oswald-cyrillic.woff2") format("woff2");font-weight:400 700;unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Oswald";src:url("../assets/fonts/oswald-latin.woff2") format("woff2");font-weight:400 700;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Rubik";src:url("../assets/fonts/rubik-cyrillic.woff2") format("woff2");font-weight:500 600;unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:"Rubik";src:url("../assets/fonts/rubik-latin.woff2") format("woff2");font-weight:500 600;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1200px;height:630px;overflow:hidden;background:#050607}
+body{font-family:"Rubik",sans-serif;font-weight:500;color:#dfe7ee}
+.card{--f:#5f8ac9;--brk:var(--f);position:relative;width:1200px;height:630px;overflow:hidden;
+  background:radial-gradient(90% 120% at 0% 0%,color-mix(in srgb,var(--f) 22%,transparent),transparent 60%),linear-gradient(180deg,#0c1014,#060809)}
+.photo{position:absolute;inset:0;background:var(--bg) right 35%/cover no-repeat;opacity:.5;filter:saturate(.65) contrast(1.05);
+  -webkit-mask-image:linear-gradient(90deg,transparent 22%,#000 78%)}
+.card::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 4px)}
+.vign{position:absolute;inset:0;background:radial-gradient(130% 100% at 50% 45%,transparent 55%,rgba(0,0,0,.65))}
+/* уголки-скобы */
+.frame{position:absolute;inset:22px 22px 70px;border:1px solid color-mix(in srgb,var(--f) 30%,rgba(255,255,255,.06));
+  background:
+   linear-gradient(var(--brk),var(--brk)) left top/34px 3px no-repeat,linear-gradient(var(--brk),var(--brk)) left top/3px 34px no-repeat,
+   linear-gradient(var(--brk),var(--brk)) right top/34px 3px no-repeat,linear-gradient(var(--brk),var(--brk)) right top/3px 34px no-repeat,
+   linear-gradient(var(--brk),var(--brk)) left bottom/34px 3px no-repeat,linear-gradient(var(--brk),var(--brk)) left bottom/3px 34px no-repeat,
+   linear-gradient(var(--brk),var(--brk)) right bottom/34px 3px no-repeat,linear-gradient(var(--brk),var(--brk)) right bottom/3px 34px no-repeat}
+.strip{position:absolute;left:23px;right:23px;top:23px;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 30px;
+  background:rgba(0,0,0,.45);border-bottom:1px solid color-mix(in srgb,var(--f) 25%,rgba(255,255,255,.05));
+  font:600 17px/1 "Rubik";letter-spacing:.2em;text-transform:uppercase;color:#7f8b95}
+.strip b{color:color-mix(in srgb,var(--f) 50%,#fff);font-weight:600}
+.no{font-family:Arial,sans-serif;font-weight:700;letter-spacing:0;font-size:1.15em;margin-right:2px}
+.sig{display:flex;align-items:center;gap:12px;color:#7fe0a0}
+.sig i{width:12px;height:12px;border-radius:50%;background:currentColor;box-shadow:0 0 12px currentColor}
+.sig.off{color:#ff8a7a}
+.main{position:absolute;left:60px;right:60px;top:108px;display:flex;gap:44px;align-items:flex-start}
+.patch{flex:0 0 210px;width:210px;margin-top:6px;transform:rotate(-5deg);filter:drop-shadow(0 14px 22px rgba(0,0,0,.7)) drop-shadow(0 0 30px color-mix(in srgb,var(--f) 40%,transparent))}
+.patch svg{display:block;width:100%;height:auto}
+.text{flex:1;min-width:0}
+.lbl{font:600 15px/1 "Rubik";letter-spacing:.24em;text-transform:uppercase;color:color-mix(in srgb,var(--f) 65%,#7f8b95)}
+h1{margin:8px 0 22px;font:600 76px/1.02 "Oswald";letter-spacing:.02em;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  text-shadow:0 3px 0 rgba(0,0,0,.6),0 0 40px color-mix(in srgb,var(--f) 40%,transparent)}
+.dossier{display:flex;gap:44px}
+.dossier dt{font:600 13px/1 "Rubik";letter-spacing:.2em;text-transform:uppercase;color:#6d7a85}
+.dossier dd{margin-top:8px;font:500 27px/1 "Rubik";color:#eef3f7;white-space:nowrap}
+.dossier dd i{display:inline-block;width:13px;height:13px;margin-right:10px;border-radius:50%;background:var(--f);box-shadow:0 0 10px var(--f);vertical-align:2px}
+.tiles{position:absolute;left:60px;right:60px;top:372px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.tile{position:relative;height:150px;padding:18px 20px;background:linear-gradient(180deg,color-mix(in srgb,var(--c) 14%,#0e1317),rgba(8,11,14,.92));
+  box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--c) 40%,transparent);clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,0 100%)}
+.tile .t{display:flex;justify-content:space-between;align-items:center;font:500 18px/1 "Oswald";letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
+.tile .r{font:600 17px/1 "Rubik";color:#cfd8df;padding:5px 8px;border-radius:3px;background:rgba(255,255,255,.06);margin-right:10px}
+.tile .r.m1{background:#ffd27a;color:#111}.tile .r.m2{background:#d7e1ea;color:#111}.tile .r.m3{background:#e3a46f;color:#111}
+.tile b{display:block;margin-top:22px;font:600 52px/1 "Oswald";color:#fff;letter-spacing:.01em;white-space:nowrap}
+.tile .bar{display:block;margin-top:24px;height:18px;width:70%;background:repeating-linear-gradient(90deg,rgba(255,255,255,.12) 0 10px,transparent 10px 14px)}
+.stamp{position:absolute;right:70px;top:108px;display:flex;flex-direction:column;align-items:center;padding:12px 22px 10px;border:4px solid #e0574f;border-radius:6px;
+  box-shadow:inset 0 0 0 3px rgba(224,87,79,.35);color:#ff6b5f;transform:rotate(8deg);font:600 46px/1 "Oswald";letter-spacing:.1em;text-transform:uppercase;opacity:.92}
+.stamp small{margin-top:6px;font-size:19px;letter-spacing:.22em}
+.foot{position:absolute;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 46px;background:#08090b;
+  font:600 17px/1 "Rubik";letter-spacing:.16em;text-transform:uppercase;color:#6d7a85}
+.foot::before{content:"";position:absolute;left:0;right:0;top:-8px;height:8px;background:repeating-linear-gradient(-45deg,rgba(255,196,64,.85) 0 14px,#0a0a0a 14px 28px)}
+.brand{font:600 28px/1 "Oswald";letter-spacing:.08em;color:#fff}
+.brand span{color:var(--f)}
+.redact{display:inline-block;height:.78em;background:#cfd8df;vertical-align:-.04em;opacity:.85}
+</style></head><body>
+<div class="card" id="card"><div class="photo"></div><div class="vign"></div><div class="frame"></div>
+<div class="strip"><span id="num"></span><span class="sig" id="sig"><i></i><span></span></span></div>
+<div class="main"><div class="patch" id="patch"></div><div class="text"><div class="lbl" id="lbl">Позывной</div><h1 id="nick"></h1><dl class="dossier" id="dossier"></dl></div></div>
+<div id="stamp"></div><div class="tiles" id="tiles"></div>
+<div class="foot"><span class="brand">Сердце <span>Зоны</span></span><span id="foot"></span></div></div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+/* d: {num, nick|null, color, bg, patch(svg), off, rows:[[подпись, значение]], tiles:[{label, value, rank, accent}], stamp:[крупно, мелко]|null, foot, title} */
+window.render=async function(d){
+ const c=$("card");c.style.setProperty("--f",d.color);c.style.setProperty("--bg",d.bg?"url("+d.bg+")":"none");
+ $("num").innerHTML='ПДА // Личное дело <b>'+(d.num?'<span class="no">№</span>'+esc(d.num):"сталкера")+'</b>';
+ $("sig").className="sig"+(d.off?" off":"");$("sig").lastChild.textContent=d.off?"Сигнал потерян":"Сигнал активен";
+ $("patch").innerHTML=d.patch;
+ $("lbl").textContent=d.nick?"Позывной":"Сеть сталкеров";
+ const h=$("nick");h.textContent=d.nick||d.title;h.style.fontSize="";
+ $("dossier").innerHTML=d.rows.map(r=>'<div><dt>'+esc(r[0])+'</dt><dd>'+(r[2]?'<i></i>':"")+(r[1]===null?'<span class="redact" style="width:'+(90+r[0].length*6)+'px"></span>':esc(r[1]))+'</dd></div>').join("");
+ $("tiles").innerHTML=d.tiles.map(t=>'<div class="tile" style="--c:'+t.accent+'"><div class="t"><span>'+esc(t.label)+'</span>'+(t.rank?'<span class="r'+(t.rank<=3?" m"+t.rank:"")+'">#'+t.rank+'</span>':"")+'</div>'+(t.value===null?'<span class="bar"></span>':'<b>'+esc(t.value)+'</b>')+'</div>').join("");
+ $("stamp").innerHTML=d.stamp?'<div class="stamp">'+d.stamp[0]+'<small>'+esc(d.stamp[1])+'</small></div>':"";
+ $("foot").textContent=d.foot;
+ await document.fonts.ready;
+ /* длинный ник: уменьшаем, пока не влезет (место справа занимает штамп) */
+ const room=()=>h.parentElement.clientWidth-(d.stamp?210:0);
+ let fs=76;while(h.scrollWidth>room()&&fs>40){fs-=2;h.style.fontSize=fs+"px"}
+ h.style.maxWidth=room()+"px";
+ if(d.bg)await new Promise(ok=>{const i=new Image();i.onload=i.onerror=ok;i.src=d.bg});
+};
+</script></body></html>

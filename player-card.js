@@ -138,7 +138,8 @@ function close(){
  if(lastFocus&&lastFocus.focus)lastFocus.focus();
 }
 function share(){
- const url=location.origin+location.pathname+"#p="+encodeURIComponent(cur);
+ /* /p/<id> — страница с превью «Личное дело» для соцсетей (build-previews.js), она сразу открывает эту карточку */
+ const url=location.origin+"/p/"+encodeURIComponent(cur);
  const btn=document.getElementById("pcShare");
  const done=()=>{btn.classList.add("ok");btn.title="Ссылка скопирована";setTimeout(()=>{btn.classList.remove("ok");btn.title="Скопировать ссылку на карточку"},1600)};
  if(navigator.share&&matchMedia("(pointer:coarse)").matches)navigator.share({title:data.players[cur].n+" — Сердце Зоны",url:url}).catch(()=>{});

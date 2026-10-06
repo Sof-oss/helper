@@ -36,10 +36,10 @@ jobs:
           cache: npm
 
       - name: Install
-        run: npm ci # esbuild для сжатия css и js
+        run: npm ci # esbuild для сжатия css и js, playwright-core для картинок-превью (Chrome в GitHub Actions уже есть)
 
       - name: Build
-        run: node build.js
+        run: node build.js && node build-previews.js
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
