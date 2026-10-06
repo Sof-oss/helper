@@ -11,7 +11,8 @@
   if (!root || !window.GuideMD) return;
   const cfg = window.GUIDES_CONFIG || {};
   const ready = !!(cfg.endpoint && cfg.turnstileSiteKey);
-  const LIM = { title: 100, author: 40, text: 30000, minText: 200, images: 5, imgBytes: 2 * 1024 * 1024, side: 1600 };
+  const LIM = { title: 100, author: 40, text: 30000, minText: 200, images: 5, imgBytes: 1024 * 1024, total: 2.4 * 1024 * 1024, side: 1600 };
+  /* лимиты — под приём в Yandex Cloud Functions: запрос целиком до 3,5 МБ, картинки идут в base64 (+33 %) */
   const DRAFT = "guideDraft";
   const esc = window.GuideMD.esc;
   const images = []; /* {name, blob, url} */
@@ -143,7 +144,7 @@
         try {
           setStatus("Сжимаю " + f.name + "…");
           const blob = await shrink(f);
-          if (blob.size > LIM.imgBytes) { setStatus(f.name + ": даже после сжатия больше 2 МБ", true); continue; }
+          if (blob.size > LIM.imgBytes) { setStatus(f.name + ": даже после сжатия больше 1 МБ", true); continue; }
           let n = 1;
           while (images.some(x => x.name.startsWith("img-" + n + "."))) n++;
           const name = "img-" + n + "." + (blob.type === "image/webp" ? "webp" : blob.type === "image/png" ? "png" : "jpg");
@@ -168,6 +169,7 @@
       if (!token) return setStatus("Подтвердите, что вы не робот (окошко над кнопкой)", true);
       /* отправляются только картинки, которые стоят в тексте */
       const used = images.filter(im => body.includes("(" + im.name + ")"));
+      if (used.reduce((n, im) => n + im.blob.size, 0) > LIM.total) return setStatus("Картинки вместе тяжелее 2,4 МБ — уберите одну или замените на скриншот поменьше", true);
       sending = true;
       $("gfSubmit").disabled = true;
       setStatus("Отправляю…");
@@ -176,7 +178,7 @@
         for (const im of used) payload.images.push({ name: im.name, data: await toBase64(im.blob) });
         let r = null, res = {};
         try {
-          r = await fetch(cfg.endpoint, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+          r = await fetch(cfg.endpoint, { method: "POST", headers: { "content-type": "text/plain;charset=UTF-8" } /* «простой» запрос: браузер не шлёт предварительный OPTIONS */, body: JSON.stringify(payload) });
           res = await r.json().catch(() => ({}));
         } catch (e) {
           /* ответ потерялся (обрыв связи и т. п.), но гайд мог дойти — спрашиваем по номеру черновика */
@@ -239,7 +241,7 @@
       c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
       const blobOf = (type, q) => new Promise(ok => c.toBlob(ok, type, q));
       let best = null;
-      for (const q of [0.86, 0.75, 0.6]) {
+      for (const q of [0.86, 0.75, 0.6, 0.45]) {
         let b = await blobOf("image/webp", q);
         if (!b || b.type !== "image/webp") b = await blobOf("image/jpeg", q);
         best = b;
