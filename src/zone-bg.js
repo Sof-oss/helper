@@ -201,6 +201,7 @@ export function startBackground() {
   function loadBg(url, first) {
     if (!url) return;
     loader.load(url, tex => {
+      wake();                                          // новое фото надо отрисовать, даже если фон на паузе
       prepTex(tex);
       imgAspect = tex.image.width / tex.image.height;
       if (first || !photoMat.uniforms.map.value) {
@@ -280,12 +281,30 @@ export function startBackground() {
     nextAnom = now + 7000 + Math.random() * 7000;
   }
 
-  /* ---------- цикл ---------- */
-  const t0 = performance.now();
-  let raf = 0;
-  function frame() {
+  /* ---------- цикл ----------
+     Экономия батареи и процессора:
+     — не чаще FPS кадров в секунду (фон медленный, разницы с 60 не видно);
+     — если IDLE_STOP_MS никто ничего не делает (мышь, касание, прокрутка, клавиши), цикл останавливается:
+       на холсте остаётся последний кадр, процессор и видеокарта отдыхают. Любое действие — фон продолжает с того же места;
+     — в скрытой вкладке браузер сам не вызывает requestAnimationFrame. */
+  const FPS = 30, FRAME_MS = 1000 / FPS, IDLE_STOP_MS = 20000;
+  let t0 = performance.now();
+  let raf = 0, lastFrame = 0, lastActive = t0, pausedAt = 0, dead = false;
+  function wake() {
+    lastActive = performance.now();
+    if (raf || dead) return;
+    const d = lastActive - pausedAt;                  // время на паузе — сдвигаем часы, чтобы сцена не прыгнула
+    t0 += d; nextAnom += d;
     raf = requestAnimationFrame(frame);
+  }
+  ["pointermove", "pointerdown", "wheel", "scroll", "keydown", "touchstart"].forEach(ev => window.addEventListener(ev, wake, { passive: true }));
+  function frame() {
     const now = performance.now();
+    /* пауза: только когда нет аномалии и смены фона, иначе они застынут на середине */
+    if (now - lastActive > IDLE_STOP_MS && !anom && !fade) { raf = 0; pausedAt = now; return; }
+    raf = requestAnimationFrame(frame);
+    if (now - lastFrame < FRAME_MS - 2) return;      // −2 мс: запас на неровный шаг кадров у монитора
+    lastFrame = now;
     const time = (now - t0) / 1000;
     U.time.value = time;
     /* без движения мыши сцена сама еле заметно «дышит» */
@@ -325,8 +344,11 @@ export function startBackground() {
     renderer.render(scene, camera);
   }
   raf = requestAnimationFrame(frame);
+  /* смена темы, размера окна и загрузка фото тоже будят фон: иначе изменение не отрисуется */
+  window.addEventListener("resize", wake);
+  new MutationObserver(wake).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
   /* потеря контекста (бывает на телефонах): прячем холст, остаётся CSS-фон */
-  canvas.addEventListener("webglcontextlost", e => { e.preventDefault(); cancelAnimationFrame(raf); canvas.classList.remove("on"); });
+  canvas.addEventListener("webglcontextlost", e => { e.preventDefault(); dead = true; cancelAnimationFrame(raf); raf = 0; canvas.classList.remove("on"); });
   return { canvas, spawnAnomaly: () => spawnAnomaly(performance.now()) };
 }

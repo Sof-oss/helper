@@ -1,5 +1,6 @@
-/* polish.js — подключается после app.js (калькулятор).
+/* polish.js — дополнение к app.js (калькулятор), ES-модуль; порядок задаёт src/calculator.js.
    Не меняет логику расчёта: дорисовывает полосу урона и плитки снаряжения, следит за перерисовкой DOM */
+import { SETS, ITEMS, keys, fmt, plural, GEAR_BONUS_LABELS, GEAR_BONUS_PCT, GEAR_EXTRA, gearBonusTags, gearTotalItem, setGearInfoRenderer } from "./app.js";
 (function(){
 "use strict";
 const $=id=>document.getElementById(id);
@@ -79,10 +80,10 @@ if(dov){
 }
 
 /* --- окно «Бонусы снаряжения» ---
-   Подменяет renderGearInfo из app.js: две группы со своей иконкой (комплекты — противогаз,
+   Заменяет вид окна из app.js (через setGearInfoRenderer): две группы со своей иконкой (комплекты — противогаз,
    вещи — разгрузка), внутри карточки три строки по оружию с полоской вклада, шкала общая
    для комплектов и вещей; крит и откат — чипами; сумма — плотными плитками.
-   openGearInfo() вызывает renderGearInfo по имени, поэтому подмена подхватывается сама */
+   openGearInfo() в app.js вызывает то, что передано в setGearInfoRenderer */
 /* семейства: имена совпадают с классами карточек в polish.css (.gi-card.free / .gi-card.paid),
    иначе не подставляется --ac и у платных комплектов пропадают рейка и полоски */
 const GI_FAM={free:["knife","pistol","auto"],paid:["grenade","gl","gauss"]};
@@ -112,7 +113,7 @@ function giTotal(count){
  return '<div class="gi-total"><div class="gi-total-title">Сумма всех бонусов · '+count+' '+plural(count,"предмет","предмета","предметов")+'</div>'
   +row(GI_NAMES.free,GI_FAM.free)+row(GI_NAMES.paid,GI_FAM.paid)+row("Крит и откат",GEAR_EXTRA)+'</div>';
 }
-window.renderGearInfo=function(){
+function renderGearInfo(){
  const visible=x=>giFilter==="all"||giFamily(x)===giFilter;
  const sets=SETS.filter(visible),items=ITEMS.filter(visible),all=[...SETS,...ITEMS];
  const counts={all:all.length,free:all.filter(x=>giFamily(x)==="free").length,paid:all.filter(x=>giFamily(x)==="paid").length};
@@ -126,7 +127,8 @@ window.renderGearInfo=function(){
   /* сумма идёт в общем потоке внизу списка, а не прилипает к окну */
   +giTotal(all.length)
   +'</div>';
-};
+}
+setGearInfoRenderer(renderGearInfo);
 /* фильтр: переключает список, сумма всегда считается по всем предметам */
 document.addEventListener("click",e=>{
  const b=e.target.closest("[data-gear-filter]");

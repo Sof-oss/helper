@@ -1,3 +1,5 @@
+/* Калькулятор урона. ES-модуль: собирается build.js из src/calculator.js вместе с talents.js и polish.js в один calculator.js */
+import { TALENTS } from "./talents.js";
 const SETS=[
 {name:"Первый день в зоне",bonuses:{knife:5,pistol:5,auto:5}},
 {name:"Любитель прогулок",bonuses:{grenade:6,gl:11,gauss:36}},
@@ -212,7 +214,10 @@ function gearTotalItem(){
  return sum;
 }
 /* базовый список; окно «Бонусы снаряжения» дорисовывает polish.js (полоски, фильтр, группы) */
-function renderGearInfo(){$("gearInfoBody").innerHTML='<div class="gear-info-group-title">Комплекты</div>'+SETS.map(x=>gearInfoCard(x)).join("")+'<div class="gear-info-group-title">Одиночные вещи</div>'+ITEMS.map(x=>gearInfoCard(x)).join("")+'<div class="gear-info-total-wrap">'+gearInfoCard(gearTotalItem(),"gear-info-total")+'</div>'}
+/* окно «Бонусы снаряжения»: polish.js подставляет свой вид через setGearInfoRenderer */
+let renderGearInfo=defaultRenderGearInfo;
+function setGearInfoRenderer(fn){renderGearInfo=fn}
+function defaultRenderGearInfo(){$("gearInfoBody").innerHTML='<div class="gear-info-group-title">Комплекты</div>'+SETS.map(x=>gearInfoCard(x)).join("")+'<div class="gear-info-group-title">Одиночные вещи</div>'+ITEMS.map(x=>gearInfoCard(x)).join("")+'<div class="gear-info-total-wrap">'+gearInfoCard(gearTotalItem(),"gear-info-total")+'</div>'}
 function openGearInfo(){$("gearInfoModal").classList.add("show");$("gearInfoModal").setAttribute("aria-hidden","false");renderGearInfo()}
 function closeGearInfo(){$("gearInfoModal").classList.remove("show");$("gearInfoModal").setAttribute("aria-hidden","true")}
 
@@ -471,3 +476,6 @@ const linked=parseBuild(location.hash);
 if(linked){cmpBuild=linked;saveCompare();history.replaceState(null,"",location.href.split("#")[0])}else loadCompare();
 render();
 if(linked)openCompare();
+
+/* то, чем пользуется polish.js */
+export { SETS, ITEMS, keys, fmt, plural, GEAR_BONUS_LABELS, GEAR_BONUS_PCT, GEAR_EXTRA, gearBonusTags, gearTotalItem, setGearInfoRenderer };

@@ -6,26 +6,16 @@
   opacity:0;transition:opacity 1.2s ease}
 .zone-bg.on{opacity:1}
 
-/* до старта заставки страницу закрывает тёмный экран, чтобы она не мелькнула (класс ставит скрипт в <head>) */
-html.intro-pending::after{content:"";position:fixed;inset:0;z-index:3000;
-  background:radial-gradient(60% 50% at 50% 45%,color-mix(in srgb,var(--accent) 14%,#05070a),#05070a 70%)}
-html.intro-pending body{overflow:hidden}
-
-.zone-intro{position:fixed;inset:0;z-index:3000;cursor:pointer;
-  background:radial-gradient(60% 50% at 50% 45%,color-mix(in srgb,var(--accent) 14%,#05070a),#05070a 70%);
-  transition:background-color .6s ease,opacity .35s ease}
+/* заставка — прозрачный слой поверх уже открытой страницы: не закрывает содержимое и не перехватывает клики
+   (pointer-events:none), кликается только «Пропустить». Запускается после загрузки страницы, роботам не показывается */
+.zone-intro{position:fixed;inset:0;z-index:3000;pointer-events:none;
+  background:radial-gradient(min(320px,45vw) min(320px,45vw) at 50% 40%,rgba(5,7,10,.55),transparent 75%);
+  transition:background .7s ease,opacity .35s ease;animation:zi-in .5s ease-out backwards}
+@keyframes zi-in{from{opacity:0}}
 .zone-intro canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
-.zone-intro.flying{background:transparent;transition:background .7s ease}
+.zone-intro.flying{background:transparent}
 .zone-intro.out{opacity:0}
-.zone-intro-title{position:absolute;left:0;right:0;top:calc(50% + min(150px,30vw));text-align:center;pointer-events:none;
-  animation:zi-title .9s .45s ease-out backwards;transition:opacity .4s ease}
-.zone-intro.flying .zone-intro-title{opacity:0}
-.zone-intro-title b{display:block;font:400 clamp(30px,6vw,52px)/1 "Graffiti1C","Segoe UI",Arial,sans-serif;color:#eef4fa;
-  text-shadow:0 0 24px color-mix(in srgb,var(--accent) 70%,transparent),0 2px 10px rgba(0,0,0,.8)}
-.zone-intro-title span{display:block;margin-top:10px;font:600 11px/1 "Oswald",sans-serif;letter-spacing:.32em;text-transform:uppercase;
-  color:color-mix(in srgb,var(--accent-2) 80%,#fff)}
-@keyframes zi-title{from{opacity:0;transform:translateY(10px);filter:blur(6px)}}
-.zone-intro-skip{position:absolute;right:20px;bottom:calc(20px + env(safe-area-inset-bottom));padding:9px 16px;border-radius:999px;
+.zone-intro-skip{pointer-events:auto;position:absolute;right:20px;bottom:calc(20px + env(safe-area-inset-bottom));padding:9px 16px;border-radius:999px;
   border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);background:rgba(5,7,10,.55);color:#cfdbe6;
   font:600 12px/1 "Oswald",sans-serif;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 .zone-intro-skip:hover{border-color:var(--accent);color:#fff}
@@ -35,4 +25,4 @@ html.intro-pending body{overflow:hidden}
 @keyframes intro-land{0%{transform:scale(1.35);filter:drop-shadow(0 0 18px var(--accent))}100%{transform:none}}
 .rad-logo.intro-land{animation:intro-land .8s cubic-bezier(.2,.8,.3,1)}
 
-@media(prefers-reduced-motion:reduce){.zone-bg,html.intro-pending::after{display:none}}
+@media(prefers-reduced-motion:reduce){.zone-bg,.zone-intro{display:none}}

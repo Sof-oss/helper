@@ -1,2 +1,5 @@
 dist/
 node_modules/
+
+# сырая выгрузка всех игроков из API игры: нужна только локально для build-top100.js, в репозиторий не попадает
+top100/heart-of-the-zone-top100-all.csv

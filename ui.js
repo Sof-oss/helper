@@ -90,7 +90,6 @@ window.__roll = function (el, text) {
     }
     Array.prototype.forEach.call(box.querySelectorAll("[data-theme-btn]"), function (b) {
       var on = b.dataset.themeBtn === t.key;
-      b.setAttribute("aria-selected", String(on));
       b.setAttribute("aria-pressed", String(on));
     });
   }

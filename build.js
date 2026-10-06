@@ -3,15 +3,17 @@
 /* Сборка для деплоя: исходники из корня -> ./dist
  * 0. Общие куски (partials/header.html, partials/footer.html) подставляются вместо <!-- @include имя -->,
  *    в шапке помечается активный пункт меню: так меню правится в одном месте, а не в каждой странице.
- * 0б. 3D главной (src/home-3d.js + three.js) собирается esbuild: маленький home-3d.js и догружаемые части в dist/3d/.
+ * 0б. Модули собираются esbuild (см. MODULES): 3D главной (src/home-3d.js + three.js) — маленький home-3d.js
+ *     и догружаемые части в dist/3d/; калькулятор (src/calculator.js -> app.js, polish.js, talents.js) — один calculator.js.
  * 1. Таблицы «Информации» и «Топ-100» дописываются прямо в HTML: их видят поисковики и те, у кого выключен JS.
  *    Разметку рисуют те же info.js / info-tasks.js / top100.js, что работают в браузере, поэтому она совпадает.
- * 2. Стили страницы склеиваются в один файл (bundle-*.css), css и js сжимаются esbuild.
+ * 2. Общие стили (styles.css, visual.css, polish.css) остаются отдельными файлами и кэшируются один раз на весь сайт,
+ *    подряд идущие стили одной страницы склеиваются (bundle-*.css); css и js сжимаются esbuild.
  * 3. Ссылки на css, js и картинки получают ?v=<хэш содержимого>, после деплоя старый кэш не подтянется.
  * 3б. Гайды из guides/<адрес>/index.md (Markdown, см. guide-md.js) становятся страницами /guide/<адрес>,
  *     список гайдов дописывается в guides.html, картинки гайдов копируются в dist/guide-img/<адрес>/.
  * 4. В sitemap.xml дописывается lastmod: дата последнего коммита страницы и её css/js, у Топ-100 — время выгрузки рейтинга.
- * Запуск: npm install (один раз, ставит esbuild), затем node build.js. Без esbuild сборка тоже пройдёт, но без сжатия */
+ * Запуск: npm install (один раз, ставит esbuild), затем node build.js. Без esbuild сборка не идёт: калькулятор собирается им */
 const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
@@ -20,16 +22,26 @@ const { execFileSync } = require("child_process");
 
 let esbuild = null;
 try { esbuild = require("esbuild"); } catch (e) {
-  console.warn("Предупреждение: esbuild не установлен (npm install), css и js не будут сжаты");
+  console.error("Ошибка: esbuild не установлен. Выполните npm install и запустите сборку ещё раз");
+  process.exit(1);
 }
 
 const ROOT = __dirname;
 const OUT = path.join(ROOT, "dist");
 
-/* в dist не попадает служебное и исходники сборки (CSV рейтинга нужны только для build-top100.js) */
+/* модули: файл в dist -> точка входа и все исходники (по ним же считается дата страницы в sitemap).
+   Исходники модулей в dist не копируются — на сайт попадает только собранный файл */
+const MODULES = {
+  "home-3d.js": ["src/home-3d.js", "src/zone-intro.js", "src/zone-bg.js", "src/zone-theme.js"],
+  "calculator.js": ["src/calculator.js", "app.js", "polish.js", "talents.js"]
+};
+
+/* в dist не попадает служебное и исходники сборки (выгрузка игроков и CSV рейтинга нужны только для build-top100.js) */
 const SKIP = new Set([
   ".git", ".github", ".gitignore", "dist", "node_modules", "top100", "partials", "src",
-  "guides", "worker", "yandex", "README.md", "build.js", "build-top100.js", "build-players.js", "build-top100.bat", "package.json", "package-lock.json"
+  "guides", "yandex", "README.md", "build.js", "build-top100.js", "build-players.js", "build-top100.bat", "package.json", "package-lock.json",
+  "fetch-players.js", "update-top100.bat",
+  ...Object.values(MODULES).flat().filter(f => !f.startsWith("src/"))
 ]);
 
 
@@ -43,7 +55,7 @@ for (const name of fs.readdirSync(ROOT)) {
 
 /* ---------- гайды ----------
    guides/<адрес>/index.md + картинки рядом. Гайд попадает в репозиторий через pull request из формы
-   «Отправить свой гайд» (worker/guide-submit.js) и публикуется, когда его принимают (Merge).
+   «Отправить свой гайд» (функция Yandex Cloud, yandex/index.js) и публикуется, когда его принимают (Merge).
    Адрес папки = адрес страницы: guides/kak-nachat/index.md -> /guide/kak-nachat.
    Картинки лежат отдельно от страницы (dist/guide-img/<адрес>/), чтобы папка не мешала адресу /guide/<адрес> */
 const GuideMD = require("./guide-md.js");
@@ -108,16 +120,26 @@ function guidesListMarkup() {
 /* ---------- 3D главной ----------
    src/home-3d.js — маленький загрузчик; заставка (zone-intro.js), живой фон (zone-bg.js) и общий кусок three.js
    собираются в отдельные файлы dist/3d/*-<хэш>.js и скачиваются только когда нужны. Хэш в имени — защита от старого кэша.
-   Из three.js попадает только используемое. Без esbuild 3D не собирается: главная работает с обычным фоном */
-if (esbuild) {
+   Из three.js попадает только используемое */
+{
   const r = esbuild.buildSync({
     entryPoints: [path.join(ROOT, "src", "home-3d.js")], outdir: OUT, entryNames: "[name]", chunkNames: "3d/[name]-[hash]",
     bundle: true, splitting: true, format: "esm", minify: true, target: "es2020", legalComments: "none", charset: "utf8", metafile: true
   });
   const parts = Object.entries(r.metafile.outputs).map(([f, o]) => path.basename(f).replace(/-[A-Z0-9]{8}\.js$/, ".js").replace(/^chunk\.js$/, "three.js (общий)") + " " + (o.bytes / 1024).toFixed(0) + " КБ");
   console.log("3D главной: " + parts.join(", "));
-} else {
-  console.warn("Предупреждение: без esbuild 3D главной не собран");
+}
+
+/* ---------- калькулятор ----------
+   app.js, polish.js и talents.js — ES-модули с явными import/export (без общих глобальных имён).
+   Точка входа src/calculator.js задаёт порядок; на сайт уходит один файл calculator.js.
+   format "iife": всё внутри одной функции, наружу ничего не торчит */
+{
+  const r = esbuild.buildSync({
+    entryPoints: [path.join(ROOT, "src", "calculator.js")], outfile: path.join(OUT, "calculator.js"),
+    bundle: true, format: "iife", minify: true, target: "es2020", legalComments: "none", charset: "utf8", metafile: true
+  });
+  console.log("Калькулятор: calculator.js " + (Object.values(r.metafile.outputs)[0].bytes / 1024).toFixed(0) + " КБ");
 }
 
 /* ---------- общие куски страниц ----------
@@ -210,27 +232,43 @@ const PRERENDER = {
   }
 };
 
-/* ---------- склейка стилей ----------
-   Все локальные <link rel="stylesheet"> страницы по порядку склеиваются в один bundle-<хэш>.css в корне dist,
-   поэтому относительные url() внутри стилей остаются верными. Одинаковые наборы на разных страницах
-   дают один и тот же файл. Исходные css в dist после этого не нужны и удаляются */
+/* ---------- стили ----------
+   Порядок подключения не меняется: от него зависит, какое правило побеждает (visual.css, например, перекрашивает polish.css).
+   — Общие файлы (подключены на двух и больше страницах: styles.css, visual.css, polish.css) идут отдельными файлами:
+     они одинаковые на всём сайте, браузер скачивает каждый один раз и на других страницах берёт из кэша.
+   — Файлы только одной страницы, если стоят подряд, склеиваются в один bundle-<хэш>.css в корне dist
+     (поэтому относительные url() внутри стилей остаются верными).
+   Исходные css, вошедшие в склейку, в dist после этого не нужны и удаляются */
 const LOCAL_CSS = /<link rel="stylesheet" href="(\/?)([^":]+\.css)">\n?/g;
 const bundledCss = new Set();
-for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
-  const file = path.join(OUT, name);
-  let html = fs.readFileSync(file, "utf8");
-  const links = [...html.matchAll(LOCAL_CSS)];
-  if (links.length < 1) continue;
-  const list = links.map(m => m[2]);
-  const css = list.map(f => "/* " + f + " */\n" + fs.readFileSync(path.join(OUT, f), "utf8")).join("\n");
-  const bundle = "bundle-" + crypto.createHash("sha1").update(list.join("|")).digest("hex").slice(0, 8) + ".css";
-  fs.writeFileSync(path.join(OUT, bundle), css);
-  list.forEach(f => bundledCss.add(f));
+const cssPages = fs.readdirSync(OUT).filter(f => f.endsWith(".html"))
+  .map(name => ({ name, list: [...fs.readFileSync(path.join(OUT, name), "utf8").matchAll(LOCAL_CSS)].map(m => m[2]) }))
+  .filter(p => p.list.length);
+const cssUse = {};
+cssPages.forEach(p => new Set(p.list).forEach(f => { cssUse[f] = (cssUse[f] || 0) + 1; }));
+const sharedCss = Object.keys(cssUse).filter(f => cssUse[f] > 1);
+if (sharedCss.length) console.log("Общие стили (кэшируются на весь сайт): " + sharedCss.join(", "));
+for (const { name, list } of cssPages) {
+  /* группы по порядку: общий файл — сам по себе, подряд идущие файлы страницы — вместе */
+  const groups = [];
+  for (const f of list) {
+    const last = groups[groups.length - 1];
+    if (cssUse[f] > 1 || !last || last.shared) groups.push({ shared: cssUse[f] > 1, files: [f] });
+    else last.files.push(f);
+  }
+  const hrefs = groups.map(g => {
+    if (g.shared || g.files.length === 1) return g.files[0];
+    const bundle = "bundle-" + crypto.createHash("sha1").update(g.files.join("|")).digest("hex").slice(0, 8) + ".css";
+    fs.writeFileSync(path.join(OUT, bundle), g.files.map(f => "/* " + f + " */\n" + fs.readFileSync(path.join(OUT, f), "utf8")).join("\n"));
+    g.files.forEach(f => bundledCss.add(f));
+    return bundle;
+  });
   let first = true;
-  html = html.replace(LOCAL_CSS, (m, slash) => {
+  const file = path.join(OUT, name);
+  const html = fs.readFileSync(file, "utf8").replace(LOCAL_CSS, (m, slash) => {
     if (!first) return "";
     first = false;
-    return '<link rel="stylesheet" href="' + slash + bundle + '">\n';
+    return hrefs.map(h => '<link rel="stylesheet" href="' + slash + h + '">\n').join("");
   });
   fs.writeFileSync(file, html);
 }
@@ -241,7 +279,7 @@ bundledCss.forEach(f => fs.rmSync(path.join(OUT, f)));
    имена верхнего уровня, поэтому app.js / polish.js / talents.js продолжают видеть друг друга */
 if (esbuild) {
   let saved = 0;
-  for (const name of fs.readdirSync(OUT).filter(f => /\.(css|js)$/.test(f) && f !== "home-3d.js")) {
+  for (const name of fs.readdirSync(OUT).filter(f => /\.(css|js)$/.test(f) && !MODULES[f])) {
     const file = path.join(OUT, name);
     const src = fs.readFileSync(file, "utf8");
     const out = esbuild.transformSync(src, { loader: name.endsWith(".css") ? "css" : "js", minify: true, target: name.endsWith(".css") ? ["chrome100", "safari15", "firefox100"] : "es2020", legalComments: "none", charset: "utf8" }).code;
@@ -352,7 +390,8 @@ function top100Date() {
 }
 function pageDeps(page) {
   const html = fs.readFileSync(path.join(ROOT, page), "utf8");
-  const deps = [...html.matchAll(/(?:href|src)="\/?([^":?#]+\.(?:css|js))"/g)].map(m => m[1]).filter(f => fs.existsSync(path.join(ROOT, f)));
+  /* собранный модуль (home-3d.js, calculator.js) в корне не лежит — вместо него берутся его исходники */
+  const deps = [...html.matchAll(/(?:href|src)="\/?([^":?#]+\.(?:css|js))"/g)].flatMap(m => MODULES[m[1]] || [m[1]]).filter(f => fs.existsSync(path.join(ROOT, f)));
   /* меню и подвал из partials тоже влияют на дату страницы */
   const parts = [...html.matchAll(/<!--\s*@include\s+([\w-]+)/g)].map(m => "partials/" + m[1] + ".html").filter(f => fs.existsSync(path.join(ROOT, f)));
   return [page, ...new Set([...deps, ...parts])];

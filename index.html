@@ -6,9 +6,6 @@
 <meta name="theme-color" content="#070d18">
 <script>/* тема до первой отрисовки, чтобы не мигало */(function(){try{var t=localStorage.getItem("zoneTheme");if(t)document.documentElement.dataset.theme=t}catch(e){}})();</script>
 <script>/* адрес без .html: /calculator.html -> /calculator, /index.html -> / (на GitHub Pages нет серверных переадресаций, канонический адрес указан в rel=canonical) */(function(){var p=location.pathname;if(/\.html$/.test(p))history.replaceState(null,"",p.replace(/(^|\/)index\.html$/,"$1").replace(/\.html$/,"")+location.search+location.hash)})();</script>
-<!-- 3D-заставка при первом заходе: тёмный экран сразу, чтобы страница не мелькнула до её старта.
-     Если 3D-скрипт не успел за 3 с (медленная сеть, старый браузер), экран убирается и заставки не будет -->
-<script>(function(){try{if(localStorage.getItem("zoneIntroSeen")||matchMedia("(prefers-reduced-motion: reduce)").matches)return;var r=document.documentElement;r.classList.add("intro-pending");setTimeout(function(){if(r.classList.contains("intro-pending")){r.classList.remove("intro-pending");window.__introSkip=true}},3000)}catch(e){}})();</script>
 <title>Сердце Зоны — сайт-помощник</title>
 <meta name="description" content="Неофициальный сайт-помощник для игры «Сердце Зоны»: калькулятор урона с древом талантов, Топ-100 игроков по семи рейтингам и таблицы опыта и стоимости талантов.">
 <link rel="canonical" href="https://heart-of-the-zone.ru/">

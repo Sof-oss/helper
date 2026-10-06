@@ -1,6 +1,7 @@
 /* 3D-логотип при первом заходе: объёмный противогаз с фильтром-«радиацией» дважды делает вдох —
    очки вспыхивают, из фильтра выходит пар, вокруг трещат разряды аномалии. Через ~3,5 с маска улетает на место логотипа в шапке.
-   Показывается один раз (метка zoneIntroSeen в браузере). Пропустить — кнопка, клик, Esc или любая клавиша */
+   Показывается один раз (метка zoneIntroSeen в браузере) прозрачным слоем поверх уже открытой страницы: содержимое видно
+   и доступно сразу, слой не перехватывает клики. Пропустить — кнопка, любая клавиша, клик, касание или прокрутка */
 import {
   WebGLRenderer, Scene, PerspectiveCamera, Shape, Path, ExtrudeGeometry, CylinderGeometry, TorusGeometry, MeshStandardMaterial, Mesh, Group,
   PMREMGenerator, DirectionalLight, PointLight, SpriteMaterial, Sprite, CanvasTexture, AdditiveBlending,
@@ -71,28 +72,21 @@ const beat = t => {                                    // двойной «вд�
   return Math.exp(-Math.pow((t - .08) / .06, 2)) + .6 * Math.exp(-Math.pow((t - .3) / .07, 2));
 };
 
-export function shouldShowIntro() {
-  const root = document.documentElement;
-  return root.classList.contains("intro-pending") && !window.__introSkip;
-}
-
 export function runIntro() {
   return new Promise(done => {
-    const root = document.documentElement;
     try { localStorage.setItem(SEEN, "1"); } catch (e) {}
     const theme = readTheme();
     const ac = new Color().setRGB(...theme.accent, SRGBColorSpace), ac2 = new Color().setRGB(...theme.accent2, SRGBColorSpace);
 
-    /* оверлей поверх страницы */
+    /* прозрачный слой поверх страницы (zone3d.css: pointer-events:none, кликается только «Пропустить») */
     const box = document.createElement("div");
     box.className = "zone-intro";
-    box.innerHTML = '<canvas aria-hidden="true"></canvas><div class="zone-intro-title"><b>Сердце Зоны</b><span>Онлайн-помощник Зоны</span></div><button type="button" class="zone-intro-skip">Пропустить</button>';
+    box.innerHTML = '<canvas aria-hidden="true"></canvas><button type="button" class="zone-intro-skip">Пропустить</button>';
     document.body.appendChild(box);
     const canvas = box.querySelector("canvas");
     let renderer;
     try { renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true }); }
-    catch (e) { console.warn("Заставка: нет WebGL", e); box.remove(); root.classList.remove("intro-pending"); return done(); }
-    root.classList.remove("intro-pending");          // теперь страницу закрывает сам оверлей
+    catch (e) { console.warn("Заставка: нет WebGL", e); box.remove(); return done(); }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lowPower ? 1.5 : 2));
     renderer.toneMapping = ACESFilmicToneMapping;
     renderer.outputColorSpace = SRGBColorSpace;
@@ -215,15 +209,17 @@ export function runIntro() {
 
     /* хронология, с */
     const BEATS = [1.0, 2.15], FLY = 3.0, END = 3.8;
-    let t0 = performance.now(), last = t0, zap = 0, skipped = false, raf = 0, fly = null;
+    let t0 = 0, last = 0, zap = 0, skipped = false, raf = 0, fly = null;
     const skip = () => { if (skipped) return; skipped = true; box.classList.add("out"); setTimeout(finish, 350); };
-    const onKey = () => skip();
-    box.addEventListener("click", skip);
-    window.addEventListener("keydown", onKey);
+    /* посетитель начал пользоваться страницей — не мешаем ему, заставка тихо исчезает */
+    const onUse = () => skip();
+    const USE = ["keydown", "pointerdown", "wheel", "touchstart"];
+    box.querySelector(".zone-intro-skip").addEventListener("click", skip);
+    USE.forEach(ev => window.addEventListener(ev, onUse, { passive: true }));
 
     function finish() {
       cancelAnimationFrame(raf);
-      window.removeEventListener("keydown", onKey); window.removeEventListener("resize", resize);
+      USE.forEach(ev => window.removeEventListener(ev, onUse)); window.removeEventListener("resize", resize);
       renderer.dispose(); pm.dispose(); box.remove();
       const logo = document.querySelector(".site-header .rad-logo");
       if (logo) { logo.classList.add("intro-land"); setTimeout(() => logo.classList.remove("intro-land"), 900); }
@@ -232,6 +228,8 @@ export function runIntro() {
     function frame() {
       raf = requestAnimationFrame(frame);
       const now = performance.now();
+      /* отсчёт — с первого кадра: подготовка сцены на слабом телефоне может занять секунду, иначе заставка «проскочит» */
+      if (!t0) { t0 = last = now; }
       const t = (now - t0) / 1000, dt = Math.min(.05, (now - last) / 1000); last = now;
       const b = BEATS.reduce((m, s) => Math.max(m, beat(t - s)), 0);
       const appear = Math.min(1, t / .75);

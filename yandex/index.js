@@ -1,6 +1,5 @@
 /* Yandex Cloud Functions: приём гайдов из формы «Отправить свой гайд» (guide-submit.js на сайте).
-   То же, что worker/guide-submit.js для Cloudflare, но сервер в России: у части российских провайдеров
-   соединения с Cloudflare обрываются, и гайды с картинками не доходят.
+   Сервер в России: у части российских провайдеров соединения с Cloudflare обрываются, поэтому не Cloudflare Worker.
    Проверяет защиту от ботов (Cloudflare Turnstile) и данные, затем создаёт в репозитории ветку
    guide/<адрес> с файлами guides/<адрес>/index.md и картинками и открывает pull request.
    На сайт гайд попадает, только когда pull request принимают (Merge). Настройка — README.md рядом.
@@ -14,9 +13,28 @@
      ALLOWED_ORIGINS   https://heart-of-the-zone.ru (через запятую, если адресов несколько) */
 "use strict";
 
-/* у Яндекса запрос целиком — до 3,5 МБ, картинки приходят в base64 (+33 %), поэтому лимиты меньше, чем в Worker */
+/* у Яндекса запрос целиком — до 3,5 МБ, картинки приходят в base64 (+33 %), поэтому такие лимиты */
 const LIM = { title: [5, 100], author: [2, 40], text: [200, 30000], images: 5, imgBytes: 1024 * 1024, total: 2.4 * 1024 * 1024 };
 const IMG_NAME = /^img-[1-9]\.(webp|jpg|png)$/;
+
+/* Защита проверки «дошёл ли гайд» (GET ?check=…). Она без капчи, а каждый вызов — запрос к GitHub API;
+   если долбить её без остановки, кончится лимит токена (5000 запросов в час) и перестанет работать вся форма.
+   Поэтому:
+   — список веток guide/… кэшируется на CHECK_CACHE_MS: сколько бы ни спрашивали, GitHub видит не больше запроса в эти секунды;
+   — с одного адреса — не больше CHECK_PER_IP проверок за CHECK_WINDOW_MS, дальше ответ 429.
+   Форма спрашивает 4 раза с паузой 2,5 с и только если потерялся ответ на отправку, так что обычный посетитель в лимит не упрётся.
+   Счётчики живут в памяти экземпляра функции (Яндекс держит его несколько минут, при нагрузке поднимает ещё) —
+   это не точный лимит, но от простого перебора защищает. Строгий лимит можно включить в API Gateway (см. README). */
+const CHECK_CACHE_MS = 5000, CHECK_PER_IP = 20, CHECK_WINDOW_MS = 10 * 60 * 1000;
+let refsCache = null;                 /* { at, refs: Promise<[...]> } */
+const checkHits = new Map();          /* ip -> { from, n } */
+function checkAllowed(ip) {
+  const now = Date.now();
+  if (checkHits.size > 5000) for (const [k, v] of checkHits) if (now - v.from > CHECK_WINDOW_MS) checkHits.delete(k);
+  const h = checkHits.get(ip);
+  if (!h || now - h.from > CHECK_WINDOW_MS) { checkHits.set(ip, { from: now, n: 1 }); return true; }
+  return ++h.n <= CHECK_PER_IP;
+}
 
 module.exports.handler = async function (event) {
   const env = process.env;
@@ -44,7 +62,8 @@ module.exports.handler = async function (event) {
   const check = query.check;
   if (method === "GET" && check) {
     if (!/^[a-z0-9]{8,20}$/.test(check)) return bad("Неправильный номер");
-    try { return reply(200, { ok: true, slug: await findGuideBranch(env, check.slice(0, 6)) }); }
+    if (!checkAllowed(ip || "?")) return bad("Слишком много проверок, попробуйте через несколько минут", 429);
+    try { return reply(200, { ok: true, slug: await findGuideBranch(env, check.slice(0, 6), true) }); }
     catch (e) { return bad("GitHub не ответил", 502); }
   }
   if (method !== "POST") return bad("Нужен POST", 405);
@@ -76,8 +95,7 @@ module.exports.handler = async function (event) {
   for (const im of imgs) {
     if (!im || !IMG_NAME.test(im.name) || names.has(im.name) || typeof im.data !== "string") return bad("Неправильная картинка");
     names.add(im.name);
-    /* целиком картинку не раскодируем: на бесплатном тарифе у Worker'а всего 10 мс процессорного времени.
-       Размер считается по длине base64, тип — по первым байтам файла (а не по имени) */
+    /* целиком картинку не раскодируем: размер считается по длине base64, тип — по первым байтам файла (а не по имени) */
     const size = Math.floor(im.data.length * 3 / 4);
     if (size > LIM.imgBytes) return bad(im.name + ": картинка больше 1 МБ");
     total += size;
@@ -100,6 +118,7 @@ module.exports.handler = async function (event) {
     const dup = await findGuideBranch(env, sid.slice(0, 6));
     if (dup) return reply(200, { ok: true, slug: dup, duplicate: true });
     const pr = await openPullRequest(env, slug, title, author, md, imgs);
+    refsCache = null;   /* новая ветка: следующая проверка спросит GitHub заново */
     return reply(200, { ok: true, slug, pr: pr.number });
   } catch (e) {
     console.log("github error", e && e.message);
@@ -121,9 +140,16 @@ function github(env) {
   };
 }
 
-/* ветка guide/…-<хвост> уже есть — этот гайд уже прислали */
-async function findGuideBranch(env, tail) {
-  const refs = await github(env)("GET", "/git/matching-refs/heads/guide/");
+/* ветка guide/…-<хвост> уже есть — этот гайд уже прислали.
+   cached: для проверки из формы список веток берётся из кэша (см. CHECK_CACHE_MS); при отправке — всегда свежий */
+async function findGuideBranch(env, tail, cached) {
+  const now = Date.now();
+  if (!cached || !refsCache || now - refsCache.at > CHECK_CACHE_MS) {
+    const refs = github(env)("GET", "/git/matching-refs/heads/guide/");
+    refsCache = { at: now, refs };
+    refs.catch(() => { if (refsCache && refsCache.refs === refs) refsCache = null; });   /* ошибку не кэшируем */
+  }
+  const refs = await refsCache.refs;
   const hit = (Array.isArray(refs) ? refs : []).find(r => r.ref.endsWith("-" + tail));
   return hit ? hit.ref.replace("refs/heads/guide/", "") : null;
 }
