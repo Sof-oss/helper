@@ -3,6 +3,6 @@
    (защита от ботов). Как получить оба значения — worker/README.md. Пока поля пустые, форма показывает
    предпросмотр, но отправка выключена */
 window.GUIDES_CONFIG = {
-  endpoint: "",
-  turnstileSiteKey: ""
+  endpoint: "https://api.heart-of-the-zone.ru",
+  turnstileSiteKey: "0x4AAAAAAFPDCyvcRUwYmyEm"
 };
