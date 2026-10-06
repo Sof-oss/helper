@@ -27,7 +27,7 @@ const OUT = path.join(ROOT, "dist");
 /* в dist не попадает служебное и исходники сборки (CSV рейтинга нужны только для build-top100.js) */
 const SKIP = new Set([
   ".git", ".github", ".gitignore", "dist", "node_modules", "top100", "partials", "src",
-  "README.md", "build.js", "build-top100.js", "build-top100.bat", "package.json", "package-lock.json"
+  "README.md", "build.js", "build-top100.js", "build-players.js", "build-top100.bat", "package.json", "package-lock.json"
 ]);
 
 

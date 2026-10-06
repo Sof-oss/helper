@@ -52,6 +52,7 @@ const toNumber = v => Number(String(v).replace(/[\s\u00A0\u202F]/g, ""));
 
 const CSV_FILE = "heart-of-the-zone-top100-all.csv";
 const NO_GROUP = new Set(["", "—", "-", "–"]);
+let BOSS_COLS = [];   // виды боссов из CSV, заполняет readPlayers
 
 /* разделы рейтинга: колонка общего CSV -> переменная в top100-data.js */
 const SOURCES = [
@@ -77,13 +78,23 @@ function readPlayers(filePath) {
     return i;
   };
   const iRank = col("№"), iNick = col("Ник"), iLevel = col("Уровень"), iGroup = col("Группировка"), iOff = col("Нет сигнала");
+  /* для карточек игроков: ID, «В Зоне» и боссы по видам (колонки «Боссы: …»); если колонок нет, карточки без них */
+  const opt = name => head.findIndex(h => h.toLowerCase() === name.toLowerCase());
+  const iId = opt("ID"), iZone = opt("В Зоне");
+  const bossIdx = head.map((h, i) => [h, i]).filter(([h]) => /^Боссы:\s*/i.test(h)).map(([h, i]) => [h.replace(/^Боссы:\s*/i, ""), i]);
+  BOSS_COLS = bossIdx.map(b => b[0]);
   const metricIdx = Object.fromEntries(SOURCES.map(s => [s.column, col(s.column)]));
   return table.slice(1).filter(r => r.length > 1 && String(r[iNick] || "").trim()).map((r, i) => {
     const group = String(r[iGroup] || "").trim();
     const values = {};
     for (const c of Object.keys(metricIdx)) values[c] = toNumber(r[metricIdx[c]]);
     const order = toNumber(r[iRank]);
+    const bosses = {};
+    for (const [b, bi] of bossIdx) bosses[b] = toNumber(r[bi]);
     return {
+      id: iId >= 0 ? String(r[iId] || "").trim() : "",
+      zone: iZone >= 0 ? String(r[iZone] || "").trim() : "",
+      bosses,
       nick: r[iNick],
       level: toNumber(r[iLevel]),
       group: NO_GROUP.has(group) ? "" : group,
@@ -386,3 +397,11 @@ fs.writeFileSync(outputFile,
 console.log("Готово:", outputFile, "| дата:", stamp, "| периодов:", periods.map(per => per.key).join(", ") || "нет");
 if (unchanged) console.log("Данные не изменились с прошлого запуска, новый снимок не добавлен.");
 if (!previous) console.log("Прошлого снимка нет: стрелки появятся после следующего обновления с новыми данными.");
+
+/* карточки игроков (build-players.js): снимок всех игроков и top100-players.json рядом с top100-data.js */
+require("./build-players.js").buildPlayers({
+  players, sources: SOURCES, bossCols: BOSS_COLS, inputDir,
+  outputFile: path.join(path.dirname(outputFile), "top100-players.json"),
+  snapId: unchanged && latest ? latest.id : snapId, snapTime,
+  legacySnaps: readSnapshots(), updated: stamp, factionColors
+});
