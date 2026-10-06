@@ -45,3 +45,46 @@
   .info-sections .top100-tab{font-size:12px}
   .info-group+.info-group{margin-top:12px}
 }
+
+/* ---------- Калькулятор энергии (info-tasks.js) ---------- */
+.ec-locs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
+.ec-locs .top100-tab{flex:1 1 auto;height:36px;padding:0 12px;font-size:12.5px;--accent:#ff6b6f}
+.ec-inputs{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;margin-bottom:14px}
+.ec-field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.ec-field>span:first-child{display:flex;align-items:center;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#a9bbc9}
+.ec-field .res-ico{width:20px;height:20px;margin-right:8px;vertical-align:0}
+.ec-field input{height:42px;padding:0 12px;border:1px solid #2a4a63;border-radius:6px;background:#081420;color:#fff;font:inherit;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;min-width:0;box-sizing:border-box;width:100%}
+.ec-field input:focus{outline:none;border-color:#ff6b6f;box-shadow:0 0 0 3px rgba(255,107,111,.18)}
+.ec-field small{font-size:11.5px;color:#71889b}
+.ec-presets{display:flex;flex-wrap:wrap;gap:6px}
+.ec-preset{height:26px;padding:0 10px;border:1px solid #2d4a60;border-radius:4px;background:transparent;color:#a9bbc9;font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.ec-preset:hover,.ec-preset:focus-visible{border-color:#ff6b6f;color:#fff}
+.ec-results{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.ec-res{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid color-mix(in srgb,var(--c) 32%,transparent);border-radius:6px;background:color-mix(in srgb,var(--c) 8%,transparent);min-width:0}
+.ec-res .res-ico{width:30px;height:30px;margin:0;flex:0 0 30px}
+.ec-res span{display:flex;flex-direction:column;min-width:0}
+.ec-res b{font-size:20px;line-height:1.15;color:#fff;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ec-res small{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--c)}
+.ec-runs{margin:10px 2px 12px;font-size:12.5px;color:#a9bbc9}
+.ec-runs b{color:#fff}
+.ec-buy{display:flex;align-items:center;gap:14px;padding:12px 14px;border:1px solid rgba(159,220,159,.3);border-radius:6px;background:linear-gradient(90deg,rgba(159,220,159,.1),rgba(159,220,159,.03))}
+.ec-drink{position:relative;display:block;width:40px;height:70px;flex:0 0 40px;margin:0 6px 0 2px}
+.ec-drink img{display:block;width:100%;height:100%;object-fit:contain;transform:rotate(-6deg);filter:drop-shadow(0 6px 10px rgba(0,0,0,.55))}
+.ec-drink-n{position:absolute;right:-12px;bottom:-4px;padding:1px 6px;border-radius:10px;background:#d9483f;color:#fff;font-style:normal;font-size:11.5px;font-weight:800;line-height:1.4;font-variant-numeric:tabular-nums;box-shadow:0 2px 6px rgba(0,0,0,.5);white-space:nowrap}
+.ec-buy-text{display:flex;flex-direction:column;gap:3px;font-size:13.5px;color:#c4ced6;min-width:0}
+.ec-buy-text b{color:#fff;font-variant-numeric:tabular-nums}
+.ec-cost{display:flex;align-items:center;flex-wrap:wrap;gap:4px;font-size:15px}
+.ec-cost b{font-size:20px;color:#9fdc9f}
+.ec-cost .res-ico{width:20px;height:20px;margin:0 2px 0 4px;vertical-align:0}
+.ec-net b.up{color:#5fd08a}.ec-net b.down{color:#ff9498}
+.ec-left{font-size:12px;color:#71889b}
+@media(max-width:760px){
+  .ec-locs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-bottom:12px}
+  .ec-locs::-webkit-scrollbar{display:none}
+  .ec-locs .top100-tab{flex:0 0 auto;font-size:12px}
+  .ec-inputs{grid-template-columns:1fr;gap:10px}
+  .ec-results{grid-template-columns:1fr 1fr;gap:8px}
+  .ec-res{padding:10px}
+  .ec-res b{font-size:17px}
+  .ec-drink{width:34px;height:60px;flex-basis:34px}
+}

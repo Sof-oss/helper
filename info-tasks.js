@@ -1,5 +1,5 @@
 /* вкладка «Задания» на странице «Информация».
-   Три таблицы: награда за прохождение локации, итог (все этапы + награда) и выгода.
+   Калькулятор энергии и три таблицы: награда за прохождение локации, итог (все этапы + награда) и выгода.
    Строки — ресурсы с иконками, столбцы — локации: все локации видно сразу.
    Всё в функции, чтобы не пересекаться с $ и fmt из info.js */
 (function(){
@@ -73,8 +73,81 @@ function block(led,title,keys,items,fmt,highlight,note){
   +(note?'<p class="tasks-note">'+note+'</p>':""));
 }
 
+
+/* ---------- калькулятор энергии ----------
+   Сколько ресурсов даст N энергии на выбранной локации и сколько жетонов уйдёт на энергетики.
+   Полное прохождение локации стоит total.energy и даёт итог всех этапов + награду (combined).
+   Остаток энергии, которого не хватает на ещё одно прохождение, пересчитывается по выгоде этапов
+   (без награды за прохождение) — поэтому такие цифры помечены «≈» */
+const DRINK_ENERGY=100,DRINK_PRICE=15;
+/* картинка энергетика «Сердце Зоны» (банка 100 энергии) */
+const DRINK_IMG='<img src="assets/energy-drink.webp" alt="Энергетик" width="103" height="180" loading="lazy" decoding="async">';
+const CALC_KEY="gameHelperEnergyCalc";
+const calcState={loc:0,energy:1000,own:0};
+try{const c=JSON.parse(localStorage.getItem(CALC_KEY)||"null");if(c){
+ if(Number.isInteger(c.loc)&&c.loc>=0&&c.loc<L.length)calcState.loc=c.loc;
+ ["energy","own"].forEach(k=>{if(Number.isFinite(c[k])&&c[k]>=0)calcState[k]=Math.floor(c[k])});
+}}catch{}
+const saveCalc=()=>{try{localStorage.setItem(CALC_KEY,JSON.stringify(calcState))}catch{}};
+
+/* результат для локации i и энергии e */
+function energyYield(i,e){
+ const cost=combined.energy[i],runs=Math.floor(e/cost),rest=e-runs*cost,out={runs:runs,rest:rest};
+ ["exp","bullets","rep"].forEach(k=>{out[k]=runs*combined[k][i]+rest*D.total[k][i]/cost});
+ out.tokens=runs*combined.tokens[i];
+ return out;
+}
+const approx=(v,partial)=>(partial&&v%1?"≈ ":"")+n0(Math.round(v));
+
+function calcResultMarkup(){
+ const i=calcState.loc,e=calcState.energy,y=energyYield(i,e),partial=y.rest>0;
+ const buy=Math.max(0,e-calcState.own),drinks=Math.ceil(buy/DRINK_ENERGY),spent=drinks*DRINK_PRICE,net=y.tokens-spent;
+ const res=(k,v)=>'<div class="ec-res res-'+R[k].cls+'"><i class="res-ico">'+ICON[k]+'</i><span><b>'+v+'</b><small>'+R[k].full+'</small></span></div>';
+ const runsTxt=y.runs?'Полных прохождений: <b>'+n0(y.runs)+'</b>'+(partial?', ещё '+n0(y.rest)+' энергии уйдёт на этапы следующего':''):(e?'На полное прохождение нужно '+n0(combined.energy[i])+' энергии — посчитано по выгоде этапов, без награды':'Укажите, сколько энергии потратить');
+ return '<div class="ec-results">'
+  +res("exp",approx(y.exp,partial))+res("bullets",approx(y.bullets,partial))+res("rep",approx(y.rep,partial))+res("tokens",n0(y.tokens))
+  +'</div><p class="ec-runs">'+runsTxt+'</p>'
+  +'<div class="ec-buy"><i class="ec-drink">'+DRINK_IMG+(drinks?'<b class="ec-drink-n">×'+n0(drinks)+'</b>':'')+'</i><div class="ec-buy-text">'
+  +(buy?'<span>Купить энергии: <b>'+n0(buy)+'</b> → энергетиков: <b>'+n0(drinks)+'</b></span>'
+     +'<span class="ec-cost">Стоимость: <b>'+n0(spent)+'</b> <i class="res-ico res-tok">'+ICON.tokens+'</i>жетонов</span>'
+     +(y.tokens?'<span class="ec-net">С учётом жетонов за прохождения: <b class="'+(net>=0?"up":"down")+'">'+(net>0?"+":net<0?"−":"")+n0(Math.abs(net))+'</b></span>':'')
+     +(drinks*DRINK_ENERGY>buy?'<span class="ec-left">Останется '+n0(drinks*DRINK_ENERGY-buy)+' энергии</span>':'')
+   :'<span>Энергии хватает — покупать энергетики не нужно</span>')
+  +'</div></div>';
+}
+function calcMarkup(){
+ const locs=L.map((l,i)=>'<button type="button" class="top100-tab'+(i===calcState.loc?' active':'')+'" data-ec-loc="'+i+'" aria-pressed="'+(i===calcState.loc)+'">'+l+'</button>').join("");
+ const presets=[100,500,1000,5000].map(v=>'<button type="button" class="ec-preset" data-ec-preset="'+v+'">'+n0(v)+'</button>').join("");
+ return card("#ff6b6f","Калькулятор энергии",
+  '<div class="ec-locs" role="group" aria-label="Локация">'+locs+'</div>'
+  +'<div class="ec-inputs">'
+  +'<label class="ec-field"><span><i class="res-ico res-en">'+ICON.energy+'</i>Потратить энергии</span><input type="number" inputmode="numeric" min="0" step="10" id="ecEnergy" value="'+calcState.energy+'"><span class="ec-presets">'+presets+'</span></label>'
+  +'<label class="ec-field"><span><i class="res-ico res-en">'+ICON.energy+'</i>Уже есть энергии</span><input type="number" inputmode="numeric" min="0" step="10" id="ecOwn" value="'+calcState.own+'"><small>Её покупать не придётся</small></label>'
+  +'</div><div id="ecResult">'+calcResultMarkup()+'</div>'
+  +'<p class="tasks-note">Энергетик даёт '+DRINK_ENERGY+' энергии и стоит '+DRINK_PRICE+' жетонов. Ресурсы за неполное прохождение — оценка по средней выгоде этапов.</p>');
+}
+function updateCalc(){const el=document.getElementById("ecResult");if(el)el.innerHTML=calcResultMarkup()}
+const num=v=>{const n=Math.floor(Number(String(v).replace(/\s/g,"").replace(",",".")));return Number.isFinite(n)&&n>=0?Math.min(n,10000000):0};
+document.addEventListener("input",e=>{
+ if(e.target.id==="ecEnergy")calcState.energy=num(e.target.value);
+ else if(e.target.id==="ecOwn")calcState.own=num(e.target.value);
+ else return;
+ saveCalc();updateCalc();
+});
+document.addEventListener("click",e=>{
+ const b=e.target.closest("[data-ec-loc]");
+ if(b){
+  calcState.loc=Number(b.dataset.ecLoc);saveCalc();
+  document.querySelectorAll("[data-ec-loc]").forEach(x=>{const on=x===b;x.classList.toggle("active",on);x.setAttribute("aria-pressed",on)});
+  updateCalc();return;
+ }
+ const p=e.target.closest("[data-ec-preset]");
+ if(p){calcState.energy=Number(p.dataset.ecPreset);const inp=document.getElementById("ecEnergy");if(inp)inp.value=calcState.energy;saveCalc();updateCalc()}
+});
+
 function tasksBody(){
- return block("#ffb74d","Награда за полное прохождение локации",["exp","bullets","rep","tokens"],D.reward,n0)
+ return calcMarkup()
+  +block("#ffb74d","Награда за полное прохождение локации",["exp","bullets","rep","tokens"],D.reward,n0)
   +block("#54bfff","Итого за все этапы + награда за прохождение",["exp","bullets","rep","tokens","energy"],combined,n0,null,
     "Затраты энергии — сколько уйдёт на все этапы локации; остальные строки — что получишь за них и за полное прохождение.")
   +block("#27db88","Выгода: ресурс на единицу затраченной энергии",["exp","bullets","rep"],gainRows,n2,true,
