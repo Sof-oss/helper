@@ -115,7 +115,15 @@ async function main() {
   if (!fs.existsSync(OUT)) { console.error("Сначала node build.js"); process.exit(1); }
   const data = JSON.parse(fs.readFileSync(path.join(ROOT, "top100-players.json"), "utf8"));
   const ids = Object.keys(data.players);
-  const ver = crypto.createHash("sha1").update(String(data.updated)).digest("hex").slice(0, 8);
+  /* версия картинок меняется и при новых данных, и при смене оформления карточки —
+     иначе мессенджеры и соцсети берут из своего кэша старую картинку по тому же адресу */
+  const vh = crypto.createHash("sha1").update(String(data.updated));
+  for (const f of ["build-previews.js", "ui.js", "top100.js", "top100/factions.json", ...fs.readdirSync(path.join(ROOT, "previews")).map(f => "previews/" + f)]) {
+    const fp = path.join(ROOT, f);
+    if (fs.existsSync(fp) && fs.statSync(fp).isFile()) vh.update(f).update(fs.readFileSync(fp));
+  }
+  const ver = vh.digest("hex").slice(0, 8);
+  const genericVer = crypto.createHash("sha1").update(fs.readFileSync(path.join(ROOT, GENERIC))).digest("hex").slice(0, 8);
 
   /* личные картинки — тем, у кого есть место в топ-100 */
   const withImg = new Set();
@@ -139,7 +147,7 @@ async function main() {
     const title = p.n + " — личное дело сталкера";
     const desc = [(p.g || "Одиночка") + " · " + titleOf(p.l) + ", " + p.l + " ур.",
       ...d.places.slice(0, 3).map(x => TABS.find(t => t.key === x.k).label + " " + fmt(p.v[x.i]) + " (#" + x.r + ")")].join(" · ");
-    const img = withImg.has(id) ? SITE + "/og/p/" + id + ".jpg?v=" + ver : SITE + "/" + GENERIC;
+    const img = withImg.has(id) ? SITE + "/og/p/" + id + ".jpg?v=" + ver : SITE + "/" + GENERIC + "?v=" + genericVer;
     const html = '<!doctype html>\n<html lang="ru"><head><meta charset="utf-8">\n'
       + "<title>" + esc(title) + " · Сердце Зоны</title>\n"
       + '<meta name="viewport" content="width=device-width,initial-scale=1">\n<meta name="robots" content="noindex,follow">\n'
