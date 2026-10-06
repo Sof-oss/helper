@@ -331,3 +331,29 @@
   .confirm-modal .talent-dialog{align-items:center;padding:0 4vw}
   .confirm-actions .cmp-btn{flex:1 1 0}
 }
+
+/* ---------- «Бонусы снаряжения»: компактные карточки ----------
+   подгруппы по семейству оружия, одна полоска силы и три плитки со значениями вместо трёх почти одинаковых полосок */
+.gi-section{margin:20px 0 4px;font-size:14px;letter-spacing:.08em}
+.gi-section .ic{width:19px;height:19px;flex:0 0 19px}
+.gi-sub{--ac:#f0ae58;display:flex;align-items:center;gap:8px;margin:12px 0 9px;font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:color-mix(in srgb,var(--ac) 70%,#fff)}
+.gi-sub.paid{--ac:#54bfff}
+.gi-sub i{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:var(--ac);box-shadow:0 0 8px var(--ac)}
+.gi-sub b{color:#fff}
+.gi-sub::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,color-mix(in srgb,var(--ac) 40%,transparent),transparent)}
+.gi-grid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;align-items:start}
+.gi-card{display:flex;flex-direction:column;padding:12px 13px 12px 16px;
+  background:linear-gradient(160deg,color-mix(in srgb,var(--ac) 10%,#0b1219),#080d12 72%)!important;border-color:color-mix(in srgb,var(--ac) 22%,#14222d)}
+.gi-card:hover{border-color:color-mix(in srgb,var(--ac) 60%,#14222d);box-shadow:0 0 18px color-mix(in srgb,var(--ac) 18%,transparent)}
+.gi-head{margin-bottom:9px}
+.gi-head b{flex:1}
+.gi-power{flex:0 0 auto;padding:3px 6px;border-radius:3px;background:color-mix(in srgb,var(--ac) 15%,transparent);color:color-mix(in srgb,var(--ac) 70%,#fff);font:700 11px/1 ui-monospace,"Cascadia Mono",Consolas,monospace}
+.gi-power-bar{display:block;height:4px;margin-bottom:10px}
+.gi-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.gi-stat{min-width:0;padding:6px 6px 7px;border-radius:5px;background:rgba(0,0,0,.28);border:1px solid color-mix(in srgb,var(--ac) 14%,transparent);text-align:center}
+.gi-stat small{display:block;margin-bottom:4px;font-size:10.5px;color:#8ea3b5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gi-stat b{display:block;color:#fff;font:700 14px/1.1 ui-monospace,"Cascadia Mono",Consolas,monospace;font-variant-numeric:tabular-nums}
+.gi-chips{margin-top:auto;padding-top:9px}
+.gi-chip{font-size:11.5px;padding:3px 8px;border-color:color-mix(in srgb,var(--ac) 30%,#1a3346);background:color-mix(in srgb,var(--ac) 7%,#0a1218)}
+.gi-total{margin-top:22px}
+.gi-total-title{font-size:14px;letter-spacing:.04em}
