@@ -122,3 +122,12 @@
   .gf-add-img{height:120px}
   .gf-actions .guide-send-btn{width:100%}
 }
+
+/* читаемость поверх фоновой картинки: текст вне панелей получает тёмную подложку */
+.guides-head{padding:14px 18px;border:1px solid var(--panel-line);border-radius:9px;background:linear-gradient(180deg,rgba(7,19,29,.88),rgba(5,15,23,.92));box-shadow:0 10px 25px #0005;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.guides-head p{color:#d3dfe9}
+.guides-empty{border-style:dashed;border-color:color-mix(in srgb,var(--accent) 45%,var(--panel-line));background:rgba(5,15,23,.85);color:#c3d1dd;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.guide-back{padding:6px 12px;border:1px solid var(--panel-line);border-radius:6px;background:rgba(5,15,23,.85);color:#d3dfe9}
+.guide-write{padding:12px 16px;border:1px solid var(--panel-line);border-radius:9px;background:rgba(5,15,23,.85);color:#c3d1dd}
+.gf-muted,.gf-foot,.gf-images>small{color:#93a8ba}
+@media (max-width:640px){.guides-head{padding:12px 14px}}
