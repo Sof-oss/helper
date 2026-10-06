@@ -14,6 +14,9 @@
    Запись, которая уже есть в changelog.js руками (та же дата и заголовок), не дублируется.
    В тексте можно ставить ссылки: <a href="/top100">Топ-100</a>.
 
+   Убрать запись уже запушенного коммита (история не переписывается): добавьте начало его хеша
+   (7+ символов) в SKIP ниже — с комментарием, почему.
+
    Проверить локально: node build-changelog.js --dry */
 const fs = require("fs");
 const path = require("path");
@@ -21,11 +24,15 @@ const { execSync } = require("child_process");
 
 const FILE = path.join(__dirname, "changelog.js");
 const DRY = process.argv.includes("--dry");
+/* коммиты, которые не попадают в «Что нового?» */
+const SKIP = [
+  "4f0c2d1" // «Задания» — тот же пункт вошёл в «Раздел «Информация»» (3033095)
+];
 const TAG = /^\s*(new|up|fix)\s*:\s*(.+?)\s*$/i;
 
 let log = "";
 try {
-  log = execSync('git log --no-merges --date=format-local:%Y-%m-%d --format=%ad%x1f%B%x1e', {
+  log = execSync('git log --no-merges --date=format-local:%Y-%m-%d --format=%H%x1f%ad%x1f%B%x1e', {
     cwd: __dirname, encoding: "utf8", env: { ...process.env, TZ: "Europe/Moscow" }, maxBuffer: 64 * 1024 * 1024
   });
 } catch (e) {
@@ -36,7 +43,8 @@ try {
 /* коммиты -> записи {date, title, items} (git log идёт от новых к старым) */
 const groups = new Map();
 for (const raw of log.split("\x1e")) {
-  const [date, body = ""] = raw.replace(/^\s+/, "").split("\x1f");
+  const [hash = "", date, body = ""] = raw.replace(/^\s+/, "").split("\x1f");
+  if (SKIP.some(h => h && hash.startsWith(h))) continue;
   if (!/^\d{4}-\d\d-\d\d$/.test(date || "")) continue;
   const lines = body.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
   if (/\[skip news\]/i.test(body)) continue;
