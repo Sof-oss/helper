@@ -290,6 +290,54 @@ const stamp = fmtStamp(dataMs);
 const previous = unchanged ? (snaps[snaps.length - 2] || null) : latest;
 const older = (unchanged ? snaps.slice(0, -1) : snaps).slice().sort((a, b) => snapTime(a.id) - snapTime(b.id));
 
+/* смена ника: снимки рейтинга хранят игроков по нику, а ник меняется (например, приписка группировки).
+   ID игрока -> все его ники по снимкам игроков (top100/players, их пишет build-players.js).
+   Без этого сменивший ник получал бы «new», а его прирост терялся */
+const idOfNick = {};
+players.forEach(pl => { if (pl.id) idOfNick[pl.nick] = pl.id; });
+const playersDir = path.join(inputDir, "players");
+const nickAt = {};      // снимок -> ID -> ник в тот момент
+const nicksOfId = {};   // ID -> все известные ники
+if (fs.existsSync(playersDir)) {
+  for (const f of fs.readdirSync(playersDir).filter(f => /^\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}\.json$/.test(f))) {
+    const pp = JSON.parse(fs.readFileSync(path.join(playersDir, f), "utf8")).p || {};
+    const at = nickAt[f.replace(".json", "")] = {};
+    for (const id of Object.keys(pp)) {
+      at[id] = pp[id][0];
+      (nicksOfId[id] = nicksOfId[id] || new Set()).add(pp[id][0]);
+    }
+  }
+}
+players.forEach(pl => { if (pl.id) (nicksOfId[pl.id] = nicksOfId[pl.id] || new Set()).add(pl.nick); });
+/* запись игрока в снимке base. Ищем по порядку:
+   1) тот же ник; 2) ник этого ID на момент снимка (снимок игроков с тем же временем);
+   3) ник без лишних пробелов: разные выгрузки по-разному сохраняли пробелы в начале, в конце и внутри ника;
+   4) прошлые ники этого ID. Чужой ник не берём: если у найденного ника сейчас другой ID, это другой игрок */
+const normNick = n => String(n).normalize("NFKC").replace(/\s+/g, " ").trim();
+const normCache = new WeakMap();
+function normIndex(prev) {
+  if (!normCache.has(prev)) {
+    const m = {};
+    for (const n of Object.keys(prev)) { const k = normNick(n); m[k] = m[k] === undefined ? n : null; }   // null — неоднозначно
+    normCache.set(prev, m);
+  }
+  return normCache.get(prev);
+}
+let renamed = 0;
+function prevEntry(prev, baseId, nick) {
+  if (prev[nick] !== undefined) return prev[nick];
+  const id = idOfNick[nick];
+  const ok = n => n != null && n !== nick && prev[n] !== undefined && (!id || !idOfNick[n] || idOfNick[n] === id);
+  let old = id && nickAt[baseId] ? nickAt[baseId][id] : undefined;
+  if (!ok(old)) {
+    const idx = normIndex(prev);
+    old = [nick, ...(id ? nicksOfId[id] || [] : [])].map(n => idx[normNick(n)]).find(ok);
+  }
+  if (!ok(old)) return undefined;
+  renamed++;
+  return prev[old];
+}
+
 /* сравнение раздела со снимком base: изменение места и прирост значения */
 function compareWith(base, key) {
   const prev = (base && base.data && base.data[key]) || null;
@@ -301,7 +349,8 @@ function compareWith(base, key) {
   if (prev) {
     for (const nick of Object.keys(current[key])) {
       const now = current[key][nick];
-      const was = prev[nick] === undefined ? undefined : readEntry(prev[nick]);
+      const raw = prevEntry(prev, base.id, nick);
+      const was = raw === undefined ? undefined : readEntry(raw);
       if (!was) rank[nick] = null;                                   // новичок в списке
       else if (was.rank !== now.rank) { rank[nick] = was.rank - now.rank; moves++; }
       if (hasValues && was && was.value !== undefined) delta[nick] = now.value - was.value;
@@ -359,7 +408,8 @@ for (const per of PERIODS) {
   periods.push({ key: per.key, label: per.label, from: base ? fmtTime(base.id) : null, partial });
   changes[per.key] = { delta, rank };
   console.log(`Период «${per.label}»:`, "с " + base.id, partial ? "(неполный)" : "",
-    "| смен мест:", moves, "| приросты:", src.join(", "));
+    "| смен мест:", moves, "| приросты:", src.join(", ") + (renamed ? " | узнаны по ID после смены ника: " + renamed : ""));
+  renamed = 0;
 }
 
 /* складываем снимок этого запуска (если данные те же, что в последнем снимке, не плодим дубли).
