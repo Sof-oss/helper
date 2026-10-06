@@ -76,10 +76,9 @@ html.pc-lock,html.pc-lock body{overflow:hidden}
   background:rgba(0,0,0,.35);font:600 11px/1.3 ui-monospace,"Cascadia Mono",Consolas,monospace;letter-spacing:.12em;text-transform:uppercase;color:#7f8b95}
 .pc-head-strip b{color:color-mix(in srgb,var(--f) 55%,#e7f0f8)}
 .pc-signal{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;color:#7fe0a0}
-.pc-signal i{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor;animation:pc-blink 1.6s steps(2,start) infinite}
+.pc-signal i{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor;animation:radarPulse 1.8s ease-in-out infinite}
 .pc-signal.off{color:#ff8a7a}
 .pc-signal.off i{animation:none;opacity:.8}
-@keyframes pc-blink{50%{opacity:.25}}
 .pc-head-main{display:flex;align-items:center;gap:18px;padding:16px 18px 14px}
 .pc-patch{flex:0 0 74px;width:74px;filter:drop-shadow(0 6px 12px rgba(0,0,0,.6)) drop-shadow(0 0 14px color-mix(in srgb,var(--f) 35%,transparent));transform:rotate(-4deg)}
 .pc-patch svg{display:block;width:100%;height:auto}
@@ -97,6 +96,9 @@ html.pc-lock,html.pc-lock body{overflow:hidden}
 .pc-stamp{flex:0 0 auto;align-self:flex-start;display:flex;flex-direction:column;align-items:center;margin:2px 4px 0 0;padding:6px 12px 5px;border:2px solid #e0574f;border-radius:4px;
   box-shadow:0 0 0 3px rgba(0,0,0,.25),inset 0 0 0 2px rgba(224,87,79,.35);color:#ff6b5f;transform:rotate(7deg);opacity:.9;
   font-family:var(--f-display);font-weight:600;font-size:20px;line-height:1.05;letter-spacing:.12em;text-transform:uppercase;mix-blend-mode:screen}
+/* знак «№» — обычным шрифтом: в моноширинном и трафаретном он мелкий и похож на «No» */
+.pc-no{font-family:system-ui,"Segoe UI",Arial,sans-serif;font-size:1.25em;font-weight:700;letter-spacing:0;margin-right:.08em}
+.pc-stamp .pc-no{font-size:1em;margin-right:.15em}
 .pc-stamp small{font-size:10.5px;letter-spacing:.18em;opacity:.9}
 /* нашивки за места */
 .pc-patches{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0 18px 14px;list-style:none}

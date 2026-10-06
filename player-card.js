@@ -20,7 +20,7 @@ const PERIODS=[
 const TAB=Object.fromEntries(TOP100_TABS.map(t=>[t.key,t]));
 const BOSS_COLOR="#ff8a65";
 /* звание по уровню — как в классическом «Сталкере» */
-const TITLES=[[20,"Легенда"],[15,"Мастер"],[10,"Ветеран"],[5,"Опытный"],[0,"Новичок"]];
+const TITLES=[[30,"Легенда"],[25,"Мастер"],[20,"Ветеран"],[10,"Опытный"],[0,"Новичок"]];
 const titleOf=l=>TITLES.find(t=>(l||0)>=t[0])[1];
 /* нашивка группировки: каноничная эмблема из ui.js, для остальных — щиток в цвете группировки с буквой */
 function patchSvg(g,color,nick){
@@ -265,14 +265,14 @@ function renderCard(){
  const places=M.map((k,i)=>({k:k,r:p.r[i]})).filter(x=>x.r&&x.r<=100&&TAB[x.k]).sort((a,b)=>a.r-b.r||TOP100_TABS.indexOf(TAB[a.k])-TOP100_TABS.indexOf(TAB[b.k]));
  const best=places[0];
  const patches=places.length?'<ul class="pc-patches" aria-label="Места в рейтингах">'+places.map(x=>'<li class="pc-patch-chip'+(x.r<=3?" m"+x.r:x.r<=10?" t10":"")+'" style="--c:'+TAB[x.k].accent+'"><b>#'+x.r+'</b>'+esc(TAB[x.k].label)+'</li>').join("")+'</ul>':"";
- const stampTxt=!best?"":best.r===1?"№ 1<small>"+esc(TAB[best.k].label)+"</small>":best.r<=10?"Топ-10<small>Зоны</small>":"";
+ const stampTxt=!best?"":best.r===1?'<span><span class="pc-no">№</span>1</span><small>'+esc(TAB[best.k].label)+"</small>":best.r<=10?"Топ-10<small>Зоны</small>":"";
  const emb=p.g&&window.__factionEmblem?window.__factionEmblem(p.g):null;
  const bg=emb?' style="--f:'+escAttr(color)+';--bg:url(assets/bg-'+emb.key+'-1280.webp)"':' style="--f:'+escAttr(color)+'"';
  const row=(k,v)=>'<div><dt>'+k+'</dt><dd>'+v+'</dd></div>';
 
  document.getElementById("pcBody").innerHTML=
   '<header class="pc-head'+(emb?" has-bg":"")+'"'+bg+'>'
-  +'<div class="pc-head-strip"><span>ПДА // Личное дело <b>№'+esc(String(cur).padStart(6,"0"))+'</b></span>'
+  +'<div class="pc-head-strip"><span>ПДА // Личное дело <b><span class="pc-no">№</span>'+esc(String(cur).padStart(6,"0"))+'</b></span>'
   +'<span class="pc-signal'+(p.off?" off":"")+'"><i></i>'+(p.off?"Сигнал потерян":"Сигнал активен")+'</span></div>'
   +'<div class="pc-head-main"><div class="pc-patch">'+patchSvg(p.g,color,p.n)+'</div><div class="pc-head-text">'
   +'<span class="pc-callsign">Позывной</span><h2 id="pcTitle">'+esc(p.n)+'</h2>'
