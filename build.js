@@ -8,6 +8,8 @@
  *    Разметку рисуют те же info.js / info-tasks.js / top100.js, что работают в браузере, поэтому она совпадает.
  * 2. Стили страницы склеиваются в один файл (bundle-*.css), css и js сжимаются esbuild.
  * 3. Ссылки на css, js и картинки получают ?v=<хэш содержимого>, после деплоя старый кэш не подтянется.
+ * 3б. Гайды из guides/<адрес>/index.md (Markdown, см. guide-md.js) становятся страницами /guide/<адрес>,
+ *     список гайдов дописывается в guides.html, картинки гайдов копируются в dist/guide-img/<адрес>/.
  * 4. В sitemap.xml дописывается lastmod: дата последнего коммита страницы и её css/js, у Топ-100 — время выгрузки рейтинга.
  * Запуск: npm install (один раз, ставит esbuild), затем node build.js. Без esbuild сборка тоже пройдёт, но без сжатия */
 const fs = require("fs");
@@ -27,7 +29,7 @@ const OUT = path.join(ROOT, "dist");
 /* в dist не попадает служебное и исходники сборки (CSV рейтинга нужны только для build-top100.js) */
 const SKIP = new Set([
   ".git", ".github", ".gitignore", "dist", "node_modules", "top100", "partials", "src",
-  "README.md", "build.js", "build-top100.js", "build-players.js", "build-top100.bat", "package.json", "package-lock.json"
+  "guides", "worker", "README.md", "build.js", "build-top100.js", "build-players.js", "build-top100.bat", "package.json", "package-lock.json"
 ]);
 
 
@@ -37,6 +39,70 @@ fs.mkdirSync(OUT);
 for (const name of fs.readdirSync(ROOT)) {
   if (SKIP.has(name)) continue;
   fs.cpSync(path.join(ROOT, name), path.join(OUT, name), { recursive: true });
+}
+
+/* ---------- гайды ----------
+   guides/<адрес>/index.md + картинки рядом. Гайд попадает в репозиторий через pull request из формы
+   «Отправить свой гайд» (worker/guide-submit.js) и публикуется, когда его принимают (Merge).
+   Адрес папки = адрес страницы: guides/kak-nachat/index.md -> /guide/kak-nachat.
+   Картинки лежат отдельно от страницы (dist/guide-img/<адрес>/), чтобы папка не мешала адресу /guide/<адрес> */
+const GuideMD = require("./guide-md.js");
+const SITE = "https://heart-of-the-zone.ru";
+const GUIDES_DIR = path.join(ROOT, "guides");
+const MONTHS = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
+const ruDate = d => { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(d || ""); return m ? +m[3] + " " + MONTHS[+m[2] - 1] + " " + m[1] : ""; };
+/* ник автора -> ID карточки в Топ-100 (если игрок есть в рейтинге, подпись ведёт на его карточку) */
+const playerIds = (() => {
+  const ids = {};
+  try {
+    const d = JSON.parse(fs.readFileSync(path.join(ROOT, "top100-players.json"), "utf8"));
+    for (const id of Object.keys(d.players)) ids[String(d.players[id].n).toLowerCase()] = id;
+  } catch (e) {}
+  return ids;
+})();
+const guides = [];
+if (fs.existsSync(GUIDES_DIR)) {
+  for (const slug of fs.readdirSync(GUIDES_DIR)) {
+    const md = path.join(GUIDES_DIR, slug, "index.md");
+    if (!fs.existsSync(md)) continue;
+    if (!/^[a-z0-9][a-z0-9-]{0,80}$/.test(slug)) throw new Error("guides/" + slug + ": в адресе гайда только латиница, цифры и дефис");
+    const { meta, body } = GuideMD.parse(fs.readFileSync(md, "utf8"));
+    if (!meta.title) throw new Error("guides/" + slug + "/index.md: нет title в шапке");
+    if (/^(true|yes|да)$/i.test(meta.draft || "")) continue;
+    /* картинки: только файлы из папки гайда, ссылки на них — /guide-img/<адрес>/<файл> */
+    const imgs = fs.readdirSync(path.join(GUIDES_DIR, slug)).filter(f => /\.(webp|jpe?g|png|gif)$/i.test(f));
+    if (imgs.length) {
+      fs.mkdirSync(path.join(OUT, "guide-img", slug), { recursive: true });
+      imgs.forEach(f => fs.copyFileSync(path.join(GUIDES_DIR, slug, f), path.join(OUT, "guide-img", slug, f)));
+    }
+    const image = src => {
+      if (/^https?:\/\//i.test(src)) return src;
+      const f = src.replace(/^\.\//, "");
+      if (!imgs.includes(f)) { console.warn("Предупреждение: guides/" + slug + ": нет картинки " + src); return null; }
+      return "/guide-img/" + slug + "/" + f;
+    };
+    const cover = GuideMD.firstImage(body);
+    guides.push({
+      slug, title: meta.title, author: meta.author || "", date: meta.date || "",
+      description: meta.description || GuideMD.excerpt(body, 160),
+      html: GuideMD.render(body, { image, siteHost: "heart-of-the-zone.ru" }),
+      cover: cover ? image(cover) : null,
+      authorId: meta.author ? playerIds[meta.author.toLowerCase()] : null
+    });
+  }
+  guides.sort((a, b) => (b.date || "").localeCompare(a.date || "") || a.title.localeCompare(b.title, "ru"));
+}
+const esc = GuideMD.esc;
+const authorMarkup = g => !g.author ? "" : g.authorId
+  ? '<a href="/top100#p=' + g.authorId + '" title="Карточка игрока в Топ-100">' + esc(g.author) + "</a>"
+  : "<b>" + esc(g.author) + "</b>";
+function guidesListMarkup() {
+  if (!guides.length) return '<p class="guides-empty">Пока здесь нет ни одного гайда. Напишите первый — расскажите, как пройти локацию, собрать билд или выбить босса.</p>';
+  return guides.map(g => '<a class="guide-card" href="/guide/' + g.slug + '">' +
+    (g.cover ? '<span class="guide-card-img"><img src="' + esc(g.cover) + '" alt="" loading="lazy" decoding="async"></span>' : '<span class="guide-card-img guide-card-noimg" aria-hidden="true"></span>') +
+    '<span class="guide-card-body"><b>' + esc(g.title) + "</b>" +
+    (g.description ? "<small>" + esc(g.description) + "</small>" : "") +
+    '<span class="guide-card-meta">' + (g.author ? esc(g.author) : "") + (g.author && g.date ? " · " : "") + (g.date ? '<time datetime="' + esc(g.date) + '">' + ruDate(g.date) + "</time>" : "") + "</span></span></a>").join("");
 }
 
 /* ---------- 3D главной ----------
@@ -124,6 +190,11 @@ function runScripts(files) {
 }
 
 const PRERENDER = {
+  /* список гайдов; пока гайдов нет, страница закрыта от индексации */
+  "guides.html": html => {
+    html = fill(html, "guidesList", guidesListMarkup());
+    return guides.length ? html.replace(/<meta name="robots" content="noindex, follow">\n?/, "") : html;
+  },
   /* «Что нового?» на главной уходит в HTML готовым, чтобы был виден сразу и поисковикам */
   "index.html": html => fill(html, "homeNews", runScripts(["changelog.js"]).homeNews.innerHTML),
   "info.html": (html, els) => {
@@ -222,6 +293,49 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
   console.log(name.padEnd(16), (before / 1024).toFixed(1) + " КБ -> " + (html.length / 1024).toFixed(1) + " КБ");
 }
 
+/* ---------- страницы гайдов ----------
+   Шаблон — уже собранная guides.html (шапка, подвал, стили, версии файлов): меняются заголовок, описание,
+   адрес, картинка для соцсетей и содержимое <main>. Страница лежит глубже (/guide/…), поэтому
+   относительные ссылки шаблона делаются от корня сайта */
+if (guides.length) {
+  const tpl = fs.readFileSync(path.join(OUT, "guides.html"), "utf8")
+    .replace(/<meta name="robots"[^>]*>\n?/, "")
+    .replace(/(\s(?:href|src)=")(?![a-z][a-z0-9+.-]*:|\/|#)/gi, "$1/")
+    .replace(/<script src="\/(?:guide-md|guides-config|guide-submit)\.js[^"]*"><\/script>/g, "");
+  fs.mkdirSync(path.join(OUT, "guide"), { recursive: true });
+  for (const g of guides) {
+    const url = SITE + "/guide/" + g.slug;
+    const title = g.title + " — гайд «Сердце Зоны»";
+    const desc = g.description || "Гайд по игре «Сердце Зоны»" + (g.author ? " от " + g.author : "");
+    const img = g.cover ? (/^https?:/.test(g.cover) ? g.cover : SITE + g.cover) : null;
+    const ld = { "@context": "https://schema.org", "@type": "Article", headline: g.title, description: desc, url, inLanguage: "ru",
+      author: g.author ? { "@type": "Person", name: g.author } : undefined, datePublished: g.date || undefined, image: img || undefined,
+      publisher: { "@type": "Organization", name: "Сердце Зоны", url: SITE + "/" } };
+    let html = tpl
+      .replace(/<title>[^<]*<\/title>/, "<title>" + esc(title) + "</title>")
+      .replace(/(<meta name="description" content=")[^"]*/, "$1" + esc(desc))
+      .replace(/(<link rel="canonical" href=")[^"]*/, "$1" + url)
+      .replace(/(<meta property="og:type" content=")[^"]*/, "$1article")
+      .replace(/(<meta property="og:title" content=")[^"]*/, "$1" + esc(g.title))
+      .replace(/(<meta property="og:description" content=")[^"]*/, "$1" + esc(desc))
+      .replace(/(<meta property="og:url" content=")[^"]*/, "$1" + url)
+      .replace(/(<meta property="og:image:alt" content=")[^"]*/, "$1" + esc(g.title))
+      .replace("</head>", '<script type="application/ld+json">' + JSON.stringify(ld).replace(/</g, "\\u003c") + "</script>\n</head>");
+    /* своя обложка: размеры общей картинки к ней не подходят */
+    if (img) html = html.replace(/(<meta property="og:image" content=")[^"]*/, "$1" + esc(img)).replace(/<meta property="og:image:(?:width|height)"[^>]*>\n?/g, "");
+    const main = '<main class="content info-content guide-page">\n' +
+      '<a class="guide-back" href="/guides"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 4l-8 8 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Все гайды</a>\n' +
+      '<article class="result-panel guide-article">\n<h1>' + esc(g.title) + "</h1>\n" +
+      '<p class="guide-meta">' + (g.author ? "Автор: " + authorMarkup(g) : "") + (g.author && g.date ? '<span aria-hidden="true"> · </span>' : "") + (g.date ? '<time datetime="' + esc(g.date) + '">' + ruDate(g.date) + "</time>" : "") + "</p>\n" +
+      '<div class="guide-body">\n' + g.html.replace(/(<img src=")(\/guide-img\/[^"]+)"/g, (m, a, u) => a + version(u, "guide/" + g.slug) + '"') + "\n</div>\n</article>\n" +
+      '<p class="guide-write">Знаете, как пройти что-то лучше? <a href="/guides#send">Отправьте свой гайд</a></p>\n</main>';
+    html = html.replace(/<main\b[\s\S]*?<\/main>/, () => main);
+    fs.writeFileSync(path.join(OUT, "guide", g.slug + ".html"), html);
+    pages++;
+  }
+  console.log("Гайды: " + guides.length + " стр. в dist/guide");
+}
+
 /* ---------- sitemap.xml: lastmod ----------
    Дата страницы — последний коммит её html и подключённых css/js (в GitHub Actions нужен checkout с fetch-depth: 0).
    У Топ-100 — время выгрузки рейтинга из top100-data.js (по Москве): страница меняется вместе с данными */
@@ -253,6 +367,9 @@ if (fs.existsSync(smSrc)) {
     const date = (page === "top100.html" && top100Date()) || gitDate(pageDeps(page));
     return "<url><loc>" + loc + "</loc><lastmod>" + date + "</lastmod></url>";
   });
-  fs.writeFileSync(path.join(OUT, "sitemap.xml"), sm);
+  /* гайды: страница списка и каждый гайд, дата — последний коммит папки гайда */
+  const extra = !guides.length ? "" : ["<url><loc>" + SITE + "/guides</loc><lastmod>" + gitDate([...pageDeps("guides.html"), ...guides.map(g => "guides/" + g.slug)]) + "</lastmod></url>",
+    ...guides.map(g => "<url><loc>" + SITE + "/guide/" + g.slug + "</loc><lastmod>" + gitDate(["guides/" + g.slug]) + "</lastmod></url>")].map(l => "  " + l + "\n").join("");
+  fs.writeFileSync(path.join(OUT, "sitemap.xml"), sm.replace("</urlset>", extra + "</urlset>"));
 }
 console.log("Готово: " + pages + " стр. в " + path.relative(process.cwd(), OUT));
