@@ -113,7 +113,19 @@ function fill(html, id, inner, attrs) {
   return html.replace(re, (_, open, tag) => open + (attrs || "") + ">" + inner + "</" + tag + ">");
 }
 
+/* прогоняет только перечисленные скрипты (для страниц, где остальные скрипты в заглушке DOM не нужны) */
+function runScripts(files) {
+  const { els, document } = fakeDom();
+  const sandbox = { document, console };
+  sandbox.window = sandbox;
+  vm.createContext(sandbox);
+  for (const f of files) vm.runInContext(fs.readFileSync(path.join(ROOT, f), "utf8"), sandbox, { filename: f });
+  return els;
+}
+
 const PRERENDER = {
+  /* «Что нового?» на главной уходит в HTML готовым, чтобы был виден сразу и поисковикам */
+  "index.html": html => fill(html, "homeNews", runScripts(["changelog.js"]).homeNews.innerHTML),
   "info.html": (html, els) => {
     html = fill(html, "infoTabs", els.infoTabs.innerHTML);
     html = fill(html, "infoGroups", els.infoGroups.innerHTML, ' data-active="' + els.infoGroups.dataset.active + '"');
@@ -200,7 +212,8 @@ let pages = 0;
 for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
   let html = fs.readFileSync(path.join(OUT, name), "utf8");
   const before = html.length;
-  if (PRERENDER[name]) html = PRERENDER[name](html, runPageScripts(html));
+  /* обработчику с одним аргументом скрипты страницы не нужны — он сам решает, что прогнать */
+  if (PRERENDER[name]) html = PRERENDER[name].length > 1 ? PRERENDER[name](html, runPageScripts(html)) : PRERENDER[name](html);
   html = html
     .replace(/(<link\b[^>]*?\shref=")([^"]+)(")/g, (m, a, u, b) => a + version(u, name) + b)
     .replace(/(<script\b[^>]*?\ssrc=")([^"]+)(")/g, (m, a, u, b) => a + version(u, name) + b);

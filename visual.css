@@ -739,3 +739,73 @@ input[type=checkbox]{accent-color:var(--accent)}
   .top100-rank-in .t100-move{margin-top:0;line-height:1.1}
   .top100-rank-in .t100-move.new{letter-spacing:.2px}
 }
+
+/* ---------- Информация: полученные уровни по данным калькулятора (info.js) ----------
+   info-done — уровень уже получен (приглушён, с галочкой), info-current — текущий уровень игрока */
+.info-group-talents{--grp:#ffb74d}
+.info-group-pda{--grp:#9fdc9f}
+.info-group-char{--grp:#54bfff}
+.info-progress{margin:-6px 2px 14px;font-size:12.5px;color:#a9bbc9;min-height:1em}
+.info-progress:empty{display:none}
+.info-progress-hint{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border:1px dashed color-mix(in srgb,var(--accent) 45%,transparent);border-radius:4px;background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.info-progress-hint.is-set{border-style:solid}
+.info-progress-hint i{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#5fd08a;box-shadow:0 0 6px #5fd08a}
+.info-progress-hint:not(.is-set) i{background:var(--accent-2);box-shadow:0 0 6px var(--accent-2)}
+.info-progress-hint a{color:var(--accent-2);text-decoration:none;border-bottom:1px dotted currentColor}
+.info-progress-line{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;margin:-2px 0 10px;padding:7px 10px;border-radius:4px;
+  border:1px solid color-mix(in srgb,var(--grp) 30%,transparent);background:color-mix(in srgb,var(--grp) 8%,transparent);font-size:12.5px;color:#c9d6e0}
+.info-progress-line b{color:#fff;font-variant-numeric:tabular-nums}
+.info-progress-done b{color:var(--grp)}
+.info-progress-max{color:#5fd08a;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+
+.info-table tbody tr.info-done td{background:color-mix(in srgb,var(--grp) 9%,transparent)!important;color:color-mix(in srgb,#eef4fa 55%,transparent)!important;border-color:color-mix(in srgb,var(--grp) 14%,transparent)}
+.info-table tbody tr.info-done td:first-child{color:var(--grp)!important;position:relative}
+.info-table tbody tr.info-done td:first-child::before{content:"✓";position:absolute;left:7px;font-size:11px;font-weight:800;opacity:.85}
+.info-table tbody tr.info-current td{background:color-mix(in srgb,var(--grp) 26%,transparent)!important;color:#fff!important;font-weight:800;
+  border-top:1px solid var(--grp);border-bottom:1px solid var(--grp)}
+.info-table tbody tr.info-current td:first-child{box-shadow:inset 3px 0 0 var(--grp)}
+.info-table tbody tr.info-current td:first-child::before{content:"▶";font-size:9px;opacity:1}
+
+/* ---------- Главная: «Что нового?» (changelog.js) ---------- */
+.home-news{position:relative;margin:28px 0 0;padding:20px 22px 16px;border-radius:var(--r-lg,8px);
+  border:1px solid color-mix(in srgb,var(--accent) 30%,rgba(255,255,255,.07));
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 8%,rgba(13,16,20,.9)),rgba(7,9,12,.94));
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 18px 40px rgba(0,0,0,.45);overflow:hidden}
+.home-news:empty{display:none}
+.home-news::before{content:"";position:absolute;inset:0 0 auto;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent-3),transparent)}
+.news-title{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.news-title h2{margin:0;font-family:var(--f-display);font-weight:500;font-size:20px;letter-spacing:.08em;text-transform:uppercase;color:#fff}
+.news-icon{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:4px;border:1px solid color-mix(in srgb,var(--accent) 45%,transparent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.news-icon svg{width:18px;height:18px;fill:none;stroke:var(--accent-2);stroke-width:1.7;stroke-linecap:round}
+.news-badge{padding:3px 7px;border-radius:3px;background:var(--accent);color:var(--accent-ink);font-family:var(--f-display);font-size:11px;font-weight:600;letter-spacing:.14em;box-shadow:0 0 12px color-mix(in srgb,var(--accent) 60%,transparent)}
+.news-list{list-style:none;margin:0;padding:0 0 0 4px}
+.news-entry{position:relative;padding:0 0 14px 22px}
+/* линия времени слева */
+.news-entry::before{content:"";position:absolute;left:3px;top:6px;width:9px;height:9px;border-radius:50%;background:var(--panel-2,#0a121b);border:2px solid var(--accent);box-sizing:border-box}
+.news-entry::after{content:"";position:absolute;left:7px;top:19px;bottom:0;width:1px;background:color-mix(in srgb,var(--accent) 30%,transparent)}
+.news-entry:first-child::before{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.news-list>.news-entry:last-child::after,.home-news:not(.open) .news-entry:nth-child(3)::after{display:none}
+.home-news:not(.open) .news-more{display:none}
+.news-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:6px}
+.news-head time{font-family:ui-monospace,"Cascadia Mono",Consolas,monospace;font-size:11.5px;letter-spacing:.06em;color:color-mix(in srgb,var(--accent) 55%,#fff)}
+.news-head b{font-size:14.5px;color:#f1f6fa}
+.news-items{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+.news-items li{display:flex;align-items:baseline;gap:9px;font-size:13.5px;line-height:1.45;color:#c4ced6}
+.news-items a{color:var(--accent-2);text-decoration:none;border-bottom:1px dotted currentColor}
+.news-items a:hover{color:#fff}
+.news-tag{flex:0 0 96px;box-sizing:border-box;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:center;line-height:1.4}
+.news-tag-new{color:#7ee2a0;background:rgba(95,208,138,.12);border:1px solid rgba(95,208,138,.35)}
+.news-tag-up{color:#8fd0ff;background:rgba(84,191,255,.12);border:1px solid rgba(84,191,255,.35)}
+.news-tag-fix{color:#ffc27a;background:rgba(255,183,77,.12);border:1px solid rgba(255,183,77,.35)}
+.news-toggle{display:inline-flex;align-items:center;gap:6px;margin:0 0 0 26px;padding:6px 12px;border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);border-radius:3px;background:transparent;
+  color:var(--accent-2);font-family:var(--f-display);font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s}
+.news-toggle:hover,.news-toggle:focus-visible{background:color-mix(in srgb,var(--accent) 16%,transparent);color:#fff}
+.news-toggle svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s}
+.home-news.open .news-toggle svg{transform:rotate(180deg)}
+@media(max-width:760px){
+  .home-news{margin-top:20px;padding:16px 14px 12px}
+  .news-title h2{font-size:17px}
+  .news-items li{flex-direction:column;gap:3px;font-size:13px}
+  .news-tag{flex:0 0 auto}
+  .news-toggle{margin-left:22px}
+}
