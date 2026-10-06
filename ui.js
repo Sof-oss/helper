@@ -62,6 +62,11 @@ window.__roll = function (el, text) {
     monolith: '<path d="M7 3h50a3 3 0 0 1 3 3v34c0 14-12 24-28 30C16 64 4 54 4 40V6a3 3 0 0 1 3-3z" fill="#1f8f8f" stroke="#d9a52c" stroke-width="3.5" stroke-linejoin="round"/><path d="M5.8 4.8h52.4V13H5.8z" fill="#d9a52c"/><path d="M10 8h44v32c0 11-9.5 19-22 24C19.5 59 10 51 10 40z" fill="none" stroke="#f2d68a" stroke-opacity=".55" stroke-width="1.3" stroke-dasharray="3 2.4"/><circle cx="32" cy="36" r="15" fill="#6b4a12"/><circle cx="32" cy="36" r="11" fill="#c9952a"/><circle cx="32" cy="36" r="7" fill="#f0cf6a"/><path d="M32 21.5a5.2 5.2 0 1 1 0 10.4a5.2 5.2 0 1 1 0-10.4zM20 62c0-14 4.5-24 12-24s12 10 12 24z" fill="#2aa7a3"/><g fill="none" stroke="#f4f1e6" stroke-width="1.5"><ellipse cx="32" cy="31" rx="13.5" ry="5"/><ellipse cx="32" cy="31" rx="13.5" ry="5" transform="rotate(60 32 31)"/><ellipse cx="32" cy="31" rx="13.5" ry="5" transform="rotate(-60 32 31)"/></g><path d="M26 49q6-5 12 0q-6 5-12 0z" fill="#f4f1e6"/><circle cx="32" cy="49" r="1.7" fill="#14304a"/>'
   };
   function emblem(key) { return GLYPHS[key] || ""; }
+  /* эмблема и фото базы по названию группировки — для карточек игроков (player-card.js) */
+  window.__factionEmblem = function (name) {
+    var t = THEMES.filter(function (x) { return x.label === name; })[0];
+    return t ? { key: t.key, svg: GLYPHS[t.key] } : null;
+  };
   var THEME_KEY = "zoneTheme";
   var saved = null;
   try { saved = localStorage.getItem(THEME_KEY); } catch (e) {}

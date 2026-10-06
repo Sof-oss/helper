@@ -19,6 +19,18 @@ const PERIODS=[
 ];
 const TAB=Object.fromEntries(TOP100_TABS.map(t=>[t.key,t]));
 const BOSS_COLOR="#ff8a65";
+/* звание по уровню — как в классическом «Сталкере» */
+const TITLES=[[20,"Легенда"],[15,"Мастер"],[10,"Ветеран"],[5,"Опытный"],[0,"Новичок"]];
+const titleOf=l=>TITLES.find(t=>(l||0)>=t[0])[1];
+/* нашивка группировки: каноничная эмблема из ui.js, для остальных — щиток в цвете группировки с буквой */
+function patchSvg(g,color,nick){
+ const e=g&&window.__factionEmblem&&window.__factionEmblem(g);
+ if(e&&e.svg)return'<svg viewBox="0 0 64 72" aria-hidden="true">'+e.svg+'</svg>';
+ const c=escAttr(color),ch=esc(((g||nick||"").replace(/[^\p{L}\p{N}]/gu,"")[0]||"?").toUpperCase());
+ return'<svg viewBox="0 0 64 72" aria-hidden="true"><path d="M7 3h50a3 3 0 0 1 3 3v34c0 14-12 24-28 30C16 64 4 54 4 40V6a3 3 0 0 1 3-3z" fill="#0b0f14" stroke="'+c+'" stroke-width="3.5" stroke-linejoin="round"/>'
+  +'<path d="M5.8 4.8h52.4V13H5.8z" fill="'+c+'"/><path d="M10 18h44v21c0 11-9 18-22 23C19 57 10 50 10 39z" fill="none" stroke="'+c+'" stroke-opacity=".5" stroke-width="1.2" stroke-dasharray="3 2.5"/>'
+  +'<text x="32" y="48" text-anchor="middle" font-family="Oswald,Arial,sans-serif" font-size="26" font-weight="600" fill="'+c+'">'+ch+'</text></svg>';
+}
 
 let data=null,loading=null,idByNick=null,searchList=null;
 let cur=null,metric=null,period=null,lastFocus=null;
@@ -138,7 +150,7 @@ function share(){
 function open(id,opts){
  show();
  const body=document.getElementById("pcBody");
- if(!data)body.innerHTML='<div class="pc-loading"><i></i>Загружаем карточки игроков…</div>';
+ if(!data)body.innerHTML='<div class="pc-loading"><i></i>Устанавливаем связь с сетью сталкеров…</div>';
  load().then(()=>{
   const sl=document.getElementById("pcSuggest");sl.hidden=true;
   if(id&&!data.players[id]){id=null}
@@ -173,13 +185,15 @@ function spark(pts,color){
 }
 function bigChart(pts,color,label){
  if(pts.length<2)return'<div class="pc-chart-empty">График появится после следующих обновлений рейтинга — пока известна одна точка.</div>';
- const W=600,H=180,PL=8,PR=8,PT=14,PB=24;
+ const narrow=window.innerWidth<600,W=narrow?360:600,H=narrow?190:180,PL=8,PR=8,PT=14,PB=24;
  const t0=pts[0][0],t1=pts[pts.length-1][0],vs=pts.map(p=>p[1]),mn=Math.min(...vs),mx=Math.max(...vs);
  const X=t=>PL+((t-t0)/((t1-t0)||1))*(W-PL-PR),Y=v=>mx===mn?(PT+H-PB)/2:H-PB-((v-mn)/(mx-mn))*(H-PT-PB);
  const d=pts.map((p,i)=>(i?"L":"M")+X(p[0]).toFixed(1)+" "+Y(p[1]).toFixed(1)).join("");
  const dots=pts.map(p=>'<circle cx="'+X(p[0]).toFixed(1)+'" cy="'+Y(p[1]).toFixed(1)+'" r="3"><title>'+dateFmt(p[0])+": "+fmt(p[1])+'</title></circle>').join("");
  return'<svg class="pc-chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+escAttr(label)+': от '+fmt(vs[0])+' до '+fmt(vs[vs.length-1])+'" style="--c:'+color+'">'
   +'<line x1="'+PL+'" x2="'+(W-PR)+'" y1="'+Y(mx)+'" y2="'+Y(mx)+'" class="pc-grid"/><line x1="'+PL+'" x2="'+(W-PR)+'" y1="'+Y(mn)+'" y2="'+Y(mn)+'" class="pc-grid"/>'
+  +[.25,.5,.75].map(k=>'<line x1="'+PL+'" x2="'+(W-PR)+'" y1="'+(PT+(H-PT-PB)*k).toFixed(1)+'" y2="'+(PT+(H-PT-PB)*k).toFixed(1)+'" class="pc-grid2"/>').join("")
+  +pts.map(q=>'<line x1="'+X(q[0]).toFixed(1)+'" x2="'+X(q[0]).toFixed(1)+'" y1="'+PT+'" y2="'+(H-PB)+'" class="pc-grid2"/>').join("")
   +'<path d="'+d+'L'+X(t1).toFixed(1)+' '+(H-PB)+'L'+X(t0).toFixed(1)+' '+(H-PB)+'Z" class="pc-area"/><path d="'+d+'" class="pc-line"/>'+dots
   +'<text x="'+PL+'" y="'+(H-6)+'">'+dateShort(t0)+'</text><text x="'+(W-PR)+'" y="'+(H-6)+'" text-anchor="end">'+dateShort(t1)+'</text>'
   +'<text x="'+(W-PR)+'" y="'+(Y(mx)-4)+'" text-anchor="end" class="pc-val">'+fmt(mx)+'</text>'+(mx!==mn?'<text x="'+(W-PR)+'" y="'+(Y(mn)-4)+'" text-anchor="end" class="pc-val">'+fmt(mn)+'</text>':"")+'</svg>';
@@ -210,7 +224,7 @@ function renderCard(){
  const tiles=order.map(k=>{
   const mi=metricIndex(k),t=metaOf(k),rank=mi>=0?p.r[mi]:null;
   return'<button type="button" class="pc-tile'+(k===metric?" active":"")+'" data-pc-metric="'+k+'" aria-pressed="'+(k===metric)+'" style="--c:'+t.accent+'">'
-   +'<span class="pc-tile-top"><span class="pc-tile-lbl">'+esc(t.label)+'</span>'+(rank?'<span class="pc-rank'+(rank<=100?" top":"")+'" title="Место в рейтинге">#'+fmt(rank)+'</span>':"")+'</span>'
+   +'<span class="pc-tile-top"><span class="pc-tile-lbl">'+esc(t.label)+'</span>'+(rank?'<span class="pc-rank'+(rank<=3?" medal m"+rank:rank<=100?" top":"")+'" title="Место в рейтинге">#'+fmt(rank)+'</span>':"")+'</span>'
    +'<b>'+fmt(cur_(p,mi))+'</b>'+deltaMarkup(delta(mi))+spark(series(p,mi),t.accent)+'</button>';
  }).join("");
 
@@ -220,42 +234,55 @@ function renderCard(){
  let perDay="";
  if(pts.length>1){const days=(pts[pts.length-1][0]-pts[0][0])/DAY;if(days>=1)perDay='<span>В среднем <b>'+signed(Math.round((pts[pts.length-1][1]-pts[0][1])/days))+'</b> в сутки</span>'}
  const rank=mi>=0?p.r[mi]:null;
- const chart='<section class="pc-section pc-chart-box" style="--c:'+t.accent+'"><div class="pc-sec-head"><h3>'+esc(t.label)+'</h3><div class="pc-chart-meta">'
-  +(mi<0?'':rank?'<span>Место <b>'+fmt(rank)+'</b>'+(rank<=100?' · в топ-100':"")+'</span>':'<span>Не в рейтинге</span>')+perDay+'</div></div>'+bigChart(pts,t.accent,t.label)+'</section>';
+ const chart='<section class="pc-section pc-chart-box" style="--c:'+t.accent+'"><div class="pc-sec-head"><h3><span class="pc-sec-pre">Динамика //</span> '+esc(t.label)+'</h3><div class="pc-chart-meta">'
+  +(mi<0?'':rank?'<span>Место <b>'+fmt(rank)+'</b>'+(rank<=100?' · в топ-100':"")+'</span>':'<span>Не в рейтинге</span>')+perDay+'</div></div><div class="pc-screen">'+bigChart(pts,t.accent,t.label)+'</div></section>';
 
  /* боссы */
  let bosses="";
  if(data.bosses&&data.bosses.length){
   const mx=Math.max(1,...p.b);
-  bosses='<section class="pc-section"><div class="pc-sec-head"><h3>Боссы</h3><span class="pc-sub">Всего <b>'+fmt(p.v[M.indexOf("bosses")])+'</b></span></div><ul class="pc-bars">'
-   +data.bosses.map((b,i)=>({b:b,v:p.b[i]})).sort((a,b)=>b.v-a.v).map(x=>'<li><span>'+esc(x.b)+'</span><i style="--w:'+(x.v/mx*100).toFixed(1)+'%"></i><b>'+fmt(x.v)+'</b></li>').join("")+'</ul></section>';
+  bosses='<section class="pc-section pc-bosses"><div class="pc-sec-head"><h3>Боссы</h3><span class="pc-sub">Уничтожено <b>'+fmt(p.v[M.indexOf("bosses")])+'</b></span></div><ul class="pc-bars">'
+   +data.bosses.map((b,i)=>({b:b,v:p.b[i]})).sort((a,b)=>b.v-a.v).map(x=>'<li'+(x.v?"":' class="zero"')+'><span>'+esc(x.b)+'</span><i style="--w:'+(x.v/mx*100).toFixed(1)+'%"></i><b>'+fmt(x.v)+'</b></li>').join("")+'</ul></section>';
  }
 
  /* группировки и ники */
  const gh=p.gh||[];
  let fac;
- if(!gh.length)fac='<li class="pc-tl-item"><i style="--f:'+escAttr(color)+'"></i><div><b>'+(p.g?esc(p.g):"Без группировки")+'</b><small>по последней выгрузке</small></div></li>';
+ if(!gh.length)fac='<li class="pc-tl-item now"><i style="--f:'+escAttr(color)+'"></i><div><b>'+(p.g?esc(p.g):"Без группировки")+'</b><small>по последней выгрузке</small></div></li>';
  else fac=gh.slice().reverse().map((g,i,arr)=>{
   const from=data.dates[g[0]],isFirst=i===arr.length-1,to=i?data.dates[arr[i-1][0]]:null;
   /* когда вступил в первую известную группировку, неизвестно — знаем только, что уже был в ней на эту дату */
   const since=isFirst?(g[1]?"как минимум с ":"на ")+dateFmt(from):"с "+dateFmt(from);
   return'<li class="pc-tl-item'+(i?"":" now")+'"><i style="--f:'+escAttr(factionColor(g[1]))+'"></i><div><b>'+(g[1]?esc(g[1]):"Без группировки")+'</b><small>'+since+(to?" по "+dateFmt(to):" · сейчас")+'</small></div></li>';
  }).join("");
- const nicks=(p.nh||[]).length?'<p class="pc-nicks">Смена ника: '+p.nh.map(x=>esc(x[1])+" → "+esc(x[2])+' <small>('+dateFmt(data.dates[x[0]])+')</small>').join("; ")+'</p>':"";
- const faction='<section class="pc-section"><div class="pc-sec-head"><h3>Членство в группировках</h3></div><ul class="pc-tl">'+fac+'</ul>'+nicks+'</section>';
+ const nicks=(p.nh||[]).length?'<p class="pc-nicks">Смена позывного: '+p.nh.map(x=>esc(x[1])+" → "+esc(x[2])+' <small>('+dateFmt(data.dates[x[0]])+')</small>').join("; ")+'</p>':"";
+ const faction='<section class="pc-section"><div class="pc-sec-head"><h3>Послужной список</h3><span class="pc-sub">группировки</span></div><ul class="pc-tl">'+fac+'</ul>'+nicks+'</section>';
 
  const periodBtns=pers.length>0?'<div class="pc-periods" role="group" aria-label="Прирост за период">'+pers.map(x=>'<button type="button" class="top100-tab'+(x.key===period?" active":"")+'" data-pc-period="'+x.key+'" aria-pressed="'+(x.key===period)+'">'+x.label+'</button>').join("")+'</div>':"";
  const fromTxt=bi!==null?'<p class="pc-period-note">Прирост с '+stamp(data.dates[bi])+' по '+stamp(data.dates[last])+' (МСК)</p>':'<p class="pc-period-note">Прирост появится после следующего обновления рейтинга</p>';
 
+ /* нашивки за места в рейтингах: лучшие места первыми */
+ const places=M.map((k,i)=>({k:k,r:p.r[i]})).filter(x=>x.r&&x.r<=100&&TAB[x.k]).sort((a,b)=>a.r-b.r||TOP100_TABS.indexOf(TAB[a.k])-TOP100_TABS.indexOf(TAB[b.k]));
+ const best=places[0];
+ const patches=places.length?'<ul class="pc-patches" aria-label="Места в рейтингах">'+places.map(x=>'<li class="pc-patch-chip'+(x.r<=3?" m"+x.r:x.r<=10?" t10":"")+'" style="--c:'+TAB[x.k].accent+'"><b>#'+x.r+'</b>'+esc(TAB[x.k].label)+'</li>').join("")+'</ul>':"";
+ const stampTxt=!best?"":best.r===1?"№ 1<small>"+esc(TAB[best.k].label)+"</small>":best.r<=10?"Топ-10<small>Зоны</small>":"";
+ const emb=p.g&&window.__factionEmblem?window.__factionEmblem(p.g):null;
+ const bg=emb?' style="--f:'+escAttr(color)+';--bg:url(assets/bg-'+emb.key+'-1280.webp)"':' style="--f:'+escAttr(color)+'"';
+ const row=(k,v)=>'<div><dt>'+k+'</dt><dd>'+v+'</dd></div>';
+
  document.getElementById("pcBody").innerHTML=
-  '<header class="pc-head" style="--f:'+escAttr(color)+'"><div class="pc-avatar" aria-hidden="true">'+esc((p.n.replace(/[^\p{L}\p{N}]/gu,"")[0]||"?").toUpperCase())+'</div><div class="pc-head-text">'
-  +'<h2 id="pcTitle">'+esc(p.n)+'</h2><div class="pc-tags">'
-  +'<span class="pc-faction"><i></i>'+(p.g?esc(p.g):"Без группировки")+'</span><span class="pc-tag">Ур. <b>'+p.l+'</b></span>'
-  +(p.z?'<span class="pc-tag">В Зоне <b>'+esc(p.z)+'</b></span>':"")+(p.off?'<span class="pc-tag off">Нет сигнала</span>':"")
-  +'</div></div></header>'
+  '<header class="pc-head'+(emb?" has-bg":"")+'"'+bg+'>'
+  +'<div class="pc-head-strip"><span>ПДА // Личное дело <b>№'+esc(String(cur).padStart(6,"0"))+'</b></span>'
+  +'<span class="pc-signal'+(p.off?" off":"")+'"><i></i>'+(p.off?"Сигнал потерян":"Сигнал активен")+'</span></div>'
+  +'<div class="pc-head-main"><div class="pc-patch">'+patchSvg(p.g,color,p.n)+'</div><div class="pc-head-text">'
+  +'<span class="pc-callsign">Позывной</span><h2 id="pcTitle">'+esc(p.n)+'</h2>'
+  +'<dl class="pc-dossier">'+row("Группировка",'<span class="pc-faction"><i></i>'+(p.g?esc(p.g):"Одиночка")+'</span>')+row("Звание",esc(titleOf(p.l)))+row("Уровень","<b>"+p.l+"</b>")
+  +(p.z?row("В Зоне",esc(p.z)):"")+'</dl></div>'
+  +(stampTxt?'<div class="pc-stamp" aria-hidden="true">'+stampTxt+'</div>':"")+'</div>'
+  +patches+'</header>'
   +periodBtns+fromTxt+'<div class="pc-tiles">'+tiles+'</div>'+chart
   +'<div class="pc-cols">'+bosses+faction+'</div>'
-  +'<p class="pc-foot">История копится с '+dateFmt(data.dates[0])+' при каждом обновлении рейтинга. Данные на '+esc(data.updated||"")+' (МСК)</p>';
+  +'<p class="pc-foot"><span>Сеть сталкеров · история с '+dateFmt(data.dates[0])+'</span><span>Синхронизация: '+esc(data.updated||"")+' МСК</span></p>';
 }
 
 /* ---------- входы ---------- */
@@ -267,7 +294,7 @@ document.addEventListener("click",e=>{
  const nick=b.dataset.t100Player,tab=typeof currentTop100Tab==="string"?currentTop100Tab:null;
  metric=tab;period=null;
  show();
- if(!data)document.getElementById("pcBody").innerHTML='<div class="pc-loading"><i></i>Загружаем карточки игроков…</div>';
+ if(!data)document.getElementById("pcBody").innerHTML='<div class="pc-loading"><i></i>Устанавливаем связь с сетью сталкеров…</div>';
  load().then(()=>open(idByNick[nick]||null)).catch(()=>open(null));
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&root&&!root.hidden)close()});
