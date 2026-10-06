@@ -115,8 +115,11 @@ function calcResultMarkup(){
    :'<span>Энергии хватает — покупать энергетики не нужно</span>')
   +'</div></div>';
 }
+/* картинки вкладок локаций калькулятора: assets/loc-<ключ>.webp, по порядку TASKS_DATA.locations */
+const LOC_IMG=["outskirts","swamps","dump","north","bar"];
 function calcMarkup(){
- const locs=L.map((l,i)=>'<button type="button" class="top100-tab'+(i===calcState.loc?' active':'')+'" data-ec-loc="'+i+'" aria-pressed="'+(i===calcState.loc)+'">'+l+'</button>').join("");
+ const locs=L.map((l,i)=>'<button type="button" class="top100-tab ec-loc'+(i===calcState.loc?' active':'')+'" data-ec-loc="'+i+'" aria-pressed="'+(i===calcState.loc)+'"'
+  +(LOC_IMG[i]?' style="--loc-img:url(assets/loc-'+LOC_IMG[i]+'.webp)"':'')+'><span>'+l+'</span></button>').join("");
  const presets=[100,500,1000,5000].map(v=>'<button type="button" class="ec-preset" data-ec-preset="'+v+'">'+n0(v)+'</button>').join("");
  return card("#ff6b6f","Калькулятор энергии",
   '<div class="ec-locs" role="group" aria-label="Локация">'+locs+'</div>'

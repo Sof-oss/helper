@@ -49,6 +49,18 @@
 /* ---------- Калькулятор энергии (info-tasks.js) ---------- */
 .ec-locs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 14px}
 .ec-locs .top100-tab{flex:1 1 auto;height:36px;padding:0 12px;font-size:12.5px;--accent:#ff6b6f}
+/* вкладки-локации с картинками */
+.ec-locs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.ec-locs .ec-loc{position:relative;display:flex;align-items:flex-end;justify-content:flex-start;height:92px;padding:0 10px 9px;overflow:hidden;isolation:isolate;text-align:left;line-height:1.15;white-space:normal;
+  background:#0a0d10 var(--loc-img) center/cover no-repeat;border-width:1px}
+.ec-locs .ec-loc::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(6,8,10,.15) 0%,rgba(6,8,10,.35) 45%,rgba(6,8,10,.88) 100%);transition:background .2s}
+.ec-locs .ec-loc{filter:saturate(.55) brightness(.8);transition:filter .2s,border-color .2s,box-shadow .2s}
+.ec-locs .ec-loc span{position:relative;color:#e8edf1;text-shadow:0 1px 3px rgba(0,0,0,.9)}
+.ec-locs .ec-loc:hover,.ec-locs .ec-loc:focus-visible{filter:saturate(.85) brightness(.95)}
+.ec-locs .ec-loc.active{filter:none;border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 6px 18px color-mix(in srgb,var(--accent) 25%,transparent)}
+.ec-locs .ec-loc.active::before{background:linear-gradient(180deg,rgba(6,8,10,0) 0%,rgba(6,8,10,.2) 45%,rgba(6,8,10,.85) 100%)}
+.ec-locs .ec-loc.active span{color:#fff}
+.ec-locs .ec-loc.active::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--accent)}
 .ec-inputs{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;margin-bottom:14px}
 .ec-field{display:flex;flex-direction:column;gap:6px;min-width:0}
 .ec-field>span:first-child{display:flex;align-items:center;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#a9bbc9}
@@ -82,9 +94,13 @@
   .ec-locs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-bottom:12px}
   .ec-locs::-webkit-scrollbar{display:none}
   .ec-locs .top100-tab{flex:0 0 auto;font-size:12px}
+  .ec-locs{display:flex;gap:6px}
+  .ec-locs .ec-loc{flex:0 0 118px;height:72px;font-size:11px;padding:0 8px 7px}
   .ec-inputs{grid-template-columns:1fr;gap:10px}
   .ec-results{grid-template-columns:1fr 1fr;gap:8px}
   .ec-res{padding:10px}
   .ec-res b{font-size:17px}
   .ec-drink{width:34px;height:60px;flex-basis:34px}
 }
+/* общий стиль активной вкладки (visual.css) задаёт свой фон — возвращаем картинку локации */
+.ec-locs .ec-loc,.ec-locs .ec-loc:hover,.ec-locs .ec-loc.active{background:#0a0d10 var(--loc-img) center/cover no-repeat}
