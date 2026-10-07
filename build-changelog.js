@@ -4,7 +4,7 @@
 
    Как писать коммит, чтобы он попал на главную:
      1-я строка — заголовок записи (например «Темы группировок»);
-     первая буква заголовка и пунктов сама становится заглавной;
+     первая буква заголовка и пунктов сама становится заглавной, точка в конце пункта убирается (многоточие остаётся);
      дальше строки-пункты с метками:
        new: текст  — Новое
        up: текст   — Улучшено
@@ -60,7 +60,7 @@ for (const raw of log.split("\x1e")) {
   const items = lines
     .map(l => TAG.exec(l))
     .filter(Boolean)
-    .map(m => [m[1].toLowerCase(), capital(m[2])]);
+    .map(m => [m[1].toLowerCase(), capital(m[2]).replace(/(?<!\.)\.$/, "")]);
   if (!items.length) continue;
   const title = lines[0] && !TAG.test(lines[0]) ? capital(lines[0]) : "Обновление";
   const key = date + "\n" + title;
