@@ -24,13 +24,18 @@
   /* строчная разметка; текст сначала экранируется, поэтому вставить свой HTML нельзя */
   function inline(text, opt) {
     const codes = [];
-    let s = String(text).replace(/`([^`\n]+)`/g, (m, c) => { codes.push(c); return "\u0000" + (codes.length - 1) + "\u0000"; });
+    let s = String(text).replace(/`([^`\n]+)`/g, (m, c) => {
+      codes.push(c);
+      return "\u0000" + (codes.length - 1) + "\u0000";
+    });
     s = esc(s);
     s = s.replace(/\[([^\]\n]+)\]\(([^)\s]+)\)/g, (m, label, url) => {
       const u = safeUrl(url.replace(/&amp;/g, "&"));
       if (!u) return label;
       const ext = /^https?:/i.test(u) && !(opt && opt.siteHost && u.toLowerCase().includes(opt.siteHost));
-      return '<a href="' + esc(u) + '"' + (ext ? ' target="_blank" rel="noopener nofollow ugc"' : "") + ">" + label + "</a>";
+      return (
+        '<a href="' + esc(u) + '"' + (ext ? ' target="_blank" rel="noopener nofollow ugc"' : "") + ">" + label + "</a>"
+      );
     });
     s = s.replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>").replace(/(^|[^*\w])\*([^*\n]+)\*(?!\w)/g, "$1<i>$2</i>");
     s = s.replace(/\u0000(\d+)\u0000/g, (m, i) => "<code>" + esc(codes[+i]) + "</code>");
@@ -42,33 +47,90 @@
     opt = opt || {};
     const lines = String(md).replace(/\r\n?/g, "\n").split("\n");
     const out = [];
-    let para = [], list = null, quote = [];
-    const flushPara = () => { if (para.length) { out.push("<p>" + para.map(l => inline(l, opt)).join("<br>") + "</p>"); para = []; } };
-    const flushList = () => { if (list) { out.push("<" + list.tag + ">" + list.items.map(i => "<li>" + inline(i, opt) + "</li>").join("") + "</" + list.tag + ">"); list = null; } };
-    const flushQuote = () => { if (quote.length) { out.push("<blockquote>" + quote.map(l => inline(l, opt)).join("<br>") + "</blockquote>"); quote = []; } };
-    const flush = () => { flushPara(); flushList(); flushQuote(); };
+    let para = [],
+      list = null,
+      quote = [];
+    const flushPara = () => {
+      if (para.length) {
+        out.push("<p>" + para.map(l => inline(l, opt)).join("<br>") + "</p>");
+        para = [];
+      }
+    };
+    const flushList = () => {
+      if (list) {
+        out.push(
+          "<" + list.tag + ">" + list.items.map(i => "<li>" + inline(i, opt) + "</li>").join("") + "</" + list.tag + ">"
+        );
+        list = null;
+      }
+    };
+    const flushQuote = () => {
+      if (quote.length) {
+        out.push("<blockquote>" + quote.map(l => inline(l, opt)).join("<br>") + "</blockquote>");
+        quote = [];
+      }
+    };
+    const flush = () => {
+      flushPara();
+      flushList();
+      flushQuote();
+    };
     for (const raw of lines) {
       const line = raw.replace(/\s+$/, "");
       let m;
-      if (!line.trim()) { flush(); continue; }
+      if (!line.trim()) {
+        flush();
+        continue;
+      }
       if ((m = line.match(/^\s*!\[([^\]\n]*)\]\(([^)\s]+)\)\s*$/))) {
         flush();
         const src = opt.image ? opt.image(m[2]) : safeUrl(m[2]);
-        if (src) out.push('<figure><img src="' + esc(src) + '" alt="' + esc(m[1]) + '" loading="lazy" decoding="async">' + (m[1] ? "<figcaption>" + inline(m[1], opt) + "</figcaption>" : "") + "</figure>");
+        if (src)
+          out.push(
+            '<figure><img src="' +
+              esc(src) +
+              '" alt="' +
+              esc(m[1]) +
+              '" loading="lazy" decoding="async">' +
+              (m[1] ? "<figcaption>" + inline(m[1], opt) + "</figcaption>" : "") +
+              "</figure>"
+          );
         continue;
       }
-      if ((m = line.match(/^(#{1,3})\s+(.+)$/))) { flush(); const lv = Math.min(4, m[1].length + 1); out.push("<h" + lv + ">" + inline(m[2], opt) + "</h" + lv + ">"); continue; }
-      if (/^\s*(-{3,}|\*{3,})\s*$/.test(line)) { flush(); out.push("<hr>"); continue; }
-      if ((m = line.match(/^\s*>\s?(.*)$/))) { flushPara(); flushList(); quote.push(m[1]); continue; }
+      if ((m = line.match(/^(#{1,3})\s+(.+)$/))) {
+        flush();
+        const lv = Math.min(4, m[1].length + 1);
+        out.push("<h" + lv + ">" + inline(m[2], opt) + "</h" + lv + ">");
+        continue;
+      }
+      if (/^\s*(-{3,}|\*{3,})\s*$/.test(line)) {
+        flush();
+        out.push("<hr>");
+        continue;
+      }
+      if ((m = line.match(/^\s*>\s?(.*)$/))) {
+        flushPara();
+        flushList();
+        quote.push(m[1]);
+        continue;
+      }
       if ((m = line.match(/^\s*([-*•])\s+(.+)$/)) || (m = line.match(/^\s*(\d+)[.)]\s+(.+)$/))) {
-        flushPara(); flushQuote();
+        flushPara();
+        flushQuote();
         const tag = /\d/.test(m[1]) ? "ol" : "ul";
-        if (!list || list.tag !== tag) { flushList(); list = { tag, items: [] }; }
+        if (!list || list.tag !== tag) {
+          flushList();
+          list = { tag, items: [] };
+        }
         list.items.push(m[2]);
         continue;
       }
-      if (list && /^\s{2,}\S/.test(raw)) { list.items[list.items.length - 1] += " " + line.trim(); continue; }
-      flushList(); flushQuote();
+      if (list && /^\s{2,}\S/.test(raw)) {
+        list.items[list.items.length - 1] += " " + line.trim();
+        continue;
+      }
+      flushList();
+      flushQuote();
       para.push(line.trim());
     }
     flush();
@@ -77,7 +139,9 @@
 
   /* блок --- ключ: значение --- в начале файла */
   function parse(text) {
-    const m = String(text).replace(/^\uFEFF/, "").match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+    const m = String(text)
+      .replace(/^\uFEFF/, "")
+      .match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
     const meta = {};
     if (!m) return { meta, body: String(text) };
     for (const l of m[1].split(/\r?\n/)) {
@@ -89,13 +153,25 @@
 
   /* первый абзац простым текстом — для описания в списке и в meta description */
   function excerpt(md, max) {
-    const p = String(md).split(/\n\s*\n/).map(x => x.trim()).find(x => x && !/^(#|!\[|>|-{3}|[-*]\s|\d+[.)]\s)/.test(x)) || "";
-    const t = p.replace(/!\[[^\]]*\]\([^)]*\)/g, "").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/[*`]/g, "").replace(/\s+/g, " ").trim();
+    const p =
+      String(md)
+        .split(/\n\s*\n/)
+        .map(x => x.trim())
+        .find(x => x && !/^(#|!\[|>|-{3}|[-*]\s|\d+[.)]\s)/.test(x)) || "";
+    const t = p
+      .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+      .replace(/[*`]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
     max = max || 180;
     return t.length > max ? t.slice(0, max - 1).replace(/\s+\S*$/, "") + "…" : t;
   }
   /* первая картинка гайда — обложка в списке */
-  function firstImage(md) { const m = String(md).match(/^\s*!\[[^\]]*\]\(([^)\s]+)\)\s*$/m); return m ? m[1] : null; }
+  function firstImage(md) {
+    const m = String(md).match(/^\s*!\[[^\]]*\]\(([^)\s]+)\)\s*$/m);
+    return m ? m[1] : null;
+  }
 
   const api = { render, parse, excerpt, firstImage, esc };
   if (typeof module === "object" && module.exports) module.exports = api;

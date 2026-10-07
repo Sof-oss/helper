@@ -13,27 +13,45 @@ const conn = navigator.connection || {};
    ради защиты от слежки занижает число ядер в navigator.hardwareConcurrency, поэтому этому числу там не верим.
    Остальным: совсем слабое железо (2 ядра или ≤2 ГБ памяти), экономия трафика или медленная сеть (2G/3G) */
 const apple = /iP(hone|ad|od)|Macintosh/.test(navigator.userAgent) && !/Android/.test(navigator.userAgent);
-const weak = (!apple && (navigator.hardwareConcurrency || 8) <= 2) || (navigator.deviceMemory || 8) <= 2
-  || conn.saveData === true || /2g|3g/.test(conn.effectiveType || "");
+const weak =
+  (!apple && (navigator.hardwareConcurrency || 8) <= 2) ||
+  (navigator.deviceMemory || 8) <= 2 ||
+  conn.saveData === true ||
+  /2g|3g/.test(conn.effectiveType || "");
 const hasGL = () => {
   try {
-    const gl = document.createElement("canvas").getContext("webgl2") || document.createElement("canvas").getContext("webgl");
+    const gl =
+      document.createElement("canvas").getContext("webgl2") || document.createElement("canvas").getContext("webgl");
     if (!gl) return false;
-    const lose = gl.getExtension("WEBGL_lose_context"); if (lose) lose.loseContext();   // пробный контекст сразу освобождаем
+    const lose = gl.getExtension("WEBGL_lose_context");
+    if (lose) lose.loseContext(); // пробный контекст сразу освобождаем
     return true;
-  } catch (e) { return false; }
+  } catch (e) {
+    return false;
+  }
 };
 /* поисковые и прочие роботы, проверки скорости, автоматизированные браузеры: им 3D не нужен
    (Googlebot, YandexBot и т. п. — по слову bot/crawl/spider; телефоны Cubot — не роботы) */
 const ua = navigator.userAgent;
-const bot = navigator.webdriver === true
-  || (/bot|crawl|spider|slurp|lighthouse|pagespeed|headless|prerender|mediapartners|inspectiontool/i.test(ua) && !/cubot/i.test(ua));
-const introSeen = () => { try { return !!localStorage.getItem("zoneIntroSeen"); } catch (e) { return true; } };
+const bot =
+  navigator.webdriver === true ||
+  (/bot|crawl|spider|slurp|lighthouse|pagespeed|headless|prerender|mediapartners|inspectiontool/i.test(ua) &&
+    !/cubot/i.test(ua));
+const introSeen = () => {
+  try {
+    return !!localStorage.getItem("zoneIntroSeen");
+  } catch (e) {
+    return true;
+  }
+};
 /* после загрузки страницы и в свободную минуту браузера */
-const whenIdle = () => new Promise(ok => {
-  const go = () => (window.requestIdleCallback ? requestIdleCallback(() => ok(), { timeout: 2000 }) : setTimeout(ok, 200));
-  if (document.readyState === "complete") go(); else addEventListener("load", go, { once: true });
-});
+const whenIdle = () =>
+  new Promise(ok => {
+    const go = () =>
+      window.requestIdleCallback ? requestIdleCallback(() => ok(), { timeout: 2000 }) : setTimeout(ok, 200);
+    if (document.readyState === "complete") go();
+    else addEventListener("load", go, { once: true });
+  });
 
 async function main() {
   if (reduce || bot || weak || !hasGL()) return;

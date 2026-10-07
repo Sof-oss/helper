@@ -7,7 +7,7 @@
  *     и догружаемые части в dist/3d/; калькулятор (src/calculator.js -> app.js, polish.js, talents.js) — один calculator.js.
  * 1. Таблицы «Информации» и «Топ-100» дописываются прямо в HTML: их видят поисковики и те, у кого выключен JS.
  *    Разметку рисуют те же info.js / info-tasks.js / top100.js, что работают в браузере, поэтому она совпадает.
- * 2. Общие стили (styles.css, visual.css, polish.css) остаются отдельными файлами и кэшируются один раз на весь сайт,
+ * 2. Общие стили (styles.css — бывшие styles.css, polish.css и visual.css) остаются отдельными файлами и кэшируются один раз на весь сайт,
  *    подряд идущие стили одной страницы склеиваются (bundle-*.css); css и js сжимаются esbuild.
  * 3. Ссылки на css, js и картинки получают ?v=<хэш содержимого>, после деплоя старый кэш не подтянется.
  * 3б. Гайды из guides/<адрес>/index.md (Markdown, см. guide-md.js) становятся страницами /guide/<адрес>,
@@ -22,7 +22,9 @@ const crypto = require("crypto");
 const { execFileSync } = require("child_process");
 
 let esbuild = null;
-try { esbuild = require("esbuild"); } catch (e) {
+try {
+  esbuild = require("esbuild");
+} catch (e) {
   console.error("Ошибка: esbuild не установлен. Выполните npm install и запустите сборку ещё раз");
   process.exit(1);
 }
@@ -34,17 +36,41 @@ const OUT = path.join(ROOT, "dist");
    Исходники модулей в dist не копируются — на сайт попадает только собранный файл */
 const MODULES = {
   "home-3d.js": ["src/home-3d.js", "src/zone-intro.js", "src/zone-bg.js", "src/zone-theme.js"],
-  "calculator.js": ["src/calculator.js", "app.js", "polish.js", "talents.js"]
+  "calculator.js": ["src/calculator.js", "src/calc-core.js", "app.js", "polish.js", "talents.js"]
 };
 
 /* в dist не попадает служебное и исходники сборки (выгрузка игроков и CSV рейтинга нужны только для build-top100.js) */
 const SKIP = new Set([
-  ".git", ".github", ".gitignore", "dist", "node_modules", "top100", "partials", "src",
-  "guides", "yandex", "README.md", "build.js", "build-top100.js", "build-players.js", "build-top100.bat", "package.json", "package-lock.json",
-  "fetch-players.js", "update-top100.bat", "build-previews.js", "previews",
-  ...Object.values(MODULES).flat().filter(f => !f.startsWith("src/"))
+  ".git",
+  ".github",
+  ".gitignore",
+  "dist",
+  "node_modules",
+  "top100",
+  "partials",
+  "src",
+  "guides",
+  "yandex",
+  "README.md",
+  "build.js",
+  "build-top100.js",
+  "build-players.js",
+  "build-top100.bat",
+  "package.json",
+  "package-lock.json",
+  "fetch-players.js",
+  "update-top100.bat",
+  "build-previews.js",
+  "build-changelog.js",
+  "previews",
+  "test",
+  "eslint.config.mjs",
+  ".prettierrc.json",
+  ".prettierignore",
+  ...Object.values(MODULES)
+    .flat()
+    .filter(f => !f.startsWith("src/"))
 ]);
-
 
 /* ---------- копирование ---------- */
 fs.rmSync(OUT, { recursive: true, force: true });
@@ -62,8 +88,24 @@ for (const name of fs.readdirSync(ROOT)) {
 const GuideMD = require("./guide-md.js");
 const SITE = "https://heart-of-the-zone.ru";
 const GUIDES_DIR = path.join(ROOT, "guides");
-const MONTHS = ["января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря"];
-const ruDate = d => { const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(d || ""); return m ? +m[3] + " " + MONTHS[+m[2] - 1] + " " + m[1] : ""; };
+const MONTHS = [
+  "января",
+  "февраля",
+  "марта",
+  "апреля",
+  "мая",
+  "июня",
+  "июля",
+  "августа",
+  "сентября",
+  "октября",
+  "ноября",
+  "декабря"
+];
+const ruDate = d => {
+  const m = /^(\d{4})-(\d\d)-(\d\d)/.exec(d || "");
+  return m ? +m[3] + " " + MONTHS[+m[2] - 1] + " " + m[1] : "";
+};
 /* ник автора -> ID карточки в Топ-100 (если игрок есть в рейтинге, подпись ведёт на его карточку) */
 const playerIds = (() => {
   const ids = {};
@@ -78,7 +120,8 @@ if (fs.existsSync(GUIDES_DIR)) {
   for (const slug of fs.readdirSync(GUIDES_DIR)) {
     const md = path.join(GUIDES_DIR, slug, "index.md");
     if (!fs.existsSync(md)) continue;
-    if (!/^[a-z0-9][a-z0-9-]{0,80}$/.test(slug)) throw new Error("guides/" + slug + ": в адресе гайда только латиница, цифры и дефис");
+    if (!/^[a-z0-9][a-z0-9-]{0,80}$/.test(slug))
+      throw new Error("guides/" + slug + ": в адресе гайда только латиница, цифры и дефис");
     const { meta, body } = GuideMD.parse(fs.readFileSync(md, "utf8"));
     if (!meta.title) throw new Error("guides/" + slug + "/index.md: нет title в шапке");
     if (/^(true|yes|да)$/i.test(meta.draft || "")) continue;
@@ -91,12 +134,18 @@ if (fs.existsSync(GUIDES_DIR)) {
     const image = src => {
       if (/^https?:\/\//i.test(src)) return src;
       const f = src.replace(/^\.\//, "");
-      if (!imgs.includes(f)) { console.warn("Предупреждение: guides/" + slug + ": нет картинки " + src); return null; }
+      if (!imgs.includes(f)) {
+        console.warn("Предупреждение: guides/" + slug + ": нет картинки " + src);
+        return null;
+      }
       return "/guide-img/" + slug + "/" + f;
     };
     const cover = GuideMD.firstImage(body);
     guides.push({
-      slug, title: meta.title, author: meta.author || "", date: meta.date || "",
+      slug,
+      title: meta.title,
+      author: meta.author || "",
+      date: meta.date || "",
       description: meta.description || GuideMD.excerpt(body, 160),
       html: GuideMD.render(body, { image, siteHost: "heart-of-the-zone.ru" }),
       cover: cover ? image(cover) : null,
@@ -106,16 +155,36 @@ if (fs.existsSync(GUIDES_DIR)) {
   guides.sort((a, b) => (b.date || "").localeCompare(a.date || "") || a.title.localeCompare(b.title, "ru"));
 }
 const esc = GuideMD.esc;
-const authorMarkup = g => !g.author ? "" : g.authorId
-  ? '<a href="/top100#p=' + g.authorId + '" title="Карточка игрока в Топ-100">' + esc(g.author) + "</a>"
-  : "<b>" + esc(g.author) + "</b>";
+const authorMarkup = g =>
+  !g.author
+    ? ""
+    : g.authorId
+      ? '<a href="/p/' + g.authorId + '" title="Карточка игрока в Топ-100">' + esc(g.author) + "</a>"
+      : "<b>" + esc(g.author) + "</b>";
 function guidesListMarkup() {
   if (!guides.length) return '<p class="guides-empty">Пока здесь нет ни одного гайда, будьте первым!</p>';
-  return guides.map(g => '<a class="guide-card" href="/guide/' + g.slug + '">' +
-    (g.cover ? '<span class="guide-card-img"><img src="' + esc(g.cover) + '" alt="" loading="lazy" decoding="async"></span>' : '<span class="guide-card-img guide-card-noimg" aria-hidden="true"></span>') +
-    '<span class="guide-card-body"><b>' + esc(g.title) + "</b>" +
-    (g.description ? "<small>" + esc(g.description) + "</small>" : "") +
-    '<span class="guide-card-meta">' + (g.author ? esc(g.author) : "") + (g.author && g.date ? " · " : "") + (g.date ? '<time datetime="' + esc(g.date) + '">' + ruDate(g.date) + "</time>" : "") + "</span></span></a>").join("");
+  return guides
+    .map(
+      g =>
+        '<a class="guide-card" href="/guide/' +
+        g.slug +
+        '">' +
+        (g.cover
+          ? '<span class="guide-card-img"><img src="' +
+            esc(g.cover) +
+            '" alt="" loading="lazy" decoding="async"></span>'
+          : '<span class="guide-card-img guide-card-noimg" aria-hidden="true"></span>') +
+        '<span class="guide-card-body"><b>' +
+        esc(g.title) +
+        "</b>" +
+        (g.description ? "<small>" + esc(g.description) + "</small>" : "") +
+        '<span class="guide-card-meta">' +
+        (g.author ? esc(g.author) : "") +
+        (g.author && g.date ? " · " : "") +
+        (g.date ? '<time datetime="' + esc(g.date) + '">' + ruDate(g.date) + "</time>" : "") +
+        "</span></span></a>"
+    )
+    .join("");
 }
 
 /* ---------- 3D главной ----------
@@ -124,10 +193,29 @@ function guidesListMarkup() {
    Из three.js попадает только используемое */
 {
   const r = esbuild.buildSync({
-    entryPoints: [path.join(ROOT, "src", "home-3d.js")], outdir: OUT, entryNames: "[name]", chunkNames: "3d/[name]-[hash]",
-    bundle: true, splitting: true, format: "esm", minify: true, target: "es2020", legalComments: "none", charset: "utf8", metafile: true
+    entryPoints: [path.join(ROOT, "src", "home-3d.js")],
+    outdir: OUT,
+    entryNames: "[name]",
+    chunkNames: "3d/[name]-[hash]",
+    bundle: true,
+    splitting: true,
+    format: "esm",
+    minify: true,
+    target: "es2020",
+    legalComments: "none",
+    charset: "utf8",
+    metafile: true
   });
-  const parts = Object.entries(r.metafile.outputs).map(([f, o]) => path.basename(f).replace(/-[A-Z0-9]{8}\.js$/, ".js").replace(/^chunk\.js$/, "three.js (общий)") + " " + (o.bytes / 1024).toFixed(0) + " КБ");
+  const parts = Object.entries(r.metafile.outputs).map(
+    ([f, o]) =>
+      path
+        .basename(f)
+        .replace(/-[A-Z0-9]{8}\.js$/, ".js")
+        .replace(/^chunk\.js$/, "three.js (общий)") +
+      " " +
+      (o.bytes / 1024).toFixed(0) +
+      " КБ"
+  );
   console.log("3D главной: " + parts.join(", "));
 }
 
@@ -137,8 +225,15 @@ function guidesListMarkup() {
    format "iife": всё внутри одной функции, наружу ничего не торчит */
 {
   const r = esbuild.buildSync({
-    entryPoints: [path.join(ROOT, "src", "calculator.js")], outfile: path.join(OUT, "calculator.js"),
-    bundle: true, format: "iife", minify: true, target: "es2020", legalComments: "none", charset: "utf8", metafile: true
+    entryPoints: [path.join(ROOT, "src", "calculator.js")],
+    outfile: path.join(OUT, "calculator.js"),
+    bundle: true,
+    format: "iife",
+    minify: true,
+    target: "es2020",
+    legalComments: "none",
+    charset: "utf8",
+    metafile: true
   });
   console.log("Калькулятор: calculator.js " + (Object.values(r.metafile.outputs)[0].bytes / 1024).toFixed(0) + " КБ");
 }
@@ -173,11 +268,19 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
 /* заглушка DOM: скрипты страницы пишут в innerHTML по id, мы забираем то, что они туда положили */
 function fakeDom() {
   const els = {};
-  const el = id => (els[id] = els[id] || {
-    innerHTML: "", textContent: "", dataset: {}, hidden: false,
-    classList: { toggle() {} }, setAttribute() {}, addEventListener() {}, insertAdjacentHTML() {}, focus() {},
-    querySelector: () => el("_" + id)
-  });
+  const el = id =>
+    (els[id] = els[id] || {
+      innerHTML: "",
+      textContent: "",
+      dataset: {},
+      hidden: false,
+      classList: { toggle() {} },
+      setAttribute() {},
+      addEventListener() {},
+      insertAdjacentHTML() {},
+      focus() {},
+      querySelector: () => el("_" + id)
+    });
   const document = { getElementById: el, querySelectorAll: () => [], querySelector: () => null, addEventListener() {} };
   return { els, document };
 }
@@ -235,18 +338,24 @@ const PRERENDER = {
 
 /* ---------- стили ----------
    Порядок подключения не меняется: от него зависит, какое правило побеждает (visual.css, например, перекрашивает polish.css).
-   — Общие файлы (подключены на двух и больше страницах: styles.css, visual.css, polish.css) идут отдельными файлами:
+   — Общие файлы (подключены на двух и больше страницах, например styles.css) идут отдельными файлами:
      они одинаковые на всём сайте, браузер скачивает каждый один раз и на других страницах берёт из кэша.
    — Файлы только одной страницы, если стоят подряд, склеиваются в один bundle-<хэш>.css в корне dist
      (поэтому относительные url() внутри стилей остаются верными).
    Исходные css, вошедшие в склейку, в dist после этого не нужны и удаляются */
 const LOCAL_CSS = /<link rel="stylesheet" href="(\/?)([^":]+\.css)">\n?/g;
 const bundledCss = new Set();
-const cssPages = fs.readdirSync(OUT).filter(f => f.endsWith(".html"))
+const cssPages = fs
+  .readdirSync(OUT)
+  .filter(f => f.endsWith(".html"))
   .map(name => ({ name, list: [...fs.readFileSync(path.join(OUT, name), "utf8").matchAll(LOCAL_CSS)].map(m => m[2]) }))
   .filter(p => p.list.length);
 const cssUse = {};
-cssPages.forEach(p => new Set(p.list).forEach(f => { cssUse[f] = (cssUse[f] || 0) + 1; }));
+cssPages.forEach(p =>
+  new Set(p.list).forEach(f => {
+    cssUse[f] = (cssUse[f] || 0) + 1;
+  })
+);
 const sharedCss = Object.keys(cssUse).filter(f => cssUse[f] > 1);
 if (sharedCss.length) console.log("Общие стили (кэшируются на весь сайт): " + sharedCss.join(", "));
 for (const { name, list } of cssPages) {
@@ -260,7 +369,10 @@ for (const { name, list } of cssPages) {
   const hrefs = groups.map(g => {
     if (g.shared || g.files.length === 1) return g.files[0];
     const bundle = "bundle-" + crypto.createHash("sha1").update(g.files.join("|")).digest("hex").slice(0, 8) + ".css";
-    fs.writeFileSync(path.join(OUT, bundle), g.files.map(f => "/* " + f + " */\n" + fs.readFileSync(path.join(OUT, f), "utf8")).join("\n"));
+    fs.writeFileSync(
+      path.join(OUT, bundle),
+      g.files.map(f => "/* " + f + " */\n" + fs.readFileSync(path.join(OUT, f), "utf8")).join("\n")
+    );
     g.files.forEach(f => bundledCss.add(f));
     return bundle;
   });
@@ -283,7 +395,13 @@ if (esbuild) {
   for (const name of fs.readdirSync(OUT).filter(f => /\.(css|js)$/.test(f) && !MODULES[f])) {
     const file = path.join(OUT, name);
     const src = fs.readFileSync(file, "utf8");
-    const out = esbuild.transformSync(src, { loader: name.endsWith(".css") ? "css" : "js", minify: true, target: name.endsWith(".css") ? ["chrome100", "safari15", "firefox100"] : "es2020", legalComments: "none", charset: "utf8" }).code;
+    const out = esbuild.transformSync(src, {
+      loader: name.endsWith(".css") ? "css" : "js",
+      minify: true,
+      target: name.endsWith(".css") ? ["chrome100", "safari15", "firefox100"] : "es2020",
+      legalComments: "none",
+      charset: "utf8"
+    }).code;
     saved += src.length - out.length;
     fs.writeFileSync(file, out);
   }
@@ -294,7 +412,14 @@ if (esbuild) {
 const hashCache = new Map();
 function fileHash(rel) {
   if (!hashCache.has(rel)) {
-    hashCache.set(rel, crypto.createHash("sha1").update(fs.readFileSync(path.join(OUT, rel))).digest("hex").slice(0, 8));
+    hashCache.set(
+      rel,
+      crypto
+        .createHash("sha1")
+        .update(fs.readFileSync(path.join(OUT, rel)))
+        .digest("hex")
+        .slice(0, 8)
+    );
   }
   return hashCache.get(rel);
 }
@@ -313,7 +438,9 @@ function version(url, from) {
 /* сначала css: версии картинок и шрифтов внутри, потом хэш самих css попадёт в HTML уже с ними */
 for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".css"))) {
   const file = path.join(OUT, name);
-  const css = fs.readFileSync(file, "utf8").replace(/url\((["']?)([^"')]+)\1\)/g, (m, q, u) => "url(" + q + version(u, name) + q + ")");
+  const css = fs
+    .readFileSync(file, "utf8")
+    .replace(/url\((["']?)([^"')]+)\1\)/g, (m, q, u) => "url(" + q + version(u, name) + q + ")");
   fs.writeFileSync(file, css);
 }
 
@@ -323,7 +450,8 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
   let html = fs.readFileSync(path.join(OUT, name), "utf8");
   const before = html.length;
   /* обработчику с одним аргументом скрипты страницы не нужны — он сам решает, что прогнать */
-  if (PRERENDER[name]) html = PRERENDER[name].length > 1 ? PRERENDER[name](html, runPageScripts(html)) : PRERENDER[name](html);
+  if (PRERENDER[name])
+    html = PRERENDER[name].length > 1 ? PRERENDER[name](html, runPageScripts(html)) : PRERENDER[name](html);
   html = html
     .replace(/(<link\b[^>]*?\shref=")([^"]+)(")/g, (m, a, u, b) => a + version(u, name) + b)
     .replace(/(<script\b[^>]*?\ssrc=")([^"]+)(")/g, (m, a, u, b) => a + version(u, name) + b);
@@ -337,7 +465,8 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
    адрес, картинка для соцсетей и содержимое <main>. Страница лежит глубже (/guide/…), поэтому
    относительные ссылки шаблона делаются от корня сайта */
 if (guides.length) {
-  const tpl = fs.readFileSync(path.join(OUT, "guides.html"), "utf8")
+  const tpl = fs
+    .readFileSync(path.join(OUT, "guides.html"), "utf8")
     .replace(/<meta name="robots"[^>]*>\n?/, "")
     .replace(/(\s(?:href|src)=")(?![a-z][a-z0-9+.-]*:|\/|#)/gi, "$1/")
     .replace(/<script src="\/(?:guide-md|guides-config|guide-submit)\.js[^"]*"><\/script>/g, "");
@@ -347,9 +476,18 @@ if (guides.length) {
     const title = g.title + " — гайд «Сердце Зоны»";
     const desc = g.description || "Гайд по игре «Сердце Зоны»" + (g.author ? " от " + g.author : "");
     const img = g.cover ? (/^https?:/.test(g.cover) ? g.cover : SITE + g.cover) : null;
-    const ld = { "@context": "https://schema.org", "@type": "Article", headline: g.title, description: desc, url, inLanguage: "ru",
-      author: g.author ? { "@type": "Person", name: g.author } : undefined, datePublished: g.date || undefined, image: img || undefined,
-      publisher: { "@type": "Organization", name: "Сердце Зоны", url: SITE + "/" } };
+    const ld = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: g.title,
+      description: desc,
+      url,
+      inLanguage: "ru",
+      author: g.author ? { "@type": "Person", name: g.author } : undefined,
+      datePublished: g.date || undefined,
+      image: img || undefined,
+      publisher: { "@type": "Organization", name: "Сердце Зоны", url: SITE + "/" }
+    };
     let html = tpl
       .replace(/<title>[^<]*<\/title>/, "<title>" + esc(title) + "</title>")
       .replace(/(<meta name="description" content=")[^"]*/, "$1" + esc(desc))
@@ -359,14 +497,29 @@ if (guides.length) {
       .replace(/(<meta property="og:description" content=")[^"]*/, "$1" + esc(desc))
       .replace(/(<meta property="og:url" content=")[^"]*/, "$1" + url)
       .replace(/(<meta property="og:image:alt" content=")[^"]*/, "$1" + esc(g.title))
-      .replace("</head>", '<script type="application/ld+json">' + JSON.stringify(ld).replace(/</g, "\\u003c") + "</script>\n</head>");
+      .replace(
+        "</head>",
+        '<script type="application/ld+json">' + JSON.stringify(ld).replace(/</g, "\\u003c") + "</script>\n</head>"
+      );
     /* своя обложка: размеры общей картинки к ней не подходят */
-    if (img) html = html.replace(/(<meta property="og:image" content=")[^"]*/, "$1" + esc(img)).replace(/<meta property="og:image:(?:width|height)"[^>]*>\n?/g, "");
-    const main = '<main class="content info-content guide-page">\n' +
+    if (img)
+      html = html
+        .replace(/(<meta property="og:image" content=")[^"]*/, "$1" + esc(img))
+        .replace(/<meta property="og:image:(?:width|height)"[^>]*>\n?/g, "");
+    const main =
+      '<main class="content info-content guide-page">\n' +
       '<a class="guide-back" href="/guides"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 4l-8 8 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Все гайды</a>\n' +
-      '<article class="result-panel guide-article">\n<h1>' + esc(g.title) + "</h1>\n" +
-      '<p class="guide-meta">' + (g.author ? "Автор: " + authorMarkup(g) : "") + (g.author && g.date ? '<span aria-hidden="true"> · </span>' : "") + (g.date ? '<time datetime="' + esc(g.date) + '">' + ruDate(g.date) + "</time>" : "") + "</p>\n" +
-      '<div class="guide-body">\n' + g.html.replace(/(<img src=")(\/guide-img\/[^"]+)"/g, (m, a, u) => a + version(u, "guide/" + g.slug) + '"') + "\n</div>\n</article>\n" +
+      '<article class="result-panel guide-article">\n<h1>' +
+      esc(g.title) +
+      "</h1>\n" +
+      '<p class="guide-meta">' +
+      (g.author ? "Автор: " + authorMarkup(g) : "") +
+      (g.author && g.date ? '<span aria-hidden="true"> · </span>' : "") +
+      (g.date ? '<time datetime="' + esc(g.date) + '">' + ruDate(g.date) + "</time>" : "") +
+      "</p>\n" +
+      '<div class="guide-body">\n' +
+      g.html.replace(/(<img src=")(\/guide-img\/[^"]+)"/g, (m, a, u) => a + version(u, "guide/" + g.slug) + '"') +
+      "\n</div>\n</article>\n" +
       '<p class="guide-write">Знаете, как пройти что-то лучше? <a href="/guides#send">Отправьте свой гайд</a></p>\n</main>';
     html = html.replace(/<main\b[\s\S]*?<\/main>/, () => main);
     fs.writeFileSync(path.join(OUT, "guide", g.slug + ".html"), html);
@@ -380,36 +533,108 @@ if (guides.length) {
    У Топ-100 — время выгрузки рейтинга из top100-data.js (по Москве): страница меняется вместе с данными */
 function gitDate(files) {
   try {
-    const out = execFileSync("git", ["log", "-1", "--format=%cI", "--", ...files], { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    const out = execFileSync("git", ["log", "-1", "--format=%cI", "--", ...files], {
+      cwd: ROOT,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"]
+    }).trim();
     if (out) return out;
   } catch (e) {}
   return new Date(Math.max(...files.map(f => fs.statSync(path.join(ROOT, f)).mtimeMs))).toISOString();
 }
 function top100Date() {
-  const m = fs.readFileSync(path.join(ROOT, "top100-data.js"), "utf8").match(/TOP100_UPDATED="(\d\d)\.(\d\d)\.(\d{4}) (\d\d:\d\d:\d\d)"/);
+  const m = fs
+    .readFileSync(path.join(ROOT, "top100-data.js"), "utf8")
+    .match(/TOP100_UPDATED="(\d\d)\.(\d\d)\.(\d{4}) (\d\d:\d\d:\d\d)"/);
   return m ? m[3] + "-" + m[2] + "-" + m[1] + "T" + m[4] + "+03:00" : null;
 }
 function pageDeps(page) {
   const html = fs.readFileSync(path.join(ROOT, page), "utf8");
   /* собранный модуль (home-3d.js, calculator.js) в корне не лежит — вместо него берутся его исходники */
-  const deps = [...html.matchAll(/(?:href|src)="\/?([^":?#]+\.(?:css|js))"/g)].flatMap(m => MODULES[m[1]] || [m[1]]).filter(f => fs.existsSync(path.join(ROOT, f)));
+  const deps = [...html.matchAll(/(?:href|src)="\/?([^":?#]+\.(?:css|js))"/g)]
+    .flatMap(m => MODULES[m[1]] || [m[1]])
+    .filter(f => fs.existsSync(path.join(ROOT, f)));
   /* меню и подвал из partials тоже влияют на дату страницы */
-  const parts = [...html.matchAll(/<!--\s*@include\s+([\w-]+)/g)].map(m => "partials/" + m[1] + ".html").filter(f => fs.existsSync(path.join(ROOT, f)));
+  const parts = [...html.matchAll(/<!--\s*@include\s+([\w-]+)/g)]
+    .map(m => "partials/" + m[1] + ".html")
+    .filter(f => fs.existsSync(path.join(ROOT, f)));
   return [page, ...new Set([...deps, ...parts])];
 }
 const smSrc = path.join(ROOT, "sitemap.xml");
 if (fs.existsSync(smSrc)) {
-  const sm = fs.readFileSync(smSrc, "utf8").replace(/<url><loc>([^<]+)<\/loc>(?:<lastmod>[^<]*<\/lastmod>)?<\/url>/g, (m, loc) => {
-    /* адреса в sitemap без .html (/calculator), файл страницы — calculator.html */
-    const slug = new URL(loc).pathname.replace(/^\//, "");
-    const page = !slug ? "index.html" : slug.endsWith(".html") ? slug : slug + ".html";
-    if (!fs.existsSync(path.join(ROOT, page))) return m;
-    const date = (page === "top100.html" && top100Date()) || gitDate(pageDeps(page));
-    return "<url><loc>" + loc + "</loc><lastmod>" + date + "</lastmod></url>";
-  });
+  const sm = fs
+    .readFileSync(smSrc, "utf8")
+    .replace(/<url><loc>([^<]+)<\/loc>(?:<lastmod>[^<]*<\/lastmod>)?<\/url>/g, (m, loc) => {
+      /* адреса в sitemap без .html (/calculator), файл страницы — calculator.html */
+      const slug = new URL(loc).pathname.replace(/^\//, "");
+      const page = !slug ? "index.html" : slug.endsWith(".html") ? slug : slug + ".html";
+      if (!fs.existsSync(path.join(ROOT, page))) return m;
+      const date = (page === "top100.html" && top100Date()) || gitDate(pageDeps(page));
+      return "<url><loc>" + loc + "</loc><lastmod>" + date + "</lastmod></url>";
+    });
   /* гайды: страница списка и каждый гайд, дата — последний коммит папки гайда */
-  const extra = !guides.length ? "" : ["<url><loc>" + SITE + "/guides</loc><lastmod>" + gitDate([...pageDeps("guides.html"), ...guides.map(g => "guides/" + g.slug)]) + "</lastmod></url>",
-    ...guides.map(g => "<url><loc>" + SITE + "/guide/" + g.slug + "</loc><lastmod>" + gitDate(["guides/" + g.slug]) + "</lastmod></url>")].map(l => "  " + l + "\n").join("");
+  const extra = !guides.length
+    ? ""
+    : [
+        "<url><loc>" +
+          SITE +
+          "/guides</loc><lastmod>" +
+          gitDate([...pageDeps("guides.html"), ...guides.map(g => "guides/" + g.slug)]) +
+          "</lastmod></url>",
+        ...guides.map(
+          g =>
+            "<url><loc>" +
+            SITE +
+            "/guide/" +
+            g.slug +
+            "</loc><lastmod>" +
+            gitDate(["guides/" + g.slug]) +
+            "</lastmod></url>"
+        )
+      ]
+        .map(l => "  " + l + "\n")
+        .join("");
   fs.writeFileSync(path.join(OUT, "sitemap.xml"), sm.replace("</urlset>", extra + "</urlset>"));
 }
+/* ---------- Content-Security-Policy ----------
+   GitHub Pages не умеет свои заголовки, поэтому политика — <meta http-equiv> в каждой странице. Встроенные
+   <script> разрешены по sha256 их текста (хэши считаются здесь, после всех правок HTML), чужие скрипты запрещены.
+   style-src 'unsafe-inline' — из-за style="…" в разметке, которую рисуют скрипты. Капча и функция приёма гайдов
+   разрешены только там, где есть форма отправки. frame-ancestors в <meta> не работает — его задаёт Cloudflare */
+const CAPTCHA_ORIGINS = ["https://smartcaptcha.yandexcloud.net", "https://challenges.cloudflare.com"];
+function cspFor(html) {
+  const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(
+    m => "'sha256-" + crypto.createHash("sha256").update(m[1], "utf8").digest("base64") + "'"
+  );
+  const form = /guide-submit\.js/.test(html);
+  const cap = form ? CAPTCHA_ORIGINS : [];
+  return [
+    "default-src 'self'",
+    ["script-src 'self'", ...hashes, ...cap].join(" "),
+    ["style-src 'self' 'unsafe-inline'", ...cap].join(" "),
+    "img-src 'self' data: blob:",
+    "font-src 'self'",
+    ["connect-src 'self'", ...(form ? ["https://functions.yandexcloud.net", ...cap] : [])].join(" "),
+    form ? "frame-src " + cap.join(" ") : "frame-src 'none'",
+    "worker-src 'self' blob:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'"
+  ].join("; ");
+}
+function addCsp(file) {
+  let html = fs.readFileSync(file, "utf8");
+  html = html.replace(/<meta http-equiv="Content-Security-Policy"[^>]*>\n?/, "");
+  const meta = '<meta http-equiv="Content-Security-Policy" content="' + cspFor(html) + '">';
+  if (!/<meta charset="utf-8">/i.test(html)) throw new Error("CSP: в " + file + " нет <meta charset>");
+  fs.writeFileSync(file, html.replace(/(<meta charset="utf-8">)\n?/i, "$1\n" + meta + "\n"));
+}
+(function walk(dir) {
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const f = path.join(dir, e.name);
+    if (e.isDirectory()) walk(f);
+    else if (e.name.endsWith(".html")) addCsp(f);
+  }
+})(OUT);
+
 console.log("Готово: " + pages + " стр. в " + path.relative(process.cwd(), OUT));

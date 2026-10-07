@@ -1,0 +1,65 @@
+# Ежедневное обновление Топ-100: выгрузка игроков из API игры -> top100-data.js и top100-players.json -> коммит -> деплой.
+# Нужен секрет репозитория ZONE_TOKEN (Settings → Secrets and variables → Actions → New repository secret):
+# токен API игры (значение заголовка authorization без слова Bearer). Обычный токен из браузера живёт около суток,
+# для ежедневного запуска нужен долгоживущий токен от разработчика игры. Если токен истёк, запуск падает с понятной
+# ошибкой, а GitHub присылает письмо; сайт при этом остаётся с прошлыми данными.
+name: Обновление Топ-100
+
+on:
+  schedule:
+    - cron: "17 3 * * *" # каждый день в 06:17 МСК (время в cron — UTC)
+  workflow_dispatch: # кнопка Run workflow на вкладке Actions
+
+permissions:
+  contents: write # коммит обновлённых данных
+  actions: write # запуск деплоя (pages.yml)
+
+concurrency:
+  group: top100-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      TZ: Europe/Moscow # скрипты считают даты как на компьютере в Москве
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Выгрузка игроков из API игры
+        env:
+          ZONE_TOKEN: ${{ secrets.ZONE_TOKEN }}
+        run: node fetch-players.js
+
+      - name: Сборка рейтингов
+        run: node build-top100.js
+
+      - name: Коммит данных
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add top100-data.js top100-players.json top100/history top100/players top100/factions.json
+          if git diff --cached --quiet; then
+            echo "Данные не изменились"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "Топ-100: обновление $(date '+%d.%m.%Y %H:%M')"
+            git pull --rebase
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # коммит от GITHUB_TOKEN сам деплой не запускает (защита GitHub от циклов) — запускаем его явно
+      - name: Деплой
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main

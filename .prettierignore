@@ -1,0 +1,13 @@
+dist/
+node_modules/
+package-lock.json
+*.html
+*.md
+top100/
+top100-data.js
+top100-players.json
+tasks-data.js
+info-data.js
+talents.js
+changelog.js
+assets/

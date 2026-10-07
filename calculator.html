@@ -38,8 +38,8 @@
 <link rel="preload" href="assets/fonts/oswald-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="polish.css">
-<link rel="stylesheet" href="visual.css">
+
+
   <link rel="stylesheet" href="tour.css">
 </head>
 <body>
@@ -64,7 +64,7 @@
 
 <div class="page">
 <aside class="sidebar">
-<section class="side-section level-section"><div class="side-title"><svg class="person-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2.6c-3.3 0-5.6 2.7-5.6 6.2v2.3c0 1.2.6 2.3 1.6 3l-2.1 1.3C4.1 16.3 3.4 18.2 3.4 21.4h17.2c0-3.2-.7-5.1-2.5-6l-2.1-1.3c1-.7 1.6-1.8 1.6-3V8.8c0-3.5-2.3-6.2-5.6-6.2zM9.3 10.6c.5-1.7 1.5-2.6 2.7-2.6s2.2.9 2.7 2.6v.6c0 1.5-1.2 2.7-2.7 2.7s-2.7-1.2-2.7-2.7z"/></svg><b>Уровень персонажа</b></div><div class="level-row"><button type="button" data-step="level" data-dir="-1">−</button><input id="level" type="number" aria-label="Уровень персонажа" min="1" max="100" value="1"><button type="button" data-step="level" data-dir="1">+</button></div></section>
+<section class="side-section level-section"><div class="side-title"><svg class="person-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2.6c-3.3 0-5.6 2.7-5.6 6.2v2.3c0 1.2.6 2.3 1.6 3l-2.1 1.3C4.1 16.3 3.4 18.2 3.4 21.4h17.2c0-3.2-.7-5.1-2.5-6l-2.1-1.3c1-.7 1.6-1.8 1.6-3V8.8c0-3.5-2.3-6.2-5.6-6.2zM9.3 10.6c.5-1.7 1.5-2.6 2.7-2.6s2.2.9 2.7 2.6v.6c0 1.5-1.2 2.7-2.7 2.7s-2.7-1.2-2.7-2.7z"/></svg><b>Уровень персонажа</b></div><div class="level-row"><button type="button" data-step="level" data-dir="-1">−</button><input id="level" type="number" inputmode="numeric" aria-label="Уровень персонажа" min="1" max="100" step="1" value="1"><button type="button" data-step="level" data-dir="1">+</button></div></section>
 <section class="side-section talent-launcher"><div class="side-title"><span><svg class="ic" aria-hidden="true"><use href="#i-tree"/></svg></span><b>Таланты</b></div><button type="button" id="openTalents" class="talent-open"><span><svg class="ic" aria-hidden="true"><use href="#i-rank"/></svg></span><span>Открыть древо талантов</span><b id="talentPointsBadge">0 / 135</b></button><div class="talent-summary" id="talentSummary">Очки не распределены</div></section>
 <section class="side-section equipment-section"><div class="side-title"><span class="clothes-icon" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-mask"/></svg></span><b>Комплекты</b><button type="button" id="openGearInfo" class="gear-info-btn" aria-label="Бонусы снаряжения" title="Бонусы снаряжения"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span>Бонусы</span></button></div><button type="button" id="gearToggle" class="gear-toggle" aria-expanded="false" aria-controls="sets items"></button><div id="sets" class="options"></div><div class="items-divider"><span>•</span><b>Одиночные вещи</b></div><div id="items" class="options"></div></section>
 <div class="side-actions">
@@ -119,9 +119,9 @@
       </header>
       <div class="gear-info-body tokens-body">
         <div class="tok-inputs">
-          <label class="tok-inp"><span class="tok-inp-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.2V2.8"/><rect x="6.5" y="6.6" width="11" height="14.6" rx="2.6"/><circle cx="12" cy="9.8" r=".9"/><path d="M9.3 13.6h5.4M9.3 16.6h3.6"/></svg></span><span class="tok-inp-lbl">Жетоны</span><input id="tokenCount" type="number" min="0" step="1" value="7200" inputmode="numeric" aria-label="Количество жетонов"></label>
+          <label class="tok-inp"><span class="tok-inp-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.2V2.8"/><rect x="6.5" y="6.6" width="11" height="14.6" rx="2.6"/><circle cx="12" cy="9.8" r=".9"/><path d="M9.3 13.6h5.4M9.3 16.6h3.6"/></svg></span><span class="tok-inp-lbl">Жетоны</span><input id="tokenCount" type="text" inputmode="numeric" autocomplete="off" maxlength="11" data-group-digits value="7 200" aria-label="Количество жетонов"></label>
           <span class="tok-inp-sep" aria-hidden="true"></span>
-          <label class="tok-inp"><span class="tok-inp-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2c-4.3 0-7.2 2.8-7.2 6.8 0 2.4 1 4.2 2.7 5.2v3.1h1.9v2.2h1.6v-2.2h2v2.2h1.6v-2.2h1.9v-3.1c1.7-1 2.7-2.8 2.7-5.2 0-4-2.9-6.8-7.2-6.8z"/><circle cx="9.3" cy="11" r="1.6"/><circle cx="14.7" cy="11" r="1.6"/><path d="M11.4 14.6 12 13.4l.6 1.2z"/></svg></span><span class="tok-inp-lbl">Нужный урон</span><input id="tokenTarget" type="number" min="0" step="1" value="1000000" inputmode="numeric" aria-label="Нужное количество урона"></label>
+          <label class="tok-inp"><span class="tok-inp-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2c-4.3 0-7.2 2.8-7.2 6.8 0 2.4 1 4.2 2.7 5.2v3.1h1.9v2.2h1.6v-2.2h2v2.2h1.6v-2.2h1.9v-3.1c1.7-1 2.7-2.8 2.7-5.2 0-4-2.9-6.8-7.2-6.8z"/><circle cx="9.3" cy="11" r="1.6"/><circle cx="14.7" cy="11" r="1.6"/><path d="M11.4 14.6 12 13.4l.6 1.2z"/></svg></span><span class="tok-inp-lbl">Нужный урон</span><input id="tokenTarget" type="text" inputmode="numeric" autocomplete="off" maxlength="13" data-group-digits value="1 000 000" aria-label="Нужное количество урона"></label>
         </div>
         <p class="tok-hint">Жетоны считаются на целые удары: граната — 3, гранатомёт — 5, гаусс — 15. Во второе поле удобно вписать запас здоровья босса.</p>
         <div class="tok-cards" id="tokCards"></div>

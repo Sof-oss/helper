@@ -3,14 +3,29 @@
    Затемнение и виньетка повторяют CSS-фон (body::before в visual.css), так что сайт выглядит как раньше,
    только оживает. Если что-то пошло не так, остаётся обычный CSS-фон. */
 import {
-  WebGLRenderer, Scene, PerspectiveCamera, PlaneGeometry, ShaderMaterial, Mesh, TextureLoader,
-  BufferGeometry, Float32BufferAttribute, Points, AdditiveBlending, NormalBlending, LinearFilter,
-  LinearSRGBColorSpace, NoColorSpace, Vector2, Vector3
+  WebGLRenderer,
+  Scene,
+  PerspectiveCamera,
+  PlaneGeometry,
+  ShaderMaterial,
+  Mesh,
+  TextureLoader,
+  BufferGeometry,
+  Float32BufferAttribute,
+  Points,
+  AdditiveBlending,
+  NormalBlending,
+  LinearFilter,
+  LinearSRGBColorSpace,
+  NoColorSpace,
+  Vector2,
+  Vector3
 } from "three";
 import { readTheme, isMobile, lowPower } from "./zone-theme.js";
 
-const FOV = 45, PHOTO_Z = -20;
-const NOISE = /* glsl */`
+const FOV = 45,
+  PHOTO_Z = -20;
+const NOISE = /* glsl */ `
 float hash(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
 float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);
   return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);}
@@ -24,7 +39,9 @@ export function startBackground() {
   let renderer;
   try {
     renderer = new WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: "low-power" });
-  } catch (e) { return null; }
+  } catch (e) {
+    return null;
+  }
   renderer.outputColorSpace = LinearSRGBColorSpace; // цвета как в CSS, без пересчёта
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 1.5));
   document.body.prepend(canvas);
@@ -38,15 +55,27 @@ export function startBackground() {
 
   /* ---------- фото с аномалией ---------- */
   const loader = new TextureLoader();
-  const prepTex = t => { t.colorSpace = NoColorSpace; t.minFilter = LinearFilter; t.generateMipmaps = false; return t; };
+  const prepTex = t => {
+    t.colorSpace = NoColorSpace;
+    t.minFilter = LinearFilter;
+    t.generateMipmaps = false;
+    return t;
+  };
   const photoMat = new ShaderMaterial({
     uniforms: {
-      time: U.time, map: { value: null }, map2: { value: null }, mixT: { value: 0 },
-      dim: { value: theme.dim }, res: { value: new Vector2(1, 1) }, aspect: { value: 1 },
-      anomPos: { value: new Vector2(0.5, 0.5) }, anomT: { value: -1 }, accent
+      time: U.time,
+      map: { value: null },
+      map2: { value: null },
+      mixT: { value: 0 },
+      dim: { value: theme.dim },
+      res: { value: new Vector2(1, 1) },
+      aspect: { value: 1 },
+      anomPos: { value: new Vector2(0.5, 0.5) },
+      anomT: { value: -1 },
+      accent
     },
     vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-    fragmentShader: /* glsl */`
+    fragmentShader: /* glsl */ `
       uniform sampler2D map,map2;uniform float time,mixT,dim,aspect,anomT;uniform vec2 res,anomPos;uniform vec3 accent;
       varying vec2 vUv;
       vec3 photo(vec2 uv){vec3 a=texture2D(map,uv).rgb;return mixT>0.?mix(a,texture2D(map2,uv).rgb,mixT):a;}
@@ -74,20 +103,36 @@ export function startBackground() {
         c*=1.-clamp((v-.55)/.45,0.,1.)*.55;
         gl_FragColor=vec4(c,1.);
       }`,
-    depthWrite: false, depthTest: false
+    depthWrite: false,
+    depthTest: false
   });
   const photo = new Mesh(new PlaneGeometry(1, 1), photoMat);
-  photo.position.z = PHOTO_Z; photo.renderOrder = 0;
+  photo.position.z = PHOTO_Z;
+  photo.renderOrder = 0;
   scene.add(photo);
   let imgAspect = 16 / 9;
 
   /* ---------- туман: три слоя на разной глубине ---------- */
-  const fogs = [[-15, 0.012, 2.2, 0.42], [-10, 0.02, 3.0, 0.34], [-6, 0.03, 4.2, 0.22]].map(([z, speed, scale, op], i) => {
+  const fogs = [
+    [-15, 0.012, 2.2, 0.42],
+    [-10, 0.02, 3.0, 0.34],
+    [-6, 0.03, 4.2, 0.22]
+  ].map(([z, speed, scale, op], i) => {
     const m = new ShaderMaterial({
       defines: { OCT: lowPower ? 3 : 5 },
-      uniforms: { time: U.time, speed: { value: speed }, scale: { value: scale }, op: { value: op }, seed: { value: i * 7.3 }, accent, flash: { value: 0 } },
+      uniforms: {
+        time: U.time,
+        speed: { value: speed },
+        scale: { value: scale },
+        op: { value: op },
+        seed: { value: i * 7.3 },
+        accent,
+        flash: { value: 0 }
+      },
       vertexShader: `varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}`,
-      fragmentShader: NOISE + /* glsl */`
+      fragmentShader:
+        NOISE +
+        /* glsl */ `
         uniform float time,speed,scale,op,seed,flash;uniform vec3 accent;varying vec2 vUv;
         void main(){
           vec2 p=vUv*vec2(scale*1.8,scale)+vec2(time*speed+seed,time*speed*.35);
@@ -98,27 +143,39 @@ export function startBackground() {
           vec3 col=mix(vec3(.6,.64,.68),accent,.28+flash*.5);
           gl_FragColor=vec4(col*(1.+flash),a);
         }`,
-      transparent: true, depthWrite: false, depthTest: false, blending: NormalBlending
+      transparent: true,
+      depthWrite: false,
+      depthTest: false,
+      blending: NormalBlending
     });
     const mesh = new Mesh(new PlaneGeometry(1, 1), m);
-    mesh.position.z = z; mesh.renderOrder = 1 + i;
+    mesh.position.z = z;
+    mesh.renderOrder = 1 + i;
     scene.add(mesh);
     return mesh;
   });
 
   /* ---------- пыль и пепел: движение считает видеокарта ---------- */
-  const N = lowPower ? 320 : 900, BOX = new Vector3(34, 20, 16);
-  const pos = new Float32Array(N * 3), seed = new Float32Array(N * 4);
+  const N = lowPower ? 320 : 900,
+    BOX = new Vector3(34, 20, 16);
+  const pos = new Float32Array(N * 3),
+    seed = new Float32Array(N * 4);
   for (let i = 0; i < N; i++) {
-    pos.set([(Math.random() - .5) * BOX.x, (Math.random() - .5) * BOX.y, -3 - Math.random() * BOX.z], i * 3);
+    pos.set([(Math.random() - 0.5) * BOX.x, (Math.random() - 0.5) * BOX.y, -3 - Math.random() * BOX.z], i * 3);
     seed.set([Math.random(), Math.random(), Math.random(), Math.random()], i * 4);
   }
   const dustGeo = new BufferGeometry();
   dustGeo.setAttribute("position", new Float32BufferAttribute(pos, 3));
   dustGeo.setAttribute("aSeed", new Float32BufferAttribute(seed, 4));
   const dustMat = new ShaderMaterial({
-    uniforms: { time: U.time, px: { value: renderer.getPixelRatio() }, box: { value: BOX }, accent, flash: { value: 0 } },
-    vertexShader: /* glsl */`
+    uniforms: {
+      time: U.time,
+      px: { value: renderer.getPixelRatio() },
+      box: { value: BOX },
+      accent,
+      flash: { value: 0 }
+    },
+    vertexShader: /* glsl */ `
       uniform float time,px;uniform vec3 box;attribute vec4 aSeed;varying float vA;varying float vGlow;
       void main(){
         vec3 p=position;
@@ -132,7 +189,7 @@ export function startBackground() {
         vA=(.35+.65*abs(sin(time*(.4+aSeed.y)+aSeed.z*20.)))*smoothstep(-19.,-14.,mv.z)*smoothstep(-2.,-4.,mv.z);
         gl_Position=projectionMatrix*mv;
       }`,
-    fragmentShader: /* glsl */`
+    fragmentShader: /* glsl */ `
       uniform vec3 accent;uniform float flash;varying float vA;varying float vGlow;
       void main(){
         float d=length(gl_PointCoord-.5);float a=smoothstep(.5,.05,d)*vA;
@@ -140,25 +197,32 @@ export function startBackground() {
         vec3 col=mix(ash*.55,accent*1.3+.15,vGlow);
         gl_FragColor=vec4(col*(1.+flash*1.5),a*(.55+vGlow*.45));
       }`,
-    transparent: true, depthWrite: false, depthTest: false, blending: AdditiveBlending
+    transparent: true,
+    depthWrite: false,
+    depthTest: false,
+    blending: AdditiveBlending
   });
   const dust = new Points(dustGeo, dustMat);
-  dust.renderOrder = 5; dust.frustumCulled = false;
+  dust.renderOrder = 5;
+  dust.frustumCulled = false;
   scene.add(dust);
 
   /* ---------- искры аномалии ---------- */
-  const SN = 70, sdir = new Float32Array(SN * 3), sspd = new Float32Array(SN);
+  const SN = 70,
+    sdir = new Float32Array(SN * 3),
+    sspd = new Float32Array(SN);
   for (let i = 0; i < SN; i++) {
-    const a = Math.random() * Math.PI * 2, b = Math.acos(2 * Math.random() - 1);
-    sdir.set([Math.sin(b) * Math.cos(a), Math.sin(b) * Math.sin(a), Math.cos(b) * .4], i * 3);
-    sspd[i] = .4 + Math.random();
+    const a = Math.random() * Math.PI * 2,
+      b = Math.acos(2 * Math.random() - 1);
+    sdir.set([Math.sin(b) * Math.cos(a), Math.sin(b) * Math.sin(a), Math.cos(b) * 0.4], i * 3);
+    sspd[i] = 0.4 + Math.random();
   }
   const sparkGeo = new BufferGeometry();
   sparkGeo.setAttribute("position", new Float32BufferAttribute(sdir, 3));
   sparkGeo.setAttribute("aSpd", new Float32BufferAttribute(sspd, 1));
   const sparkMat = new ShaderMaterial({
     uniforms: { origin: { value: new Vector3() }, t: { value: -1 }, px: { value: renderer.getPixelRatio() }, accent2 },
-    vertexShader: /* glsl */`
+    vertexShader: /* glsl */ `
       uniform vec3 origin;uniform float t,px;attribute float aSpd;varying float vA;
       void main(){
         float e=1.-pow(1.-t,3.);
@@ -169,29 +233,47 @@ export function startBackground() {
         gl_Position=projectionMatrix*mv;
       }`,
     fragmentShader: `uniform vec3 accent2;varying float vA;void main(){float d=length(gl_PointCoord-.5);gl_FragColor=vec4(accent2*1.4+.2,smoothstep(.5,0.,d)*vA);}`,
-    transparent: true, depthWrite: false, depthTest: false, blending: AdditiveBlending
+    transparent: true,
+    depthWrite: false,
+    depthTest: false,
+    blending: AdditiveBlending
   });
   const sparks = new Points(sparkGeo, sparkMat);
-  sparks.renderOrder = 6; sparks.frustumCulled = false;
+  sparks.renderOrder = 6;
+  sparks.frustumCulled = false;
   scene.add(sparks);
 
   /* ---------- размеры: фото и туман всегда закрывают экран с запасом под наклон ---------- */
-  let W = 1, H = 1;
-  const viewAt = z => { const h = 2 * Math.abs(z) * Math.tan(FOV * Math.PI / 360); return [h * camera.aspect, h]; };
+  let W = 1,
+    H = 1;
+  const viewAt = z => {
+    const h = 2 * Math.abs(z) * Math.tan((FOV * Math.PI) / 360);
+    return [h * camera.aspect, h];
+  };
   function fitPhoto() {
-    const [vw, vh] = viewAt(PHOTO_Z), m = 1.14;
-    let w = vw * m, h = w / imgAspect;
-    if (h < vh * m) { h = vh * m; w = h * imgAspect; }
+    const [vw, vh] = viewAt(PHOTO_Z),
+      m = 1.14;
+    let w = vw * m,
+      h = w / imgAspect;
+    if (h < vh * m) {
+      h = vh * m;
+      w = h * imgAspect;
+    }
     photo.scale.set(w, h, 1);
     photoMat.uniforms.aspect.value = imgAspect;
   }
   function resize() {
-    W = window.innerWidth; H = canvas.clientHeight || window.innerHeight;
+    W = window.innerWidth;
+    H = canvas.clientHeight || window.innerHeight;
     renderer.setSize(W, H, false);
-    camera.aspect = W / H; camera.updateProjectionMatrix();
+    camera.aspect = W / H;
+    camera.updateProjectionMatrix();
     photoMat.uniforms.res.value.set(W * renderer.getPixelRatio(), H * renderer.getPixelRatio());
     fitPhoto();
-    fogs.forEach(f => { const [vw, vh] = viewAt(f.position.z); f.scale.set(vw * 1.35, vh * 1.3, 1); });
+    fogs.forEach(f => {
+      const [vw, vh] = viewAt(f.position.z);
+      f.scale.set(vw * 1.35, vh * 1.3, 1);
+    });
   }
   resize();
   window.addEventListener("resize", resize);
@@ -201,35 +283,46 @@ export function startBackground() {
   function loadBg(url, first) {
     if (!url) return;
     loader.load(url, tex => {
-      wake();                                          // новое фото надо отрисовать, даже если фон на паузе
+      wake(); // новое фото надо отрисовать, даже если фон на паузе
       prepTex(tex);
       imgAspect = tex.image.width / tex.image.height;
       if (first || !photoMat.uniforms.map.value) {
-        photoMat.uniforms.map.value = tex; fitPhoto();
+        photoMat.uniforms.map.value = tex;
+        fitPhoto();
         requestAnimationFrame(() => canvas.classList.add("on"));
       } else {
-        photoMat.uniforms.map2.value = tex; fitPhoto();
+        photoMat.uniforms.map2.value = tex;
+        fitPhoto();
         fade = { t0: performance.now(), tex };
       }
     });
   }
   loadBg(theme.bg, true);
-  new MutationObserver(() => requestAnimationFrame(() => {
-    const t = readTheme();
-    if (t.key === theme.key) return;
-    theme = t;
-    accent.value.set(...t.accent); accent2.value.set(...t.accent2);
-    photoMat.uniforms.dim.value = t.dim;
-    loadBg(t.bg, false);
-  })).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  new MutationObserver(() =>
+    requestAnimationFrame(() => {
+      const t = readTheme();
+      if (t.key === theme.key) return;
+      theme = t;
+      accent.value.set(...t.accent);
+      accent2.value.set(...t.accent2);
+      photoMat.uniforms.dim.value = t.dim;
+      loadBg(t.bg, false);
+    })
+  ).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
   /* ---------- мышь и наклон телефона ---------- */
-  const target = new Vector2(), cur = new Vector2();
+  const target = new Vector2(),
+    cur = new Vector2();
   let lastInput = 0;
-  window.addEventListener("pointermove", e => {
-    if (e.pointerType !== "mouse") return;
-    target.set(e.clientX / W * 2 - 1, e.clientY / H * 2 - 1); lastInput = performance.now();
-  }, { passive: true });
+  window.addEventListener(
+    "pointermove",
+    e => {
+      if (e.pointerType !== "mouse") return;
+      target.set((e.clientX / W) * 2 - 1, (e.clientY / H) * 2 - 1);
+      lastInput = performance.now();
+    },
+    { passive: true }
+  );
   /* наклон планшета/телефона. В альбомной ориентации оси beta/gamma меняются местами — поворачиваем их по углу экрана */
   let base = null;
   const cl = v => Math.max(-1, Math.min(1, v));
@@ -240,9 +333,12 @@ export function startBackground() {
     const x = a === 90 ? e.beta : a === 270 ? -e.beta : a === 180 ? -e.gamma : e.gamma;
     const y = a === 90 ? -e.gamma : a === 270 ? e.gamma : a === 180 ? -e.beta : e.beta;
     if (!base) base = { x, y };
-    target.set(cl((x - base.x) / 20), cl((y - base.y) / 20)); lastInput = performance.now();
+    target.set(cl((x - base.x) / 20), cl((y - base.y) / 20));
+    lastInput = performance.now();
   }
-  const resetBase = () => { base = null; };
+  const resetBase = () => {
+    base = null;
+  };
   window.addEventListener("orientationchange", resetBase);
   if (screen.orientation) screen.orientation.addEventListener("change", resetBase);
   /* iOS/iPadOS (Safari 13+) не присылает наклон без разрешения, а спросить его можно только по нажатию.
@@ -250,32 +346,59 @@ export function startBackground() {
   const DOE = window.DeviceOrientationEvent;
   if (DOE && typeof DOE.requestPermission === "function") {
     let busy = false;
-    const stop = () => { window.removeEventListener("touchend", ask, true); window.removeEventListener("click", ask, true); };
-    const ask = () => {
-      if (busy) return; busy = true;
-      DOE.requestPermission().then(r => {
-        stop();                                                        // ответ получен — больше не спрашиваем
-        if (r === "granted") window.addEventListener("deviceorientation", onTilt, { passive: true });
-      }).catch(() => { busy = false; });                               // касание не засчиталось (например, прокрутка) — спросим при следующем
+    const stop = () => {
+      window.removeEventListener("touchend", ask, true);
+      window.removeEventListener("click", ask, true);
     };
-    window.addEventListener("touchend", ask, true); window.addEventListener("click", ask, true);
+    const ask = () => {
+      if (busy) return;
+      busy = true;
+      DOE.requestPermission()
+        .then(r => {
+          stop(); // ответ получен — больше не спрашиваем
+          if (r === "granted") window.addEventListener("deviceorientation", onTilt, { passive: true });
+        })
+        .catch(() => {
+          busy = false;
+        }); // касание не засчиталось (например, прокрутка) — спросим при следующем
+    };
+    window.addEventListener("touchend", ask, true);
+    window.addEventListener("click", ask, true);
   } else window.addEventListener("deviceorientation", onTilt, { passive: true });
   /* пока наклона нет (не разрешили или нет датчика) — фон чуть следует за пальцем при прокрутке */
   let touch0 = null;
-  window.addEventListener("touchstart", e => { const t = e.touches[0]; touch0 = { x: t.clientX, y: t.clientY, tx: target.x, ty: target.y }; }, { passive: true });
-  window.addEventListener("touchmove", e => {
-    if (!touch0 || base) return;
-    const t = e.touches[0];
-    target.set(cl(touch0.tx + (t.clientX - touch0.x) / W * 1.5), cl(touch0.ty + (t.clientY - touch0.y) / H * 1.5)); lastInput = performance.now();
-  }, { passive: true });
+  window.addEventListener(
+    "touchstart",
+    e => {
+      const t = e.touches[0];
+      touch0 = { x: t.clientX, y: t.clientY, tx: target.x, ty: target.y };
+    },
+    { passive: true }
+  );
+  window.addEventListener(
+    "touchmove",
+    e => {
+      if (!touch0 || base) return;
+      const t = e.touches[0];
+      target.set(
+        cl(touch0.tx + ((t.clientX - touch0.x) / W) * 1.5),
+        cl(touch0.ty + ((t.clientY - touch0.y) / H) * 1.5)
+      );
+      lastInput = performance.now();
+    },
+    { passive: true }
+  );
 
   /* ---------- аномалия: раз в 7–14 секунд в случайном месте ---------- */
-  let anom = null, nextAnom = performance.now() + 3500 + Math.random() * 3000;
+  let anom = null,
+    nextAnom = performance.now() + 3500 + Math.random() * 3000;
   function spawnAnomaly(now) {
-    const sx = .15 + Math.random() * .7, sy = .18 + Math.random() * .45;   // доля экрана (сверху)
+    const sx = 0.15 + Math.random() * 0.7,
+      sy = 0.18 + Math.random() * 0.45; // доля экрана (сверху)
     const [vw, vh] = viewAt(PHOTO_Z);
-    const wx = (sx - .5) * vw, wy = (.5 - sy) * vh;
-    photoMat.uniforms.anomPos.value.set(wx / photo.scale.x + .5, wy / photo.scale.y + .5);
+    const wx = (sx - 0.5) * vw,
+      wy = (0.5 - sy) * vh;
+    photoMat.uniforms.anomPos.value.set(wx / photo.scale.x + 0.5, wy / photo.scale.y + 0.5);
     sparkMat.uniforms.origin.value.set(wx, wy, PHOTO_Z).multiplyScalar(12 / 20);
     anom = { t0: now, dur: 2200 };
     nextAnom = now + 7000 + Math.random() * 7000;
@@ -287,48 +410,70 @@ export function startBackground() {
      — если IDLE_STOP_MS никто ничего не делает (мышь, касание, прокрутка, клавиши), цикл останавливается:
        на холсте остаётся последний кадр, процессор и видеокарта отдыхают. Любое действие — фон продолжает с того же места;
      — в скрытой вкладке браузер сам не вызывает requestAnimationFrame. */
-  const FPS = 30, FRAME_MS = 1000 / FPS, IDLE_STOP_MS = 20000;
+  const FPS = 30,
+    FRAME_MS = 1000 / FPS,
+    IDLE_STOP_MS = 20000;
   let t0 = performance.now();
-  let raf = 0, lastFrame = 0, lastActive = t0, pausedAt = 0, dead = false;
+  let raf = 0,
+    lastFrame = 0,
+    lastActive = t0,
+    pausedAt = 0,
+    dead = false;
   function wake() {
     lastActive = performance.now();
     if (raf || dead) return;
-    const d = lastActive - pausedAt;                  // время на паузе — сдвигаем часы, чтобы сцена не прыгнула
-    t0 += d; nextAnom += d;
+    const d = lastActive - pausedAt; // время на паузе — сдвигаем часы, чтобы сцена не прыгнула
+    t0 += d;
+    nextAnom += d;
     raf = requestAnimationFrame(frame);
   }
-  ["pointermove", "pointerdown", "wheel", "scroll", "keydown", "touchstart"].forEach(ev => window.addEventListener(ev, wake, { passive: true }));
+  ["pointermove", "pointerdown", "wheel", "scroll", "keydown", "touchstart"].forEach(ev =>
+    window.addEventListener(ev, wake, { passive: true })
+  );
   function frame() {
     const now = performance.now();
     /* пауза: только когда нет аномалии и смены фона, иначе они застынут на середине */
-    if (now - lastActive > IDLE_STOP_MS && !anom && !fade) { raf = 0; pausedAt = now; return; }
+    if (now - lastActive > IDLE_STOP_MS && !anom && !fade) {
+      raf = 0;
+      pausedAt = now;
+      return;
+    }
     raf = requestAnimationFrame(frame);
-    if (now - lastFrame < FRAME_MS - 2) return;      // −2 мс: запас на неровный шаг кадров у монитора
+    if (now - lastFrame < FRAME_MS - 2) return; // −2 мс: запас на неровный шаг кадров у монитора
     lastFrame = now;
     const time = (now - t0) / 1000;
     U.time.value = time;
     /* без движения мыши сцена сама еле заметно «дышит» */
     const idle = now - lastInput > 4000;
-    const amp = isMobile ? 1.8 : 1;                    // без мыши фон «дышит» заметнее
-    const tx = idle ? Math.sin(time * .13) * .35 * amp : target.x, ty = idle ? Math.sin(time * .09) * .25 * amp : target.y;
-    cur.x += (tx - cur.x) * .04; cur.y += (ty - cur.y) * .04;
-    camera.rotation.set(-cur.y * .028, -cur.x * .04, 0);
-    camera.position.set(cur.x * .45, -cur.y * .28, 0);
+    const amp = isMobile ? 1.8 : 1; // без мыши фон «дышит» заметнее
+    const tx = idle ? Math.sin(time * 0.13) * 0.35 * amp : target.x,
+      ty = idle ? Math.sin(time * 0.09) * 0.25 * amp : target.y;
+    cur.x += (tx - cur.x) * 0.04;
+    cur.y += (ty - cur.y) * 0.04;
+    camera.rotation.set(-cur.y * 0.028, -cur.x * 0.04, 0);
+    camera.position.set(cur.x * 0.45, -cur.y * 0.28, 0);
 
     if (now > nextAnom && !anom) spawnAnomaly(now);
     if (anom) {
       const k = (now - anom.t0) / anom.dur;
-      if (k >= 1) { anom = null; photoMat.uniforms.anomT.value = -1; sparkMat.uniforms.t.value = -1; }
-      else {
+      if (k >= 1) {
+        anom = null;
+        photoMat.uniforms.anomT.value = -1;
+        sparkMat.uniforms.t.value = -1;
+      } else {
         photoMat.uniforms.anomT.value = k;
-        const st = (k - .06) / .55;                     // искры разлетаются в начале аномалии
+        const st = (k - 0.06) / 0.55; // искры разлетаются в начале аномалии
         sparkMat.uniforms.t.value = st < 0 || st >= 1 ? -1 : st;
-        const fl = Math.max(0, Math.sin(k * Math.PI)) * .35 * (1 + .5 * Math.sin(now * .05));
-        fogs.forEach(f => { f.material.uniforms.flash.value = fl; });
-        dustMat.uniforms.flash.value = fl * .6;
+        const fl = Math.max(0, Math.sin(k * Math.PI)) * 0.35 * (1 + 0.5 * Math.sin(now * 0.05));
+        fogs.forEach(f => {
+          f.material.uniforms.flash.value = fl;
+        });
+        dustMat.uniforms.flash.value = fl * 0.6;
       }
     } else {
-      fogs.forEach(f => { f.material.uniforms.flash.value = 0; });
+      fogs.forEach(f => {
+        f.material.uniforms.flash.value = 0;
+      });
       dustMat.uniforms.flash.value = 0;
     }
     if (fade) {
@@ -336,7 +481,9 @@ export function startBackground() {
       photoMat.uniforms.mixT.value = k;
       if (k >= 1) {
         const old = photoMat.uniforms.map.value;
-        photoMat.uniforms.map.value = fade.tex; photoMat.uniforms.map2.value = null; photoMat.uniforms.mixT.value = 0;
+        photoMat.uniforms.map.value = fade.tex;
+        photoMat.uniforms.map2.value = null;
+        photoMat.uniforms.mixT.value = 0;
         if (old && old !== fade.tex) old.dispose();
         fade = null;
       }
@@ -349,6 +496,12 @@ export function startBackground() {
   new MutationObserver(wake).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
   /* потеря контекста (бывает на телефонах): прячем холст, остаётся CSS-фон */
-  canvas.addEventListener("webglcontextlost", e => { e.preventDefault(); dead = true; cancelAnimationFrame(raf); raf = 0; canvas.classList.remove("on"); });
+  canvas.addEventListener("webglcontextlost", e => {
+    e.preventDefault();
+    dead = true;
+    cancelAnimationFrame(raf);
+    raf = 0;
+    canvas.classList.remove("on");
+  });
   return { canvas, spawnAnomaly: () => spawnAnomaly(performance.now()) };
 }

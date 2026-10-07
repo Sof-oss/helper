@@ -1,18 +1,28 @@
 # Приём гайдов: Yandex Cloud Functions
 
 Форма «Отправить свой гайд» (страница /guides) отправляет гайд сюда. Функция проверяет «я не робот»
-(Cloudflare Turnstile) и создаёт в репозитории pull request с файлами `guides/<адрес>/index.md` и картинками.
+(Yandex SmartCaptcha, запасной вариант — Cloudflare Turnstile) и создаёт в репозитории pull request с файлами `guides/<адрес>/index.md` и картинками.
 На сайт гайд попадает только после **Merge**.
 
 Почему Яндекс, а не Cloudflare Worker: у части российских провайдеров соединения с Cloudflare обрываются,
 и гайды с картинками не доходят. Серверы Яндекса в России, с ними такой проблемы нет.
 Бесплатного объёма Cloud Functions (1 млн вызовов в месяц) хватает с запасом.
 
-Нужны: Secret Key виджета Turnstile и токен GitHub (как получить — ниже, шаг 0).
+Нужны: ключи капчи (SmartCaptcha или Turnstile) и токен GitHub (как получить — ниже, шаг 0).
 
 ## 0. Защита от ботов и токен GitHub
 
-**Turnstile** (проверка «я не робот», бесплатно; сам виджет Cloudflare в России работает):
+**Yandex SmartCaptcha** (основной вариант: серверы в России, у посетителей не обрывается; до 100 000 проверок
+в месяц бесплатно):
+
+1. https://console.yandex.cloud → каталог **default** → сервис **SmartCaptcha** → **Создать капчу**.
+2. Имя — любое, **Список сайтов** — `heart-of-the-zone.ru`, тип задания — на ваш вкус (по умолчанию «Чекбокс»).
+3. Откройте капчу → вкладка **Обзор**: **Ключ клиента** (открытый, пойдёт в `guides-config.js`
+   как `smartcaptchaSiteKey`) и **Ключ сервера** (секретный, переменная `SMARTCAPTCHA_SERVER_KEY` в функции).
+
+Пока `smartcaptchaSiteKey` пустой, форма показывает Turnstile — как раньше.
+
+**Turnstile** (запасной вариант, бесплатно):
 
 1. https://dash.cloudflare.com → **Turnstile** → **Add widget**.
 2. Название — любое, **Hostname** — `heart-of-the-zone.ru`, режим **Managed**.
@@ -41,12 +51,13 @@
 2. **Точка входа**: `index.handler`.
 3. **Таймаут**: `30` секунд (по умолчанию 3 — мало: функция успевает сходить в GitHub несколько раз).
 4. **Память**: 128 МБ. **Сервисный аккаунт**: не нужен.
-5. **Переменные окружения** → добавьте пять штук:
+5. **Переменные окружения** → добавьте (капча — одна из двух или обе):
 
    | Ключ | Значение |
    |---|---|
    | `GITHUB_TOKEN` | токен GitHub (`github_pat_…`) |
-   | `TURNSTILE_SECRET` | Secret Key из Turnstile |
+   | `SMARTCAPTCHA_SERVER_KEY` | Ключ сервера SmartCaptcha (если включаете SmartCaptcha) |
+   | `TURNSTILE_SECRET` | Secret Key из Turnstile (если остаётесь на Turnstile; можно задать оба) |
    | `GITHUB_REPO` | `Sof-oss/helper` |
    | `GITHUB_BRANCH` | `main` |
    | `ALLOWED_ORIGINS` | `https://heart-of-the-zone.ru` |
@@ -68,6 +79,15 @@ endpoint: "https://functions.yandexcloud.net/d4e…",
 ```
 
 `turnstileSiteKey` остаётся прежним.
+
+## 5. Перейти на SmartCaptcha
+
+1. В функцию добавьте переменную `SMARTCAPTCHA_SERVER_KEY` (шаг 2) и вставьте свежий `yandex/index.js`.
+2. В `guides-config.js` впишите ключ клиента: `smartcaptchaSiteKey: "ysc1_…"` — и закоммитьте.
+3. Откройте /guides#send: вместо окошка Cloudflare должно появиться окошко Яндекса. Отправьте тестовый гайд
+   и закройте его pull request без Merge.
+
+Откатиться: очистите `smartcaptchaSiteKey` — форма снова покажет Turnstile.
 
 ## Потом
 
