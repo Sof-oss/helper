@@ -30,9 +30,16 @@ test("базовый урон на 1 уровне совпадает с игро
 });
 
 test("бесплатные удары растут на 2% за уровень", () => {
-  assert.equal(freeBase(47, 1), 47);
-  assert.equal(freeBase(47, 2), Math.round(47 * 1.02));
-  assert.equal(freeBase(55, 24), Math.round(55 * Math.pow(1.02, 23)));
+  assert.equal(freeBase(46, 1), 47);
+  assert.equal(freeBase(46, 2), Math.round(46 * 1.02 * 1.02));
+});
+
+test("бесплатные удары совпадают с игрой на 24 и 25 уровне", () => {
+  const b24 = baseDamageByLevel(24),
+    b25 = baseDamageByLevel(25);
+  assert.deepEqual([b24.knife, b24.pistol, b24.auto], [74, 77, 87]);
+  /* замер в игре: билд #l=25&s=1023&i=15&t=505505505000010000000000000 — нож 143, пистолет 202, автомат 280 */
+  assert.deepEqual([b25.knife, b25.pistol, b25.auto], [75, 79, 89]);
 });
 
 test("урон растёт с уровнем и не убывает", () => {

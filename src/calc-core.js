@@ -32,16 +32,19 @@ export function clampLevel(v) {
   return Math.max(MIN_LEVEL, Math.min(MAX_LEVEL, n));
 }
 
-/* бесплатные удары растут на 2% за уровень от значения на 1 уровне (47/49/55), подтверждено замерами на 1 и 24 уровне */
-export const freeBase = (atLevel1, level) => Math.round(atLevel1 * Math.pow(1.02, level - 1));
+/* бесплатные удары считаются так же, как оружие за жетоны: «нулевое» значение × 1,02^уровень, округление в конце.
+   Нож 46, пистолет 48, автомат 54 — на 1 уровне это 47/49/55, совпадает с игрой на 1, 24 и 25 уровне.
+   Раньше бралось значение 1 уровня × 1,02^(уровень−1) — из-за уже округлённого 47/49/55 на части уровней
+   (например, 25: нож 76 вместо 75, автомат 88 вместо 89) выходила разница в единицу */
+export const freeBase = (atLevel0, level) => Math.round(atLevel0 * Math.pow(1.02, level));
 export function baseDamageByLevel(level) {
   return {
     grenade: Math.round(55 * Math.pow(1.02, level)),
     gl: Math.round(113 * Math.pow(1.02, level)),
     gauss: Math.round(360 * Math.pow(1.02, level)),
-    knife: freeBase(47, level),
-    pistol: freeBase(49, level),
-    auto: freeBase(55, level)
+    knife: freeBase(46, level),
+    pistol: freeBase(48, level),
+    auto: freeBase(54, level)
   };
 }
 
