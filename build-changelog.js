@@ -4,6 +4,7 @@
 
    Как писать коммит, чтобы он попал на главную:
      1-я строка — заголовок записи (например «Темы группировок»);
+     первая буква заголовка и пунктов сама становится заглавной;
      дальше строки-пункты с метками:
        new: текст  — Новое
        up: текст   — Улучшено
@@ -29,6 +30,8 @@ const SKIP = [
   "4f0c2d1" // «Задания» — тот же пункт вошёл в «Раздел «Информация»» (3033095)
 ];
 const TAG = /^\s*(new|up|fix)\s*:\s*(.+?)\s*$/i;
+/* первая буква — заглавная, даже если в коммите написали с маленькой (ссылка <a …> в начале не мешает) */
+const capital = s => s.replace(/^((?:<[^>]*>)*)(\p{Ll})/u, (m, tags, ch) => tags + ch.toUpperCase());
 
 let log = "";
 try {
@@ -57,9 +60,9 @@ for (const raw of log.split("\x1e")) {
   const items = lines
     .map(l => TAG.exec(l))
     .filter(Boolean)
-    .map(m => [m[1].toLowerCase(), m[2]]);
+    .map(m => [m[1].toLowerCase(), capital(m[2])]);
   if (!items.length) continue;
-  const title = lines[0] && !TAG.test(lines[0]) ? lines[0] : "Обновление";
+  const title = lines[0] && !TAG.test(lines[0]) ? capital(lines[0]) : "Обновление";
   const key = date + "\n" + title;
   if (!groups.has(key)) groups.set(key, { date, title, items: [] });
   /* внутри записи — в порядке коммитов: старые пункты выше */
