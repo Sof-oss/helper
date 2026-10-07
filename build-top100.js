@@ -454,7 +454,10 @@ const compactMap = map => {
 
 /* ---------- периоды ----------
    last — с прошлого обновления, остальные — за срок ms.
-   Период, у которого база совпала с уже добавленным, пропускаем: кнопка была бы дублем */
+   Снимок годится для периода, если ему не меньше срока за вычетом допуска (SLACK): обновления идут
+   не минута в минуту, и снимок 23,5 часа назад — это «за сутки», а не повод брать позавчерашний.
+   Совпала база у двух периодов — кнопка была бы дублем: «С прошлого обновления» уступает периоду
+   со сроком («За сутки» понятнее при ежедневных обновлениях), из периодов со сроком остаётся первый */
 const PERIODS = [
   { key: "last", label: "С прошлого обновления" },
   { key: "d1", label: "За сутки", ms: DAY },
@@ -462,22 +465,29 @@ const PERIODS = [
   { key: "d30", label: "За месяц", ms: 30 * DAY }
 ];
 
+const SLACK = ms => Math.min(ms * 0.25, 12 * 36e5);
 const periods = [];
 const changes = {};
 const usedBases = new Set();
 
+function periodBase(per) {
+  if (per.key === "last") return { base: previous, partial: false };
+  if (!older.length) return { base: null, partial: false };
+  const target = dataMs - per.ms + SLACK(per.ms);
+  let base = null;
+  for (const sn of older) if (snapTime(sn.id) <= target) base = sn; // самый свежий из достаточно старых
+  return base ? { base, partial: false } : { base: older[0], partial: true }; // истории не хватает
+}
+const timedBases = new Set(
+  PERIODS.filter(p => p.ms)
+    .map(p => periodBase(p).base)
+    .filter(Boolean)
+    .map(b => b.id)
+);
+
 for (const per of PERIODS) {
-  let base = null,
-    partial = false;
-  if (per.key === "last") base = previous;
-  else if (older.length) {
-    const target = dataMs - per.ms;
-    for (const sn of older) if (snapTime(sn.id) <= target) base = sn; // самый свежий из достаточно старых
-    if (!base) {
-      base = older[0];
-      partial = true;
-    } // истории не хватает
-  }
+  const { base, partial } = periodBase(per);
+  if (base && per.key === "last" && timedBases.has(base.id)) continue;
   if (base && usedBases.has(base.id)) continue;
 
   const delta = {},

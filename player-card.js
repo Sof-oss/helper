@@ -128,24 +128,28 @@
     }
     return v;
   }
-  /* индекс снимка-базы для периода (как в рейтинге: самый свежий снимок, которому уже не меньше срока) */
+  /* индекс снимка-базы для периода (как в рейтинге, build-top100.js: самый свежий снимок, которому
+     не меньше срока за вычетом допуска — четверть срока, но не больше 12 часов) */
   function baseIndex(per) {
     const d = data.dates,
       last = d.length - 1;
     if (last < 1) return null;
     if (per.key === "last") return last - 1;
     if (per.key === "all") return 0;
-    const target = d[last] - per.ms;
+    const target = d[last] - per.ms + Math.min(per.ms * 0.25, 12 * 36e5);
     let b = null;
     for (let i = 0; i < last; i++) if (d[i] <= target) b = i;
     return b;
   }
-  /* периоды, для которых есть база; одинаковая база у разных периодов — дубль, оставляем первый */
+  /* периоды, для которых есть база; одинаковая база у разных периодов — дубль: «С прошлого обновления»
+     уступает периоду со сроком, из остальных остаётся первый (как в рейтинге) */
   function availablePeriods() {
+    const timed = new Set(PERIODS.filter(p => p.ms).map(baseIndex));
     const seen = new Set();
     return PERIODS.filter(per => {
       const b = baseIndex(per);
       if (b === null || seen.has(b)) return false;
+      if (per.key === "last" && timed.has(b)) return false;
       seen.add(b);
       return true;
     });

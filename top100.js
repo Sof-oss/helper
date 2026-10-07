@@ -372,9 +372,15 @@ function renderPeriod() {
       (cur.partial ? "<small>Данных за полный период пока нет: считаем с самой ранней сохранённой даты</small>" : "")
     : "Показаны изменения <b>" + esc(cur.label.toLowerCase()) + "</b>";
   /* коротко: «05.10 15:20 → 19:29», полная фраза — в подсказке и для экранного диктора */
-  const full = range.textContent;
+  /* в подсказке две строки: период и, если он неполный, пояснение (textContent склеил бы их без пробела) */
+  const full = cur.from
+    ? "Показаны изменения с " +
+      cur.from +
+      (to ? " по " + to : "") +
+      (cur.partial ? "\n* Данных за полный период пока нет: считаем с самой ранней сохранённой даты" : "")
+    : range.textContent;
   range.title = full;
-  range.setAttribute("aria-label", full);
+  range.setAttribute("aria-label", full.replace("\n* ", ". "));
   if (cur.from) {
     const f = shortStamp(cur.from),
       t = to ? shortStamp(to) : null;

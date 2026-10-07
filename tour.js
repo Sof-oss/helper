@@ -109,26 +109,55 @@
       text: "Выберите период — и увидите, кто вырос и на сколько мест поднялся."
     },
 
+    /* «Информация»: шаги сами открывают нужный раздел (и на телефоне — вкладку внутри раздела),
+       поэтому рассказ совпадает с тем, что на экране, какой бы раздел ни был открыт до тура */
     {
       g: "info",
       page: "/info",
-      sel: ["#infoSections", "#infoTabs"],
+      prep: infoView("levels"),
+      sel: "#infoSections",
       title: "Справочник сталкера",
-      text: "Две вкладки: прогресс по уровням и задания."
+      text: "Здесь два раздела: «Прогресс по уровням» — таблицы улучшений талантов, ПДА и персонажа, и «Задания» — награды за локации и калькулятор энергии. Начнём с первого."
     },
     {
       g: "info",
       page: "/info",
-      sel: "#infoGroups",
-      title: "Таблицы по уровням",
-      text: "Сколько стоит каждое улучшение таланта, опыт ПДА и персонажа по уровням — и сколько вам осталось до следующего."
+      prep: infoView("levels", "talents"),
+      sel: '[data-info-group="talents"]',
+      title: "Улучшение талантов",
+      text: "Сколько урона нужно нанести ради каждого очка таланта и сколько всего с начала. Очки, которые вы уже вложили в калькуляторе, отмечены, а кнопка «К текущему уровню» прокрутит таблицу к вашей строке."
     },
     {
       g: "info",
       page: "/info",
-      sel: ["#infoSections .top100-tab:nth-child(2)", "#infoTabs .top100-tab:nth-child(2)"],
-      title: "Награды за задания",
-      text: "Во вкладке «Задания» — награды за задания по всем локациям и калькулятор энергии."
+      prep: infoView("levels", "pda"),
+      sel: '[data-info-group="pda"]',
+      title: "Опыт ПДА",
+      text: "Сколько опыта нужно на каждый уровень ПДА и сколько всего с начала. Под таблицей — сколько опыта дают ПДА новичка, ветерана и учёного."
+    },
+    {
+      g: "info",
+      page: "/info",
+      prep: infoView("levels", "char"),
+      sel: '[data-info-group="char"]',
+      title: "Опыт персонажа",
+      text: "Опыт до каждого уровня персонажа. Уровень берётся из калькулятора: видно, сколько уже пройдено и сколько осталось до максимума."
+    },
+    {
+      g: "info",
+      page: "/info",
+      prep: infoView("tasks"),
+      sel: "#tasksRoot > .info-group:first-child",
+      title: "Калькулятор энергии",
+      text: "Раздел «Задания». Выберите локацию и сколько энергии готовы потратить — калькулятор покажет опыт, пули, репутацию и жетоны, а если энергии не хватает, сколько энергетиков докупить."
+    },
+    {
+      g: "info",
+      page: "/info",
+      prep: infoView("tasks"),
+      sel: "#tasksRoot > .info-group:nth-child(2)",
+      title: "Награды и выгода",
+      text: "Ниже — награды за полное прохождение каждой локации, итог за все этапы и выгода на единицу энергии. Зелёным отмечено самое выгодное значение в строке."
     },
 
     { g: "guides", page: "/guides", sel: "#guidesList", title: "Гайды игроков", text: "Советы от опытных игроков." },
@@ -156,6 +185,17 @@
     }
   ];
 
+  /* открыть раздел страницы «Информация» (levels / tasks) и, на телефоне, вкладку группы (talents / pda / char).
+     Кнопки те же, что нажимает посетитель, поэтому выбор запоминается как обычно */
+  function infoView(section, tab) {
+    return function () {
+      var b = d.querySelector('[data-section="' + section + '"]');
+      if (b && !b.classList.contains("active")) b.click();
+      if (!tab || !mobile()) return;
+      var t = d.querySelector('[data-info-tab="' + tab + '"]');
+      if (t && !t.classList.contains("active")) t.click();
+    };
+  }
   function ls(k, v) {
     try {
       if (v === undefined) return localStorage.getItem(k);
@@ -438,6 +478,7 @@
     ss(STEP, String(i));
     var s = STEPS[i];
     d.documentElement.classList.add("tour-on");
+    if (s.prep) s.prep();
     targets = [];
     render();
     place();
