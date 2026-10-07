@@ -1,5 +1,5 @@
-/* Живой фон Зоны на главной: фото группировки с глубиной, туман, пыль и пепел, иногда — аномалия.
-   Камера чуть поворачивается за мышью (на телефоне — за наклоном, если браузер даёт эти данные).
+/* Живой фон Зоны на главной: фото группировки с глубиной, туман, пыль и пепел, иногда - аномалия.
+   Камера чуть поворачивается за мышью (на телефоне - за наклоном, если браузер даёт эти данные).
    Затемнение и виньетка повторяют CSS-фон (body::before в visual.css), так что сайт выглядит как раньше,
    только оживает. Если что-то пошло не так, остаётся обычный CSS-фон. */
 import {
@@ -95,7 +95,7 @@ export function startBackground() {
           c=mix(c,c*vec3(.75)+accent*.5,core*.6);
           c+=accent*(ring*.35+core*.45);
         } else c=photo(uv);
-        /* затемнение и виньетка — как в CSS (body::before) */
+        /* затемнение и виньетка - как в CSS (body::before) */
         vec2 s=gl_FragCoord.xy/res;float t=1.-s.y;
         float a=t<.3?mix(dim+.1,dim,t/.3):t<.7?mix(dim,dim+.15,(t-.3)/.4):mix(dim+.15,1.,(t-.7)/.3);
         c=mix(c,vec3(.016,.024,.031),clamp(a,0.,1.));
@@ -323,7 +323,7 @@ export function startBackground() {
     },
     { passive: true }
   );
-  /* наклон планшета/телефона. В альбомной ориентации оси beta/gamma меняются местами — поворачиваем их по углу экрана */
+  /* наклон планшета/телефона. В альбомной ориентации оси beta/gamma меняются местами - поворачиваем их по углу экрана */
   let base = null;
   const cl = v => Math.max(-1, Math.min(1, v));
   const angle = () => (screen.orientation && screen.orientation.angle) || window.orientation || 0;
@@ -355,17 +355,17 @@ export function startBackground() {
       busy = true;
       DOE.requestPermission()
         .then(r => {
-          stop(); // ответ получен — больше не спрашиваем
+          stop(); // ответ получен - больше не спрашиваем
           if (r === "granted") window.addEventListener("deviceorientation", onTilt, { passive: true });
         })
         .catch(() => {
           busy = false;
-        }); // касание не засчиталось (например, прокрутка) — спросим при следующем
+        }); // касание не засчиталось (например, прокрутка) - спросим при следующем
     };
     window.addEventListener("touchend", ask, true);
     window.addEventListener("click", ask, true);
   } else window.addEventListener("deviceorientation", onTilt, { passive: true });
-  /* пока наклона нет (не разрешили или нет датчика) — фон чуть следует за пальцем при прокрутке */
+  /* пока наклона нет (не разрешили или нет датчика) - фон чуть следует за пальцем при прокрутке */
   let touch0 = null;
   window.addEventListener(
     "touchstart",
@@ -406,10 +406,10 @@ export function startBackground() {
 
   /* ---------- цикл ----------
      Экономия батареи и процессора:
-     — не чаще FPS кадров в секунду (фон медленный, разницы с 60 не видно);
-     — если IDLE_STOP_MS никто ничего не делает (мышь, касание, прокрутка, клавиши), цикл останавливается:
-       на холсте остаётся последний кадр, процессор и видеокарта отдыхают. Любое действие — фон продолжает с того же места;
-     — в скрытой вкладке браузер сам не вызывает requestAnimationFrame. */
+     - не чаще FPS кадров в секунду (фон медленный, разницы с 60 не видно);
+     - если IDLE_STOP_MS никто ничего не делает (мышь, касание, прокрутка, клавиши), цикл останавливается:
+       на холсте остаётся последний кадр, процессор и видеокарта отдыхают. Любое действие - фон продолжает с того же места;
+     - в скрытой вкладке браузер сам не вызывает requestAnimationFrame. */
   const FPS = 30,
     FRAME_MS = 1000 / FPS,
     IDLE_STOP_MS = 20000;
@@ -422,7 +422,7 @@ export function startBackground() {
   function wake() {
     lastActive = performance.now();
     if (raf || dead) return;
-    const d = lastActive - pausedAt; // время на паузе — сдвигаем часы, чтобы сцена не прыгнула
+    const d = lastActive - pausedAt; // время на паузе - сдвигаем часы, чтобы сцена не прыгнула
     t0 += d;
     nextAnom += d;
     raf = requestAnimationFrame(frame);

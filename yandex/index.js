@@ -2,11 +2,11 @@
    Сервер в России: у части российских провайдеров соединения с Cloudflare обрываются, поэтому не Cloudflare Worker.
    Проверяет защиту от ботов (Yandex SmartCaptcha или Cloudflare Turnstile) и данные, затем создаёт в репозитории ветку
    guide/<адрес> с файлами guides/<адрес>/index.md и картинками и открывает pull request.
-   На сайт гайд попадает, только когда pull request принимают (Merge). Настройка — README.md рядом.
+   На сайт гайд попадает, только когда pull request принимают (Merge). Настройка - README.md рядом.
 
    Среда выполнения Node.js 22, точка входа index.handler, таймаут 30 с, функция публичная.
    Переменные окружения:
-     GITHUB_TOKEN      fine-grained токен только на этот репозиторий, права Contents и Pull requests — Read and write
+     GITHUB_TOKEN      fine-grained токен только на этот репозиторий, права Contents и Pull requests - Read and write
      SMARTCAPTCHA_SERVER_KEY  ключ сервера Yandex SmartCaptcha (если на сайте включена SmartCaptcha)
      TURNSTILE_SECRET  Secret key виджета Turnstile (запасной вариант; можно оставить оба)
      GITHUB_REPO       Sof-oss/helper
@@ -14,7 +14,7 @@
      ALLOWED_ORIGINS   https://heart-of-the-zone.ru (через запятую, если адресов несколько) */
 "use strict";
 
-/* у Яндекса запрос целиком — до 3,5 МБ, картинки приходят в base64 (+33 %), поэтому такие лимиты */
+/* у Яндекса запрос целиком - до 3,5 МБ, картинки приходят в base64 (+33 %), поэтому такие лимиты */
 const LIM = {
   title: [5, 100],
   author: [2, 40],
@@ -25,13 +25,13 @@ const LIM = {
 };
 const IMG_NAME = /^img-[1-9]\.(webp|jpg|png)$/;
 
-/* Защита проверки «дошёл ли гайд» (GET ?check=…). Она без капчи, а каждый вызов — запрос к GitHub API;
+/* Защита проверки «дошёл ли гайд» (GET ?check=…). Она без капчи, а каждый вызов - запрос к GitHub API;
    если долбить её без остановки, кончится лимит токена (5000 запросов в час) и перестанет работать вся форма.
    Поэтому:
-   — список веток guide/… кэшируется на CHECK_CACHE_MS: сколько бы ни спрашивали, GitHub видит не больше запроса в эти секунды;
-   — с одного адреса — не больше CHECK_PER_IP проверок за CHECK_WINDOW_MS, дальше ответ 429.
+   - список веток guide/… кэшируется на CHECK_CACHE_MS: сколько бы ни спрашивали, GitHub видит не больше запроса в эти секунды;
+   - с одного адреса - не больше CHECK_PER_IP проверок за CHECK_WINDOW_MS, дальше ответ 429.
    Форма спрашивает 4 раза с паузой 2,5 с и только если потерялся ответ на отправку, так что обычный посетитель в лимит не упрётся.
-   Счётчики живут в памяти экземпляра функции (Яндекс держит его несколько минут, при нагрузке поднимает ещё) —
+   Счётчики живут в памяти экземпляра функции (Яндекс держит его несколько минут, при нагрузке поднимает ещё) -
    это не точный лимит, но от простого перебора защищает. Строгий лимит можно включить в API Gateway (см. README). */
 const CHECK_CACHE_MS = 5000,
   CHECK_PER_IP = 20,
@@ -102,13 +102,13 @@ module.exports.handler = async function (event) {
   if (d.website) return reply(200, { ok: true }); /* скрытое поле заполняют только боты */
 
   /* защита от ботов: форма сообщает, какая капча стояла на странице (captcha: "yandex" | "turnstile").
-     Проверяется только та, для которой в функции задан ключ, — подделать поле и обойти проверку нельзя */
+     Проверяется только та, для которой в функции задан ключ, - подделать поле и обойти проверку нельзя */
   const token = String(d.token || "");
   const useYandex = d.captcha === "yandex" ? !!env.SMARTCAPTCHA_SERVER_KEY : !env.TURNSTILE_SECRET;
   let human = false;
   if (!token) human = false;
   else if (useYandex) {
-    /* https://yandex.cloud/ru/docs/smartcaptcha/concepts/validation: при ошибке сервиса status != "ok" —
+    /* https://yandex.cloud/ru/docs/smartcaptcha/concepts/validation: при ошибке сервиса status != "ok" -
        такой гайд не пропускаем */
     const q = new URLSearchParams({ secret: env.SMARTCAPTCHA_SERVER_KEY || "", token, ip });
     const sc = await fetch("https://smartcaptcha.yandexcloud.net/validate?" + q, { method: "GET" })
@@ -155,7 +155,7 @@ module.exports.handler = async function (event) {
     if (!im || !IMG_NAME.test(im.name) || names.has(im.name) || typeof im.data !== "string")
       return bad("Неправильная картинка");
     names.add(im.name);
-    /* целиком картинку не раскодируем: размер считается по длине base64, тип — по первым байтам файла (а не по имени) */
+    /* целиком картинку не раскодируем: размер считается по длине base64, тип - по первым байтам файла (а не по имени) */
     const size = Math.floor((im.data.length * 3) / 4);
     if (size > LIM.imgBytes) return bad(im.name + ": картинка больше 1 МБ");
     total += size;
@@ -216,8 +216,8 @@ function github(env) {
   };
 }
 
-/* ветка guide/…-<хвост> уже есть — этот гайд уже прислали.
-   cached: для проверки из формы список веток берётся из кэша (см. CHECK_CACHE_MS); при отправке — всегда свежий */
+/* ветка guide/…-<хвост> уже есть - этот гайд уже прислали.
+   cached: для проверки из формы список веток берётся из кэша (см. CHECK_CACHE_MS); при отправке - всегда свежий */
 async function findGuideBranch(env, tail, cached) {
   const now = Date.now();
   if (!cached || !refsCache || now - refsCache.at > CHECK_CACHE_MS) {
@@ -245,14 +245,14 @@ async function openPullRequest(env, slug, title, author, md, imgs) {
   }
   const t = await gh("POST", "/git/trees", { base_tree: head.tree.sha, tree });
   const commit = await gh("POST", "/git/commits", {
-    message: "Гайд: " + title + " — " + author,
+    message: "Гайд: " + title + " - " + author,
     tree: t.sha,
     parents: [ref.object.sha]
   });
   const branch = "guide/" + slug;
   await gh("POST", "/git/refs", { ref: "refs/heads/" + branch, sha: commit.sha });
   const pr = await gh("POST", "/pulls", {
-    title: "Гайд: " + title + " — " + author,
+    title: "Гайд: " + title + " - " + author,
     head: branch,
     base,
     body: [
@@ -262,15 +262,15 @@ async function openPullRequest(env, slug, title, author, md, imgs) {
       "**Адрес после публикации:** https://heart-of-the-zone.ru/guide/" + slug,
       "",
       "### Как проверить и опубликовать",
-      "1. **Files changed** → файл `" + dir + "index.md` → «⋯» → **View file** — текст гайда с картинками.",
-      "2. Поправить текст или подпись: в том же меню **Edit file** (карандаш). Подпись автора — строка `author:` в шапке файла, заголовок — `title:`. Сохранить — **Commit changes** (в эту же ветку).",
+      "1. **Files changed** → файл `" + dir + "index.md` → «⋯» → **View file** - текст гайда с картинками.",
+      "2. Поправить текст или подпись: в том же меню **Edit file** (карандаш). Подпись автора - строка `author:` в шапке файла, заголовок - `title:`. Сохранить - **Commit changes** (в эту же ветку).",
       "3. Опубликовать: **Merge pull request**. Через пару минут после сборки гайд появится на сайте.",
       "4. Отклонить: **Close pull request**, ветку можно удалить.",
       "",
       "Картинки: " + (imgs.length ? imgs.map(i => "`" + i.name + "`").join(", ") : "нет") + "."
     ].join("\n")
   });
-  /* метка — для удобства, без неё тоже работает */
+  /* метка - для удобства, без неё тоже работает */
   try {
     await gh("POST", "/issues/" + pr.number + "/labels", { labels: ["гайд"] });
   } catch (e) {}

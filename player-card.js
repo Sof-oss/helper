@@ -1,11 +1,11 @@
 /* Карточки игроков на странице «Топ-100».
    Открываются кликом по нику в рейтинге, кнопкой «Найти игрока» или по ссылке /top100#p=<ID> или /p/<ID>.
-   Данные — top100-players.json (собирает build-players.js при обновлении рейтинга),
+   Данные - top100-players.json (собирает build-players.js при обновлении рейтинга),
    скачиваются один раз при первом открытии карточки, поэтому сам рейтинг грузится так же быстро.
    Использует общие с top100.js TOP100_TABS, esc, escAttr, fmt, norm, top100Period */
 (function () {
   "use strict";
-  /* пререндер в build.js гоняет скрипты без браузера — там карточкам делать нечего */
+  /* пререндер в build.js гоняет скрипты без браузера - там карточкам делать нечего */
   if (typeof window.fetch !== "function" || !document.body) return;
 
   const URL_DATA =
@@ -20,7 +20,7 @@
     { key: "all", label: "За всё время" }
   ];
   const TAB = Object.fromEntries(TOP100_TABS.map(t => [t.key, t]));
-  /* звание по уровню — как в классическом «Сталкере» */
+  /* звание по уровню - как в классическом «Сталкере» */
   const TITLES = [
     [30, "Легенда"],
     [25, "Мастер"],
@@ -29,7 +29,7 @@
     [0, "Новичок"]
   ];
   const titleOf = l => TITLES.find(t => (l || 0) >= t[0])[1];
-  /* нашивка группировки: каноничная эмблема из ui.js, для остальных — щиток в цвете группировки с буквой */
+  /* нашивка группировки: каноничная эмблема из ui.js, для остальных - щиток в цвете группировки с буквой */
   function patchSvg(g, color, nick) {
     const e = g && window.__factionEmblem && window.__factionEmblem(g);
     if (e && e.svg) return '<svg viewBox="0 0 64 72" aria-hidden="true">' + e.svg + "</svg>";
@@ -129,7 +129,7 @@
     return v;
   }
   /* индекс снимка-базы для периода (как в рейтинге, build-top100.js: самый свежий снимок, которому
-     не меньше срока за вычетом допуска — четверть срока, но не больше 12 часов) */
+     не меньше срока за вычетом допуска - четверть срока, но не больше 12 часов) */
   function baseIndex(per) {
     const d = data.dates,
       last = d.length - 1;
@@ -141,7 +141,7 @@
     for (let i = 0; i < last; i++) if (d[i] <= target) b = i;
     return b;
   }
-  /* периоды, для которых есть база; одинаковая база у разных периодов — дубль: «С прошлого обновления»
+  /* периоды, для которых есть база; одинаковая база у разных периодов - дубль: «С прошлого обновления»
      уступает периоду со сроком, из остальных остаётся первый (как в рейтинге) */
   function availablePeriods() {
     const timed = new Set(PERIODS.filter(p => p.ms).map(baseIndex));
@@ -285,7 +285,7 @@
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
   function share() {
-    /* /p/<id> — страница с превью «Личное дело» для соцсетей (build-previews.js), она сразу открывает эту карточку */
+    /* /p/<id> - страница с превью «Личное дело» для соцсетей (build-previews.js), она сразу открывает эту карточку */
     const url = location.origin + "/p/" + encodeURIComponent(cur);
     const btn = document.getElementById("pcShare");
     const done = () => {
@@ -297,13 +297,13 @@
       }, 1600);
     };
     if (navigator.share && matchMedia("(pointer:coarse)").matches)
-      navigator.share({ title: data.players[cur].n + " — Сердце Зоны", url: url }).catch(() => {});
+      navigator.share({ title: data.players[cur].n + " - Сердце Зоны", url: url }).catch(() => {});
     else if (navigator.clipboard)
       navigator.clipboard.writeText(url).then(done, () => prompt("Ссылка на карточку:", url));
     else prompt("Ссылка на карточку:", url);
   }
 
-  /* открыть: id игрока, либо null — только поиск */
+  /* открыть: id игрока, либо null - только поиск */
   function open(id, opts) {
     show();
     const body = document.getElementById("pcBody");
@@ -331,7 +331,7 @@
           period = PERIODS.some(p => p.key === tp) ? tp : "last";
         }
         renderCard();
-        /* пока карточка открыта, в адресной строке /p/<id> — страница с превью «Личное дело»: скопированная
+        /* пока карточка открыта, в адресной строке /p/<id> - страница с превью «Личное дело»: скопированная
            оттуда ссылка в Telegram/VK показывает карточку игрока, а не общее превью рейтинга.
            Все пути к данным и картинкам на странице абсолютные, поэтому смена адреса их не ломает */
         if (!/^\/p\//.test(location.pathname)) basePath = location.pathname;
@@ -383,7 +383,7 @@
   }
   function bigChart(pts, color, label) {
     if (pts.length < 2)
-      return '<div class="pc-chart-empty">График появится после следующих обновлений рейтинга — пока известна одна точка.</div>';
+      return '<div class="pc-chart-empty">График появится после следующих обновлений рейтинга - пока известна одна точка.</div>';
     const narrow = window.innerWidth < 600,
       W = narrow ? 360 : 600,
       H = narrow ? 190 : 180,
@@ -443,7 +443,7 @@
           "</text>"
       )
       .join("");
-    /* середина шкалы значений — третья подпись по вертикали */
+    /* середина шкалы значений - третья подпись по вертикали */
     const midVal =
       mx - mn > 2
         ? '<text x="' +
@@ -557,7 +557,7 @@
   }
 
   /* ---------- карточка ---------- */
-  /* показатель по ключу: индекс в metrics, у уровня -1 (в ряду он стоит перед показателями); -2 — нет такого */
+  /* показатель по ключу: индекс в metrics, у уровня -1 (в ряду он стоит перед показателями); -2 - нет такого */
   const metricIndex = k => (k === "level" ? -1 : data.metrics.indexOf(k) >= 0 ? data.metrics.indexOf(k) : -2);
   const metaOf = k =>
     k === "level" ? { label: "Уровень", accent: "#e7f0f8" } : TAB[k] || { label: k, accent: "#54bfff" };
@@ -708,7 +708,7 @@
           const from = data.dates[g[0]],
             isFirst = i === arr.length - 1,
             to = i ? data.dates[arr[i - 1][0]] : null;
-          /* когда вступил в первую известную группировку, неизвестно — знаем только, что уже был в ней на эту дату */
+          /* когда вступил в первую известную группировку, неизвестно - знаем только, что уже был в ней на эту дату */
           const since = isFirst ? (g[1] ? "как минимум с " : "на ") + dateFmt(from) : "с " + dateFmt(from);
           return (
             '<li class="pc-tl-item' +

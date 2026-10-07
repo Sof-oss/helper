@@ -16,7 +16,7 @@ function infoNoteColor(note) {
   if (note.includes("ученого") || note.includes("учёного")) return "#26c6da";
   return "#6fcf97";
 }
-/* reached — уровень игрока из калькулятора: строки до него включительно уже получены, сама строка reached — текущая */
+/* reached - уровень игрока из калькулятора: строки до него включительно уже получены, сама строка reached - текущая */
 function infoTableMarkup(rows, headers, reached) {
   const r = reached || 0;
   return (
@@ -50,7 +50,7 @@ function infoTableMarkup(rows, headers, reached) {
 }
 
 /* прогресс игрока из калькулятора (app.js хранит его в localStorage gameHelperState):
-   level — уровень персонажа, talents — сколько очков талантов вложено (= сколько уровней талантов получено) */
+   level - уровень персонажа, talents - сколько очков талантов вложено (= сколько уровней талантов получено) */
 const CALC_STATE_KEY = "gameHelperState";
 function readCalcProgress() {
   try {
@@ -100,7 +100,7 @@ function infoProgressMarkup(rows, reached, unit, doneLabel) {
 }
 function infoProgressNoteMarkup(p) {
   if (!p || (!p.level && !p.talents))
-    return '<span class="info-progress-hint"><i aria-hidden="true"></i><span>Укажите уровень персонажа и вложите таланты в <a href="/calculator">калькуляторе</a> — полученные уровни отметятся в таблицах</span></span>';
+    return '<span class="info-progress-hint"><i aria-hidden="true"></i><span>Укажите уровень персонажа и вложите таланты в <a href="/calculator">калькуляторе</a> - полученные уровни отметятся в таблицах</span></span>';
   return '<span class="info-progress-hint is-set"><i aria-hidden="true"></i><span>Полученные уровни отмечены по данным <a href="/calculator">калькулятора</a></span></span>';
 }
 
@@ -197,7 +197,7 @@ function renderInfo() {
   renderInfoTabs();
   applyInfoActiveTab();
 }
-/* калькулятор открыт в соседней вкладке — таблицы обновляются сразу; при возврате на вкладку тоже */
+/* калькулятор открыт в соседней вкладке - таблицы обновляются сразу; при возврате на вкладку тоже */
 window.addEventListener &&
   window.addEventListener("storage", e => {
     if (e.key === CALC_STATE_KEY) renderInfo();

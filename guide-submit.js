@@ -1,17 +1,17 @@
 /* Форма «Отправить свой гайд» на странице гайдов.
    Открывается кнопкой или по адресу /guides#send. Текст пишется в простом Markdown (guide-md.js),
    предпросмотр рисуется тем же кодом, что и страница гайда на сайте. Картинки сжимаются прямо в браузере.
-   Отправка — в функцию Yandex Cloud (yandex/index.js), она создаёт pull request в репозитории сайта;
-   гайд публикуется, когда его принимают. Адрес и ключ защиты от ботов — в guides-config.js:
+   Отправка - в функцию Yandex Cloud (yandex/index.js), она создаёт pull request в репозитории сайта;
+   гайд публикуется, когда его принимают. Адрес и ключ защиты от ботов - в guides-config.js:
    Yandex SmartCaptcha (smartcaptchaSiteKey) или, если его нет, Cloudflare Turnstile (turnstileSiteKey).
-   Черновик (заголовок, ник, текст) хранится в localStorage, картинки — только до перезагрузки страницы */
+   Черновик (заголовок, ник, текст) хранится в localStorage, картинки - только до перезагрузки страницы */
 (function () {
   "use strict";
   const root = document.getElementById("guideForm");
   const openBtn = document.getElementById("guideSendOpen");
   if (!root || !window.GuideMD) return;
   const cfg = window.GUIDES_CONFIG || {};
-  /* капча: SmartCaptcha от Яндекса работает в России без обрывов, Turnstile — запасной вариант */
+  /* капча: SmartCaptcha от Яндекса работает в России без обрывов, Turnstile - запасной вариант */
   const CAPTCHA = cfg.smartcaptchaSiteKey ? "yandex" : cfg.turnstileSiteKey ? "turnstile" : "";
   const ready = !!(cfg.endpoint && CAPTCHA);
   const LIM = { title: 100, author: 40, text: 30000, minText: 200, images: 5, imgBytes: 2 * 1024 * 1024, side: 1600 };
@@ -23,7 +23,7 @@
     widget = null,
     sending = false;
   /* номер черновика: повторная отправка того же гайда (двойной клик, повтор после ошибки сети)
-     не создаст второй pull request — Worker узнает его по этому номеру */
+     не создаст второй pull request - Worker узнает его по этому номеру */
   const newSid = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
   let sid = newSid();
 
@@ -57,7 +57,7 @@
       "</button></div>" +
       (ready
         ? ""
-        : '<p class="gf-note gf-warn">Приём гайдов скоро заработает. Пока можно написать гайд и посмотреть, как он будет выглядеть, — черновик сохранится в этом браузере.</p>') +
+        : '<p class="gf-note gf-warn">Приём гайдов скоро заработает. Пока можно написать гайд и посмотреть, как он будет выглядеть, - черновик сохранится в этом браузере.</p>') +
       '<form id="gfForm" novalidate>' +
       '<div class="gf-row"><label class="gf-field"><span>Заголовок</span><input id="gfTitle" maxlength="' +
       LIM.title +
@@ -82,7 +82,7 @@
       '</div><div class="gf-tabs" role="tablist"><button type="button" role="tab" class="active" aria-selected="true" data-tab="edit">Текст</button><button type="button" role="tab" aria-selected="false" data-tab="preview">Предпросмотр</button></div></div>' +
       '<textarea id="gfText" maxlength="' +
       LIM.text +
-      '" rows="16" placeholder="Текст гайда. Пустая строка — новый абзац. ## в начале строки — подзаголовок, - — пункт списка, **жирный**, *курсив*. Картинки — кнопкой на панели." required></textarea>' +
+      '" rows="16" placeholder="Текст гайда. Пустая строка - новый абзац. ## в начале строки - подзаголовок, - - пункт списка, **жирный**, *курсив*. Картинки - кнопкой на панели." required></textarea>' +
       '<div class="gf-preview guide-body" id="gfPreview" hidden></div>' +
       '<div class="gf-foot"><span id="gfCount"></span><span>Оформление: <b>## Подзаголовок</b>, <b>**жирный**</b>, <b>- список</b>, <b>[текст](ссылка)</b></span></div></div>' +
       '<div class="gf-images"><div class="gf-images-list" id="gfImages"></div>' +
@@ -332,8 +332,8 @@
       const t = title.value.trim(),
         a = author.value.trim(),
         body = text.value.trim();
-      if (t.length < 5) return fail(title, "Напишите заголовок — хотя бы 5 символов");
-      if (a.length < 2) return fail(author, "Укажите ник — он будет подписью автора");
+      if (t.length < 5) return fail(title, "Напишите заголовок - хотя бы 5 символов");
+      if (a.length < 2) return fail(author, "Укажите ник - он будет подписью автора");
       if (body.length < LIM.minText)
         return fail(
           text,
@@ -369,7 +369,7 @@
           });
           res = await r.json().catch(() => ({}));
         } catch (e) {
-          /* ответ потерялся (обрыв связи и т. п.), но гайд мог дойти — спрашиваем по номеру черновика */
+          /* ответ потерялся (обрыв связи и т. п.), но гайд мог дойти - спрашиваем по номеру черновика */
           setStatus("Проверяю, дошёл ли гайд…");
           if (!(await arrived())) throw new Error("Связь оборвалась, гайд не дошёл. Попробуйте отправить ещё раз");
           r = { ok: true };
@@ -437,7 +437,7 @@
     el.focus();
   }
 
-  /* сжатие: длинная сторона до 1600 px, WebP (если браузер не умеет — JPEG); PNG/JPG меньше лимита и размера не трогаем */
+  /* сжатие: длинная сторона до 1600 px, WebP (если браузер не умеет - JPEG); PNG/JPG меньше лимита и размера не трогаем */
   async function shrink(file) {
     const url = URL.createObjectURL(file);
     try {

@@ -234,7 +234,7 @@ function talentAncestors(code) {
 }
 
 /* Дерево статичное: пользователь его не двигает и не масштабирует.
-   Масштаб считается один раз — так, чтобы дерево целиком помещалось в окно,
+   Масштаб считается один раз - так, чтобы дерево целиком помещалось в окно,
    и пересчитывается при изменении размеров окна */
 const treeT = { s: 1, x: 0, y: 0 };
 function clampTreeScale(s) {
@@ -629,7 +629,7 @@ function renderTalents() {
   const legend =
     '<div class="talent-legend" aria-hidden="true"><span><i class="lg-maxed"></i>Изучено до максимума</span><span><i class="lg-ready"></i>Можно прокачать</span><span><i class="lg-open"></i>Открыт, очков нет</span><span><i class="lg-locked"></i>Закрыт требованием</span></div>';
   $("talentSidebar").innerHTML =
-    /* «Таланты N / 135» уже есть в шапке окна — здесь не повторяем */
+    /* «Таланты N / 135» уже есть в шапке окна - здесь не повторяем */
     '<div class="talent-gauge" style="--pct:' +
     pct +
     '"><div class="talent-gauge-ticks"></div><div class="talent-gauge-value"><b>' +
@@ -867,7 +867,7 @@ function tokenWeaponStats() {
   });
 }
 /* карточки оружия: урон за жетон, полоска выгоды и три строки расчёта.
-   Самое выгодное оружие выделено рамкой и зелёной полоской — этого достаточно. */
+   Самое выгодное оружие выделено рамкой и зелёной полоской - этого достаточно. */
 const TOKEN_ICON_CLASS = { grenade: "grenade", gl: "ubgl", gauss: "gauss" };
 function renderTokens() {
   const tokens = tokenInt("tokenCount"),
@@ -1010,7 +1010,7 @@ function optionMarkup(arr, set, type) {
 function set(id, v, roll) {
   const el = $(id);
   if (!el) return;
-  /* итоговый урон «докручивается» до нового значения (ui.js), остальные подписи — сразу */
+  /* итоговый урон «докручивается» до нового значения (ui.js), остальные подписи - сразу */
   if (roll && window.__roll) {
     window.__roll(el, v);
     return;
@@ -1018,7 +1018,7 @@ function set(id, v, roll) {
   el.textContent = v;
 }
 function calc() {
-  /* уровень — только целое 1–100; пустое поле не трогаем, пока человек печатает (поправится при уходе из поля) */
+  /* уровень - только целое 1–100; пустое поле не трогаем, пока человек печатает (поправится при уходе из поля) */
   const rawLevel = $("level").value,
     level = clampLevel(rawLevel);
   if (rawLevel !== "" && rawLevel !== String(level)) $("level").value = level;
@@ -1083,7 +1083,7 @@ const buildHashOf = b => buildHashOfCore(b);
 function buildHash() {
   return buildHashOf(currentBuild());
 }
-/* разбор билда — src/calc-core.js */
+/* разбор билда - src/calc-core.js */
 const parseBuild = raw => parseBuildCore(raw);
 /* расчёт чужого билда: на время подменяем состояние и возвращаем как было */
 function resultsFor(b) {
@@ -1146,8 +1146,8 @@ const CMP_GROUPS = [
   ]
 ];
 const sumRanks = t => Object.values(t).reduce((a, b) => a + b, 0);
-/* у большего значения зелёная стрелка вверх, у меньшего красная вниз, рядом на сколько; поровну — без отметок.
-   Под числом — полоска: насколько значение больше/меньше второго билда */
+/* у большего значения зелёная стрелка вверх, у меньшего красная вниз, рядом на сколько; поровну - без отметок.
+   Под числом - полоска: насколько значение больше/меньше второго билда */
 function cmpRow(label, x, y, pct) {
   const d = Math.abs(y - x),
     eq = d < (pct ? 0.005 : 0.5),
@@ -1259,7 +1259,7 @@ function renderCompare() {
     '<th class="cmp-h-a"><i class="cmp-dot"></i>Ваш билд</th><th class="cmp-h-b"><i class="cmp-dot"></i>Другой билд</th></tr></thead><tbody>' +
     rows +
     "</tbody></table>" +
-    '<p class="cmp-note">▲ больше, ▼ меньше; рядом показано, на сколько, а полоска — насколько значение больше второго билда.</p>' +
+    '<p class="cmp-note">▲ больше, ▼ меньше; рядом показано, на сколько, а полоска - насколько значение больше второго билда.</p>' +
     '<details class="cmp-diff"' +
     (diff ? " open" : "") +
     "><summary>Что отличается</summary>" +

@@ -38,7 +38,7 @@ test("бесплатные удары совпадают с игрой на 24 �
   const b24 = baseDamageByLevel(24),
     b25 = baseDamageByLevel(25);
   assert.deepEqual([b24.knife, b24.pistol, b24.auto], [74, 77, 87]);
-  /* замер в игре: билд #l=25&s=1023&i=15&t=505505505000010000000000000 — нож 143, пистолет 202, автомат 280 */
+  /* замер в игре: билд #l=25&s=1023&i=15&t=505505505000010000000000000 - нож 143, пистолет 202, автомат 280 */
   assert.deepEqual([b25.knife, b25.pistol, b25.auto], [75, 79, 89]);
 });
 
@@ -78,7 +78,7 @@ test("таланты без выполненных требований отбр
   const r = sanitizeTalents({ [child[0]]: 5 });
   assert.equal(r[child[0]], undefined);
   const ok = sanitizeTalents({ ...Object.fromEntries(child[9].map(q => [q, 5])), [child[0]]: 2 });
-  // предки самого child тоже должны быть выполнены — проверяем только если они корневые
+  // предки самого child тоже должны быть выполнены - проверяем только если они корневые
   if (child[9].every(q => !TALENTS.find(t => t[0] === q)[9].length)) assert.equal(ok[child[0]], 2);
 });
 

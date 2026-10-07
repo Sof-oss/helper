@@ -1,4 +1,4 @@
-/* ESLint: npm run lint. Только явные ошибки (необъявленные имена, недостижимый код и т. п.), стиль — за Prettier */
+/* ESLint: npm run lint. Только явные ошибки (необъявленные имена, недостижимый код и т. п.), стиль - за Prettier */
 import js from "@eslint/js";
 import globals from "globals";
 
@@ -56,7 +56,7 @@ export default [
       }
     }
   },
-  /* скрипты сборки и выгрузки — Node.js */
+  /* скрипты сборки и выгрузки - Node.js */
   {
     files: ["build*.js", "fetch-players.js", "yandex/**/*.js", "guide-md.js", "test/**"],
     languageOptions: { globals: { ...globals.node } }

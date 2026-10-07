@@ -43,8 +43,8 @@ const TOP100_TABS = [
 ];
 
 /* группировки приходят из общей выгрузки (top100-data.js, собирает build-top100.js):
-   TOP100_FACTIONS — группировки текущего рейтинга с цветами, TOP100_GROUPS — ник -> группировка.
-   Новая группировка в рейтинге сама получает плашку и цвет, пропавшая — исчезает */
+   TOP100_FACTIONS - группировки текущего рейтинга с цветами, TOP100_GROUPS - ник -> группировка.
+   Новая группировка в рейтинге сама получает плашку и цвет, пропавшая - исчезает */
 const FACTIONS = (Array.isArray(window.TOP100_FACTIONS) ? window.TOP100_FACTIONS : []).map(f => ({
   key: f.name,
   label: f.name,
@@ -54,7 +54,7 @@ const FACTION_BY_KEY = new Map(FACTIONS.map(f => [f.key, f]));
 const GROUPS = window.TOP100_GROUPS || {};
 const norm = s => String(s).toLowerCase().replace(/ё/g, "е");
 const factionOf = nick => FACTION_BY_KEY.get(GROUPS[nick]) || null;
-const NO_FACTION = "—"; // «—» в выгрузке = без группировки, своей группировкой быть не может
+const NO_FACTION = "-"; // «-» в выгрузке = без группировки, своей группировкой быть не может
 
 let currentTop100Tab = TOP100_TABS[0].key;
 try {
@@ -87,7 +87,7 @@ function periodChanges() {
   if (p && all && all[p.key]) return all[p.key];
   return { delta: window.TOP100_DELTA, rank: window.TOP100_RANK };
 }
-/* «за неделю», «с прошлого обновления» — для подсказок у стрелок */
+/* «за неделю», «с прошлого обновления» - для подсказок у стрелок */
 function periodPhrase() {
   const p = currentPeriod();
   return p ? p.label.charAt(0).toLowerCase() + p.label.slice(1) : "с прошлого обновления";
@@ -150,7 +150,7 @@ function metricDeltaMarkup(nick, tabKey) {
   );
 }
 
-/* rank — реальное место. plain — без медалей и подсветки (при сортировке по уровню места вразброс) */
+/* rank - реальное место. plain - без медалей и подсветки (при сортировке по уровню места вразброс) */
 function top100RowMarkup(row, rank, plain, tabKey) {
   const [nick, level, value, inactive] = row;
   const podium = !plain && rank <= 3;
@@ -300,12 +300,12 @@ function renderTop100Tabs() {
       t.label +
       "</button>"
   ).join("");
-  /* при загрузке активная вкладка сразу на месте, при смене раздела — плавно */
+  /* при загрузке активная вкладка сразу на месте, при смене раздела - плавно */
   centerActiveTab(tabsRendered);
   tabsRendered = true;
 }
 /* вкладки на телефоне идут одной строкой: показываем, что строку можно прокрутить, и держим активную на виду.
-   В пререндере (build.js) у элементов нет размеров — тогда ничего не делаем */
+   В пререндере (build.js) у элементов нет размеров - тогда ничего не делаем */
 function updateTabsFade() {
   const t = $("top100Tabs");
   if (!t || typeof t.scrollWidth !== "number") return;
@@ -343,7 +343,7 @@ function renderPeriod() {
     cur = currentPeriod();
   box.hidden = !cur;
   if (!cur) return;
-  /* один период — выбирать не из чего: кнопку и «Изменения:» не показываем, остаётся только подпись с датами */
+  /* один период - выбирать не из чего: кнопку и «Изменения:» не показываем, остаётся только подпись с датами */
   const single = list.length < 2;
   btns.hidden = single;
   const title = box.querySelector(".t100-period-title");
@@ -371,7 +371,7 @@ function renderPeriod() {
       (to ? " по <b>" + esc(to) + "</b>" : "") +
       (cur.partial ? "<small>Данных за полный период пока нет: считаем с самой ранней сохранённой даты</small>" : "")
     : "Показаны изменения <b>" + esc(cur.label.toLowerCase()) + "</b>";
-  /* коротко: «05.10 15:20 → 19:29», полная фраза — в подсказке и для экранного диктора */
+  /* коротко: «05.10 15:20 → 19:29», полная фраза - в подсказке и для экранного диктора */
   /* в подсказке две строки: период и, если он неполный, пояснение (textContent склеил бы их без пробела) */
   const full = cur.from
     ? "Показаны изменения с " +
@@ -502,7 +502,7 @@ document.addEventListener("keydown", e => {
 /* дату отдаёт top100-data.js, в разметке только заглушка */
 const updatedEl = $("top100Updated");
 if (updatedEl && window.TOP100_UPDATED) {
-  /* в шапке коротко «05.10 19:29», полная дата — в подсказке */
+  /* в шапке коротко «05.10 19:29», полная дата - в подсказке */
   const st = shortStamp(window.TOP100_UPDATED),
     box = $("top100UpdatedBox");
   updatedEl.textContent = st.time ? st.day + " " + st.time : window.TOP100_UPDATED;

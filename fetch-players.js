@@ -8,13 +8,13 @@
  * Токен живёт около суток, сохранять его никуда не нужно (и нельзя коммитить в репозиторий).
  *
  * Как работает:
- *  1. /api/users/search постранично (по 100) — список всех игроков: id, ник, уровень, репутация, последний вход, группировка;
- *  2. /api/users/<id>/profile — подробности (таланты, боссы, тайники и т. д.) только для тех, у кого есть прогресс
+ *  1. /api/users/search постранично (по 100) - список всех игроков: id, ник, уровень, репутация, последний вход, группировка;
+ *  2. /api/users/<id>/profile - подробности (таланты, боссы, тайники и т. д.) только для тех, у кого есть прогресс
  *     (репутация > 0 или уровень > 1): у остальных все показатели нулевые, их профили не запрашиваем;
- *  3. CSV в том же формате, что раньше, — его читает build-top100.js.
+ *  3. CSV в том же формате, что раньше, - его читает build-top100.js.
  * Запросы идут понемногу (по 3 одновременно, с паузой) и повторяются при ошибках, чтобы не нагружать сервер игры.
  *
- * Параметры: --limit=N — взять только N профилей (для проверки), --out=путь — куда писать CSV */
+ * Параметры: --limit=N - взять только N профилей (для проверки), --out=путь - куда писать CSV */
 const fs = require("fs");
 const path = require("path");
 const readline = require("readline");
@@ -73,14 +73,14 @@ async function get(url, tries = 5) {
       continue;
     }
     if (res.status === 401 || res.status === 403)
-      throw new Error("Сервер не принял токен (" + res.status + "). Скорее всего, он устарел — возьмите новый.");
+      throw new Error("Сервер не принял токен (" + res.status + "). Скорее всего, он устарел - возьмите новый.");
     if (res.ok) return res.json();
     if (i >= tries || (res.status < 500 && res.status !== 429)) throw new Error(`Ошибка ${res.status} на ${url}`);
-    await sleep((res.status === 429 ? 5000 : 1000) * i); // сервер просит притормозить — ждём дольше
+    await sleep((res.status === 429 ? 5000 : 1000) * i); // сервер просит притормозить - ждём дольше
   }
 }
 
-/* «В Зоне»: сколько прошло с регистрации, как в игре — «4 месяца», «12 дней» */
+/* «В Зоне»: сколько прошло с регистрации, как в игре - «4 месяца», «12 дней» */
 function plural(n, one, few, many) {
   const a = n % 10,
     b = n % 100;
@@ -103,7 +103,7 @@ const csvField = v => {
   /* в GitHub Actions спросить токен некого: без ZONE_TOKEN сразу понятная ошибка, а не зависание */
   const given = tokenArg || process.env.ZONE_TOKEN;
   if (!given && !process.stdin.isTTY)
-    throw new Error("Токен не указан: задайте переменную окружения ZONE_TOKEN (в GitHub — секрет репозитория)");
+    throw new Error("Токен не указан: задайте переменную окружения ZONE_TOKEN (в GitHub - секрет репозитория)");
   TOKEN = cleanToken(given || (await askToken()));
   if (!TOKEN) throw new Error("Токен не указан");
   const exp = tokenInfo(TOKEN);
@@ -115,7 +115,7 @@ const csvField = v => {
       (process.env.GITHUB_ACTIONS ? "::warning::" : "") +
         "Токен истекает " +
         exp.toLocaleString("ru-RU", { timeZone: "Europe/Moscow" }) +
-        " (МСК) — скоро нужен новый"
+        " (МСК) - скоро нужен новый"
     );
 
   /* 1. список всех игроков */
@@ -189,7 +189,7 @@ const csvField = v => {
           p.user_id,
           p.name ?? s.name,
           inZone(p.created_at, now),
-          (p.clan && p.clan.name) || (s.clan && s.clan.name) || "—",
+          (p.clan && p.clan.name) || (s.clan && s.clan.name) || "-",
           p.level ?? s.level,
           p.reputation ?? s.reputation ?? 0,
           p.talents ?? 0,

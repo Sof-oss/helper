@@ -14,7 +14,7 @@
   "use strict";
   const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-  /* ссылки: только http(s), почта и адреса внутри сайта; всё остальное (javascript: и т. п.) — обычный текст */
+  /* ссылки: только http(s), почта и адреса внутри сайта; всё остальное (javascript: и т. п.) - обычный текст */
   function safeUrl(u) {
     u = String(u).trim();
     if (/^https?:\/\//i.test(u) || /^mailto:/i.test(u) || /^\/(?!\/)/.test(u) || /^#/.test(u)) return u;
@@ -151,7 +151,7 @@
     return { meta, body: m[2] };
   }
 
-  /* первый абзац простым текстом — для описания в списке и в meta description */
+  /* первый абзац простым текстом - для описания в списке и в meta description */
   function excerpt(md, max) {
     const p =
       String(md)
@@ -167,7 +167,7 @@
     max = max || 180;
     return t.length > max ? t.slice(0, max - 1).replace(/\s+\S*$/, "") + "…" : t;
   }
-  /* первая картинка гайда — обложка в списке */
+  /* первая картинка гайда - обложка в списке */
   function firstImage(md) {
     const m = String(md).match(/^\s*!\[[^\]]*\]\(([^)\s]+)\)\s*$/m);
     return m ? m[1] : null;

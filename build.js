@@ -3,17 +3,17 @@
 /* Сборка для деплоя: исходники из корня -> ./dist
  * 0. Общие куски (partials/header.html, partials/footer.html) подставляются вместо <!-- @include имя -->,
  *    в шапке помечается активный пункт меню: так меню правится в одном месте, а не в каждой странице.
- * 0б. Модули собираются esbuild (см. MODULES): 3D главной (src/home-3d.js + three.js) — маленький home-3d.js
- *     и догружаемые части в dist/3d/; калькулятор (src/calculator.js -> app.js, polish.js, talents.js) — один calculator.js.
+ * 0б. Модули собираются esbuild (см. MODULES): 3D главной (src/home-3d.js + three.js) - маленький home-3d.js
+ *     и догружаемые части в dist/3d/; калькулятор (src/calculator.js -> app.js, polish.js, talents.js) - один calculator.js.
  * 1. Таблицы «Информации» и «Топ-100» дописываются прямо в HTML: их видят поисковики и те, у кого выключен JS.
  *    Разметку рисуют те же info.js / info-tasks.js / top100.js, что работают в браузере, поэтому она совпадает.
- * 2. Общие стили (styles.css — бывшие styles.css, polish.css и visual.css) остаются отдельными файлами и кэшируются один раз на весь сайт,
+ * 2. Общие стили (styles.css - бывшие styles.css, polish.css и visual.css) остаются отдельными файлами и кэшируются один раз на весь сайт,
  *    подряд идущие стили одной страницы склеиваются (bundle-*.css); css и js сжимаются esbuild.
  * 3. Ссылки на css, js и картинки получают ?v=<хэш содержимого>, после деплоя старый кэш не подтянется.
  * 3б. Гайды из guides/<адрес>/index.md (Markdown, см. guide-md.js) становятся страницами /guide/<адрес>,
  *     список гайдов дописывается в guides.html, картинки гайдов копируются в dist/guide-img/<адрес>/.
- * 4. В sitemap.xml дописывается lastmod: дата последнего коммита страницы и её css/js, у Топ-100 — время выгрузки рейтинга.
- * 5. После сборки build-previews.js делает ссылки на карточки игроков /p/<id> с картинкой «Личное дело» (npm run build — оба шага).
+ * 4. В sitemap.xml дописывается lastmod: дата последнего коммита страницы и её css/js, у Топ-100 - время выгрузки рейтинга.
+ * 5. После сборки build-previews.js делает ссылки на карточки игроков /p/<id> с картинкой «Личное дело» (npm run build - оба шага).
  * Запуск: npm install (один раз, ставит esbuild), затем node build.js. Без esbuild сборка не идёт: калькулятор собирается им */
 const fs = require("fs");
 const path = require("path");
@@ -33,7 +33,7 @@ const ROOT = __dirname;
 const OUT = path.join(ROOT, "dist");
 
 /* модули: файл в dist -> точка входа и все исходники (по ним же считается дата страницы в sitemap).
-   Исходники модулей в dist не копируются — на сайт попадает только собранный файл */
+   Исходники модулей в dist не копируются - на сайт попадает только собранный файл */
 const MODULES = {
   "home-3d.js": ["src/home-3d.js", "src/zone-intro.js", "src/zone-bg.js", "src/zone-theme.js"],
   "calculator.js": ["src/calculator.js", "src/calc-core.js", "app.js", "polish.js", "talents.js"]
@@ -125,7 +125,7 @@ if (fs.existsSync(GUIDES_DIR)) {
     const { meta, body } = GuideMD.parse(fs.readFileSync(md, "utf8"));
     if (!meta.title) throw new Error("guides/" + slug + "/index.md: нет title в шапке");
     if (/^(true|yes|да)$/i.test(meta.draft || "")) continue;
-    /* картинки: только файлы из папки гайда, ссылки на них — /guide-img/<адрес>/<файл> */
+    /* картинки: только файлы из папки гайда, ссылки на них - /guide-img/<адрес>/<файл> */
     const imgs = fs.readdirSync(path.join(GUIDES_DIR, slug)).filter(f => /\.(webp|jpe?g|png|gif)$/i.test(f));
     if (imgs.length) {
       fs.mkdirSync(path.join(OUT, "guide-img", slug), { recursive: true });
@@ -188,8 +188,8 @@ function guidesListMarkup() {
 }
 
 /* ---------- 3D главной ----------
-   src/home-3d.js — маленький загрузчик; заставка (zone-intro.js), живой фон (zone-bg.js) и общий кусок three.js
-   собираются в отдельные файлы dist/3d/*-<хэш>.js и скачиваются только когда нужны. Хэш в имени — защита от старого кэша.
+   src/home-3d.js - маленький загрузчик; заставка (zone-intro.js), живой фон (zone-bg.js) и общий кусок three.js
+   собираются в отдельные файлы dist/3d/*-<хэш>.js и скачиваются только когда нужны. Хэш в имени - защита от старого кэша.
    Из three.js попадает только используемое */
 {
   const r = esbuild.buildSync({
@@ -220,7 +220,7 @@ function guidesListMarkup() {
 }
 
 /* ---------- калькулятор ----------
-   app.js, polish.js и talents.js — ES-модули с явными import/export (без общих глобальных имён).
+   app.js, polish.js и talents.js - ES-модули с явными import/export (без общих глобальных имён).
    Точка входа src/calculator.js задаёт порядок; на сайт уходит один файл calculator.js.
    format "iife": всё внутри одной функции, наружу ничего не торчит */
 {
@@ -338,9 +338,9 @@ const PRERENDER = {
 
 /* ---------- стили ----------
    Порядок подключения не меняется: от него зависит, какое правило побеждает (visual.css, например, перекрашивает polish.css).
-   — Общие файлы (подключены на двух и больше страницах, например styles.css) идут отдельными файлами:
+   - Общие файлы (подключены на двух и больше страницах, например styles.css) идут отдельными файлами:
      они одинаковые на всём сайте, браузер скачивает каждый один раз и на других страницах берёт из кэша.
-   — Файлы только одной страницы, если стоят подряд, склеиваются в один bundle-<хэш>.css в корне dist
+   - Файлы только одной страницы, если стоят подряд, склеиваются в один bundle-<хэш>.css в корне dist
      (поэтому относительные url() внутри стилей остаются верными).
    Исходные css, вошедшие в склейку, в dist после этого не нужны и удаляются */
 const LOCAL_CSS = /<link rel="stylesheet" href="(\/?)([^":]+\.css)">\n?/g;
@@ -359,7 +359,7 @@ cssPages.forEach(p =>
 const sharedCss = Object.keys(cssUse).filter(f => cssUse[f] > 1);
 if (sharedCss.length) console.log("Общие стили (кэшируются на весь сайт): " + sharedCss.join(", "));
 for (const { name, list } of cssPages) {
-  /* группы по порядку: общий файл — сам по себе, подряд идущие файлы страницы — вместе */
+  /* группы по порядку: общий файл - сам по себе, подряд идущие файлы страницы - вместе */
   const groups = [];
   for (const f of list) {
     const last = groups[groups.length - 1];
@@ -388,7 +388,7 @@ for (const { name, list } of cssPages) {
 bundledCss.forEach(f => fs.rmSync(path.join(OUT, f)));
 
 /* ---------- сжатие ----------
-   js — обычные скрипты (не модули) с общими глобальными именами: esbuild без format не переименовывает
+   js - обычные скрипты (не модули) с общими глобальными именами: esbuild без format не переименовывает
    имена верхнего уровня, поэтому app.js / polish.js / talents.js продолжают видеть друг друга */
 if (esbuild) {
   let saved = 0;
@@ -449,7 +449,7 @@ let pages = 0;
 for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
   let html = fs.readFileSync(path.join(OUT, name), "utf8");
   const before = html.length;
-  /* обработчику с одним аргументом скрипты страницы не нужны — он сам решает, что прогнать */
+  /* обработчику с одним аргументом скрипты страницы не нужны - он сам решает, что прогнать */
   if (PRERENDER[name])
     html = PRERENDER[name].length > 1 ? PRERENDER[name](html, runPageScripts(html)) : PRERENDER[name](html);
   html = html
@@ -461,7 +461,7 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
 }
 
 /* ---------- страницы гайдов ----------
-   Шаблон — уже собранная guides.html (шапка, подвал, стили, версии файлов): меняются заголовок, описание,
+   Шаблон - уже собранная guides.html (шапка, подвал, стили, версии файлов): меняются заголовок, описание,
    адрес, картинка для соцсетей и содержимое <main>. Страница лежит глубже (/guide/…), поэтому
    относительные ссылки шаблона делаются от корня сайта */
 if (guides.length) {
@@ -473,7 +473,7 @@ if (guides.length) {
   fs.mkdirSync(path.join(OUT, "guide"), { recursive: true });
   for (const g of guides) {
     const url = SITE + "/guide/" + g.slug;
-    const title = g.title + " — гайд «Сердце Зоны»";
+    const title = g.title + " - гайд «Сердце Зоны»";
     const desc = g.description || "Гайд по игре «Сердце Зоны»" + (g.author ? " от " + g.author : "");
     const img = g.cover ? (/^https?:/.test(g.cover) ? g.cover : SITE + g.cover) : null;
     const ld = {
@@ -529,8 +529,8 @@ if (guides.length) {
 }
 
 /* ---------- sitemap.xml: lastmod ----------
-   Дата страницы — последний коммит её html и подключённых css/js (в GitHub Actions нужен checkout с fetch-depth: 0).
-   У Топ-100 — время выгрузки рейтинга из top100-data.js (по Москве): страница меняется вместе с данными */
+   Дата страницы - последний коммит её html и подключённых css/js (в GitHub Actions нужен checkout с fetch-depth: 0).
+   У Топ-100 - время выгрузки рейтинга из top100-data.js (по Москве): страница меняется вместе с данными */
 function gitDate(files) {
   try {
     const out = execFileSync("git", ["log", "-1", "--format=%cI", "--", ...files], {
@@ -550,7 +550,7 @@ function top100Date() {
 }
 function pageDeps(page) {
   const html = fs.readFileSync(path.join(ROOT, page), "utf8");
-  /* собранный модуль (home-3d.js, calculator.js) в корне не лежит — вместо него берутся его исходники */
+  /* собранный модуль (home-3d.js, calculator.js) в корне не лежит - вместо него берутся его исходники */
   const deps = [...html.matchAll(/(?:href|src)="\/?([^":?#]+\.(?:css|js))"/g)]
     .flatMap(m => MODULES[m[1]] || [m[1]])
     .filter(f => fs.existsSync(path.join(ROOT, f)));
@@ -565,14 +565,14 @@ if (fs.existsSync(smSrc)) {
   const sm = fs
     .readFileSync(smSrc, "utf8")
     .replace(/<url><loc>([^<]+)<\/loc>(?:<lastmod>[^<]*<\/lastmod>)?<\/url>/g, (m, loc) => {
-      /* адреса в sitemap без .html (/calculator), файл страницы — calculator.html */
+      /* адреса в sitemap без .html (/calculator), файл страницы - calculator.html */
       const slug = new URL(loc).pathname.replace(/^\//, "");
       const page = !slug ? "index.html" : slug.endsWith(".html") ? slug : slug + ".html";
       if (!fs.existsSync(path.join(ROOT, page))) return m;
       const date = (page === "top100.html" && top100Date()) || gitDate(pageDeps(page));
       return "<url><loc>" + loc + "</loc><lastmod>" + date + "</lastmod></url>";
     });
-  /* гайды: страница списка и каждый гайд, дата — последний коммит папки гайда */
+  /* гайды: страница списка и каждый гайд, дата - последний коммит папки гайда */
   const extra = !guides.length
     ? ""
     : [
@@ -597,10 +597,10 @@ if (fs.existsSync(smSrc)) {
   fs.writeFileSync(path.join(OUT, "sitemap.xml"), sm.replace("</urlset>", extra + "</urlset>"));
 }
 /* ---------- Content-Security-Policy ----------
-   GitHub Pages не умеет свои заголовки, поэтому политика — <meta http-equiv> в каждой странице. Встроенные
+   GitHub Pages не умеет свои заголовки, поэтому политика - <meta http-equiv> в каждой странице. Встроенные
    <script> разрешены по sha256 их текста (хэши считаются здесь, после всех правок HTML), чужие скрипты запрещены.
-   style-src 'unsafe-inline' — из-за style="…" в разметке, которую рисуют скрипты. Капча и функция приёма гайдов
-   разрешены только там, где есть форма отправки. frame-ancestors в <meta> не работает — его задаёт Cloudflare */
+   style-src 'unsafe-inline' - из-за style="…" в разметке, которую рисуют скрипты. Капча и функция приёма гайдов
+   разрешены только там, где есть форма отправки. frame-ancestors в <meta> не работает - его задаёт Cloudflare */
 const CAPTCHA_ORIGINS = ["https://smartcaptcha.yandexcloud.net", "https://challenges.cloudflare.com"];
 function cspFor(html) {
   const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(

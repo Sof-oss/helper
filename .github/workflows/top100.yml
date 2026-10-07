@@ -7,7 +7,7 @@ name: Обновление Топ-100
 
 on:
   schedule:
-    - cron: "17 3 * * *" # каждый день в 06:17 МСК (время в cron — UTC)
+    - cron: "17 3 * * *" # каждый день в 06:17 МСК (время в cron - UTC)
   workflow_dispatch: # кнопка Run workflow на вкладке Actions
 
 permissions:
@@ -57,7 +57,7 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # коммит от GITHUB_TOKEN сам деплой не запускает (защита GitHub от циклов) — запускаем его явно
+      # коммит от GITHUB_TOKEN сам деплой не запускает (защита GitHub от циклов) - запускаем его явно
       - name: Деплой
         if: steps.commit.outputs.changed == 'true'
         env:

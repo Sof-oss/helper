@@ -4,10 +4,10 @@
  * 1. dist/p/<id>.html для каждого игрока: заголовок, описание и картинка для соцсетей и мессенджеров,
  *    посетителя страница сразу переводит на /top100#p=<id> (там открывается карточка).
  *    Ссылки вида /top100#p=<id> тоже работают, но соцсети не видят, что после #, и показывают общее превью Топ-100.
- * 2. dist/og/p/<id>.jpg — личная картинка 1200×630 для игроков, у которых есть место в топ-100 хотя бы одного рейтинга.
+ * 2. dist/og/p/<id>.jpg - личная картинка 1200×630 для игроков, у которых есть место в топ-100 хотя бы одного рейтинга.
  *    Рисует Chrome по шаблону previews/dossier.html (нужен playwright-core и установленный Chrome/Edge;
- *    в GitHub Actions Chrome уже есть). Нет Chrome — у всех будет общая картинка assets/preview-dossier.jpg.
- * node build-previews.js --generic — перерисовать общую картинку assets/preview-dossier.jpg (её коммитят в репозиторий) */
+ *    в GitHub Actions Chrome уже есть). Нет Chrome - у всех будет общая картинка assets/preview-dossier.jpg.
+ * node build-previews.js --generic - перерисовать общую картинку assets/preview-dossier.jpg (её коммитят в репозиторий) */
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
@@ -27,7 +27,7 @@ const fmt = n =>
     .toLocaleString("ru-RU")
     .replace(/\u202f|\u00a0/g, " ");
 
-/* названия, цвета показателей и эмблемы — из тех же файлов, что использует сайт */
+/* названия, цвета показателей и эмблемы - из тех же файлов, что использует сайт */
 const tabsSrc = fs.readFileSync(path.join(ROOT, "top100.js"), "utf8");
 const TABS = [...tabsSrc.matchAll(/key:\s*"(\w+)",\s*label:\s*"([^"]+)"[^}]*?accent:\s*"(#[0-9a-fA-F]+)"/g)].map(m => ({
   key: m[1],
@@ -44,10 +44,10 @@ const GLYPHS = Object.fromEntries(
 const FACTION_KEY = Object.fromEntries(
   [...uiSrc.matchAll(/\{\s*key:\s*"(\w+)",\s*label:\s*"([^"]+)"/g)].map(m => [m[2], m[1]])
 );
-/* защита от тихой поломки: если формат исходников поменялся и разбор ничего не нашёл — сборка падает */
+/* защита от тихой поломки: если формат исходников поменялся и разбор ничего не нашёл - сборка падает */
 if (!TABS.length || Object.keys(GLYPHS).length < 7 || Object.keys(FACTION_KEY).length < 7)
   throw new Error("build-previews: не удалось прочитать вкладки (top100.js) или эмблемы группировок (ui.js)");
-/* звания — как в player-card.js */
+/* звания - как в player-card.js */
 const TITLES = [
   [30, "Легенда"],
   [25, "Мастер"],
@@ -212,7 +212,7 @@ async function main() {
   }
   const data = JSON.parse(fs.readFileSync(path.join(ROOT, "top100-players.json"), "utf8"));
   const ids = Object.keys(data.players);
-  /* версия картинок меняется и при новых данных, и при смене оформления карточки —
+  /* версия картинок меняется и при новых данных, и при смене оформления карточки -
      иначе мессенджеры и соцсети берут из своего кэша старую картинку по тому же адресу */
   const vh = crypto.createHash("sha1").update(String(data.updated));
   for (const f of [
@@ -232,7 +232,7 @@ async function main() {
     .digest("hex")
     .slice(0, 8);
 
-  /* личные картинки — тем, у кого есть место в топ-100 */
+  /* личные картинки - тем, у кого есть место в топ-100 */
   const withImg = new Set();
   const want = ids.filter(id => data.players[id].r.some(r => r && r <= 100));
   const { browser, why } = await openBrowser();
@@ -253,7 +253,7 @@ async function main() {
     console.log(
       "Превью «Личное дело»: " + withImg.size + " картинок за " + ((Date.now() - t0) / 1000).toFixed(0) + " с"
     );
-  } else console.log("Превью «Личное дело»: личные картинки пропущены — " + why + ". У всех общая картинка");
+  } else console.log("Превью «Личное дело»: личные картинки пропущены - " + why + ". У всех общая картинка");
 
   /* страницы-ссылки /p/<id> */
   fs.mkdirSync(path.join(OUT, "p"), { recursive: true });
@@ -261,7 +261,7 @@ async function main() {
     const p = data.players[id],
       d = cardData(data, id);
     const target = "/top100#p=" + encodeURIComponent(id);
-    const title = p.n + " — личное дело сталкера";
+    const title = p.n + " - личное дело сталкера";
     const desc = [
       (p.g || "Одиночка") + " · " + titleOf(p.l) + ", " + p.l + " ур.",
       ...d.places.slice(0, 3).map(x => TABS.find(t => t.key === x.k).label + " " + fmt(p.v[x.i]) + " (#" + x.r + ")")
