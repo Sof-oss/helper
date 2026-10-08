@@ -151,7 +151,7 @@
               it +
               " «" +
               b.set.name +
-              '»" width="118" height="118" loading="lazy" decoding="async"><figcaption>' +
+              '»" width="236" height="236" loading="lazy" decoding="async"><figcaption>' +
               it +
               "</figcaption></figure>"
           )
