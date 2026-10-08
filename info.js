@@ -156,7 +156,7 @@ function applyInfoActiveTab() {
   $("infoGroups").dataset.active = currentInfoTab;
 }
 
-/* вид блока: «chart» - график + расчёт «с уровня - по уровень» (по умолчанию), «table» - прежние полные таблицы */
+/* вид блока: «chart» - график + расчёт «с уровня - до уровня» (по умолчанию), «table» - прежние полные таблицы */
 const INFO_VIEW_KEY = "gameHelperInfoView";
 let currentInfoView = "chart";
 try {
@@ -344,13 +344,24 @@ function chartCardsMarkup(g) {
     "</div>"
   );
 }
-/* расчёт «с уровня - по уровень»: сколько нужно на этот отрезок */
+/* расчёт «с уровня - до уровня»: сколько нужно, чтобы с уровня a (уже есть) подняться до уровня b.
+   Строка уровня хранит, сколько нужно, чтобы его получить, поэтому сам уровень a в сумму не входит */
 function planSum(g, a, b) {
-  return g.rows[b - 1][2] - (a > 1 ? g.rows[a - 2][2] : 0);
+  return g.rows[b - 1][2] - g.rows[a - 1][2];
+}
+/* уровня ПДА нет в калькуляторе, поэтому «С уровня» на вкладке ПДА запоминается на этом устройстве */
+const PDA_FROM_KEY = "gameHelperInfoPdaFrom";
+function readPdaFrom(n) {
+  try {
+    const v = Math.round(Number(localStorage.getItem(PDA_FROM_KEY)));
+    return v >= 1 && v <= n ? v : 0;
+  } catch {
+    return 0;
+  }
 }
 function planMarkup(g) {
   const n = g.rows.length,
-    a = g.reached ? Math.min(n, g.reached + 1) : 1,
+    a = (g.key === "pda" && readPdaFrom(n)) || g.reached || 1,
     b = n;
   return (
     '<div class="ich-plan" data-plan="' +
@@ -359,7 +370,7 @@ function planMarkup(g) {
     n +
     '" value="' +
     a +
-    '" data-plan-from></label><label>По уровень<input type="number" inputmode="numeric" min="1" max="' +
+    '" data-plan-from></label><label>До уровня<input type="number" inputmode="numeric" min="1" max="' +
     n +
     '" value="' +
     b +
@@ -484,6 +495,10 @@ document.addEventListener("input", e => {
   const val = s => Math.max(1, Math.min(n, Math.round(Number(plan.querySelector(s).value) || 1)));
   const a = val("[data-plan-from]"),
     b = val("[data-plan-to]");
+  if (g.key === "pda" && e.target.matches("[data-plan-from]") && e.target.value !== "")
+    try {
+      localStorage.setItem(PDA_FROM_KEY, a);
+    } catch {}
   plan.querySelector("[data-plan-res]").textContent = fmt(planSum(g, Math.min(a, b), Math.max(a, b)));
 });
 
