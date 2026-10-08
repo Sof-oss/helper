@@ -1,6 +1,6 @@
 /* вкладка «Задания» на странице «Информация».
-   Калькулятор энергии и три таблицы: награда за прохождение локации, итог (все этапы + награда) и выгода.
-   Строки - ресурсы с иконками, столбцы - локации: все локации видно сразу.
+   Калькулятор энергии и карточки локаций (награда за прохождение, итог, выгода);
+   по нажатию на карточку раскрывается досье: место среди локаций и этапы с числом повторов.
    Всё в функции, чтобы не пересекаться с $ и fmt из info.js */
 (function () {
   "use strict";
@@ -38,114 +38,238 @@
     body +
     "</div>";
 
-  /* итог за все этапы плюс награда за полное прохождение: столько ресурсов даёт локация целиком */
-  const combined = {};
-  ["exp", "bullets", "rep"].forEach(k => {
-    combined[k] = L.map((_, i) => D.total[k][i] + D.reward[k][i]);
-  });
-  combined.tokens = D.reward.tokens.slice();
-  combined.energy = D.total.energy.slice();
+  /* сколько даёт полное прохождение локации: в данных total уже посчитан за все задания всех этапов
+     вместе с наградой за прохождение (как в таблице: этап × число повторов + награда) */
+  const combined = {
+    exp: D.total.exp,
+    bullets: D.total.bullets,
+    rep: D.total.rep,
+    tokens: D.reward.tokens,
+    energy: D.total.energy
+  };
   const gainRows = { exp: gain("exp"), bullets: gain("bullets"), rep: gain("rep") };
+  /* сколько заданий в локации: сумма повторов всех этапов */
+  const tasksCount = L.map((_, i) => D.stages.reduce((a, s) => a + s.reps[i], 0));
+  const max = a => Math.max.apply(null, a);
+  /* место локации среди пяти по ресурсу (больше - лучше); одинаковые значения делят место */
+  const rank = (arr, i) => 1 + arr.filter(v => round2(v) > round2(arr[i])).length;
+  const isBest = (arr, i) => round2(arr[i]) === round2(max(arr));
+  const ico = k => '<i class="res-ico res-' + R[k].cls + '">' + ICON[k] + "</i>";
+  const bar = (v, m) => '<span class="tl-bar"><i style="width:' + Math.round((v / m) * 100) + '%"></i></span>';
+  const plural = (n, a, b, c) => {
+    const m10 = n % 10,
+      m100 = n % 100;
+    return m10 === 1 && m100 !== 11 ? a : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? b : c;
+  };
 
-  const shortLoc = l => l.split(/[ «]/)[0];
-  function locHead() {
-    return L.map(
-      l => '<th><span class="loc-full">' + l + '</span><span class="loc-short">' + shortLoc(l) + "</span></th>"
-    ).join("");
-  }
-  function row(k, vals, fmt, highlight) {
-    const r = highlight ? vals.map(round2) : vals,
-      best = highlight ? Math.max.apply(null, r) : null;
+  /* ---------- карточки локаций ----------
+   Все пять локаций рядом (на телефоне - лента с прокруткой вбок): награда за прохождение, итог и выгода.
+   Нажатие на карточку раскрывает под лентой «досье»: место среди локаций по каждому ресурсу
+   и этапы - сколько раз выполнить задание и что оно даёт за раз и за весь этап */
+  const OPEN_KEY = "gameHelperTasksLoc";
+  let openLoc = null;
+  try {
+    const v = Number(localStorage.getItem(OPEN_KEY));
+    if (localStorage.getItem(OPEN_KEY) !== null && Number.isInteger(v) && v >= 0 && v < L.length) openLoc = v;
+  } catch {}
+
+  function locCard(i) {
+    const on = openLoc === i;
+    const pair = (k, arr) => '<span class="tl-v">' + ico(k) + "<b>" + n0(arr[i]) + "</b></span>";
+    const gainRow = k => {
+      const best = isBest(gainRows[k], i);
+      return (
+        '<span class="tl-gr res-' +
+        R[k].cls +
+        (best ? " best" : "") +
+        '">' +
+        ico(k) +
+        bar(gainRows[k][i], max(gainRows[k])) +
+        "<b>" +
+        n2(gainRows[k][i]) +
+        "</b></span>"
+      );
+    };
     return (
-      '<tr class="res-' +
-      R[k].cls +
-      '"><th scope="row"><i class="res-ico">' +
-      ICON[k] +
-      "</i>" +
-      '<span class="lbl-full">' +
-      R[k].full +
-      '</span><span class="lbl-short">' +
-      R[k].short +
-      "</span></th>" +
-      vals
-        .map((v, j) => "<td" + (highlight && r[j] === best ? ' class="best"' : "") + ">" + fmt(v) + "</td>")
+      '<button type="button" class="tl-card' +
+      (on ? " active" : "") +
+      '" data-tl-loc="' +
+      i +
+      '" aria-expanded="' +
+      on +
+      '" aria-controls="tlDetail">' +
+      '<span class="tl-img"' +
+      (LOC_IMG[i] ? ' style="--loc-img:url(assets/loc-' + LOC_IMG[i] + '.webp)"' : "") +
+      '><span class="tl-en" title="Энергия на все задания локации">' +
+      ico("energy") +
+      n0(combined.energy[i]) +
+      '</span><span class="tl-name"><b>' +
+      L[i] +
+      "</b><small>" +
+      D.stages.length +
+      " этапов · " +
+      tasksCount[i] +
+      " " +
+      plural(tasksCount[i], "задание", "задания", "заданий") +
+      "</small></span></span>" +
+      '<span class="tl-sec"><span class="tl-h">Награда за прохождение</span><span class="tl-grid">' +
+      ["exp", "bullets", "rep", "tokens"].map(k => pair(k, D.reward[k])).join("") +
+      "</span></span>" +
+      '<span class="tl-sec"><span class="tl-h">Итого: задания + награда</span><span class="tl-grid">' +
+      ["exp", "bullets", "rep", "tokens"].map(k => pair(k, combined[k])).join("") +
+      "</span></span>" +
+      '<span class="tl-sec"><span class="tl-h">Выгода на 1 энергии</span><span class="tl-gain">' +
+      ["exp", "bullets", "rep"].map(gainRow).join("") +
+      "</span></span>" +
+      '<span class="tl-more"><span class="tl-more-t">' +
+      (on ? "Скрыть этапы" : "Этапы и сравнение") +
+      '</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>' +
+      "</button>"
+    );
+  }
+
+  function locDetail(i) {
+    const row = (k, arr, fmt) => {
+      const best = isBest(arr, i);
+      return (
+        '<div class="tl-r res-' +
+        R[k].cls +
+        (best ? " best" : "") +
+        '">' +
+        ico(k) +
+        '<span class="tl-lbl">' +
+        R[k].full +
+        "</span><b>" +
+        fmt(arr[i]) +
+        "</b><small>" +
+        bar(arr[i], max(arr)) +
+        (best ? "лучшая" : rank(arr, i) + "-е из " + L.length) +
+        "</small></div>"
+      );
+    };
+    const col = (led, title, keys, items, fmt) =>
+      '<div class="tl-col"><div class="tl-ch"><i style="--led:' +
+      led +
+      '"></i>' +
+      title +
+      "</div>" +
+      keys.map(k => row(k, items[k], fmt)).join("") +
+      "</div>";
+    const stage = s => {
+      const r = s.reps[i],
+        val = k =>
+          '<span class="tl-sv">' + ico(k) + "<b>" + n0(s[k][i]) + "</b><small>→ " + n0(s[k][i] * r) + "</small></span>";
+      return (
+        '<li class="tl-stage"><span class="tl-sh">Этап ' +
+        s.n +
+        "<b>×" +
+        r +
+        '</b></span><span class="tl-boxes" aria-label="' +
+        r +
+        " " +
+        plural(r, "раз", "раза", "раз") +
+        '">' +
+        "<i></i>".repeat(r) +
+        '</span><span class="tl-per">за раз: ' +
+        ico("energy") +
+        n0(s.energy[i]) +
+        "</span>" +
+        val("exp") +
+        val("bullets") +
+        val("rep") +
+        '<span class="tl-se">' +
+        ico("energy") +
+        n0(s.energy[i] * r) +
+        " на этап</span></li>"
+      );
+    };
+    const fin =
+      '<li class="tl-stage tl-fin"><span class="tl-sh">Награда</span><span class="tl-per">за всю локацию</span>' +
+      ["exp", "bullets", "rep", "tokens"]
+        .map(k => '<span class="tl-sv">' + ico(k) + "<b>" + n0(D.reward[k][i]) + "</b></span>")
         .join("") +
-      "</tr>"
-    );
-  }
-  /* ПК: ресурсы строками, локации столбцами - все локации видно сразу */
-  function locTable(keys, items, fmt, highlight) {
+      "</li>";
     return (
-      '<div class="data-wrap"><table class="data-table tasks-v2"><thead><tr><th class="th-corner">Ресурс</th>' +
-      locHead() +
-      "</tr></thead><tbody>" +
-      keys.map(k => row(k, items[k] || [], fmt, highlight)).join("") +
-      "</tbody></table></div>"
-    );
-  }
-  /* телефон: то же самое, но локации строками, а ресурсы - столбцами с иконками:
-   пять колонок с числами в экран не влезают, а так всё видно без прокрутки вбок */
-  function locTableNarrow(keys, items, fmt, highlight) {
-    const head = keys
-      .map(
-        k =>
-          '<th class="res-' +
-          R[k].cls +
-          '" title="' +
-          R[k].full +
-          '"><i class="res-ico">' +
-          ICON[k] +
-          '</i><span class="t-only">' +
-          R[k].full +
-          "</span></th>"
-      )
-      .join("");
-    /* лучшее значение считаем по каждому ресурсу среди локаций - как и в широкой таблице */
-    const bests = {};
-    if (highlight)
-      keys.forEach(k => {
-        bests[k] = Math.max.apply(
-          null,
-          L.map((_, j) => round2((items[k] || [])[j]))
-        );
-      });
-    const body = L.map((l, i) => {
-      const cells = keys
-        .map(k => {
-          const v = (items[k] || [])[i];
-          return "<td" + (highlight && round2(v) === bests[k] ? ' class="best"' : "") + ">" + fmt(v) + "</td>";
-        })
-        .join("");
-      return '<tr><th scope="row">' + l + "</th>" + cells + "</tr>";
-    }).join("");
-    return (
-      '<div class="data-wrap"><table class="data-table tasks-v2 tasks-v2-n"><thead><tr><th class="th-corner">Локация</th>' +
-      head +
-      "</tr></thead><tbody>" +
-      body +
-      "</tbody></table></div>"
+      '<div class="tl-ban"' +
+      (LOC_IMG[i] ? ' style="--loc-img:url(assets/loc-' + LOC_IMG[i] + '.webp)"' : "") +
+      '><div><h3 class="tl-title">' +
+      L[i] +
+      '</h3><div class="tl-pills"><span class="tl-pill tl-pill-en">' +
+      ico("energy") +
+      n0(combined.energy[i]) +
+      " энергии на все задания</span>" +
+      '<span class="tl-pill">' +
+      D.stages.length +
+      " этапов · " +
+      tasksCount[i] +
+      " " +
+      plural(tasksCount[i], "задание", "задания", "заданий") +
+      "</span>" +
+      '<span class="tl-pill">' +
+      ico("tokens") +
+      D.reward.tokens[i] +
+      " " +
+      plural(D.reward.tokens[i], "жетон", "жетона", "жетонов") +
+      " за прохождение</span></div></div>" +
+      '<button type="button" class="tl-close" data-tl-close aria-label="Скрыть этапы"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>' +
+      '<div class="tl-cols">' +
+      col("#ffb74d", "Награда за прохождение", ["exp", "bullets", "rep", "tokens"], D.reward, n0) +
+      col("#54bfff", "Итого: задания + награда", ["exp", "bullets", "rep", "tokens"], combined, n0) +
+      col("#27db88", "Выгода на 1 энергии", ["exp", "bullets", "rep"], gainRows, n2) +
+      "</div>" +
+      '<div class="tl-stages"><div class="tl-ch"><i style="--led:#ffd65a"></i>Этапы: награда за одно задание → за весь этап</div>' +
+      '<ol class="tl-stage-list">' +
+      D.stages.map(stage).join("") +
+      fin +
+      "</ol></div>"
     );
   }
 
-  function block(led, title, keys, items, fmt, highlight, note) {
+  function locsMarkup() {
     return card(
-      led,
-      title,
-      '<div class="tasks-wide">' +
-        locTable(keys, items, fmt, highlight) +
+      "#ffb74d",
+      "Локации: награды и выгода",
+      '<div class="tl-cards">' +
+        L.map((_, i) => locCard(i)).join("") +
         "</div>" +
-        '<div class="tasks-narrow">' +
-        locTableNarrow(keys, items, fmt, highlight) +
+        '<div class="tl-detail" id="tlDetail" role="region" aria-live="polite"' +
+        (openLoc === null ? " hidden" : ' aria-label="' + L[openLoc] + '"') +
+        ">" +
+        (openLoc === null ? "" : locDetail(openLoc)) +
         "</div>" +
-        (note ? '<p class="tasks-note">' + note + "</p>" : "")
+        '<p class="tasks-note">Итого - за все задания всех этапов вместе с наградой за прохождение, ' +
+        ico("energy") +
+        " - энергия на все задания. Выгода - итого на единицу энергии, зелёным отмечена лучшая локация. " +
+        "Нажмите на карточку - откроются этапы: сколько раз выполнить задание и что оно даёт.</p>"
     );
   }
-
+  function setOpen(i, scroll) {
+    openLoc = openLoc === i ? null : i;
+    try {
+      if (openLoc === null) localStorage.removeItem(OPEN_KEY);
+      else localStorage.setItem(OPEN_KEY, String(openLoc));
+    } catch {}
+    /* карточки не перерисовываются, чтобы фокус оставался на нажатой */
+    root.querySelectorAll("[data-tl-loc]").forEach(c => {
+      const on = Number(c.dataset.tlLoc) === openLoc;
+      c.classList.toggle("active", on);
+      c.setAttribute("aria-expanded", on);
+      const m = c.querySelector(".tl-more-t");
+      if (m) m.textContent = on ? "Скрыть этапы" : "Этапы и сравнение";
+    });
+    const det = document.getElementById("tlDetail");
+    if (!det) return;
+    det.hidden = openLoc === null;
+    det.innerHTML = openLoc === null ? "" : locDetail(openLoc);
+    if (openLoc === null) det.removeAttribute("aria-label");
+    else det.setAttribute("aria-label", L[openLoc]);
+    if (scroll && openLoc !== null) det.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
   /* ---------- калькулятор энергии ----------
    Сколько ресурсов даст N энергии на выбранной локации и сколько жетонов уйдёт на энергетики.
-   Полное прохождение локации стоит total.energy и даёт итог всех этапов + награду (combined).
-   Остаток энергии, которого не хватает на ещё одно прохождение, пересчитывается по выгоде этапов
-   (без награды за прохождение) - поэтому такие цифры помечены «≈» */
+   Полное прохождение локации стоит combined.energy и даёт итог всех заданий + награду (жетоны - только она).
+   Остаток энергии проходит задания по порядку: этап за этапом, каждое задание этапа - reps раз,
+   поэтому результат точный, а не оценка */
   const DRINK_ENERGY = 100,
     DRINK_PRICE = 15;
   /* картинка энергетика «Сердце Зоны» (банка 100 энергии) */
@@ -168,25 +292,34 @@
     } catch {}
   };
 
-  /* результат для локации i и энергии e */
+  /* результат для локации i и энергии e: полные прохождения, потом задания следующего по порядку.
+     stage/done - где остановитесь (этап по счёту с 1 и сколько его заданий выполнено), left - энергия,
+     которой не хватило на следующее задание */
   function energyYield(i, e) {
     const cost = combined.energy[i],
       runs = Math.floor(e / cost),
-      rest = e - runs * cost,
-      out = { runs: runs, rest: rest };
-    ["exp", "bullets", "rep"].forEach(k => {
-      out[k] = runs * combined[k][i] + (rest * D.total[k][i]) / cost;
-    });
+      out = { runs: runs, left: e - runs * cost, stage: 0, done: 0, tasks: 0 };
+    ["exp", "bullets", "rep"].forEach(k => (out[k] = runs * combined[k][i]));
     out.tokens = runs * combined.tokens[i];
+    for (let j = 0; j < D.stages.length; j++) {
+      const s = D.stages[j],
+        k = Math.min(s.reps[i], Math.floor(out.left / s.energy[i]));
+      ["exp", "bullets", "rep"].forEach(r => (out[r] += k * s[r][i]));
+      out.left -= k * s.energy[i];
+      out.tasks += k;
+      if (k < s.reps[i]) {
+        out.stage = j + 1;
+        out.done = k;
+        break;
+      }
+    }
     return out;
   }
-  const approx = (v, partial) => (partial && v % 1 ? "≈ " : "") + n0(Math.round(v));
 
   function calcResultMarkup() {
     const i = calcState.loc,
       e = calcState.energy,
-      y = energyYield(i, e),
-      partial = y.rest > 0;
+      y = energyYield(i, e);
     const buy = Math.max(0, e - calcState.own),
       drinks = Math.ceil(buy / DRINK_ENERGY),
       spent = drinks * DRINK_PRICE,
@@ -201,19 +334,33 @@
       "</b><small>" +
       R[k].full +
       "</small></span></div>";
-    const runsTxt = y.runs
-      ? "Полных прохождений: <b>" +
-        n0(y.runs) +
-        "</b>" +
-        (partial ? ", ещё " + n0(y.rest) + " энергии уйдёт на этапы следующего" : "")
-      : e
-        ? "На полное прохождение нужно " + n0(combined.energy[i]) + " энергии - посчитано по выгоде этапов, без награды"
-        : "Укажите, сколько энергии потратить";
+    /* где остановитесь после полных прохождений: этап и сколько его заданий выполнено */
+    const st = y.stage ? D.stages[y.stage - 1] : null;
+    const where = st
+      ? "остановитесь на этапе " +
+        y.stage +
+        " (выполнено " +
+        y.done +
+        " из " +
+        st.reps[i] +
+        ")" +
+        (y.left ? ", останется " + n0(y.left) + " энергии" : "")
+      : "";
+    const runsTxt = !e
+      ? "Укажите, сколько энергии потратить"
+      : y.runs
+        ? "Полных прохождений: <b>" + n0(y.runs) + "</b>" + (st && (y.tasks || y.left) ? ", затем " + where : "")
+        : "На полное прохождение нужно " +
+          n0(combined.energy[i]) +
+          " энергии. Заданий выполнено: <b>" +
+          n0(y.tasks) +
+          "</b>, " +
+          where;
     return (
       '<div class="ec-results">' +
-      res("exp", approx(y.exp, partial)) +
-      res("bullets", approx(y.bullets, partial)) +
-      res("rep", approx(y.rep, partial)) +
+      res("exp", n0(y.exp)) +
+      res("bullets", n0(y.bullets)) +
+      res("rep", n0(y.rep)) +
       res("tokens", n0(y.tokens)) +
       '</div><p class="ec-runs">' +
       runsTxt +
@@ -297,7 +444,7 @@
         DRINK_ENERGY +
         " энергии и стоит " +
         DRINK_PRICE +
-        " жетонов. Ресурсы за неполное прохождение - оценка по средней выгоде этапов.</p>"
+        " жетонов. Жетоны дают только за полное прохождение локации, остаток энергии считается по заданиям этапов по порядку.</p>"
     );
   }
   function updateCalc() {
@@ -316,6 +463,17 @@
     updateCalc();
   });
   document.addEventListener("click", e => {
+    const t = e.target.closest("[data-tl-loc], [data-tl-close]");
+    if (t) {
+      const was = openLoc;
+      setOpen(t.dataset.tlClose !== undefined ? openLoc : Number(t.dataset.tlLoc), t.dataset.tlClose === undefined);
+      /* после закрытия крестиком фокус возвращается на карточку */
+      if (t.dataset.tlClose !== undefined) {
+        const c = root.querySelector('[data-tl-loc="' + was + '"]');
+        if (c) c.focus({ preventScroll: true });
+      }
+      return;
+    }
     const b = e.target.closest("[data-ec-loc]");
     if (b) {
       calcState.loc = Number(b.dataset.ecLoc);
@@ -339,28 +497,7 @@
   });
 
   function tasksBody() {
-    return (
-      calcMarkup() +
-      block("#ffb74d", "Награда за полное прохождение локации", ["exp", "bullets", "rep", "tokens"], D.reward, n0) +
-      block(
-        "#54bfff",
-        "Итого за все этапы + награда за прохождение",
-        ["exp", "bullets", "rep", "tokens", "energy"],
-        combined,
-        n0,
-        null,
-        "Затраты энергии - сколько уйдёт на все этапы локации; остальные строки - что получишь за них и за полное прохождение."
-      ) +
-      block(
-        "#27db88",
-        "Выгода: ресурс на единицу затраченной энергии",
-        ["exp", "bullets", "rep"],
-        gainRows,
-        n2,
-        true,
-        "Зелёным отмечено самое выгодное значение в строке."
-      )
-    );
+    return calcMarkup() + locsMarkup();
   }
 
   const root = document.getElementById("tasksRoot");
