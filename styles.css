@@ -7708,6 +7708,10 @@ main.content.page-narrow {
   white-space: nowrap;
   pointer-events: none;
 }
+.ich-me-lbl-top {
+  top: 4px;
+  bottom: auto;
+}
 /* у краёв графика метка не центрируется, чтобы не вылезать */
 .ich-me-lbl-left {
   transform: translateX(-100%);

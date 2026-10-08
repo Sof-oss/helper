@@ -286,11 +286,12 @@ function chartMarkup(g) {
         me.x +
         "%;top:" +
         me.y +
-        '%"></i><i class="ich-me-line" style="left:' +
-        me.x +
-        "%;top:" +
-        me.y +
-        '%"></i><span class="ich-me-lbl' +
+        /* точка у нижнего края (начало кривой) - подпись наверху графика, иначе внизу; пунктир от точки к подписи */
+        (me.y > 75
+          ? '%"></i><i class="ich-me-line" style="left:' + me.x + "%;top:0;bottom:" + (100 - me.y) + "%"
+          : '%"></i><i class="ich-me-line" style="left:' + me.x + "%;top:" + me.y + "%") +
+        '"></i><span class="ich-me-lbl' +
+        (me.y > 75 ? " ich-me-lbl-top" : "") +
         (me.x > 92 ? " ich-me-lbl-left" : me.x < 6 ? " ich-me-lbl-right" : "") +
         '" style="left:' +
         me.x +
