@@ -368,7 +368,7 @@
     root.innerHTML = tasksBody();
   }
 
-  /* переключатель разделов «Прогресс по уровням» / «Задания» */
+  /* переключатель разделов «Прогресс по уровням» / «Задания» / «Боссы» */
   function setSection(k) {
     document.querySelectorAll("[data-section]").forEach(b => {
       const on = b.dataset.section === k;
@@ -395,7 +395,7 @@
   let sec = "levels";
   try {
     const s = localStorage.getItem(SEC_KEY);
-    if (s === "levels" || s === "tasks") sec = s;
+    if (s === "levels" || s === "tasks" || s === "bosses") sec = s;
   } catch {}
   setSection(sec);
 })();

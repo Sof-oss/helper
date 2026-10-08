@@ -326,7 +326,8 @@ const PRERENDER = {
   "info.html": (html, els) => {
     html = fill(html, "infoTabs", els.infoTabs.innerHTML);
     html = fill(html, "infoGroups", els.infoGroups.innerHTML, ' data-active="' + els.infoGroups.dataset.active + '"');
-    return fill(html, "tasksRoot", els.tasksRoot.innerHTML);
+    html = fill(html, "tasksRoot", els.tasksRoot.innerHTML);
+    return fill(html, "bossesRoot", els.bossesRoot.innerHTML);
   },
   /* у рейтинга в HTML уходит стартовая вкладка; остальные рисует JS по клику */
   "top100.html": (html, els) => {
