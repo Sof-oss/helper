@@ -7,7 +7,7 @@
      первая буква заголовка и пунктов сама становится заглавной, точка в конце пункта убирается (многоточие остаётся);
      дальше строки-пункты с метками:
        new: текст  - Новое
-       up: текст   - Улучшено
+       up: текст   - Улучшено (upd: и update: тоже понимаются)
        fix: текст  - Исправлено
    Коммиты без таких строк («Fix», «Update visual.css») пропускаются.
    Если 1-я строка сама начинается с метки, заголовок будет «Обновление».
@@ -29,7 +29,15 @@ const DRY = process.argv.includes("--dry");
 const SKIP = [
   "4f0c2d1" // «Задания» - тот же пункт вошёл в «Раздел «Информация»» (3033095)
 ];
-const TAG = /^\s*(new|up|fix)\s*:\s*(.+?)\s*$/i;
+const TAG = /^\s*(new|upd|update|up|fix)\s*:\s*(.+?)\s*$/i;
+/* upd: и update: - то же, что up: (частая опечатка) */
+const KIND = { new: "new", up: "up", upd: "up", update: "up", fix: "fix" };
+/* "прямые кавычки" вне HTML-тегов - в «ёлочки», как на сайте */
+const quotes = s =>
+  s
+    .split(/(<[^>]*>)/)
+    .map(part => (part.startsWith("<") ? part : part.replace(/"([^"<>]*)"/g, "«$1»")))
+    .join("");
 /* первая буква - заглавная, даже если в коммите написали с маленькой (ссылка <a …> в начале не мешает) */
 const capital = s =>
   s.replace(/\u2014/g, "-").replace(/^((?:<[^>]*>)*)(\p{Ll})/u, (m, tags, ch) => tags + ch.toUpperCase());
@@ -61,9 +69,9 @@ for (const raw of log.split("\x1e")) {
   const items = lines
     .map(l => TAG.exec(l))
     .filter(Boolean)
-    .map(m => [m[1].toLowerCase(), capital(m[2]).replace(/(?<!\.)\.$/, "")]);
+    .map(m => [KIND[m[1].toLowerCase()], quotes(capital(m[2])).replace(/(?<!\.)\.$/, "")]);
   if (!items.length) continue;
-  const title = lines[0] && !TAG.test(lines[0]) ? capital(lines[0]) : "Обновление";
+  const title = lines[0] && !TAG.test(lines[0]) ? quotes(capital(lines[0])) : "Обновление";
   const key = date + "\n" + title;
   if (!groups.has(key)) groups.set(key, { date, title, items: [] });
   /* внутри записи - в порядке коммитов: старые пункты выше */
