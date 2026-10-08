@@ -324,8 +324,13 @@ const PRERENDER = {
   /* «Что нового?» на главной уходит в HTML готовым, чтобы был виден сразу и поисковикам */
   "index.html": html => fill(html, "homeNews", runScripts(["changelog.js"]).homeNews.innerHTML),
   "info.html": (html, els) => {
-    html = fill(html, "infoTabs", els.infoTabs.innerHTML);
-    html = fill(html, "infoGroups", els.infoGroups.innerHTML, ' data-active="' + els.infoGroups.dataset.active + '"');
+    html = fill(html, "infoTabs", els.infoTabs.innerHTML, ' data-view="' + els.infoTabs.dataset.view + '"');
+    html = fill(
+      html,
+      "infoGroups",
+      els.infoGroups.innerHTML,
+      ' data-active="' + els.infoGroups.dataset.active + '" data-view="' + els.infoGroups.dataset.view + '"'
+    );
     html = fill(html, "tasksRoot", els.tasksRoot.innerHTML);
     return fill(html, "bossesRoot", els.bossesRoot.innerHTML);
   },

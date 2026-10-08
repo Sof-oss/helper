@@ -55,8 +55,14 @@
     <p class="info-lead">Стоимость улучшения таланта на уровень, опыт ПДА и опыт персонажа по уровням</p>
     <!-- отметка полученных уровней по данным калькулятора, заполняет info.js -->
     <p class="info-progress" id="infoProgress"></p>
-    <!-- вкладки только для телефона (#infoTabs в styles.css) -->
-    <div class="top100-tabs" id="infoTabs"></div>
+    <!-- вкладки блоков (в виде «График» - всегда, в виде «Таблицы» - только на телефоне) и переключатель вида -->
+    <div class="info-viewbar">
+      <div class="top100-tabs" id="infoTabs"></div>
+      <div class="info-view" role="group" aria-label="Вид">
+        <button type="button" class="active" data-info-view="chart" aria-pressed="true">График</button>
+        <button type="button" data-info-view="table" aria-pressed="false">Таблицы</button>
+      </div>
+    </div>
     <div class="info-groups" id="infoGroups"></div>
   </div>
 

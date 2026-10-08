@@ -156,47 +156,337 @@ function applyInfoActiveTab() {
   $("infoGroups").dataset.active = currentInfoTab;
 }
 
+/* вид блока: «chart» - график + расчёт «с уровня - по уровень» (по умолчанию), «table» - прежние полные таблицы */
+const INFO_VIEW_KEY = "gameHelperInfoView";
+let currentInfoView = "chart";
+try {
+  if (localStorage.getItem(INFO_VIEW_KEY) === "table") currentInfoView = "table";
+} catch {}
+
+/* описание трёх блоков: данные, подписи и сколько уровней уже получено по калькулятору */
+function infoGroupsData(p) {
+  return [
+    {
+      key: "talents",
+      title: "Таланты",
+      color: "#ffb74d",
+      rows: TALENT_LEVELS,
+      reached: p.talents,
+      step: "Урон",
+      need: "Нужно нанести урона",
+      gen: "урона"
+    },
+    {
+      key: "pda",
+      title: "Опыт ПДА",
+      color: "#9fdc9f",
+      rows: PDA_LEVELS,
+      reached: 0,
+      step: "Опыт",
+      need: "Нужно опыта",
+      gen: "опыта",
+      notes: PDA_LEVEL_NOTES
+    },
+    {
+      key: "char",
+      title: "Опыт персонажа",
+      color: "#54bfff",
+      rows: CHAR_LEVELS,
+      reached: p.level,
+      step: "Опыт",
+      need: "Нужно опыта",
+      gen: "опыта"
+    }
+  ];
+}
+
+/* короткая запись для осей: 1,5М, 250к */
+function fmtShort(v) {
+  if (v >= 1e6) return (Math.round(v / 1e5) / 10).toLocaleString("ru-RU") + "М";
+  if (v >= 1e3) return Math.round(v / 1e3).toLocaleString("ru-RU") + "к";
+  return String(v);
+}
+/* «красивый» шаг сетки: 1, 2, 2,5 или 5 × 10^n, примерно 4-5 линий */
+function niceStep(max) {
+  const raw = max / 4.5,
+    p = Math.pow(10, Math.floor(Math.log10(raw)));
+  return [1, 2, 2.5, 5, 10].map(m => m * p).find(s => s >= raw);
+}
+/* уровень, который показывает подсказка графика сразу: следующий после полученного, иначе 10-й */
+function chartDefaultLevel(g) {
+  const n = g.rows.length;
+  return g.reached ? Math.min(n, g.reached + 1) : Math.min(n, 10);
+}
+/* координаты точки уровня в процентах от области графика */
+function chartPos(g, lvl) {
+  const n = g.rows.length,
+    max = g.rows[n - 1][2];
+  return { x: ((lvl - 1) / (n - 1)) * 100, y: 100 - (g.rows[lvl - 1][2] / max) * 100 };
+}
+function chartTipMarkup(g, lvl) {
+  const r = g.rows[lvl - 1],
+    from = g.reached ? g.rows[g.reached - 1][2] : 0;
+  return (
+    "<b>" +
+    lvl +
+    " уровень</b><span>" +
+    g.step +
+    ": <em>" +
+    fmt(r[1]) +
+    "</em></span><span>Всего: <em>" +
+    fmt(r[2]) +
+    "</em></span>" +
+    (g.reached && lvl > g.reached ? '<span>От вас: <em class="ich-plus">+' + fmt(r[2] - from) + "</em></span>" : "")
+  );
+}
+/* график «всего с начала»: линии в SVG растягиваются по ширине, подписи и точки - HTML поверх, поэтому текст не искажается */
+function chartMarkup(g) {
+  const rows = g.rows,
+    n = rows.length,
+    max = rows[n - 1][2],
+    st = niceStep(max);
+  const pt = r => ((r[0] - 1) / (n - 1)) * 1000 + "," + (1000 - (r[2] / max) * 1000);
+  let grid = "",
+    ylab = "",
+    xlab = "";
+  for (let v = 0; v <= max; v += st) {
+    const y = 100 - (v / max) * 100;
+    grid += '<line x1="0" x2="1000" y1="' + y * 10 + '" y2="' + y * 10 + '"/>';
+    ylab += '<span style="top:' + y + '%">' + fmtShort(v) + "</span>";
+  }
+  const xs = n > 60 ? 20 : 10;
+  for (let l = xs; l <= n; l += xs) xlab += '<span style="left:' + ((l - 1) / (n - 1)) * 100 + '%">' + l + "</span>";
+  const done = g.reached ? rows.slice(0, g.reached) : [];
+  const me = g.reached ? chartPos(g, g.reached) : null;
+  const sel = chartDefaultLevel(g),
+    sp = chartPos(g, sel);
+  return (
+    '<div class="ich" data-ich="' +
+    g.key +
+    '"><div class="ich-plot"><div class="ich-y">' +
+    ylab +
+    '</div><div class="ich-area"><svg viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true"><g class="ich-grid">' +
+    grid +
+    "</g>" +
+    (done.length > 1
+      ? '<polygon class="ich-fill" points="0,1000 ' +
+        done.map(pt).join(" ") +
+        " " +
+        pt(done[done.length - 1]).split(",")[0] +
+        ',1000"/>'
+      : "") +
+    '<polyline class="ich-line" points="' +
+    rows.map(pt).join(" ") +
+    '"/>' +
+    (done.length > 1 ? '<polyline class="ich-done" points="' + done.map(pt).join(" ") + '"/>' : "") +
+    "</svg>" +
+    (me
+      ? '<i class="ich-me" style="left:' +
+        me.x +
+        "%;top:" +
+        me.y +
+        '%"></i><span class="ich-me-lbl' +
+        (me.x > 80 ? " ich-me-lbl-left" : "") +
+        '" style="left:' +
+        me.x +
+        "%;top:" +
+        me.y +
+        '%">вы: ' +
+        g.reached +
+        " ур.</span>"
+      : "") +
+    '<i class="ich-cursor" style="left:' +
+    sp.x +
+    '%"></i><i class="ich-dot" style="left:' +
+    sp.x +
+    "%;top:" +
+    sp.y +
+    '%"></i><div class="ich-tip' +
+    (sp.x > 60 ? " ich-tip-left" : "") +
+    (sp.y < 35 ? " ich-tip-low" : "") +
+    '" style="left:' +
+    sp.x +
+    "%;top:" +
+    sp.y +
+    '%">' +
+    chartTipMarkup(g, sel) +
+    '</div></div><div class="ich-x">' +
+    xlab +
+    '</div></div><input type="range" class="ich-range" min="1" max="' +
+    n +
+    '" value="' +
+    sel +
+    '" aria-label="Уровень на графике"></div>'
+  );
+}
+/* карточки с ключевыми цифрами под графиком */
+function chartCardsMarkup(g) {
+  const rows = g.rows,
+    n = rows.length,
+    last = rows[n - 1][2],
+    r = g.reached;
+  const card = (label, val) => '<div class="ich-card"><span>' + label + "</span><b>" + val + "</b></div>";
+  if (!r)
+    return (
+      '<div class="ich-cards">' +
+      card("Уровней", n) +
+      card("Всего " + g.gen + " до " + n + " ур.", fmt(last)) +
+      "</div>"
+    );
+  const cur = rows[r - 1][2],
+    goal = Math.min(n, (Math.floor(r / 10) + 1) * 10);
+  return (
+    '<div class="ich-cards">' +
+    card(g.key === "talents" ? "Получено" : "Ваш уровень", g.key === "talents" ? r + " / " + n : r) +
+    card("Следующий уровень", r < n ? fmt(rows[r][1]) : "максимум") +
+    (goal < n && goal > r ? card("До " + goal + " ур.", fmt(rows[goal - 1][2] - cur)) : "") +
+    card("До максимума", r < n ? fmt(last - cur) : "-") +
+    "</div>"
+  );
+}
+/* расчёт «с уровня - по уровень»: сколько нужно на этот отрезок */
+function planSum(g, a, b) {
+  return g.rows[b - 1][2] - (a > 1 ? g.rows[a - 2][2] : 0);
+}
+function planMarkup(g) {
+  const n = g.rows.length,
+    a = g.reached ? Math.min(n, g.reached + 1) : 1,
+    b = n;
+  return (
+    '<div class="ich-plan" data-plan="' +
+    g.key +
+    '"><label>С уровня<input type="number" inputmode="numeric" min="1" max="' +
+    n +
+    '" value="' +
+    a +
+    '" data-plan-from></label><label>По уровень<input type="number" inputmode="numeric" min="1" max="' +
+    n +
+    '" value="' +
+    b +
+    '" data-plan-to></label><div class="ich-plan-res"><span>' +
+    g.need +
+    "</span><b data-plan-res>" +
+    fmt(planSum(g, Math.min(a, b), Math.max(a, b))) +
+    "</b></div></div>"
+  );
+}
 function renderInfo() {
   const p = readCalcProgress() || { level: 0, talents: 0 };
-  const talentChunks = chunkRows(TALENT_LEVELS, 3)
-    .map(rows => infoTableMarkup(rows, ["Уровень", "Урон", "Всего"], p.talents))
-    .join("");
-  $("infoGroups").innerHTML =
-    infoGroupMarkup(
-      "Таланты",
-      "#ffb74d",
-      infoProgressMarkup(
-        TALENT_LEVELS,
-        p.talents,
-        "урона",
-        "Получено: <b>" + p.talents + "</b> из " + TALENT_LEVELS.length
+  const groups = infoGroupsData(p);
+  if (currentInfoView === "table") {
+    const talentChunks = chunkRows(TALENT_LEVELS, 3)
+      .map(rows => infoTableMarkup(rows, ["Уровень", "Урон", "Всего"], p.talents))
+      .join("");
+    $("infoGroups").innerHTML =
+      infoGroupMarkup(
+        "Таланты",
+        "#ffb74d",
+        infoProgressMarkup(
+          TALENT_LEVELS,
+          p.talents,
+          "урона",
+          "Получено: <b>" + p.talents + "</b> из " + TALENT_LEVELS.length
+        ) +
+          '<div class="info-subcols">' +
+          talentChunks +
+          "</div>",
+        null,
+        "talents"
       ) +
-        '<div class="info-subcols">' +
-        talentChunks +
-        "</div>",
-      null,
-      "talents"
-    ) +
-    infoGroupMarkup(
-      "Опыт ПДА",
-      "#9fdc9f",
-      infoTableMarkup(PDA_LEVELS, ["Уровень", "Опыт", "Всего"]),
-      PDA_LEVEL_NOTES,
-      "pda"
-    ) +
-    infoGroupMarkup(
-      "Опыт персонажа",
-      "#54bfff",
-      infoProgressMarkup(CHAR_LEVELS, p.level, "опыта", "Ваш уровень: <b>" + p.level + "</b>") +
-        infoTableMarkup(CHAR_LEVELS, ["Уровень", "Опыт", "Всего"], p.level),
-      null,
-      "char"
-    );
+      infoGroupMarkup(
+        "Опыт ПДА",
+        "#9fdc9f",
+        infoTableMarkup(PDA_LEVELS, ["Уровень", "Опыт", "Всего"]),
+        PDA_LEVEL_NOTES,
+        "pda"
+      ) +
+      infoGroupMarkup(
+        "Опыт персонажа",
+        "#54bfff",
+        infoProgressMarkup(CHAR_LEVELS, p.level, "опыта", "Ваш уровень: <b>" + p.level + "</b>") +
+          infoTableMarkup(CHAR_LEVELS, ["Уровень", "Опыт", "Всего"], p.level),
+        null,
+        "char"
+      );
+  } else {
+    $("infoGroups").innerHTML = groups
+      .map(g => infoGroupMarkup(g.title, g.color, chartMarkup(g) + chartCardsMarkup(g) + planMarkup(g), g.notes, g.key))
+      .join("");
+  }
+  $("infoGroups").dataset.view = currentInfoView;
+  $("infoTabs").dataset.view = currentInfoView;
   const note = $("infoProgress");
   if (note) note.innerHTML = infoProgressNoteMarkup(p);
   renderInfoTabs();
   applyInfoActiveTab();
+  applyInfoViewButtons();
 }
+/* переключатель вида «График / Таблицы» (кнопки в info.html) */
+function applyInfoViewButtons() {
+  document.querySelectorAll("[data-info-view]").forEach(b => {
+    const on = b.dataset.infoView === currentInfoView;
+    b.classList.toggle("active", on);
+    b.setAttribute("aria-pressed", on);
+  });
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-info-view]");
+  if (!b || b.dataset.infoView === currentInfoView) return;
+  const swap = () => {
+    currentInfoView = b.dataset.infoView;
+    try {
+      localStorage.setItem(INFO_VIEW_KEY, currentInfoView);
+    } catch {}
+    renderInfo();
+  };
+  window.__vt ? window.__vt(swap) : swap();
+});
+
+/* график: наведение, касание и ползунок двигают подсказку по уровням */
+function infoGroupByKey(key) {
+  return infoGroupsData(readCalcProgress() || { level: 0, talents: 0 }).find(g => g.key === key);
+}
+function chartSelect(box, lvl) {
+  const g = infoGroupByKey(box.dataset.ich);
+  if (!g) return;
+  lvl = Math.max(1, Math.min(g.rows.length, lvl));
+  const p = chartPos(g, lvl),
+    tip = box.querySelector(".ich-tip");
+  box.querySelector(".ich-cursor").style.left = p.x + "%";
+  const dot = box.querySelector(".ich-dot");
+  dot.style.left = p.x + "%";
+  dot.style.top = p.y + "%";
+  tip.style.left = p.x + "%";
+  tip.style.top = p.y + "%";
+  tip.classList.toggle("ich-tip-left", p.x > 60);
+  tip.classList.toggle("ich-tip-low", p.y < 35);
+  tip.innerHTML = chartTipMarkup(g, lvl);
+  const range = box.querySelector(".ich-range");
+  if (+range.value !== lvl) range.value = lvl;
+}
+document.addEventListener("pointermove", e => {
+  const area = e.target.closest && e.target.closest(".ich-area");
+  if (!area) return;
+  const box = area.closest(".ich"),
+    rect = area.getBoundingClientRect(),
+    n = +box.querySelector(".ich-range").max;
+  chartSelect(box, Math.round(1 + ((e.clientX - rect.left) / rect.width) * (n - 1)));
+});
+document.addEventListener("input", e => {
+  if (e.target.classList.contains("ich-range")) {
+    chartSelect(e.target.closest(".ich"), +e.target.value);
+    return;
+  }
+  const plan = e.target.closest && e.target.closest("[data-plan]");
+  if (!plan) return;
+  const g = infoGroupByKey(plan.dataset.plan),
+    n = g.rows.length;
+  const val = s => Math.max(1, Math.min(n, Math.round(Number(plan.querySelector(s).value) || 1)));
+  const a = val("[data-plan-from]"),
+    b = val("[data-plan-to]");
+  plan.querySelector("[data-plan-res]").textContent = fmt(planSum(g, Math.min(a, b), Math.max(a, b)));
+});
+
 /* калькулятор открыт в соседней вкладке - таблицы обновляются сразу; при возврате на вкладку тоже */
 window.addEventListener &&
   window.addEventListener("storage", e => {
