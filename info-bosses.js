@@ -2,14 +2,14 @@
    Всё в функции, чтобы не пересекаться с $ и fmt из info.js */
 (function () {
   "use strict";
-  /* карты: босс отдаёт одну карту своего цвета, три такие карты нужны для боя со следующим */
+  /* ключи босса (в игре - карточки-ключи): босс отдаёт один ключ своего цвета, три таких ключа нужны для боя со следующим */
   const CARDS = {
-    green: { color: "#3ecf5a", one: "Зелёная карта", many: "зелёные карты" },
-    blue: { color: "#4f86f7", one: "Синяя карта", many: "синие карты" },
-    purple: { color: "#a565e8", one: "Фиолетовая карта", many: "фиолетовые карты" },
-    orange: { color: "#ff9a2e", one: "Оранжевая карта", many: "оранжевые карты" },
-    red: { color: "#ec4b4f", one: "Красная карта", many: "красные карты" },
-    cyan: { color: "#35c9d6", one: "Бирюзовая карта", many: "бирюзовые карты" }
+    green: { color: "#3ecf5a", one: "Зелёный ключ", many: "зелёных ключа" },
+    blue: { color: "#4f86f7", one: "Синий ключ", many: "синих ключа" },
+    purple: { color: "#a565e8", one: "Фиолетовый ключ", many: "фиолетовых ключа" },
+    orange: { color: "#ff9a2e", one: "Оранжевый ключ", many: "оранжевых ключа" },
+    red: { color: "#ec4b4f", one: "Красный ключ", many: "красных ключа" },
+    cyan: { color: "#35c9d6", one: "Бирюзовый ключ", many: "бирюзовых ключа" }
   };
   const BOSSES = [
     {
@@ -85,7 +85,7 @@
     }
   };
   const n0 = v => v.toLocaleString("ru-RU");
-  /* значок карты: белая карточка с цветной полосой, как в игре */
+  /* значок ключа: белая карточка с цветной полосой, как в игре */
   const cardIcon = c =>
     '<svg class="boss-card-ico" viewBox="0 0 24 24" aria-hidden="true"><g transform="rotate(10 12 12)"><rect x="6.2" y="2.4" width="11.6" height="19.2" rx="1.6" fill="#eef2f5"/><rect x="13.9" y="3.6" width="2.3" height="16.8" fill="' +
     CARDS[c].color +
@@ -161,11 +161,15 @@
     return (
       '<article class="boss-card" data-boss="' +
       b.key +
-      '"><div class="boss-art"><img src="assets/bosses/' +
+      '"><div class="boss-art"><video class="boss-video" muted loop playsinline disablepictureinpicture preload="none" width="512" height="320" poster="assets/bosses/' +
       b.key +
-      '.webp" alt="' +
+      '.webp" aria-label="' +
       b.name +
-      '" width="606" height="438" loading="lazy" decoding="async"><span class="boss-num">' +
+      '"><source src="assets/bosses/' +
+      b.key +
+      '.webm" type="video/webm"><source src="assets/bosses/' +
+      b.key +
+      '.mp4" type="video/mp4"></video><span class="boss-num">' +
       (i + 1) +
       '</span><h3 class="boss-name">' +
       b.name +
@@ -186,5 +190,19 @@
     root.innerHTML =
       '<div class="bosses-grid">' +
       BOSSES.map(bossCard).join("") +
-      '</div><p class="damage-footnote">Боссы идут по цепочке: с каждого падает карта, а три такие карты открывают бой со следующим. Значок бронежилета в награде в игре - вещи комплекта, которые могут выпасть с босса.</p>';
+      '</div><p class="damage-footnote">Боссы идут по цепочке: с каждого падает ключ, а три таких ключа открывают бой со следующим. Значок бронежилета в награде в игре - вещи комплекта, которые могут выпасть с босса.</p>';
+  /* анимация из игры играет, только пока карточка на экране; при «уменьшить движение» остаётся кадр-заставка */
+  const still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (root && !still && typeof IntersectionObserver === "function") {
+    const io = new IntersectionObserver(entries =>
+      entries.forEach(e => {
+        const v = e.target;
+        if (e.isIntersecting) {
+          const p = v.play();
+          if (p && p.catch) p.catch(() => {});
+        } else v.pause();
+      })
+    );
+    root.querySelectorAll(".boss-video").forEach(v => io.observe(v));
+  }
 })();
