@@ -7616,7 +7616,7 @@ main.content.page-narrow {
   position: relative;
   height: 100%;
   touch-action: pan-y;
-  cursor: crosshair;
+  cursor: ew-resize;
 }
 .ich-area svg {
   position: absolute;

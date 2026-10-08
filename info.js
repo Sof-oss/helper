@@ -460,8 +460,7 @@ document.addEventListener("click", e => {
 function infoGroupByKey(key) {
   return infoGroupsData(readCalcProgress() || { level: 0, talents: 0 }).find(g => g.key === key);
 }
-/* hover - временный просмотр: ползунок остаётся на месте, а когда курсор уходит с графика, подсказка возвращается к ползунку */
-function chartSelect(box, lvl, hover) {
+function chartSelect(box, lvl) {
   const g = infoGroupByKey(box.dataset.ich);
   if (!g) return;
   lvl = Math.max(1, Math.min(g.rows.length, lvl));
@@ -476,24 +475,31 @@ function chartSelect(box, lvl, hover) {
   tip.classList.toggle("ich-tip-left", p.x > 60);
   tip.classList.toggle("ich-tip-low", p.y < 35);
   tip.innerHTML = chartTipMarkup(g, lvl);
-  if (hover) return;
   const range = box.querySelector(".ich-range");
   if (+range.value !== lvl) range.value = lvl;
 }
+/* линия на графике не ездит за курсором: её ставят нажатием и перетаскивают с зажатой кнопкой (или пальцем) */
+let chartDrag = null;
+function chartLevelAt(area, x) {
+  const rect = area.getBoundingClientRect(),
+    n = +area.closest(".ich").querySelector(".ich-range").max;
+  return Math.round(1 + ((x - rect.left) / rect.width) * (n - 1));
+}
+document.addEventListener("pointerdown", e => {
+  const area = e.target.closest && e.target.closest(".ich-area");
+  if (!area || e.button > 0) return;
+  chartDrag = area;
+  if (area.setPointerCapture) area.setPointerCapture(e.pointerId);
+  chartSelect(area.closest(".ich"), chartLevelAt(area, e.clientX));
+});
 document.addEventListener("pointermove", e => {
-  const area = e.target.closest && e.target.closest(".ich-area");
-  if (!area) return;
-  const box = area.closest(".ich"),
-    rect = area.getBoundingClientRect(),
-    n = +box.querySelector(".ich-range").max;
-  chartSelect(box, Math.round(1 + ((e.clientX - rect.left) / rect.width) * (n - 1)), true);
+  if (chartDrag) chartSelect(chartDrag.closest(".ich"), chartLevelAt(chartDrag, e.clientX));
 });
-document.addEventListener("pointerout", e => {
-  const area = e.target.closest && e.target.closest(".ich-area");
-  if (!area || (e.relatedTarget && area.contains(e.relatedTarget))) return;
-  const box = area.closest(".ich");
-  chartSelect(box, +box.querySelector(".ich-range").value);
-});
+["pointerup", "pointercancel"].forEach(t =>
+  document.addEventListener(t, () => {
+    chartDrag = null;
+  })
+);
 document.addEventListener("input", e => {
   if (e.target.classList.contains("ich-range")) {
     chartSelect(e.target.closest(".ich"), +e.target.value);
