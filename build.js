@@ -35,7 +35,14 @@ const OUT = path.join(ROOT, "dist");
 /* модули: файл в dist -> точка входа и все исходники (по ним же считается дата страницы в sitemap).
    Исходники модулей в dist не копируются - на сайт попадает только собранный файл */
 const MODULES = {
-  "home-3d.js": ["src/home-3d.js", "src/zone-intro.js", "src/zone-heart.js", "src/zone-bg.js", "src/zone-theme.js"],
+  "home-3d.js": [
+    "src/home-3d.js",
+    "src/zone-intro.js",
+    "src/zone-heart.js",
+    "src/zone-sign.js",
+    "src/zone-bg.js",
+    "src/zone-theme.js"
+  ],
   "calculator.js": ["src/calculator.js", "src/calc-core.js", "app.js", "polish.js", "talents.js"]
 };
 
@@ -61,6 +68,7 @@ const SKIP = new Set([
   "fetch-players.js",
   "update-top100.bat",
   "build-previews.js",
+  "build-logo.js",
   "build-changelog.js",
   "previews",
   "test",

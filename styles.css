@@ -5400,18 +5400,28 @@ body::after {
   text-decoration: none;
 }
 .rad-logo {
-  width: 40px;
-  height: 40px;
+  width: 52px;
+  height: 52px;
   font-size: 0;
-  filter: drop-shadow(0 0 8px rgba(255, 60, 40, 0.38));
+  filter: drop-shadow(0 0 7px rgba(255, 96, 30, 0.32));
   transition: transform 0.4s ease;
 }
-/* логотип - «Сердце Зоны»: рендер той же 3D-модели, что в заставке (src/zone-heart.js), поэтому прилетевшее сердце
-   встаёт на место картинки без подмены. Раз в несколько секунд сердце тихо бьётся «тук-тук» */
+/* логотип - «Сердце Зоны»: живой знак радиации (SVG из src/zone-sign.js, его вставляет build-logo.js) и поверх -
+   рендер той же 3D-модели, что в заставке (src/zone-heart.js), поэтому прилетевшее сердце встаёт на место без подмены.
+   Раз в несколько секунд сердце бьётся «тук-тук», каждый удар отбрасывает волну, а волна, проходя, зажигает
+   дуги знака одну за другой - изнутри наружу */
+.rad-logo {
+  position: relative;
+}
+.rad-logo .rad-sign,
 .rad-logo img {
-  width: 40px;
-  height: 40px;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   display: block;
+}
+.rad-logo img {
   animation: heart-beat 4.2s ease-in-out 2s infinite;
 }
 @keyframes heart-beat {
@@ -5428,6 +5438,58 @@ body::after {
   }
   11% {
     transform: scale(1.04);
+  }
+}
+.rad-sign .rs-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: rs-pulse 4.2s cubic-bezier(0.3, 0.6, 0.5, 1) 2s infinite both;
+}
+.rad-sign .rs-p2 {
+  animation-delay: 2.29s;
+  stroke-opacity: 0.6;
+}
+@keyframes rs-pulse {
+  0%,
+  3% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  5% {
+    opacity: 0.75;
+  }
+  20%,
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+.rad-sign .rs-flare {
+  animation: rs-flare 4.2s ease-out 2s infinite both;
+}
+.rad-sign .rs-f2 {
+  animation-delay: 2.15s;
+}
+.rad-sign .rs-f3 {
+  animation-delay: 2.3s;
+}
+@keyframes rs-flare {
+  0%,
+  9% {
+    opacity: 0;
+  }
+  10.7% {
+    opacity: 1;
+  }
+  14% {
+    opacity: 0.2;
+  }
+  17.6% {
+    opacity: 0.85;
+  }
+  24%,
+  100% {
+    opacity: 0;
   }
 }
 .logo:hover .rad-logo {
@@ -6016,8 +6078,8 @@ th.top100-sort {
   }
   .rad-logo,
   .rad-logo img {
-    width: 32px;
-    height: 32px;
+    width: 42px;
+    height: 42px;
   }
   .logo-title {
     font-size: 21px;
@@ -6070,7 +6132,9 @@ th.top100-sort {
   .theme-item {
     transition: none;
   }
-  .rad-logo img {
+  .rad-logo img,
+  .rad-sign .rs-pulse,
+  .rad-sign .rs-flare {
     animation: none;
   }
 }
@@ -6577,8 +6641,8 @@ th.top100-sort {
   }
   .rad-logo,
   .rad-logo img {
-    width: 34px;
-    height: 34px;
+    width: 44px;
+    height: 44px;
   }
   .logo-title {
     font-size: 22px;
