@@ -315,6 +315,16 @@
   gap: 12px;
   margin: 0 0 12px;
 }
+.gf-desc {
+  margin: 0 0 12px;
+}
+.gf-field > span i {
+  font-style: normal;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #7f95a6;
+}
 .gf-field {
   display: flex;
   flex-direction: column;

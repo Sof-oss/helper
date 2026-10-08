@@ -14,7 +14,16 @@
   /* капча: SmartCaptcha от Яндекса работает в России без обрывов, Turnstile - запасной вариант */
   const CAPTCHA = cfg.smartcaptchaSiteKey ? "yandex" : cfg.turnstileSiteKey ? "turnstile" : "";
   const ready = !!(cfg.endpoint && CAPTCHA);
-  const LIM = { title: 100, author: 40, text: 30000, minText: 200, images: 5, imgBytes: 2 * 1024 * 1024, side: 1600 };
+  const LIM = {
+    title: 100,
+    author: 40,
+    description: 200,
+    text: 30000,
+    minText: 200,
+    images: 5,
+    imgBytes: 2 * 1024 * 1024,
+    side: 1600
+  };
   const DRAFT = "guideDraft";
   const esc = window.GuideMD.esc;
   const images = []; /* {name, blob, url} */
@@ -65,6 +74,9 @@
       '<label class="gf-field gf-author"><span>Ваш ник в игре</span><input id="gfAuthor" maxlength="' +
       LIM.author +
       '" placeholder="Подпись автора" autocomplete="nickname" required></label></div>' +
+      '<label class="gf-field gf-desc"><span>Краткое описание <i>- необязательно</i></span><input id="gfDesc" maxlength="' +
+      LIM.description +
+      '" placeholder="1–2 предложения о том, что в гайде. Если не заполнить, в списке покажется начало текста" autocomplete="off"></label>' +
       '<div class="gf-editor">' +
       '<div class="gf-bar"><div class="gf-tools" role="toolbar" aria-label="Оформление">' +
       TOOLS.map(
@@ -104,6 +116,7 @@
     const $ = id => document.getElementById(id);
     const title = $("gfTitle"),
       author = $("gfAuthor"),
+      desc = $("gfDesc"),
       text = $("gfText"),
       preview = $("gfPreview");
 
@@ -146,6 +159,7 @@
       if (d) {
         title.value = d.title || "";
         author.value = d.author || "";
+        desc.value = d.description || "";
         text.value = d.text || "";
         if (/^[a-z0-9]{8,20}$/.test(d.sid || "")) sid = d.sid;
       }
@@ -157,7 +171,7 @@
         try {
           localStorage.setItem(
             DRAFT,
-            JSON.stringify({ title: title.value, author: author.value, text: text.value, sid })
+            JSON.stringify({ title: title.value, author: author.value, description: desc.value, text: text.value, sid })
           );
         } catch (e) {}
       }, 400);
@@ -166,7 +180,7 @@
       $("gfCount").textContent = text.value.length.toLocaleString("ru-RU") + " / " + LIM.text.toLocaleString("ru-RU");
       drawTodo();
     };
-    [title, author, text].forEach(el =>
+    [title, author, desc, text].forEach(el =>
       el.addEventListener("input", () => {
         save();
         count();
@@ -352,6 +366,7 @@
           id: sid,
           title: t,
           author: a,
+          description: desc.value.trim(),
           text: body,
           website: $("gfWebsite").value,
           token,

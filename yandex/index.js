@@ -18,6 +18,7 @@
 const LIM = {
   title: [5, 100],
   author: [2, 40],
+  description: [0, 200],
   text: [200, 30000],
   images: 5,
   imgBytes: 1024 * 1024,
@@ -133,7 +134,8 @@ module.exports.handler = async function (event) {
       .replace(/\s+/g, " ")
       .trim();
   const title = line(d.title),
-    author = line(d.author);
+    author = line(d.author),
+    description = line(d.description);
   const text = String(d.text || "")
     .replace(/\r\n?/g, "\n")
     .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, "")
@@ -144,7 +146,11 @@ module.exports.handler = async function (event) {
       : s.length > b
         ? what + ": слишком длинно (до " + b + " символов)"
         : "";
-  const err = len(title, LIM.title, "Заголовок") || len(author, LIM.author, "Ник") || len(text, LIM.text, "Текст");
+  const err =
+    len(title, LIM.title, "Заголовок") ||
+    len(author, LIM.author, "Ник") ||
+    len(description, LIM.description, "Описание") ||
+    len(text, LIM.text, "Текст");
   if (err) return bad(err);
 
   const imgs = Array.isArray(d.images) ? d.images : [];
@@ -182,7 +188,17 @@ module.exports.handler = async function (event) {
   const slug = translit(title).slice(0, 60).replace(/-+$/, "") + "-" + sid.slice(0, 6);
   const date = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10); /* по Москве */
   const yaml = s => (/^[\s"'#|>&*!%@`{[-]|:\s|\s#/.test(s) ? '"' + s.replace(/"/g, "'") + '"' : s);
-  const md = "---\ntitle: " + yaml(title) + "\nauthor: " + yaml(author) + "\ndate: " + date + "\n---\n\n" + text + "\n";
+  const md =
+    "---\ntitle: " +
+    yaml(title) +
+    "\nauthor: " +
+    yaml(author) +
+    (description ? "\ndescription: " + yaml(description) : "") +
+    "\ndate: " +
+    date +
+    "\n---\n\n" +
+    text +
+    "\n";
 
   try {
     const dup = await findGuideBranch(env, sid.slice(0, 6));
