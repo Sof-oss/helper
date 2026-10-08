@@ -227,7 +227,9 @@
     var p = location.pathname
       .replace(/\.html$/, "")
       .replace(/\/index$/, "/")
-      .replace(/\/+$/, "");
+      .replace(/\/+$/, "")
+      /* разделы «Информации» (/info-tasks, /info-bosses) - та же страница, шаги тура переключают их сами */
+      .replace(/^\/info-(tasks|bosses)$/, "/info");
     return p || "/";
   }
   function reduced() {

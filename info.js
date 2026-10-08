@@ -137,6 +137,9 @@ try {
   const saved = localStorage.getItem(INFO_TAB_KEY);
   if (INFO_TABS.some(t => t.key === saved)) currentInfoTab = saved;
 } catch {}
+/* вкладку можно открыть ссылкой: /info#pda, /info#char, /info#talents - метка важнее запомненной вкладки */
+const INFO_HASH = typeof location !== "undefined" ? location.hash.slice(1) : "";
+if (INFO_TABS.some(t => t.key === INFO_HASH)) currentInfoTab = INFO_HASH;
 
 function renderInfoTabs() {
   $("infoTabs").innerHTML = INFO_TABS.map(
@@ -571,6 +574,10 @@ document.addEventListener("click", e => {
     try {
       localStorage.setItem(INFO_TAB_KEY, currentInfoTab);
     } catch {}
+    /* метка вкладки в адресе - чтобы ссылкой можно было поделиться; запись в истории не добавляется */
+    try {
+      history.replaceState(history.state, "", location.pathname + location.search + "#" + currentInfoTab);
+    } catch {}
     renderInfoTabs();
     applyInfoActiveTab();
   };
@@ -578,3 +585,12 @@ document.addEventListener("click", e => {
 });
 
 renderInfo();
+/* открыли по ссылке с меткой (/info#pda), а вкладки блоков скрыты (вид «Таблицы» на ПК) -
+   все блоки на экране, поэтому просто прокручиваем к нужному */
+if (INFO_TABS.some(t => t.key === INFO_HASH)) {
+  requestAnimationFrame(() => {
+    const tabs = $("infoTabs");
+    const g = document.querySelector('[data-info-group="' + INFO_HASH + '"]');
+    if (g && tabs && !tabs.offsetParent && g.offsetParent) g.scrollIntoView({ block: "start" });
+  });
+}

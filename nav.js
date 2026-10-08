@@ -19,3 +19,17 @@
     }
   } catch (e) {}
 })();
+
+/* Пункт меню «Информация» ведёт в раздел, который открывали последним: /info-tasks или /info-bosses
+   (info-tasks.js запоминает его в gameHelperInfoSection). Прямые ссылки на /info это не меняет */
+(() => {
+  let s = null;
+  try {
+    s = localStorage.getItem("gameHelperInfoSection");
+  } catch (e) {}
+  const url = { tasks: "/info-tasks", bosses: "/info-bosses" }[s];
+  if (!url) return;
+  document
+    .querySelectorAll('.main-nav a[href="/info"], .tabbar a[href="/info"]')
+    .forEach(a => a.setAttribute("href", url));
+})();

@@ -505,7 +505,20 @@
     root.innerHTML = tasksBody();
   }
 
-  /* переключатель разделов «Прогресс по уровням» / «Задания» / «Боссы» */
+  /* переключатель разделов «Прогресс по уровням» / «Задания» / «Боссы».
+     У каждого раздела свой адрес (страницы собирает build.js из info.html): раздел берётся из адреса,
+     при переключении адрес меняется без перезагрузки, «Назад» и «Вперёд» возвращают прежний раздел.
+     Последний раздел запоминается (SEC_KEY) - по нему nav.js ведёт пункт меню «Информация» */
+  const SECTIONS = {
+    levels: { url: "/info", title: "Сердце Зоны - Информация" },
+    tasks: { url: "/info-tasks", title: "Сердце Зоны - Задания: награды локаций и калькулятор энергии" },
+    bosses: { url: "/info-bosses", title: "Сердце Зоны - Боссы: здоровье, ключи и награды" }
+  };
+  const hasLoc = typeof location !== "undefined";
+  function secFromPath() {
+    const p = hasLoc ? location.pathname.replace(/\.html$/, "").replace(/\/+$/, "") : "";
+    return p.endsWith("/info-tasks") ? "tasks" : p.endsWith("/info-bosses") ? "bosses" : "levels";
+  }
   function setSection(k) {
     document.querySelectorAll("[data-section]").forEach(b => {
       const on = b.dataset.section === k;
@@ -515,24 +528,44 @@
     document.querySelectorAll("[data-section-panel]").forEach(p => {
       p.hidden = p.dataset.sectionPanel !== k;
     });
+    if (!hasLoc) return;
+    document.title = SECTIONS[k].title;
+    /* пункт меню «Информация» ведёт в открытый сейчас раздел (как и после перезагрузки, см. nav.js) */
+    document.querySelectorAll(".main-nav a, .tabbar a").forEach(a => {
+      if (/^\/info(-tasks|-bosses)?$/.test(a.getAttribute("href") || "")) a.setAttribute("href", SECTIONS[k].url);
+    });
+    const c = document.querySelector('link[rel="canonical"]');
+    if (c) c.href = location.origin + SECTIONS[k].url;
   }
   document.addEventListener("click", e => {
     const s = e.target.closest("[data-section]");
     if (!s) return;
+    const k = s.dataset.section;
+    if (!SECTIONS[k] || k === secFromPath()) return;
     /* смена раздела проходит через View Transition, если браузер умеет */
     const swap = () => {
-      setSection(s.dataset.section);
+      setSection(k);
       try {
-        localStorage.setItem(SEC_KEY, s.dataset.section);
+        history.pushState({ infoSection: k }, "", SECTIONS[k].url);
+      } catch {}
+      try {
+        localStorage.setItem(SEC_KEY, k);
       } catch {}
     };
     window.__vt ? window.__vt(swap) : swap();
   });
+  if (hasLoc)
+    window.addEventListener("popstate", () => {
+      const k = secFromPath();
+      try {
+        localStorage.setItem(SEC_KEY, k);
+      } catch {}
+      window.__vt ? window.__vt(() => setSection(k)) : setSection(k);
+    });
   renderTasks();
-  let sec = "levels";
-  try {
-    const s = localStorage.getItem(SEC_KEY);
-    if (s === "levels" || s === "tasks" || s === "bosses") sec = s;
-  } catch {}
+  const sec = secFromPath();
   setSection(sec);
+  try {
+    localStorage.setItem(SEC_KEY, sec);
+  } catch {}
 })();

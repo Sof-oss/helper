@@ -466,6 +466,65 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
   console.log(name.padEnd(16), (before / 1024).toFixed(1) + " КБ -> " + (html.length / 1024).toFixed(1) + " КБ");
 }
 
+/* ---------- разделы «Информации» на своих адресах ----------
+   /info - «Прогресс по уровням», /info-tasks - «Задания», /info-bosses - «Боссы». Это одна и та же страница
+   (переключение разделов - без перезагрузки, адрес меняет info-tasks.js), но у каждого раздела свой файл
+   со своими заголовком, описанием и canonical, и в нём сразу открыт нужный раздел - для ссылок и поисковиков.
+   Адреса через дефис, а не /info/tasks: файл info.html рядом с папкой info/ на GitHub Pages - лишний риск */
+const INFO_SECTIONS = {
+  tasks: {
+    file: "info-tasks.html",
+    name: "Задания",
+    title: "Сердце Зоны - Задания: награды локаций и калькулятор энергии",
+    desc: "Задания всех локаций игры «Сердце Зоны»: этапы и число повторов, награда за прохождение, итог и выгода на единицу энергии, калькулятор энергии и энергетиков."
+  },
+  bosses: {
+    file: "info-bosses.html",
+    name: "Боссы",
+    title: "Сердце Зоны - Боссы: здоровье, ключи и награды",
+    desc: "Все боссы игры «Сердце Зоны»: здоровье, сколько ключей нужно для боя, награды за победу и комплекты вещей, которые могут выпасть."
+  }
+};
+{
+  const base = fs.readFileSync(path.join(OUT, "info.html"), "utf8");
+  for (const [key, sec] of Object.entries(INFO_SECTIONS)) {
+    const url = SITE + "/" + sec.file.replace(/\.html$/, "");
+    const attr = s => esc(s);
+    let html = base
+      .replace(/<title>[^<]*<\/title>/, "<title>" + attr(sec.title) + "</title>")
+      .replace(/(<meta name="description" content=")[^"]*/, "$1" + attr(sec.desc))
+      .replace(/(<meta property="og:title" content=")[^"]*/, "$1" + attr(sec.title))
+      .replace(/(<meta property="og:description" content=")[^"]*/, "$1" + attr(sec.desc))
+      .replace(/(<meta property="og:image:alt" content=")[^"]*/, "$1" + attr(sec.title))
+      .replace(/(<meta property="og:url" content=")[^"]*/, "$1" + url)
+      .replace(/(<link rel="canonical" href=")[^"]*/, "$1" + url)
+      /* хлебные крошки: Главная → Информация → раздел */
+      .replace(
+        /("item": "https:\/\/heart-of-the-zone\.ru\/info"\})\]/,
+        '$1, {"@type": "ListItem", "position": 3, "name": "' + sec.name + '", "item": "' + url + '"}]'
+      )
+      /* открытый раздел: кнопка и панель */
+      .replace(
+        /<button type="button" class="top100-tab(?: active)?" data-section="(\w+)" aria-pressed="(?:true|false)"/g,
+        (m, k) =>
+          '<button type="button" class="top100-tab' +
+          (k === key ? " active" : "") +
+          '" data-section="' +
+          k +
+          '" aria-pressed="' +
+          (k === key) +
+          '"'
+      )
+      .replace(/<div data-section-panel="(\w+)"(?: hidden)?>/g, (m, k) =>
+        k === key ? '<div data-section-panel="' + k + '">' : '<div data-section-panel="' + k + '" hidden>'
+      );
+    if (!html.includes('data-section="' + key + '" aria-pressed="true"'))
+      throw new Error(sec.file + ": не нашлась кнопка раздела " + key);
+    fs.writeFileSync(path.join(OUT, sec.file), html);
+    pages++;
+  }
+}
+
 /* ---------- страницы гайдов ----------
    Шаблон - уже собранная guides.html (шапка, подвал, стили, версии файлов): меняются заголовок, описание,
    адрес, картинка для соцсетей и содержимое <main>. Страница лежит глубже (/guide/…), поэтому
@@ -573,20 +632,30 @@ if (fs.existsSync(smSrc)) {
     .replace(/<url><loc>([^<]+)<\/loc>(?:<lastmod>[^<]*<\/lastmod>)?<\/url>/g, (m, loc) => {
       /* адреса в sitemap без .html (/calculator), файл страницы - calculator.html */
       const slug = new URL(loc).pathname.replace(/^\//, "");
-      const page = !slug ? "index.html" : slug.endsWith(".html") ? slug : slug + ".html";
+      let page = !slug ? "index.html" : slug.endsWith(".html") ? slug : slug + ".html";
+      /* разделы «Информации» собираются из info.html (см. INFO_SECTIONS) */
+      if (Object.values(INFO_SECTIONS).some(sec => sec.file === page)) page = "info.html";
       if (!fs.existsSync(path.join(ROOT, page))) return m;
-      const date = (page === "top100.html" && top100Date()) || gitDate(pageDeps(page));
+      /* у списка гайдов дата - ещё и последний коммит папок гайдов */
+      const deps =
+        page === "guides.html" ? [...pageDeps(page), ...guides.map(g => "guides/" + g.slug)] : pageDeps(page);
+      const date = (page === "top100.html" && top100Date()) || gitDate(deps);
       return "<url><loc>" + loc + "</loc><lastmod>" + date + "</lastmod></url>";
     });
   /* гайды: страница списка и каждый гайд, дата - последний коммит папки гайда */
+  /* /guides может уже стоять в sitemap.xml - тогда второй раз не дописываем */
   const extra = !guides.length
     ? ""
     : [
-        "<url><loc>" +
-          SITE +
-          "/guides</loc><lastmod>" +
-          gitDate([...pageDeps("guides.html"), ...guides.map(g => "guides/" + g.slug)]) +
-          "</lastmod></url>",
+        ...(sm.includes(SITE + "/guides<")
+          ? []
+          : [
+              "<url><loc>" +
+                SITE +
+                "/guides</loc><lastmod>" +
+                gitDate([...pageDeps("guides.html"), ...guides.map(g => "guides/" + g.slug)]) +
+                "</lastmod></url>"
+            ]),
         ...guides.map(
           g =>
             "<url><loc>" +
