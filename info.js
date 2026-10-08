@@ -461,7 +461,8 @@ document.addEventListener("click", e => {
 function infoGroupByKey(key) {
   return infoGroupsData(readCalcProgress() || { level: 0, talents: 0 }).find(g => g.key === key);
 }
-function chartSelect(box, lvl) {
+/* hover - только просмотр: подсказка показывает уровень под курсором, ползунок остаётся на месте */
+function chartSelect(box, lvl, hover) {
   const g = infoGroupByKey(box.dataset.ich);
   if (!g) return;
   lvl = Math.max(1, Math.min(g.rows.length, lvl));
@@ -476,6 +477,7 @@ function chartSelect(box, lvl) {
   tip.classList.toggle("ich-tip-left", p.x > 60);
   tip.classList.toggle("ich-tip-low", p.y < 35);
   tip.innerHTML = chartTipMarkup(g, lvl);
+  if (hover) return;
   const range = box.querySelector(".ich-range");
   if (+range.value !== lvl) range.value = lvl;
 }
@@ -493,8 +495,21 @@ document.addEventListener("pointerdown", e => {
   if (area.setPointerCapture) area.setPointerCapture(e.pointerId);
   chartSelect(area.closest(".ich"), chartLevelAt(area, e.clientX));
 });
+/* наведение показывает подсказку для уровня под курсором; нажатие или перетаскивание с зажатой кнопкой (пальцем)
+   переставляет выбранный уровень вместе с ползунком. Курсор ушёл с графика - подсказка возвращается к ползунку */
 document.addEventListener("pointermove", e => {
-  if (chartDrag) chartSelect(chartDrag.closest(".ich"), chartLevelAt(chartDrag, e.clientX));
+  if (chartDrag) {
+    chartSelect(chartDrag.closest(".ich"), chartLevelAt(chartDrag, e.clientX));
+    return;
+  }
+  const area = e.pointerType !== "touch" && e.target.closest && e.target.closest(".ich-area");
+  if (area) chartSelect(area.closest(".ich"), chartLevelAt(area, e.clientX), true);
+});
+document.addEventListener("pointerout", e => {
+  const area = !chartDrag && e.target.closest && e.target.closest(".ich-area");
+  if (!area || (e.relatedTarget && area.contains(e.relatedTarget))) return;
+  const box = area.closest(".ich");
+  chartSelect(box, +box.querySelector(".ich-range").value);
 });
 ["pointerup", "pointercancel"].forEach(t =>
   document.addEventListener(t, () => {
