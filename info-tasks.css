@@ -739,10 +739,8 @@ html .data-table.tasks-v2 tbody tr:last-child > :is(th, td) {
 .boss-items figcaption {
   margin-top: 4px;
   font-size: 11.5px;
+  line-height: 1.25;
   color: #8ea3b4;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .bosses-grid + .damage-footnote {
   margin-top: 14px;

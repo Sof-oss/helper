@@ -26,7 +26,7 @@
       hp: 10000,
       req: "green",
       reward: { card: "blue", exp: 30, bullets: 100, tokens: 3, rep: 15 },
-      set: { name: "Марафонец", img: "marathon", items: ["Олимпийка", "Штаны"] }
+      set: { name: "Марафонец", img: "marathon", items: ["Олимпийка", "Спортивные штаны"] }
     },
     {
       key: "boar",
@@ -34,7 +34,7 @@
       hp: 50000,
       req: "blue",
       reward: { card: "purple", exp: 50, bullets: 300, tokens: 5, rep: 30 },
-      set: { name: "Полевой", img: "field", items: ["Кепка", "Штаны", "Китель"] }
+      set: { name: "Полевой", img: "field", items: ["Армейская кепка", "Армейские штаны", "Армейская куртка"] }
     },
     {
       key: "swamp",
@@ -42,7 +42,7 @@
       hp: 100000,
       req: "purple",
       reward: { card: "orange", exp: 100, bullets: 500, rep: 60 },
-      set: { name: "КХК-01", img: "khk", items: ["Капюшон", "Комбинезон"] }
+      set: { name: "КХК-01", img: "khk", items: ["Шлем", "Комбинезон"] }
     },
     {
       key: "ghoul",
@@ -50,7 +50,7 @@
       hp: 500000,
       req: "orange",
       reward: { card: "red", exp: 200, bullets: 5000, rep: 120 },
-      set: { name: "Рубеж-М", img: "rubezh", items: ["Шлем", "Бронежилет", "Штаны"] }
+      set: { name: "Рубеж-М", img: "rubezh", items: ["Шлем", "Бронекуртка", "Тактические штаны"] }
     },
     {
       key: "izlom",
@@ -58,7 +58,7 @@
       hp: 2000000,
       req: "red",
       reward: { card: "cyan", exp: 1000, bullets: 10000, rep: 600 },
-      set: { name: "Жестянка", img: "tin", items: ["Шлем", "Бронежилет", "Штаны"] }
+      set: { name: "Жестянка", img: "tin", items: ["Консервная банка", "Бронекуртка", "Штаны"] }
     }
   ];
   /* ресурсы награды: подписи и иконки те же, что во вкладке «Задания» */
@@ -165,7 +165,7 @@
       b.key +
       '.webp" alt="' +
       b.name +
-      '" width="202" height="146" loading="lazy" decoding="async"><span class="boss-num">' +
+      '" width="606" height="438" loading="lazy" decoding="async"><span class="boss-num">' +
       (i + 1) +
       '</span><h3 class="boss-name">' +
       b.name +
