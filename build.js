@@ -35,7 +35,7 @@ const OUT = path.join(ROOT, "dist");
 /* модули: файл в dist -> точка входа и все исходники (по ним же считается дата страницы в sitemap).
    Исходники модулей в dist не копируются - на сайт попадает только собранный файл */
 const MODULES = {
-  "home-3d.js": ["src/home-3d.js", "src/zone-intro.js", "src/zone-bg.js", "src/zone-theme.js"],
+  "home-3d.js": ["src/home-3d.js", "src/zone-intro.js", "src/zone-heart.js", "src/zone-bg.js", "src/zone-theme.js"],
   "calculator.js": ["src/calculator.js", "src/calc-core.js", "app.js", "polish.js", "talents.js"]
 };
 
@@ -460,7 +460,8 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
     html = PRERENDER[name].length > 1 ? PRERENDER[name](html, runPageScripts(html)) : PRERENDER[name](html);
   html = html
     .replace(/(<link\b[^>]*?\shref=")([^"]+)(")/g, (m, a, u, b) => a + version(u, name) + b)
-    .replace(/(<script\b[^>]*?\ssrc=")([^"]+)(")/g, (m, a, u, b) => a + version(u, name) + b);
+    .replace(/(<script\b[^>]*?\ssrc=")([^"]+)(")/g, (m, a, u, b) => a + version(u, name) + b)
+    .replace(/(<img\b[^>]*?\ssrc=")(\/assets\/[^"]+)(")/g, (m, a, u, b) => a + version(u, name) + b);
   fs.writeFileSync(path.join(OUT, name), html);
   pages++;
   console.log(name.padEnd(16), (before / 1024).toFixed(1) + " КБ -> " + (html.length / 1024).toFixed(1) + " КБ");

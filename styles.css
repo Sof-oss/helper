@@ -5403,31 +5403,32 @@ body::after {
   width: 40px;
   height: 40px;
   font-size: 0;
-  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--accent) 55%, transparent));
+  filter: drop-shadow(0 0 8px rgba(255, 60, 40, 0.38));
   transition: transform 0.4s ease;
 }
-.rad-logo svg {
+/* логотип - «Сердце Зоны»: рендер той же 3D-модели, что в заставке (src/zone-heart.js), поэтому прилетевшее сердце
+   встаёт на место картинки без подмены. Раз в несколько секунд сердце тихо бьётся «тук-тук» */
+.rad-logo img {
   width: 40px;
   height: 40px;
   display: block;
+  animation: heart-beat 4.2s ease-in-out 2s infinite;
 }
-.rl-body {
-  fill: var(--accent);
-  stroke: color-mix(in srgb, var(--accent) 40%, #000);
-  stroke-width: 2.2;
-  stroke-linejoin: round;
-}
-.rl-dark {
-  fill: color-mix(in srgb, var(--accent) 18%, #07090b);
-}
-.rl-lens {
-  fill: color-mix(in srgb, var(--accent) 38%, #07090b);
-}
-.rl-glint {
-  fill: none;
-  stroke: color-mix(in srgb, var(--accent-2) 55%, #fff);
-  stroke-width: 1.5;
-  stroke-linecap: round;
+@keyframes heart-beat {
+  0%,
+  16%,
+  100% {
+    transform: none;
+  }
+  4% {
+    transform: scale(1.07);
+  }
+  8% {
+    transform: scale(0.99);
+  }
+  11% {
+    transform: scale(1.04);
+  }
 }
 .logo:hover .rad-logo {
   transform: scale(1.06) rotate(-4deg);
@@ -6014,7 +6015,7 @@ th.top100-sort {
     min-height: 60px;
   }
   .rad-logo,
-  .rad-logo svg {
+  .rad-logo img {
     width: 32px;
     height: 32px;
   }
@@ -6068,6 +6069,9 @@ th.top100-sort {
   .home-card,
   .theme-item {
     transition: none;
+  }
+  .rad-logo img {
+    animation: none;
   }
 }
 .t100-pbtn.active {
@@ -6572,7 +6576,7 @@ th.top100-sort {
     flex-shrink: 0;
   }
   .rad-logo,
-  .rad-logo svg {
+  .rad-logo img {
     width: 34px;
     height: 34px;
   }

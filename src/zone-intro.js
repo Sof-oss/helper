@@ -1,161 +1,230 @@
-/* 3D-логотип при первом заходе: объёмный противогаз с фильтром-«радиацией» дважды делает вдох -
-   очки вспыхивают, из фильтра выходит пар, вокруг трещат разряды аномалии. Через ~3,5 с маска улетает на место логотипа в шапке.
+/* Заставка при первом заходе: «Сердце Зоны». Объёмное анатомическое сердце-артефакт бьётся («тук-тук» ×2),
+   каждый удар выпускает волну, волны складываются в знак радиации вокруг сердца. Знак вспыхивает и втягивается
+   в сердце, а оно улетает в левый верхний угол и остаётся там логотипом (картинка логотипа - рендер той же модели).
    Показывается один раз (метка zoneIntroSeen в браузере) прозрачным слоем поверх уже открытой страницы: содержимое видно
    и доступно сразу, слой не перехватывает клики. Пропустить - кнопка, любая клавиша, клик, касание или прокрутка */
 import {
   WebGLRenderer,
   Scene,
   PerspectiveCamera,
-  Shape,
-  Path,
-  ExtrudeGeometry,
-  CylinderGeometry,
-  TorusGeometry,
-  MeshStandardMaterial,
-  Mesh,
-  Group,
   PMREMGenerator,
   DirectionalLight,
   PointLight,
+  PlaneGeometry,
+  ShaderMaterial,
+  Box3,
+  Vector3,
   SpriteMaterial,
   Sprite,
   CanvasTexture,
+  Mesh,
   AdditiveBlending,
-  BufferGeometry,
-  Float32BufferAttribute,
-  Line,
-  LineBasicMaterial,
-  Points,
-  PointsMaterial,
-  Color,
-  Vector3,
   SRGBColorSpace,
   ACESFilmicToneMapping
 } from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { readTheme, lowPower } from "./zone-theme.js";
+import { createHeart } from "./zone-heart.js";
+import { lowPower } from "./zone-theme.js";
 
 const SEEN = "zoneIntroSeen";
-const S = 1 / 26; // масштаб SVG-координат логотипа (64×64) в 3D
-const P = (x, y) => [(x - 32) * S, (32.5 - y) * S]; // точка из SVG: центр в 0, ось Y вверх
+const clamp = x => Math.min(1, Math.max(0, x));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const easeOut = x => 1 - (1 - x) ** 3;
+const easeIn = x => x * x * x;
+const easeInOut = x => (x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2);
+const easeOutBack = x => 1 + 2.2 * (x - 1) ** 3 + 1.2 * (x - 1) ** 2;
+const pulse = (t, at, w = 0.075) => Math.exp(-(((t - at) / w) ** 2));
 
-/* контур маски противогаза - тот же путь, что в SVG-логотипе; глазницы вырезаны под очки */
-const EYES = [
-  [22.3, 24],
-  [41.7, 24]
-];
-function maskShape() {
-  const s = new Shape(),
-    c = (a, b, d, e, f, g) => s.bezierCurveTo(...P(a, b), ...P(d, e), ...P(f, g));
-  s.moveTo(...P(32, 3));
-  c(19.8, 3, 11, 11.3, 11, 23.5);
-  c(11, 30.9, 13.4, 35.9, 17.6, 39.8);
-  s.lineTo(...P(22, 44));
-  s.lineTo(...P(42, 44));
-  s.lineTo(...P(46.4, 39.8));
-  c(50.6, 35.9, 53, 30.9, 53, 23.5);
-  c(53, 11.3, 44.2, 3, 32, 3);
-  for (const [x, y] of EYES) {
-    const h = new Path();
-    h.absarc(...P(x, y), 7.6 * S, 0, Math.PI * 2, true);
-    s.holes.push(h);
-  }
-  return s;
-}
-const poly = pts => {
-  const s = new Shape();
-  s.moveTo(...P(...pts[0]));
-  pts.slice(1).forEach(q => s.lineTo(...P(...q)));
-  s.closePath();
-  return s;
-};
-/* «рыло» под фильтр и ремни крепления (повёрнутые прямоугольники, как в SVG) */
-const snoutShape = () =>
-  poly([
-    [22, 41.5],
-    [42, 41.5],
-    [39.4, 48],
-    [24.6, 48]
-  ]);
-function strapShape(x, y, w, h, deg) {
-  const cx = x + w / 2,
-    cy = y + h / 2,
-    a = (deg * Math.PI) / 180;
-  return poly(
-    [
-      [x, y],
-      [x + w, y],
-      [x + w, y + h],
-      [x, y + h]
-    ].map(([px, py]) => {
-      const dx = px - cx,
-        dy = py - cy;
-      return [cx + dx * Math.cos(a) - dy * Math.sin(a), cy + dx * Math.sin(a) + dy * Math.cos(a)];
-    })
-  );
-}
-/* оправа очков - кольцо */
-function rimShape(x, y) {
-  const s = new Shape();
-  s.absarc(...P(x, y), 7.6 * S, 0, Math.PI * 2, false);
-  const h = new Path();
-  h.absarc(...P(x, y), 4.9 * S, 0, Math.PI * 2, true);
-  s.holes.push(h);
-  return s;
-}
-/* знак радиации на крышке фильтра: три лопасти (кольцевые сектора) и центр */
-function trefoilShapes() {
-  const [cx, cy] = P(32, 52),
-    r1 = 3.4 * S,
-    r2 = 7.6 * S,
-    out = [];
-  for (const mid of [90, -30, 210]) {
-    // верхняя, правая нижняя, левая нижняя
-    const a1 = ((mid - 30) * Math.PI) / 180,
-      a2 = ((mid + 30) * Math.PI) / 180;
-    const s = new Shape();
-    s.moveTo(cx + Math.cos(a1) * r2, cy + Math.sin(a1) * r2);
-    s.absarc(cx, cy, r2, a1, a2, false);
-    s.lineTo(cx + Math.cos(a2) * r1, cy + Math.sin(a2) * r1);
-    s.absarc(cx, cy, r1, a2, a1, true);
-    out.push(s);
-  }
-  const dot = new Shape();
-  dot.absarc(cx, cy, 1.9 * S, 0, Math.PI * 2, false);
-  out.push(dot);
-  return out;
+/* хронология, с */
+const BEATS = [0.85, 1.07, 1.75, 1.97]; // два «тук-тук»; каждый удар - волна
+const LOCK = 2.6; // третий, сильный удар: знак радиации вспыхивает целиком
+const COLLAPSE = [3.0, 3.35]; // знак втягивается в сердце
+const FLY = [3.3, 4.15]; // полёт в логотип
+export const DURATION = 4.2;
+
+/* радиусы знака (в единицах сцены): сердце - центр знака, лопасти - из дуг-волн */
+const R0 = 1.18,
+  R1 = 2.3;
+const RINGS = BEATS.map((_, i) => R0 + ((R1 - R0) * i) / (BEATS.length - 1));
+
+/* волны и знак радиации - один шейдер на плоскости за сердцем */
+function waveMaterial() {
+  return new ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    blending: AdditiveBlending,
+    uniforms: {
+      uR: { value: new Array(8).fill(0) },
+      uA: { value: new Array(8).fill(0) },
+      uM: { value: new Array(8).fill(0) },
+      uFill: { value: 0 },
+      uScale: { value: 1 },
+      uRot: { value: 0 }
+    },
+    vertexShader:
+      "varying vec2 vP; void main(){ vP = position.xy; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }",
+    fragmentShader: `
+      varying vec2 vP;
+      uniform float uR[8], uA[8], uM[8], uFill, uScale, uRot;
+      const float PI = 3.14159265;
+      void main(){
+        vec2 p = vP / max(uScale, 1e-3);
+        float r = length(p);
+        float a = atan(p.y, p.x) - uRot;
+        /* лопасти по 60° с центрами на 30°, 150° и 270° - как у знака радиации */
+        float d = abs(mod(a - PI / 6. + PI / 3., 2. * PI / 3.) - PI / 3.);
+        float blade = 1. - smoothstep(PI / 6. - .025, PI / 6. + .025, d);
+        float I = 0.;
+        for (int i = 0; i < 8; i++) {
+          float w = .07 + .05 * (1. - uM[i]);
+          float band = exp(-pow((r - uR[i]) / w, 2.));
+          I += uA[i] * band * mix(1., blade, uM[i]);
+        }
+        float inside = smoothstep(${(R0 - 0.12).toFixed(3)}, ${(R0 - 0.06).toFixed(3)}, r) * (1. - smoothstep(${(R1 + 0.06).toFixed(3)}, ${(R1 + 0.12).toFixed(3)}, r));
+        I += uFill * blade * inside * (.55 + .45 * smoothstep(${R0.toFixed(3)}, ${R1.toFixed(3)}, r));
+        vec3 col = mix(vec3(1., .42, .12), vec3(1., .82, .45), clamp(I - .4, 0., 1.));
+        gl_FragColor = vec4(col * I, I);
+      }`
+  });
 }
 function glowTexture() {
   const c = document.createElement("canvas");
   c.width = c.height = 128;
-  const g = c.getContext("2d"),
-    gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
-  gr.addColorStop(0, "rgba(255,255,255,1)");
-  gr.addColorStop(0.25, "rgba(255,255,255,.45)");
-  gr.addColorStop(1, "rgba(255,255,255,0)");
+  const g = c.getContext("2d");
+  const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gr.addColorStop(0, "rgba(255,120,80,1)");
+  gr.addColorStop(0.3, "rgba(220,40,30,.45)");
+  gr.addColorStop(1, "rgba(120,0,0,0)");
   g.fillStyle = gr;
   g.fillRect(0, 0, 128, 128);
   const t = new CanvasTexture(c);
   t.colorSpace = SRGBColorSpace;
   return t;
 }
-const easeOutBack = x => 1 + 2.2 * Math.pow(x - 1, 3) + 1.2 * Math.pow(x - 1, 2);
-const easeInOut = x => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
-const beat = t => {
-  // двойной «вдох» маски, t - секунды от начала
-  if (t < 0 || t > 0.7) return 0;
-  return Math.exp(-Math.pow((t - 0.08) / 0.06, 2)) + 0.6 * Math.exp(-Math.pow((t - 0.3) / 0.07, 2));
-};
+
+/* Сцена заставки. render(t, target) рисует кадр в момент t (с); target - куда и каким размером прилететь
+   {x, y, s} в единицах сцены. Детерминирована по t - удобно проверять по кадрам */
+export function createIntroScene(renderer) {
+  const scene = new Scene(),
+    camera = new PerspectiveCamera(35, 1, 0.1, 50);
+  camera.position.set(0, 0, 8.6);
+  const pm = new PMREMGenerator(renderer);
+  scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environmentIntensity = 0.45;
+  const key = new DirectionalLight(0xffffff, 1.3);
+  key.position.set(2, 3, 4);
+  scene.add(key);
+  const rim = new PointLight(0xff6040, 16, 12);
+  rim.position.set(-1.6, 1, -2.4);
+  scene.add(rim);
+  const core = new PointLight(0xff5030, 0, 6);
+  core.position.set(0.4, 0, 2);
+  scene.add(core);
+
+  const heart = createHeart({ detail: lowPower ? 3 : 4, tube: lowPower ? 8 : 10 });
+  const H = 0.72; // масштаб сердца в заставке
+  /* рамка сердца при масштабе 1 - по ней картинка логотипа кадрируется так же (высота с сосудами + 4 %) */
+  const frame = new Box3().setFromObject(heart.group);
+  const fc = frame.getCenter(new Vector3()),
+    fh = (frame.max.y - frame.min.y) * 1.04;
+  scene.add(heart.group);
+
+  const glowTex = glowTexture();
+  const glow = new Sprite(
+    new SpriteMaterial({ map: glowTex, transparent: true, blending: AdditiveBlending, depthWrite: false, opacity: 0 })
+  );
+  glow.position.z = -0.8;
+  scene.add(glow);
+
+  const wMat = waveMaterial();
+  const waves = new Mesh(new PlaneGeometry(7.2, 7.2), wMat);
+  waves.position.z = -0.6;
+  scene.add(waves);
+  /* свободные волны-«ударные» от каждого удара уходят дальше и гаснут */
+  const FREE = BEATS.length;
+
+  function render(t, target) {
+    const appear = seg(t, 0, 0.7);
+    let b = 0;
+    BEATS.forEach((s, i) => (b = Math.max(b, pulse(t, s) * (i % 2 ? 0.75 : 1))));
+    b = Math.max(b, pulse(t, LOCK, 0.09) * 1.15);
+    const col = easeIn(seg(t, COLLAPSE[0], COLLAPSE[1]));
+    const fly = easeInOut(seg(t, FLY[0], FLY[1]));
+
+    /* сердце */
+    const sway = 1 - fly;
+    heart.group.rotation.set(
+      0.1 * Math.sin(t * 0.9) * sway,
+      (-1.3 * (1 - easeInOut(appear)) + 0.32 * Math.sin(t * 1.25)) * sway,
+      0.04 * Math.sin(t * 1.6) * sway
+    );
+    const tgt = target || { x: 0, y: 0, s: H };
+    let s = H * (0.2 + 0.8 * easeOutBack(appear)) * (1 + 0.13 * b + 0.12 * col * (1 - fly));
+    s = s * (1 - fly) + tgt.s * fly;
+    heart.group.scale.set(s * (1 - 0.04 * b), s * (1 + 0.05 * b), s);
+    heart.group.position.set(tgt.x * fly, 0.1 * (1 - fly) + tgt.y * fly, 0);
+    heart.beat(Math.min(1, b + col * 0.8 * (1 - fly)) * (1 - fly) + 0.25 * fly);
+    scene.environmentIntensity = 0.45 + 0.3 * fly;
+    key.intensity = 1.3 + 0.9 * fly;
+    core.intensity = (b * 9 + col * 6) * (1 - fly);
+    rim.intensity = 12 + 14 * b;
+
+    glow.position.x = heart.group.position.x;
+    glow.position.y = heart.group.position.y;
+    glow.scale.setScalar((2.6 + 1.4 * b) * (s / H));
+    glow.material.opacity = clamp(appear * 1.4) * (0.35 + 0.5 * b) * (1 - fly * 0.85);
+
+    /* волны: каждая выходит из сердца кругом, по пути сужается до трёх лопастей и встаёт на своё место в знаке */
+    const u = wMat.uniforms;
+    BEATS.forEach((te, i) => {
+      const k = seg(t, te, te + 0.55);
+      u.uR.value[i] = 0.45 + (RINGS[i] - 0.45) * easeOut(k);
+      u.uM.value[i] = easeInOut(seg(k, 0.25, 1));
+      u.uA.value[i] = t < te ? 0 : 0.62 + 0.6 * (1 - k) + 0.35 * pulse(t, LOCK, 0.12);
+      const f = seg(t, te, te + 1.1);
+      u.uR.value[FREE + i] = 0.5 + 3.4 * easeOut(f);
+      u.uM.value[FREE + i] = 0;
+      u.uA.value[FREE + i] = t < te || f >= 1 ? 0 : 0.32 * (1 - f) * (i % 2 ? 0.7 : 1);
+    });
+    u.uFill.value = 0.55 * pulse(t, LOCK + 0.05, 0.16) + 0.12 * seg(t, LOCK, LOCK + 0.2);
+    u.uScale.value = 1 - col;
+    u.uRot.value = -0.6 * col;
+    waves.visible = col < 1;
+    renderer.render(scene, camera);
+  }
+  function resize(W, Hh) {
+    renderer.setSize(W, Hh, false);
+    camera.aspect = W / Hh;
+    camera.position.z = W < Hh ? 13 : 8.6; // на узком экране дальше, чтобы знак поместился по ширине
+    camera.updateProjectionMatrix();
+  }
+  /* центр элемента на экране → точка сцены на плоскости z=0 и масштаб сердца под его высоту */
+  function targetFor(rect, W, Hh) {
+    const vh = 2 * camera.position.z * Math.tan((camera.fov * Math.PI) / 360),
+      vw = vh * camera.aspect;
+    const s = ((rect.height / Hh) * vh) / fh;
+    return {
+      x: ((rect.left + rect.width / 2) / W - 0.5) * vw - fc.x * s,
+      y: (0.5 - (rect.top + rect.height / 2) / Hh) * vh - fc.y * s,
+      s
+    };
+  }
+  function dispose() {
+    heart.dispose();
+    wMat.dispose();
+    waves.geometry.dispose();
+    glow.material.dispose();
+    glowTex.dispose();
+    pm.dispose();
+  }
+  return { render, resize, targetFor, dispose, camera };
+}
 
 export function runIntro() {
   return new Promise(done => {
     try {
       localStorage.setItem(SEEN, "1");
     } catch (e) {}
-    const theme = readTheme();
-    const ac = new Color().setRGB(...theme.accent, SRGBColorSpace),
-      ac2 = new Color().setRGB(...theme.accent2, SRGBColorSpace);
-
     /* прозрачный слой поверх страницы (zone3d.css: pointer-events:none, кликается только «Пропустить») */
     const box = document.createElement("div");
     box.className = "zone-intro";
@@ -174,265 +243,22 @@ export function runIntro() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lowPower ? 1.5 : 2));
     renderer.toneMapping = ACESFilmicToneMapping;
     renderer.outputColorSpace = SRGBColorSpace;
-
-    const scene = new Scene(),
-      camera = new PerspectiveCamera(35, 1, 0.1, 50);
-    camera.position.set(0, 0, 7);
-    const pm = new PMREMGenerator(renderer);
-    scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
-    scene.environmentIntensity = 0.55;
-    const key = new DirectionalLight(0xffffff, 1.1);
-    key.position.set(2, 3, 4);
-    scene.add(key);
-    const rim = new PointLight(ac, 18, 12);
-    rim.position.set(-1.5, 1, -2.5);
-    scene.add(rim);
-
-    /* противогаз */
-    const glowTex = glowTexture();
-    const mask = new Group();
-    const depth = 0.36,
-      seg = lowPower ? 24 : 48;
-    const ext = (sh, d, bt, bs, bseg = lowPower ? 3 : 6) => {
-      const g = new ExtrudeGeometry(sh, {
-        depth: d,
-        bevelEnabled: true,
-        bevelThickness: bt,
-        bevelSize: bs,
-        bevelSegments: bseg,
-        curveSegments: seg
-      });
-      g.translate(0, 0, -d / 2);
-      return g;
-    };
-    const hMat = new MeshStandardMaterial({
-      color: new Color(ac).multiplyScalar(0.8),
-      metalness: 0.6,
-      roughness: 0.34,
-      emissive: ac,
-      emissiveIntensity: 0.18
-    });
-    const dMat = new MeshStandardMaterial({
-      color: new Color(ac).multiplyScalar(0.1),
-      metalness: 0.75,
-      roughness: 0.38
-    });
-    const lMat = new MeshStandardMaterial({
-      color: 0x0b0d10,
-      metalness: 0.95,
-      roughness: 0.06,
-      emissive: ac2,
-      emissiveIntensity: 0.05
-    });
-    mask.add(new Mesh(ext(maskShape(), depth, 0.16, 0.1), hMat));
-    const snout = new Mesh(ext(snoutShape(), 0.3, 0.06, 0.05), hMat);
-    snout.position.z = 0.2;
-    mask.add(snout);
-    for (const st of [strapShape(5, 17, 9, 5, -18), strapShape(50, 17, 9, 5, 18)])
-      mask.add(new Mesh(ext(st, 0.14, 0.03, 0.03, 2), dMat));
-    for (const [x, y] of EYES) {
-      const rimM = new Mesh(ext(rimShape(x, y), 0.16, 0.04, 0.03, 3), dMat);
-      rimM.position.z = depth / 2 + 0.1;
-      mask.add(rimM);
-      const lens = new Mesh(new CylinderGeometry(4.95 * S, 4.95 * S, 0.06, seg), lMat);
-      lens.rotation.x = Math.PI / 2;
-      lens.position.set(...P(x, y), depth / 2 + 0.04);
-      mask.add(lens);
-    }
-    /* фильтр: цилиндр с рёбрами, на крышке - знак радиации */
-    const [fx, fy] = P(32, 52),
-      fr = 10 * S,
-      fl = 0.6,
-      fz = depth / 2 + 0.22;
-    const can = new Mesh(new CylinderGeometry(fr, fr * 0.96, fl, seg), hMat);
-    can.rotation.x = Math.PI / 2;
-    can.position.set(fx, fy, fz - fl / 2 + 0.12);
-    mask.add(can);
-    for (const z of [-0.18, 0, 0.18]) {
-      const rib = new Mesh(new TorusGeometry(fr * 0.99, 0.028, 8, seg), dMat);
-      rib.position.set(fx, fy, fz - fl / 2 + 0.12 + z);
-      mask.add(rib);
-    }
-    const cap = new Mesh(new CylinderGeometry(fr * 0.86, fr * 0.86, 0.04, seg), dMat);
-    cap.rotation.x = Math.PI / 2;
-    cap.position.set(fx, fy, fz + 0.13);
-    mask.add(cap);
-    const tMat = new MeshStandardMaterial({
-      color: new Color(ac).multiplyScalar(0.85),
-      metalness: 0.55,
-      roughness: 0.35,
-      emissive: ac2,
-      emissiveIntensity: 0
-    });
-    const tre = new Mesh(
-      new ExtrudeGeometry(trefoilShapes(), {
-        depth: 0.03,
-        bevelEnabled: true,
-        bevelThickness: 0.012,
-        bevelSize: 0.01,
-        bevelSegments: 2,
-        curveSegments: 24
-      }),
-      tMat
-    );
-    tre.position.z = fz + 0.15;
-    mask.add(tre);
-    mask.position.y = 0;
-    scene.add(mask);
-
-    /* «выдох» из фильтра: клубы пара (цвет гаснет к чёрному - при сложении это и есть исчезновение) */
-    const PN = lowPower ? 40 : 80,
-      pp = new Float32Array(PN * 3),
-      pv = new Float32Array(PN * 3),
-      pc = new Float32Array(PN * 3),
-      plife = new Float32Array(PN).fill(-1),
-      pmax = new Float32Array(PN).fill(1);
-    const pGeo = new BufferGeometry();
-    pGeo.setAttribute("position", new Float32BufferAttribute(pp, 3));
-    pGeo.setAttribute("color", new Float32BufferAttribute(pc, 3));
-    const puffMat = new PointsMaterial({
-      map: glowTex,
-      size: 0.55,
-      vertexColors: true,
-      transparent: true,
-      blending: AdditiveBlending,
-      depthWrite: false
-    });
-    const puffs = new Points(pGeo, puffMat);
-    puffs.frustumCulled = false;
-    mask.add(puffs);
-    function breathe(n) {
-      for (let i = 0, e = 0; i < PN && e < n; i++)
-        if (plife[i] <= 0) {
-          const a = Math.random() * Math.PI * 2,
-            r = Math.random() * fr * 0.6;
-          pp.set([fx + Math.cos(a) * r, fy + Math.sin(a) * r, fz + 0.16], i * 3);
-          pv.set([(Math.random() - 0.5) * 1.1, -0.25 - Math.random() * 0.6, 0.9 + Math.random() * 1.2], i * 3);
-          plife[i] = pmax[i] = 0.7 + Math.random() * 0.6;
-          e++;
-        }
-    }
-    /* свечение за маской */
-    const glowMat = new SpriteMaterial({
-      map: glowTex,
-      color: ac,
-      blending: AdditiveBlending,
-      transparent: true,
-      depthWrite: false,
-      opacity: 0
-    });
-    const glow = new Sprite(glowMat);
-    glow.position.set(0, 0.5, -0.6);
-    glow.scale.setScalar(4.5);
-    scene.add(glow);
-
-    /* разряды аномалии: ломаные линии, перерисовываются каждые ~70 мс */
-    const ARCS = lowPower ? 4 : 7,
-      SEG = 10;
-    const arcs = Array.from({ length: ARCS }, () => {
-      const g = new BufferGeometry();
-      g.setAttribute("position", new Float32BufferAttribute(new Float32Array((SEG + 1) * 3), 3));
-      const l = new Line(
-        g,
-        new LineBasicMaterial({
-          color: new Color(ac2).multiplyScalar(1.6),
-          transparent: true,
-          opacity: 0,
-          blending: AdditiveBlending,
-          depthWrite: false
-        })
-      );
-      l.position.y = 0.5;
-      scene.add(l);
-      return l;
-    });
-    function zapArc(l, power) {
-      const a = Math.random() * Math.PI * 2,
-        r0 = 1.05 + Math.random() * 0.2,
-        r1 = 1.6 + Math.random() * 0.8;
-      const p0 = new Vector3(Math.cos(a) * r0, Math.sin(a) * r0 * 0.9, (Math.random() - 0.5) * 0.6);
-      const a2 = a + (Math.random() - 0.5) * 0.9;
-      const p1 = new Vector3(Math.cos(a2) * r1, Math.sin(a2) * r1 * 0.9, (Math.random() - 0.5) * 1.2);
-      const arr = l.geometry.attributes.position.array;
-      for (let i = 0; i <= SEG; i++) {
-        const k = i / SEG,
-          j = Math.sin(k * Math.PI) * 0.22;
-        arr[i * 3] = p0.x + (p1.x - p0.x) * k + (Math.random() - 0.5) * j;
-        arr[i * 3 + 1] = p0.y + (p1.y - p0.y) * k + (Math.random() - 0.5) * j;
-        arr[i * 3 + 2] = p0.z + (p1.z - p0.z) * k + (Math.random() - 0.5) * j;
-      }
-      l.geometry.attributes.position.needsUpdate = true;
-      l.material.opacity = Math.random() < 0.55 * power ? 0.5 + Math.random() * 0.5 : 0;
-    }
-
-    /* искры: вылетают из-за контура маски и гаснут */
-    const SN = lowPower ? 90 : 180,
-      sp = new Float32Array(SN * 3),
-      sv = new Float32Array(SN * 3),
-      life = new Float32Array(SN).fill(-1);
-    const sGeo = new BufferGeometry();
-    sGeo.setAttribute("position", new Float32BufferAttribute(sp, 3));
-    const sMat = new PointsMaterial({
-      color: ac2,
-      size: 0.045,
-      map: glowMat.map,
-      transparent: true,
-      blending: AdditiveBlending,
-      depthWrite: false,
-      opacity: 0.95
-    });
-    const sparks = new Points(sGeo, sMat);
-    sparks.frustumCulled = false;
-    sparks.position.y = 0.5;
-    scene.add(sparks);
-    function emit(n) {
-      for (let i = 0, e = 0; i < SN && e < n; i++)
-        if (life[i] <= 0) {
-          const a = Math.random() * Math.PI * 2,
-            r = 0.9 + Math.random() * 0.3;
-          sp.set([Math.cos(a) * r, Math.sin(a) * r * 0.9, (Math.random() - 0.5) * 0.5], i * 3);
-          const v = 1.2 + Math.random() * 2.2;
-          sv.set([Math.cos(a) * v, Math.sin(a) * v * 0.9, (Math.random() - 0.5) * 1.5], i * 3);
-          life[i] = 0.5 + Math.random() * 0.6;
-          e++;
-        }
-    }
-
-    /* куда улетать: центр логотипа в шапке → точка в 3D на плоскости z=0 */
-    function logoTarget() {
-      const el = document.querySelector(".site-header .rad-logo");
-      const r = el ? el.getBoundingClientRect() : { left: 20, top: 20, width: 40, height: 40 };
-      const W = window.innerWidth,
-        H = window.innerHeight;
-      const vh = 2 * camera.position.z * Math.tan((camera.fov * Math.PI) / 360),
-        vw = vh * camera.aspect;
-      return {
-        x: ((r.left + r.width / 2) / W - 0.5) * vw,
-        y: (0.5 - (r.top + r.height / 2) / H) * vh,
-        s: ((r.height / H) * vh) / 2.3 // маска с фильтром ≈ 2,3 единицы в высоту
-      };
-    }
-    function resize() {
-      const W = window.innerWidth,
-        H = window.innerHeight;
-      renderer.setSize(W, H, false);
-      camera.aspect = W / H;
-      camera.position.z = W < H ? 10.5 : 8.6; // на узком экране чуть дальше
-      camera.updateProjectionMatrix();
-    }
+    const intro = createIntroScene(renderer);
+    const resize = () => intro.resize(window.innerWidth, window.innerHeight);
     resize();
     window.addEventListener("resize", resize);
+    const logoTarget = () => {
+      const el = document.querySelector(".site-header .rad-logo");
+      const r = el ? el.getBoundingClientRect() : { left: 20, top: 20, width: 40, height: 40 };
+      return intro.targetFor(r, window.innerWidth, window.innerHeight);
+    };
 
-    /* хронология, с */
-    const BEATS = [1.0, 2.15],
-      FLY = 3.0,
-      END = 3.8;
     let t0 = 0,
-      last = 0,
-      zap = 0,
       skipped = false,
       raf = 0,
-      fly = null;
+      target = null,
+      logoHidden = false;
+    const logo = document.querySelector(".site-header .rad-logo");
     const skip = () => {
       if (skipped) return;
       skipped = true;
@@ -449,13 +275,15 @@ export function runIntro() {
       cancelAnimationFrame(raf);
       USE.forEach(ev => window.removeEventListener(ev, onUse));
       window.removeEventListener("resize", resize);
+      intro.dispose();
       renderer.dispose();
-      pm.dispose();
       box.remove();
-      const logo = document.querySelector(".site-header .rad-logo");
       if (logo) {
-        logo.classList.add("intro-land");
-        setTimeout(() => logo.classList.remove("intro-land"), 900);
+        logo.classList.remove("intro-wait");
+        if (logoHidden) {
+          logo.classList.add("intro-land");
+          setTimeout(() => logo.classList.remove("intro-land"), 900);
+        }
       }
       done();
     }
@@ -463,86 +291,22 @@ export function runIntro() {
       raf = requestAnimationFrame(frame);
       const now = performance.now();
       /* отсчёт - с первого кадра: подготовка сцены на слабом телефоне может занять секунду, иначе заставка «проскочит» */
-      if (!t0) {
-        t0 = last = now;
-      }
-      const t = (now - t0) / 1000,
-        dt = Math.min(0.05, (now - last) / 1000);
-      last = now;
-      const b = BEATS.reduce((m, s) => Math.max(m, beat(t - s)), 0);
-      const appear = Math.min(1, t / 0.75);
-      let scale = 0.88 * (0.15 + 0.85 * easeOutBack(appear)) * (1 + b * 0.12);
-      mask.rotation.y = -1.4 * (1 - easeInOut(appear)) + Math.sin(t * 1.15) * 0.5;
-      mask.rotation.x = Math.sin(t * 0.8) * 0.12;
-      mask.position.set(0, 0.5 + Math.sin(t * 1.6) * 0.04, 0);
-      hMat.emissiveIntensity = 0.14 + b * 0.55;
-      lMat.emissiveIntensity = 0.05 + b * 1.3; // очки вспыхивают на «вдохе»
-      tMat.emissiveIntensity = b * 0.9;
-      glowMat.opacity = Math.min(1, appear * 1.2) * (0.45 + b * 0.55);
-      glow.scale.setScalar(4.2 + b * 1.2);
-      rim.intensity = 14 + b * 30;
-
-      /* разряды и искры: сильнее на «вдохах» */
-      const power = Math.min(1, appear) * (0.35 + b);
-      if ((zap -= dt) <= 0) {
-        zap = 0.07;
-        arcs.forEach(l => zapArc(l, power));
-      }
-      emit(Math.round(power * (lowPower ? 3 : 6)) + (b > 0.9 ? 25 : 0));
-      for (let i = 0; i < SN; i++) {
-        if (life[i] > 0) {
-          life[i] -= dt;
-          sv[i * 3 + 1] -= 1.6 * dt;
-          for (let k = 0; k < 3; k++) sp[i * 3 + k] += sv[i * 3 + k] * dt;
-          if (life[i] <= 0) sp.set([0, 0, -99], i * 3);
+      if (!t0) t0 = now;
+      const t = (now - t0) / 1000;
+      if (t > FLY[0] && !target) {
+        target = logoTarget();
+        box.classList.add("flying");
+        /* пока сердце летит, логотип в шапке прячем - прилетевшее сердце встанет на его место */
+        if (logo) {
+          logo.classList.add("intro-wait");
+          logoHidden = true;
         }
       }
-      sGeo.attributes.position.needsUpdate = true;
-      BEATS.forEach(s0 => {
-        if (t - s0 > 0.28 && t - s0 - dt <= 0.28) breathe(lowPower ? 22 : 45);
-      });
-      for (let i = 0; i < PN; i++) {
-        if (plife[i] > 0) {
-          plife[i] -= dt;
-          for (let k = 0; k < 3; k++) {
-            pp[i * 3 + k] += pv[i * 3 + k] * dt;
-            pv[i * 3 + k] *= 1 - 1.6 * dt;
-          }
-          const f = Math.max(0, plife[i] / pmax[i]) * 0.32;
-          pc.set([f * 0.9, f * 0.95, f], i * 3);
-          if (plife[i] <= 0) {
-            pc.set([0, 0, 0], i * 3);
-            pp.set([0, 0, -99], i * 3);
-          }
-        }
+      intro.render(Math.min(t, DURATION), target);
+      if (t >= DURATION && !skipped) {
+        skipped = true;
+        finish();
       }
-      pGeo.attributes.position.needsUpdate = true;
-      pGeo.attributes.color.needsUpdate = true;
-
-      /* полёт на место логотипа */
-      if (t > FLY && !skipped) {
-        if (!fly) {
-          fly = logoTarget();
-          box.classList.add("flying");
-        }
-        const k = easeInOut(Math.min(1, (t - FLY) / (END - FLY)));
-        mask.position.set(fly.x * k, 0.5 * (1 - k) + fly.y * k, 0);
-        mask.rotation.y *= 1 - k;
-        mask.rotation.x *= 1 - k;
-        scale = scale * (1 - k) + fly.s * k;
-        glowMat.opacity *= 1 - k;
-        arcs.forEach(l => {
-          l.material.opacity *= 1 - k;
-        });
-        sMat.opacity = 0.95 * (1 - k);
-        if (k >= 1) {
-          skipped = true;
-          box.classList.add("out");
-          setTimeout(finish, 250);
-        }
-      }
-      mask.scale.setScalar(scale);
-      renderer.render(scene, camera);
     }
     raf = requestAnimationFrame(frame);
   });

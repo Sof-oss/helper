@@ -25,7 +25,7 @@
   inset: 0;
   z-index: 3000;
   pointer-events: none;
-  background: radial-gradient(min(320px, 45vw) min(320px, 45vw) at 50% 40%, rgba(5, 7, 10, 0.55), transparent 75%);
+  background: radial-gradient(circle at 50% 50%, rgba(8, 4, 6, 0.8), rgba(4, 5, 8, 0.58) 42%, rgba(4, 5, 8, 0.4));
   transition:
     background 0.7s ease,
     opacity 0.35s ease;
@@ -75,15 +75,14 @@
   transition: opacity 0.3s;
 }
 
-/* логотип в шапке «принимает» прилетевшую маску */
+/* логотип в шапке «принимает» прилетевшее сердце: та же картинка, только вспыхивает и гаснет свечение */
 @keyframes intro-land {
   0% {
-    transform: scale(1.35);
-    filter: drop-shadow(0 0 18px var(--accent));
+    filter: drop-shadow(0 0 16px rgba(255, 90, 50, 0.95));
   }
-  100% {
-    transform: none;
-  }
+}
+.rad-logo.intro-wait {
+  opacity: 0;
 }
 .rad-logo.intro-land {
   animation: intro-land 0.8s cubic-bezier(0.2, 0.8, 0.3, 1);
