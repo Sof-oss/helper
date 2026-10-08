@@ -181,7 +181,8 @@ function infoGroupsData(p) {
       title: "Опыт ПДА",
       color: "#9fdc9f",
       rows: PDA_LEVELS,
-      reached: 0,
+      /* уровня ПДА нет в калькуляторе - берём тот, что посетитель ввёл в «С уровня» на этой вкладке */
+      reached: readPdaFrom(PDA_LEVELS.length),
       step: "Опыт",
       need: "Нужно опыта",
       gen: "опыта",
@@ -285,12 +286,14 @@ function chartMarkup(g) {
         me.x +
         "%;top:" +
         me.y +
-        '%"></i><span class="ich-me-lbl' +
-        (me.x > 80 ? " ich-me-lbl-left" : "") +
-        '" style="left:' +
+        '%"></i><i class="ich-me-line" style="left:' +
         me.x +
         "%;top:" +
         me.y +
+        '%"></i><span class="ich-me-lbl' +
+        (me.x > 92 ? " ich-me-lbl-left" : me.x < 6 ? " ich-me-lbl-right" : "") +
+        '" style="left:' +
+        me.x +
         '%">вы: ' +
         g.reached +
         " ур.</span>"
@@ -361,7 +364,7 @@ function readPdaFrom(n) {
 }
 function planMarkup(g) {
   const n = g.rows.length,
-    a = (g.key === "pda" && readPdaFrom(n)) || g.reached || 1,
+    a = g.reached || 1,
     b = n;
   return (
     '<div class="ich-plan" data-plan="' +
@@ -495,10 +498,16 @@ document.addEventListener("input", e => {
   const val = s => Math.max(1, Math.min(n, Math.round(Number(plan.querySelector(s).value) || 1)));
   const a = val("[data-plan-from]"),
     b = val("[data-plan-to]");
-  if (g.key === "pda" && e.target.matches("[data-plan-from]") && e.target.value !== "")
+  if (g.key === "pda" && e.target.matches("[data-plan-from]") && e.target.value !== "") {
     try {
       localStorage.setItem(PDA_FROM_KEY, a);
     } catch {}
+    /* график и карточки ПДА сразу перерисовываются под введённый уровень; поля ввода не трогаем, чтобы не сбить набор */
+    const box = plan.closest(".info-group"),
+      pg = infoGroupByKey("pda");
+    box.querySelector(".ich").outerHTML = chartMarkup(pg);
+    box.querySelector(".ich-cards").outerHTML = chartCardsMarkup(pg);
+  }
   plan.querySelector("[data-plan-res]").textContent = fmt(planSum(g, Math.min(a, b), Math.max(a, b)));
 });
 
