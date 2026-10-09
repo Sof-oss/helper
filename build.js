@@ -59,6 +59,7 @@ const SKIP = new Set([
   "guides",
   "yandex",
   "README.md",
+  "DEVELOPMENT.md",
   "build.js",
   "build-top100.js",
   "build-players.js",
