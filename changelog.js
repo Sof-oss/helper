@@ -1,4 +1,4 @@
-/* «Что нового?» на главной.
+/* «Новости сайта» (бывшее «Что нового?») на главной.
    Новая запись - в начало списка. date - ГГГГ-ММ-ДД, items - пункты: [тип, текст], тип: new - новое, up - улучшено, fix - исправлено.
    В тексте можно ставить ссылки: <a href="/top100">Топ-100</a>.
    Или без правки этого файла: строки «new: …», «up: …», «fix: …» в описании коммита добавляются сюда
@@ -86,7 +86,7 @@ window.CHANGELOG=[
   return '<li class="'+cls+'">'+head+'<ul class="news-items">'+items+'</ul>'+more+'</li>';
  };
  let seen="";try{seen=localStorage.getItem(SEEN_KEY)||""}catch{}
- root.innerHTML='<div class="news-title"><span class="news-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3.2"/></svg></span><h2>Что нового?</h2>'+
+ root.innerHTML='<div class="news-title"><span class="news-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3.2"/></svg></span><h2>Новости сайта</h2>'+
   (seen&&seen<latest?'<span class="news-badge">NEW</span>':'')+'</div>'+
   '<ol class="news-list" id="homeNewsList">'+list.map(entry).join("")+'</ol>'+
   (list.length>COMPACT+1?'<button type="button" class="news-toggle" aria-expanded="false" aria-controls="homeNewsList"><span>Вся история</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>':'');

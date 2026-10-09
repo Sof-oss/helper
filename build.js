@@ -389,8 +389,13 @@ const PRERENDER = {
     html = fill(html, "guidesList", guidesListMarkup());
     return guides.length ? html.replace(/<meta name="robots" content="noindex, follow">\n?/, "") : html;
   },
-  /* «Что нового?» на главной уходит в HTML готовым, чтобы был виден сразу и поисковикам */
-  "index.html": html => fill(html, "homeNews", runScripts(["changelog.js"]).homeNews.innerHTML),
+  /* «Новости сайта» и «Новости Зоны» на главной уходят в HTML готовыми, чтобы были видны сразу и поисковикам;
+     пустой список новостей Зоны допустим - тогда блок просто скрыт */
+  "index.html": html => {
+    const els = runScripts(["changelog.js", "news.js"]);
+    html = fill(html, "homeNews", els.homeNews.innerHTML);
+    return els.zoneNews && els.zoneNews.innerHTML ? fill(html, "zoneNews", els.zoneNews.innerHTML) : html;
+  },
   "info.html": (html, els) => {
     /* содержимое разделов в метках <!--sec:…-->: на странице каждого раздела в HTML остаётся только его раздел
        (см. INFO_SECTIONS ниже), остальные дорисовывает скрипт при переключении */

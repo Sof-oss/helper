@@ -40,6 +40,7 @@
 
 
 <main class="content home-content" id="main">
+  <div class="home-hero-wrap">
   <div class="home-hero">
     <span class="home-hero-frame" aria-hidden="true"></span>
     <span class="home-hero-meta" aria-hidden="true"><i>Сеть сталкеров</i><i>Приём</i></span>
@@ -48,6 +49,7 @@
     <p>Помощник сталкера: калькулятор урона, справочник и бестиарий Зоны, Топ лучших игроков и гайды</p>
     <ul class="home-status" aria-label="Коротко о сайте"><li>Без регистрации</li><li>Топ-100 - каждый день</li><li>Работает без сети</li></ul>
     <button type="button" class="tour-start" id="tourStart" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2.3 4.7-4.7 2.3 2.3-4.7z"/></g></svg>Тур по сайту за 1 минуту</button>
+  </div>
     <!-- анонс ивента: не ссылка, только картинка и подпись. Убрать после ивента - удалить этот блок -->
     <aside class="home-event" aria-label="Скоро: Хэллоуин в Зоне"><img src="assets/event-halloween-600.webp" srcset="assets/event-halloween-600.webp 600w, assets/event-halloween-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 300px" width="600" height="300" alt="" loading="lazy" decoding="async"><span class="home-event-text"><span class="home-event-soon">Скоро</span><b>Хэллоуин в Зоне</b></span></aside>
   </div>
@@ -88,10 +90,14 @@
   </div>
   <!-- «Моё место»: места посетителя в рейтингах, рисует my-place.js (без отметки «это я» - приглашение отметиться) -->
   <section class="home-me" id="homeMe" aria-label="Моё место" hidden></section>
-  <!-- «Что нового?»: записи в changelog.js, разметку рисует он же -->
-  <section class="home-news" id="homeNews" aria-label="Что нового"></section>
+  <div class="home-feeds">
+    <!-- «Новости Зоны»: новости игры со ссылками на ВК, список и разметка - в news.js -->
+    <section class="home-news zone-news" id="zoneNews" aria-label="Новости Зоны"></section>
+    <!-- «Новости сайта»: записи в changelog.js, разметку рисует он же -->
+    <section class="home-news" id="homeNews" aria-label="Новости сайта"></section>
+  </div>
 </main>
 
 <!-- @include footer -->
 
-<script src="ui.js" defer></script><script src="changelog.js" defer></script><script src="zone-players.js" defer></script><script src="my-place.js" defer></script><script src="nav.js" defer></script><script src="tour.js" defer></script><script type="module" src="home-3d.js"></script></body></html>
+<script src="ui.js" defer></script><script src="changelog.js" defer></script><script src="news.js" defer></script><script src="zone-players.js" defer></script><script src="my-place.js" defer></script><script src="nav.js" defer></script><script src="tour.js" defer></script><script type="module" src="home-3d.js"></script></body></html>
