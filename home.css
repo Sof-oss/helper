@@ -460,3 +460,113 @@ html.tour-seen .home-hero .tour-start {
     letter-spacing: 0.02em;
   }
 }
+
+/* ---------- анонс ивента «Хэллоуин в Зоне»: приглушённая некликабельная табличка в правом верхнем углу ---------- */
+.home-hero {
+  position: relative;
+}
+.home-event {
+  --ev: #e0782f;
+  position: absolute;
+  top: 36px;
+  right: 30px;
+  z-index: 2;
+  width: 280px;
+  aspect-ratio: 2 / 1;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--ev) 40%, rgba(255, 255, 255, 0.08));
+  border-radius: 3px;
+  background: #07090c;
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.6);
+  opacity: 0.88;
+  pointer-events: none;
+  user-select: none;
+}
+.home-event img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 30% 50%;
+  filter: saturate(0.7) brightness(0.72) contrast(0.95);
+}
+/* затемнение под подписью и строки развёртки, как на экране ПДА */
+.home-event::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px),
+    linear-gradient(90deg, transparent 35%, rgba(4, 6, 8, 0.85));
+}
+/* уголки, как у рамки первого экрана */
+.home-event::after {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  --c: color-mix(in srgb, var(--ev) 70%, #fff);
+  background:
+    linear-gradient(var(--c), var(--c)) 0 0 / 10px 1px,
+    linear-gradient(var(--c), var(--c)) 0 0 / 1px 10px,
+    linear-gradient(var(--c), var(--c)) 100% 100% / 10px 1px,
+    linear-gradient(var(--c), var(--c)) 100% 100% / 1px 10px;
+  background-repeat: no-repeat;
+  opacity: 0.6;
+}
+.home-event-text {
+  position: absolute;
+  right: 14px;
+  bottom: 12px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  text-align: right;
+}
+.home-event-soon {
+  padding: 4px 8px;
+  border: 1px solid var(--ev);
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--ev);
+  font: 600 11px/1 var(--mono);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+.home-event-text b {
+  font-family: var(--f-display);
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1.1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #e8dfd4;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+}
+/* средние экраны: табличка меньше, чтобы не наезжать на заголовок */
+@media (max-width: 1180px) {
+  .home-event {
+    width: 220px;
+  }
+  .home-event-text b {
+    font-size: 14px;
+  }
+}
+/* планшет и телефон: узкая полоса в конце первого экрана */
+@media (max-width: 960px) {
+  .home-event {
+    position: relative;
+    top: auto;
+    right: auto;
+    order: 99;
+    width: 100%;
+    max-width: 520px;
+    aspect-ratio: 4 / 1;
+    margin: 18px auto 0;
+  }
+  .home-event img {
+    object-position: 30% 55%;
+  }
+}
