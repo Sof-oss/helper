@@ -510,9 +510,18 @@
      при переключении адрес меняется без перезагрузки, «Назад» и «Вперёд» возвращают прежний раздел.
      Последний раздел запоминается (SEC_KEY) - по нему nav.js ведёт пункт меню «Информация» */
   const SECTIONS = {
-    levels: { url: "/info", title: "Сердце Зоны - Информация" },
-    tasks: { url: "/info-tasks", title: "Сердце Зоны - Задания: награды локаций и калькулятор энергии" },
-    bosses: { url: "/info-bosses", title: "Сердце Зоны - Боссы: здоровье, ключи и награды" }
+    /* h1 - свой у каждого раздела (те же тексты подставляет build.js в info-tasks.html и info-bosses.html) */
+    levels: { url: "/info", title: "Сердце Зоны - Информация", h1: "Прогресс по уровням" },
+    tasks: {
+      url: "/info-tasks",
+      title: "Сердце Зоны - Задания: награды локаций и калькулятор энергии",
+      h1: "Задания: награды локаций"
+    },
+    bosses: {
+      url: "/info-bosses",
+      title: "Сердце Зоны - Боссы: здоровье, ключи и награды",
+      h1: "Боссы: здоровье и награды"
+    }
   };
   const hasLoc = typeof location !== "undefined";
   function secFromPath() {
@@ -523,8 +532,11 @@
     document.querySelectorAll("[data-section]").forEach(b => {
       const on = b.dataset.section === k;
       b.classList.toggle("active", on);
-      b.setAttribute("aria-pressed", on);
+      b.setAttribute("aria-selected", on);
+      b.tabIndex = on ? 0 : -1;
     });
+    const h1 = document.getElementById("infoTitle");
+    if (h1) h1.textContent = SECTIONS[k].h1;
     document.querySelectorAll("[data-section-panel]").forEach(p => {
       p.hidden = p.dataset.sectionPanel !== k;
     });

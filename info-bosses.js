@@ -157,7 +157,8 @@
           )
           .join("") +
         "</div></div>"
-      : "";
+      : /* без комплекта карточка не короче остальных и не выглядит недоделанной */
+        '<div class="boss-block boss-set boss-set-none"><h3>Комплект</h3><div class="boss-req boss-req-none">Комплект с этого босса не выпадает</div></div>';
     return (
       '<article class="boss-card" data-boss="' +
       b.key +
@@ -167,13 +168,13 @@
       b.name +
       '"><source src="assets/bosses/' +
       b.key +
-      '.webm" type="video/webm"><source src="assets/bosses/' +
+      '.mp4" type="video/mp4"><source src="assets/bosses/' +
       b.key +
-      '.mp4" type="video/mp4"></video><span class="boss-num">' +
+      '.webm" type="video/webm"></video><span class="boss-num">' +
       (i + 1) +
-      '</span><h3 class="boss-name">' +
+      '</span><h2 class="boss-name">' +
       b.name +
-      '</h3></div><div class="boss-hp"><span>Здоровье</span><b>' +
+      '</h2></div><div class="boss-hp"><span>Здоровье</span><b>' +
       n0(b.hp) +
       ' <small>HP</small></b></div><div class="boss-block"><h3>Требования</h3>' +
       req +

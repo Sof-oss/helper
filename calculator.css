@@ -1,0 +1,437 @@
+/* ===== Стили калькулятора, перенесённые из styles.css (настройки, окно талантов, карточки урона) =====
+   Перенесены только правила, которые ничем не перекрываются ниже в styles.css, порядок сохранён.
+   Файл подключается только на /calculator после styles.css */
+.level-row input::-webkit-inner-spin-button,
+.level-row input::-webkit-outer-spin-button {
+  appearance: none;
+  margin: 0;
+}
+.gear-info-btn:active {
+  transform: translateY(0);
+  box-shadow:
+    0 0 8px rgba(84, 191, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.select-all span {
+  user-select: none;
+}
+.talent-detail-overlay.show {
+  display: flex;
+}
+.gear-info-window {
+  width: min(760px, 92vw);
+  height: auto;
+  max-height: 86vh;
+}
+.tokens-window {
+  width: min(1040px, 94vw);
+}
+.gear-info-dialog {
+  align-items: center;
+}
+@media (max-width: 850px) {
+  .talent-game-sidebar {
+    flex-basis: 260px;
+    width: 260px;
+  }
+}
+@media (max-width: 760px) {
+  .damage-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 650px) {
+  .talent-game-sidebar {
+    width: 100%;
+    height: auto;
+    max-height: 48%;
+    border-right: 0;
+    border-bottom: 1px solid #34383a;
+  }
+  .talent-detail-overlay {
+    padding: 12px;
+  }
+  .gear-info-window {
+    width: 94vw;
+  }
+}
+@media (max-width: 430px) {
+  .level-row button,
+  .level-row input {
+    height: 42px;
+  }
+  .talent-points {
+    font-size: var(--fs-xs);
+    padding: 5px 8px;
+  }
+  .talent-icon-button {
+    width: 32px;
+    height: 32px;
+    font-size: var(--fs-xl);
+  }
+}
+.cmp-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+@media (max-width: 760px) {
+  .equipment-section.gear-open .options {
+    display: grid;
+  }
+  .equipment-section.gear-open .items-divider {
+    display: flex;
+  }
+}
+.side-actions {
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.select-all {
+  grid-column: 1/-1;
+}
+.tokens-body {
+  padding: 18px 20px 22px;
+}
+@media (max-width: 900px) {
+  .tok-cards {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 650px) {
+  .tokens-body {
+    padding: 14px 12px 18px;
+  }
+  .tok-inp-sep {
+    width: auto;
+    height: 1px;
+    margin: 0 12px;
+  }
+}
+.talent-detail-overlay.rerender .talent-detail-modal {
+  animation: none;
+}
+@media (max-width: 760px) {
+  .gear-info-btn {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
+  .level-row {
+    grid-template-columns: 44px 1fr 44px;
+  }
+}
+#gearInfoModal .gear-info-window {
+  width: min(1180px, 94vw);
+  height: min(88vh, 900px);
+  max-height: none;
+}
+@media (max-width: 650px) {
+  .talent-game-sidebar {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    flex: 0 0 auto;
+    overflow: visible;
+    padding: 10px 12px 12px;
+    border-right: 0;
+    border-bottom: 1px solid #34383a;
+  }
+  .talent-detail-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  #gearInfoModal .gear-info-window {
+    height: 92vh;
+  }
+}
+.confirm-modal .confirm-window {
+  width: min(440px, 92vw);
+  height: auto;
+  max-height: 86vh;
+}
+.confirm-modal .confirm-body {
+  gap: 16px;
+  padding: 18px 20px 20px;
+}
+.confirm-actions .cmp-btn {
+  height: 40px;
+  min-width: 110px;
+}
+@media (max-width: 760px) {
+  .confirm-modal .talent-dialog {
+    align-items: center;
+    padding: 0 4vw;
+  }
+  .confirm-actions .cmp-btn {
+    flex: 1 1 0;
+  }
+}
+.items-divider b {
+  font-family: var(--f-display);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.gear-info-btn {
+  border-radius: 50%;
+}
+.side-section {
+  border-bottom-color: var(--line);
+}
+.items-divider {
+  border-color: var(--line);
+}
+.talent-open {
+  border-radius: var(--r-sm);
+  border-color: var(--line-strong);
+  color: #fff;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 16%, #0d1115), #080a0d);
+}
+.talent-open:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.select-all input:checked {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+.side-title .clothes-icon {
+  filter: none;
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .damage-grid {
+    gap: 12px;
+  }
+  .side-actions .side-btn {
+    font-size: var(--fs-xs);
+    letter-spacing: 0.02em;
+    padding: 0 4px;
+    gap: 5px;
+    white-space: nowrap;
+  }
+}
+@media (min-width: 761px) and (max-width: 900px) {
+  .damage-grid {
+    grid-template-columns: 1fr;
+  }
+  .extra-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.side-title .gear-info-btn {
+  position: relative;
+  width: auto;
+  height: 30px;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 13px 0 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 85%, #fff);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent) 75%, #fff 8%),
+    color-mix(in srgb, var(--accent) 55%, #05090f)
+  );
+  color: #fff;
+  font-size: var(--fs-xs);
+  letter-spacing: 0.08em;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent),
+    0 0 16px color-mix(in srgb, var(--accent) 40%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+.side-title .gear-info-btn span {
+  width: auto;
+  height: auto;
+  display: inline;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  line-height: 1;
+}
+.side-title .gear-info-btn .ic {
+  width: 15px;
+  height: 15px;
+  color: #fff;
+}
+.side-title .gear-info-btn::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 1px solid var(--accent);
+  opacity: 0;
+  pointer-events: none;
+  animation: gi-ping 2.8s ease-out infinite;
+}
+.side-title .gear-info-btn:hover {
+  transform: translateY(-1px);
+  border-color: #fff;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent),
+    0 0 24px color-mix(in srgb, var(--accent) 60%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.side-title .gear-info-btn:hover::after {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .side-title .gear-info-btn::after {
+    animation: none;
+  }
+}
+@media (max-width: 760px) {
+  .side-title .gear-info-btn {
+    width: auto;
+    height: 34px;
+    flex-basis: auto;
+  }
+}
+.side-actions .side-btn {
+  white-space: nowrap;
+  letter-spacing: 0.3px;
+  padding: 0 6px;
+  gap: 6px;
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .result-panel > .section-heading > .tokens-btn {
+    margin-left: auto;
+  }
+}
+
+/* Калькулятор урона: раскладка страницы, мини-сводка для телефона, подсказка уровня.
+   Подключается только на /calculator после styles.css */
+
+/* заголовок стоит в HTML перед настройками (на телефоне виден первым), на компьютере сетка ставит его над результатами */
+.page {
+  align-content: start;
+}
+.page > .calc-title {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 15px 13px 0 0;
+}
+.page > .sidebar {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+.page > .content {
+  grid-column: 2;
+  grid-row: 2;
+  padding-top: 0;
+}
+
+/* место под карточки урона и список комплектов заранее: их рисует скрипт, и без этого блоки ниже «прыгали» (CLS).
+   Высоты сняты с отрисованной страницы; действуют только пока блок пуст */
+#paidCards:empty {
+  min-height: 296px;
+}
+#freeCards:empty {
+  min-height: 281px;
+}
+#sets:empty {
+  min-height: 508px;
+}
+#items:empty {
+  min-height: 189px;
+}
+@media (max-width: 1100px) {
+  #paidCards:empty {
+    min-height: 277px;
+  }
+  #freeCards:empty {
+    min-height: 262px;
+  }
+}
+@media (max-width: 1050px) {
+  #sets:empty {
+    min-height: 541px;
+  }
+  #items:empty {
+    min-height: 204px;
+  }
+}
+@media (max-width: 900px) {
+  #paidCards:empty {
+    min-height: 686px;
+  }
+  #freeCards:empty {
+    min-height: 641px;
+  }
+}
+
+/* подсказка, если уровень вне 1–100 */
+.level-hint {
+  margin: 6px 0 0;
+  min-height: 0;
+  color: #ffc46b;
+  font-size: var(--fs-sm);
+  line-height: 1.3;
+}
+.level-hint:empty {
+  display: none;
+}
+#level.is-fixed {
+  border-color: #ffc46b;
+  box-shadow: 0 0 0 2px rgba(255, 196, 107, 0.35);
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+/* мини-сводка урона: только телефон, видна, пока карточки урона за краем экрана */
+.calc-dock {
+  display: none;
+}
+@media (max-width: 760px) {
+  .page > .calc-title {
+    margin: 8px 8px 0;
+  }
+  #paidCards:empty {
+    min-height: 721px;
+  }
+  #freeCards:empty {
+    min-height: 676px;
+  }
+}
+@media (max-width: 430px) {
+  #paidCards:empty {
+    min-height: 780px;
+  }
+  #freeCards:empty {
+    min-height: 720px;
+  }
+  .calc-dock:not([hidden]) {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 8px);
+    z-index: 40;
+    display: flex;
+    justify-content: space-around;
+    gap: 10px;
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    border-radius: 10px;
+    background: rgba(8, 12, 17, 0.96);
+    box-shadow: 0 8px 24px #000a;
+    color: #c9d6e2;
+    font: inherit;
+    font-size: var(--fs-sm);
+    cursor: pointer;
+  }
+  .calc-dock span {
+    white-space: nowrap;
+  }
+  .calc-dock b {
+    color: #fff;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+  }
+}

@@ -3,7 +3,7 @@
   "private": true,
   "description": "Сайт-помощник для игры «Сердце Зоны». Сборка: npm install, затем npm run build",
   "scripts": {
-    "build": "node build.js && node build-previews.js",
+    "build": "node build-guide-images.js && node build.js && node build-previews.js",
     "test": "node --no-warnings --test test/*.test.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -11,10 +11,10 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
-    "esbuild": "0.25.0",
+    "esbuild": "0.25.12",
     "eslint": "^9.39.5",
     "globals": "^15.15.0",
-    "playwright-core": "1.63.0",
+    "playwright-core": "1.64.0",
     "prettier": "^3.9.9",
     "three": "0.186.1"
   }

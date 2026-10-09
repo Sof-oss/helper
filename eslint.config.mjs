@@ -56,6 +56,11 @@ export default [
       }
     }
   },
+  /* service worker */
+  {
+    files: ["sw.js"],
+    languageOptions: { globals: { ...globals.serviceworker } }
+  },
   /* скрипты сборки и выгрузки - Node.js */
   {
     files: ["build*.js", "fetch-players.js", "yandex/**/*.js", "guide-md.js", "test/**"],

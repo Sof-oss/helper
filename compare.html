@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#070d18">
+<script>/* тема до первой отрисовки, чтобы не мигало */(function(){try{var t=localStorage.getItem("zoneTheme");if(t)document.documentElement.dataset.theme=t}catch(e){}})();</script>
+<script>/* адрес без .html: /calculator.html -> /calculator, /index.html -> / (на GitHub Pages нет серверных переадресаций, канонический адрес указан в rel=canonical) */(function(){var p=location.pathname;if(/\.html$/.test(p))history.replaceState(null,"",p.replace(/(^|\/)index\.html$/,"$1").replace(/\.html$/,"")+location.search+location.hash)})();</script>
+<title>Сравнение игроков - Сердце Зоны</title>
+<meta name="description" content="Сравнение двух игроков «Сердце Зоны»: «Личное дело» рядом, места и показатели во всех семи рейтингах Топ-100.">
+<link rel="canonical" href="https://heart-of-the-zone.ru/compare">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Сердце Зоны">
+<meta property="og:title" content="Сравнение игроков - Сердце Зоны">
+<meta property="og:description" content="Два «Личных дела» рядом: места и показатели во всех семи рейтингах Топ-100.">
+<meta property="og:url" content="https://heart-of-the-zone.ru/compare">
+<meta property="og:image" content="https://heart-of-the-zone.ru/assets/preview-dossier.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Сравнение игроков - Сердце Зоны">
+<meta property="og:locale" content="ru_RU">
+<meta name="twitter:card" content="summary_large_image">
+<!-- структурированные данные для поисковиков: хлебные крошки -->
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://heart-of-the-zone.ru/"}, {"@type": "ListItem", "position": 2, "name": "Сравнение игроков", "item": "https://heart-of-the-zone.ru/compare"}]}]}</script>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!-- свои шрифты (assets/fonts, @font-face в styles.css); Oswald нужен сразу - заголовки и меню -->
+<link rel="preload" href="/assets/fonts/oswald-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/player-card.css">
+<link rel="stylesheet" href="/zone-players.css">
+<link rel="stylesheet" href="/my-place.css">
+<link rel="stylesheet" href="/compare.css">
+</head>
+<body>
+<!-- @include header active="/compare" -->
+
+
+<!-- Сравнение двух игроков: /compare?a=<ID>&b=<ID> (ID - как в /p/<ID>). Всё содержимое рисует compare.js из top100-players.json -->
+<main class="content info-content page-narrow vs-content" id="main">
+<div class="result-title"><svg class="target-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11M11.5 3.5 15 7l-3.5 3.5"/><path d="M20 17H9M12.5 13.5 9 17l3.5 3.5"/></g></svg><h1>Сравнение игроков</h1></div>
+<p class="vs-lead">Два «Личных дела» рядом: места и показатели игроков во всех семи рейтингах Топ-100 - репутация, боссы, тайники, таланты, коллекции, экспедиции и защита лагеря. Найдите двух игроков по нику и поделитесь ссылкой на сравнение.</p>
+<section class="result-panel vs-panel" id="vsRoot">
+  <noscript><p class="damage-footnote">Для сравнения игроков нужен включённый JavaScript.</p></noscript>
+</section>
+<p class="damage-footnote vs-foot"><a href="/top100">← Топ-100</a></p>
+</main>
+
+<!-- @include footer -->
+
+<script src="/ui.js" defer></script><script src="/zone-players.js" defer></script><script src="/compare.js" defer></script><script src="/nav.js" defer></script></body></html>

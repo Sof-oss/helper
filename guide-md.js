@@ -1,7 +1,7 @@
 /* Разметка гайдов: простой Markdown -> безопасный HTML.
    Один и тот же код работает в сборке (build.js) и в браузере (предпросмотр формы «Отправить гайд»),
    поэтому автор видит гайд ровно таким, каким он будет на сайте.
-   Поддерживается: ## заголовки, абзацы, **жирный**, *курсив*, `код`, [ссылка](https://…), ![подпись](картинка),
+   Поддерживается: ## заголовки (h2, ### - h3), абзацы, **жирный**, *курсив*, `код`, [ссылка](https://…), ![подпись](картинка),
    списки (- и 1.), > цитата, --- разделитель. Любой HTML в тексте выводится как текст.
    Файл гайда: guides/<адрес>/index.md, сверху блок
    ---
@@ -14,10 +14,11 @@
   "use strict";
   const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-  /* ссылки: только http(s), почта и адреса внутри сайта; всё остальное (javascript: и т. п.) - обычный текст */
+  /* ссылки: только http(s), почта и адреса внутри сайта; всё остальное (javascript: и т. п.) - обычный текст.
+     Адрес внутри сайта - «/путь», но не «//сайт» и не «/\сайт»: браузер открывает оба как чужой сайт */
   function safeUrl(u) {
     u = String(u).trim();
-    if (/^https?:\/\//i.test(u) || /^mailto:/i.test(u) || /^\/(?!\/)/.test(u) || /^#/.test(u)) return u;
+    if (/^https?:\/\//i.test(u) || /^mailto:/i.test(u) || /^\/(?![/\\])/.test(u) || /^#/.test(u)) return u;
     return null;
   }
 
@@ -84,12 +85,18 @@
       }
       if ((m = line.match(/^\s*!\[([^\]\n]*)\]\(([^)\s]+)\)\s*$/))) {
         flush();
-        const src = opt.image ? opt.image(m[2]) : safeUrl(m[2]);
-        if (src)
+        /* opt.image(src) -> адрес или { src, width, height, srcset, sizes }: с размерами браузер заранее
+           оставляет место под картинку и текст не прыгает, srcset отдаёт телефону уменьшенную копию */
+        let img = opt.image ? opt.image(m[2]) : safeUrl(m[2]);
+        if (typeof img === "string") img = { src: img };
+        if (img && img.src)
           out.push(
             '<figure><img src="' +
-              esc(src) +
-              '" alt="' +
+              esc(img.src) +
+              '"' +
+              (img.srcset ? ' srcset="' + esc(img.srcset) + '" sizes="' + esc(img.sizes || "100vw") + '"' : "") +
+              (img.width && img.height ? ' width="' + +img.width + '" height="' + +img.height + '"' : "") +
+              ' alt="' +
               esc(m[1]) +
               '" loading="lazy" decoding="async">' +
               (m[1] ? "<figcaption>" + inline(m[1], opt) + "</figcaption>" : "") +
@@ -99,7 +106,8 @@
       }
       if ((m = line.match(/^(#{1,3})\s+(.+)$/))) {
         flush();
-        const lv = Math.min(4, m[1].length + 1);
+        /* заголовок страницы гайда - h1, поэтому «#» и «##» дают h2, «###» - h3 (без пропуска уровня) */
+        const lv = Math.max(2, m[1].length);
         out.push("<h" + lv + ">" + inline(m[2], opt) + "</h" + lv + ">");
         continue;
       }

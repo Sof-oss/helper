@@ -42,7 +42,7 @@ jobs:
         run: npm test && npm run lint
 
       - name: Build
-        run: node build-changelog.js && node build.js && node build-previews.js # build-changelog.js дописывает «Что нового?» из коммитов
+        run: node build-changelog.js && node build-guide-images.js && node build.js && node build-previews.js # build-changelog.js дописывает «Что нового?» из коммитов, build-guide-images.js - копии картинок гайдов для телефонов
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5

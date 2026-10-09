@@ -13,7 +13,23 @@
   height: 42px;
   padding: 0 10px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: var(--fs-sm);
+}
+/* цвет раздела - только у открытой вкладки; неактивные - нейтральные, как у Топ-100 (иначе неактивная
+   «Боссы» выглядела выбранной или тревожной) */
+.info-sections .top100-tab.active[data-section="levels"] {
+  --accent: #54bfff;
+}
+.info-sections .top100-tab.active[data-section="tasks"] {
+  --accent: #ffb74d;
+}
+.info-sections .top100-tab.active[data-section="bosses"] {
+  --accent: #ff6b6f;
+}
+.info-sections .top100-tab:not(.active) {
+  border-color: rgba(120, 160, 190, 0.18);
+  background: rgba(3, 8, 13, 0.5);
+  color: #9fb1c1;
 }
 .res-exp {
   --c: #54bfff;
@@ -68,16 +84,16 @@
 .tasks-note {
   margin: 10px 2px 0;
   color: #8196a9;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   line-height: 1.5;
 }
 
 @media (max-width: 760px) {
   .tasks-note {
-    font-size: 11.5px;
+    font-size: var(--fs-xs);
   }
   .info-sections .top100-tab {
-    font-size: 12px;
+    font-size: var(--fs-xs);
   }
   .info-group + .info-group {
     margin-top: 12px;
@@ -95,7 +111,7 @@
   flex: 1 1 auto;
   height: 36px;
   padding: 0 12px;
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   --accent: #ff6b6f;
 }
 /* вкладки-локации с картинками */
@@ -180,7 +196,7 @@
 .ec-field > span:first-child {
   display: flex;
   align-items: center;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -213,7 +229,7 @@
   box-shadow: 0 0 0 3px rgba(255, 107, 111, 0.18);
 }
 .ec-field small {
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: #71889b;
 }
 .ec-presets {
@@ -229,7 +245,7 @@
   background: transparent;
   color: #a9bbc9;
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   cursor: pointer;
 }
@@ -265,7 +281,7 @@
   min-width: 0;
 }
 .ec-res b {
-  font-size: 20px;
+  font-size: var(--fs-xl);
   line-height: 1.15;
   color: #fff;
   font-variant-numeric: tabular-nums;
@@ -274,14 +290,14 @@
   text-overflow: ellipsis;
 }
 .ec-res small {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--c);
 }
 .ec-runs {
   margin: 10px 2px 12px;
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   color: #a9bbc9;
 }
 .ec-runs b {
@@ -321,7 +337,7 @@
   background: #d9483f;
   color: #fff;
   font-style: normal;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   font-weight: 800;
   line-height: 1.4;
   font-variant-numeric: tabular-nums;
@@ -332,7 +348,7 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   color: #c4ced6;
   min-width: 0;
 }
@@ -348,7 +364,7 @@
   font-size: 15px;
 }
 .ec-cost b {
-  font-size: 20px;
+  font-size: var(--fs-xl);
   color: #9fdc9f;
 }
 .ec-cost .res-ico {
@@ -364,7 +380,7 @@
   color: #ff9498;
 }
 .ec-left {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #71889b;
 }
 @media (max-width: 760px) {
@@ -379,7 +395,7 @@
   }
   .ec-locs .top100-tab {
     flex: 0 0 auto;
-    font-size: 12px;
+    font-size: var(--fs-xs);
   }
   .ec-locs {
     display: flex;
@@ -388,7 +404,7 @@
   .ec-locs .ec-loc {
     flex: 0 0 118px;
     height: 72px;
-    font-size: 11px;
+    font-size: var(--fs-xs);
     padding: 0 8px 7px;
   }
   .ec-inputs {
@@ -420,7 +436,7 @@
 .ec-net small {
   display: block;
   margin-top: 2px;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: #8a9aa8;
 }
 
@@ -482,7 +498,7 @@
   display: block;
   color: #fff;
   font-family: Oswald, "Arial Narrow", sans-serif;
-  font-size: 14px;
+  font-size: var(--fs-md);
   font-weight: 600;
   letter-spacing: 0.06em;
   line-height: 1.15;
@@ -493,7 +509,7 @@
   display: block;
   margin-top: 3px;
   color: #c9d4dc;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   text-shadow: 0 1px 2px #000;
 }
@@ -509,7 +525,7 @@
   border-radius: 20px;
   background: rgba(5, 8, 12, 0.8);
   color: #ffd65a;
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 .tl-card .res-ico,
@@ -536,7 +552,7 @@
   display: block;
   margin: 0 0 7px;
   color: #8aa0b2;
-  font-size: 10.5px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -555,7 +571,7 @@
 }
 .tl-v b {
   color: #e8edf1;
-  font-size: 14px;
+  font-size: var(--fs-md);
 }
 .tl-gain {
   display: flex;
@@ -571,7 +587,7 @@
 }
 .tl-gr b {
   color: #e8edf1;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   text-align: right;
 }
 .tl-bar {
@@ -610,7 +626,7 @@
   padding: 8px 10px;
   border-top: 1px solid #1a2a3a;
   color: #ffb74d;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 700;
 }
 .tl-more svg {
@@ -672,7 +688,7 @@
   margin: 0;
   color: #fff;
   font-family: Oswald, "Arial Narrow", sans-serif;
-  font-size: 28px;
+  font-size: var(--fs-2xl);
   font-weight: 600;
   letter-spacing: 0.05em;
   line-height: 1;
@@ -693,7 +709,7 @@
   border-radius: 20px;
   background: rgba(5, 8, 12, 0.75);
   color: #e8edf1;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 700;
 }
 .tl-pill-en {
@@ -746,7 +762,7 @@
   gap: 6px;
   margin: 0 0 10px;
   color: #8aa0b2;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -768,7 +784,7 @@
 }
 .tl-lbl {
   color: #b8c7d3;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 .tl-r b {
   color: #e8edf1;
@@ -780,7 +796,7 @@
   align-items: center;
   gap: 8px;
   color: #7f95a6;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   white-space: nowrap;
 }
 .tl-r small .tl-bar {
@@ -819,13 +835,13 @@
   border: 1px solid #1f3346;
   border-radius: 8px;
   background: #0e1a25;
-  font-size: 12px;
+  font-size: var(--fs-xs);
 }
 .tl-sh {
   display: flex;
   justify-content: space-between;
   color: #8aa0b2;
-  font-size: 10.5px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -850,7 +866,7 @@
   align-items: center;
   gap: 3px;
   color: #8aa0b2;
-  font-size: 10.5px;
+  font-size: var(--fs-xs);
 }
 .tl-stage .res-ico {
   width: 14px;
@@ -867,7 +883,7 @@
 .tl-sv small {
   margin-left: auto;
   color: #8aa0b2;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 600;
 }
 .tl-se {
@@ -876,7 +892,7 @@
   gap: 3px;
   margin-top: 3px;
   color: #ffd65a;
-  font-size: 10.5px;
+  font-size: var(--fs-xs);
   font-weight: 600;
 }
 .tl-fin {
@@ -919,7 +935,7 @@
     font-size: 22px;
   }
   .tl-pill {
-    font-size: 12px;
+    font-size: var(--fs-xs);
   }
   .tl-cols {
     grid-template-columns: 1fr;
@@ -938,10 +954,10 @@
     grid-column: 1 / -1;
   }
   .tl-lbl {
-    font-size: 12px;
+    font-size: var(--fs-xs);
   }
   .tl-r b {
-    font-size: 14px;
+    font-size: var(--fs-md);
   }
   .tl-stage-list {
     display: flex;
@@ -1043,7 +1059,7 @@
   background: color-mix(in srgb, #ff6b6f 7%, transparent);
 }
 .boss-hp span {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: #a9bbc9;
@@ -1057,7 +1073,7 @@
   white-space: nowrap;
 }
 .boss-hp small {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #c98385;
 }
 .boss-block {
@@ -1082,7 +1098,7 @@
 }
 .boss-block h3 small {
   font-weight: 400;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   line-height: 1.2;
   text-transform: none;
   letter-spacing: 0;
@@ -1099,7 +1115,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: #c3d1dc;
 }
 .boss-req b {
@@ -1144,7 +1160,7 @@
   white-space: nowrap;
 }
 .boss-loot span {
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   line-height: 1.2;
   color: #8ea3b4;
   overflow: hidden;
@@ -1172,7 +1188,7 @@
 }
 .boss-items figcaption {
   margin-top: 4px;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   line-height: 1.25;
   color: #8ea3b4;
 }
@@ -1187,7 +1203,7 @@
 @media (max-width: 760px) {
   .info-sections .top100-tab {
     padding: 0 6px;
-    font-size: 12px;
+    font-size: var(--fs-xs);
     line-height: 1.15;
   }
   .bosses-grid {

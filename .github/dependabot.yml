@@ -1,0 +1,23 @@
+# Еженедельная проверка обновлений зависимостей.
+# Мажорные версии eslint/@eslint/js/globals ждут ручного перехода (eslint 10 меняет конфиг).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      dev-minor:
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+      - dependency-name: "@eslint/js"
+        update-types: [version-update:semver-major]
+      - dependency-name: globals
+        update-types: [version-update:semver-major]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

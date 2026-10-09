@@ -4,6 +4,8 @@ import {
   SETS,
   ITEMS,
   clampLevel,
+  MIN_LEVEL,
+  MAX_LEVEL,
   baseDamageByLevel,
   buildHashOf as buildHashOfCore,
   parseBuild as parseBuildCore,
@@ -45,7 +47,11 @@ const $ = id => document.getElementById(id),
   MAX_TALENT_POINTS = TALENTS.length * 5;
 const cap = k => k[0].toUpperCase() + k.slice(1);
 
+/* сохранённые билды (src/calc-slots.js) узнают о каждой правке через onBuildSaved */
+const buildSavedListeners = [];
+const onBuildSaved = fn => buildSavedListeners.push(fn);
 function saveState() {
+  buildSavedListeners.forEach(fn => fn());
   try {
     localStorage.setItem(
       STORAGE_KEY,
@@ -346,7 +352,6 @@ function hideTalentTip() {
 }
 
 /* суммарные бонусы, урон и крит */
-const MIN_LEVEL = 1;
 function totals() {
   const total = Object.fromEntries(keys.map(k => [k, 0]));
   let critChance = 0,
@@ -433,10 +438,11 @@ function pulse(id, v, pct) {
   if (!el || isZero(v, pct)) return;
   clearTimeout(el._t);
   el.textContent = fmtDelta(v, pct);
+  el.title = "Изменение после последней правки";
   el.className = "delta show " + (v > 0 ? "up" : "down");
   el._t = setTimeout(() => {
     el.className = "delta";
-  }, 2600);
+  }, 3500);
 }
 let prevResults = null,
   lastTalentChange = null;
@@ -1021,7 +1027,10 @@ function calc() {
   /* уровень - только целое 1–100; пустое поле не трогаем, пока человек печатает (поправится при уходе из поля) */
   const rawLevel = $("level").value,
     level = clampLevel(rawLevel);
-  if (rawLevel !== "" && rawLevel !== String(level)) $("level").value = level;
+  if (rawLevel !== "" && rawLevel !== String(level)) {
+    $("level").value = level;
+    levelHint(rawLevel);
+  }
   const T = totals(),
     tal = T.talentTotal,
     base = baseDamageByLevel(level),
@@ -1052,6 +1061,62 @@ function calc() {
   }
   announceResults(r);
   prevResults = r;
+  updateDock(r);
+}
+/* уровень вне 1–100 исправляется, но не молча: подсказка под полем и короткая подсветка */
+function levelHint(raw) {
+  const n = Number(String(raw).replace(",", "."));
+  const hint = $("levelHint");
+  if (!hint) return;
+  hint.textContent =
+    n > MAX_LEVEL
+      ? "Максимальный уровень - " + MAX_LEVEL
+      : n < MIN_LEVEL
+        ? "Минимальный уровень - " + MIN_LEVEL
+        : "Уровень - целое число от " + MIN_LEVEL + " до " + MAX_LEVEL;
+  $("level").classList.add("is-fixed");
+  clearTimeout(hint._t);
+  hint._t = setTimeout(() => {
+    hint.textContent = "";
+    $("level").classList.remove("is-fixed");
+  }, 3000);
+}
+/* мини-сводка урона на телефоне: настройки стоят над результатами, и без неё не видно, что изменилось */
+const DOCK = [
+  ["grenade", "Граната"],
+  ["gauss", "Гаусс"],
+  ["knife", "Нож"]
+];
+function updateDock(r) {
+  const dock = $("calcDock");
+  if (!dock) return;
+  dock.innerHTML = DOCK.map(([k, l]) => "<span>" + l + " <b>" + fmt(r[k]) + "</b></span>").join("");
+}
+function initDock() {
+  const dock = $("calcDock");
+  if (!dock || !("IntersectionObserver" in window)) return;
+  const narrow = matchMedia("(max-width: 760px)");
+  const seen = new Set();
+  const sync = () => {
+    dock.hidden = !narrow.matches || seen.size > 0;
+  };
+  /* карточки считаются видными, когда поднялись выше нижней трети экрана, а не выглянули краем */
+  const io = new IntersectionObserver(
+    entries => {
+      entries.forEach(e => (e.isIntersecting ? seen.add(e.target) : seen.delete(e.target)));
+      sync();
+    },
+    { rootMargin: "0px 0px -35% 0px" }
+  );
+  ["paidCards", "freeCards"].forEach(id => io.observe($(id)));
+  narrow.addEventListener("change", sync);
+  dock.addEventListener("click", () => {
+    const top = $("paidCards").closest(".result-panel");
+    top.scrollIntoView({
+      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      block: "start"
+    });
+  });
 }
 function render() {
   $("sets").innerHTML = optionMarkup(SETS, state.sets, "set");
@@ -1069,7 +1134,7 @@ function showToast(text, kind) {
   if (kind) t.classList.add(kind);
   t.classList.add("show");
   clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
+  window.__toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
 }
 
 /* билд в ссылке: уровень, снаряжение и таланты после # */
@@ -1309,7 +1374,8 @@ function copyText(s) {
     : Promise.resolve(fallbackCopy(s));
 }
 function shareBuild() {
-  copyText(location.href.split("#")[0] + "#" + buildHash()).then(ok =>
+  /* ссылка ведёт на /build - копию калькулятора со своим превью для соцсетей (build.js) */
+  copyText(location.origin + "/build#" + buildHash()).then(ok =>
     showToast(ok ? "Ссылка скопирована" : "Не удалось скопировать", ok ? "ok" : "err")
   );
 }
@@ -1319,7 +1385,7 @@ function shareBuild() {
    Фокус идёт в окно и возвращается на кнопку, которой его открыли. Следим за классом .show, поэтому функции открытия и закрытия окон не трогаем */
 const openedModals = new Map();
 function setPageInert(on) {
-  document.querySelectorAll(".site-header,.page,.site-footer").forEach(el => {
+  document.querySelectorAll(".site-header,.page,.calc-dock,.site-footer").forEach(el => {
     el.inert = on;
   });
 }
@@ -1594,7 +1660,11 @@ $("selectAllEquipment").addEventListener("change", e => {
   render();
 });
 $("level").addEventListener("change", () => {
-  if ($("level").value !== String(clampLevel($("level").value))) $("level").value = clampLevel($("level").value);
+  const raw = $("level").value;
+  if (raw !== String(clampLevel(raw))) {
+    $("level").value = clampLevel(raw);
+    levelHint(raw);
+  }
 });
 $("level").addEventListener("input", () => {
   saveState();
@@ -1623,6 +1693,7 @@ $("resetAll").onclick = () =>
   })
 );
 renderCards();
+initDock();
 loadState();
 loadTokens();
 $("cmpInput").addEventListener("keydown", e => {
@@ -1633,13 +1704,34 @@ const linked = parseBuild(location.hash);
 if (linked) {
   cmpBuild = linked;
   saveCompare();
-  history.replaceState(null, "", location.href.split("#")[0]);
+  history.replaceState(null, "", location.pathname.replace(/\/build$/, "/calculator") + location.search);
 } else loadCompare();
 render();
 if (linked) openCompare();
 
-/* то, чем пользуется polish.js */
+/* загрузить билд (строка из ссылки на билд) как свой: для слотов сохранённых билдов (src/calc-slots.js) */
+function applyBuild(raw) {
+  const b = parseBuild(raw);
+  if (!b) return false;
+  state.sets = new Set(b.sets);
+  state.items = new Set(b.items);
+  state.talents = b.talents;
+  $("level").value = b.level;
+  lastTalentChange = null;
+  saveState();
+  render();
+  return true;
+}
+
+/* то, чем пользуются polish.js и src/calc-slots.js */
 export {
+  buildHash,
+  applyBuild,
+  onBuildSaved,
+  parseBuild,
+  showToast,
+  askConfirm,
+  copyText,
   SETS,
   ITEMS,
   keys,

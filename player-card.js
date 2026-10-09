@@ -851,8 +851,16 @@
 
   /* ---------- входы ---------- */
   /* клик по нику в рейтинге: карточка открывается сразу на показателе текущей вкладки */
+  /* строка рейтинга кликается целиком (в ник трудно попасть пальцем); выделение текста мышью карточку не открывает */
+  const rowPlayer = t => {
+    const tr = t.closest(".top100-table tbody tr");
+    if (!tr || t.closest("a, button, input")) return null;
+    const sel = window.getSelection && window.getSelection();
+    if (sel && String(sel).trim()) return null;
+    return tr.querySelector("[data-t100-player]");
+  };
   document.addEventListener("click", e => {
-    const b = e.target.closest("[data-t100-player]");
+    const b = e.target.closest("[data-t100-player]") || rowPlayer(e.target);
     if (!b) return;
     e.preventDefault();
     const nick = b.dataset.t100Player,
@@ -872,11 +880,13 @@
   });
   /* кнопка «Найти игрока» рядом с поиском рейтинга */
   const tools = document.querySelector(".t100-tools");
-  if (tools && !document.getElementById("pcOpenSearch")) {
-    tools.insertAdjacentHTML(
-      "beforeend",
-      '<button type="button" class="t100-find" id="pcOpenSearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.6-3.6 3.4-5.6 7-5.6s6.4 2 7 5.6"/></svg>Карточка игрока</button>'
-    );
+  if (tools) {
+    /* в top100.html кнопка уже стоит (место занято заранее), на других страницах - вставляется */
+    if (!document.getElementById("pcOpenSearch"))
+      tools.insertAdjacentHTML(
+        "beforeend",
+        '<button type="button" class="t100-find" id="pcOpenSearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.6-3.6 3.4-5.6 7-5.6s6.4 2 7 5.6"/></svg>Карточка игрока</button>'
+      );
     document.getElementById("pcOpenSearch").addEventListener("click", () => {
       period = null;
       metric = null;
@@ -889,7 +899,14 @@
     if (m) {
       period = null;
       metric = null;
-      open(decodeURIComponent(m[1]));
+      /* испорченная ссылка (%E0 и т. п.) не роняет скрипт: просто не открываем карточку */
+      let id;
+      try {
+        id = decodeURIComponent(m[1]);
+      } catch {
+        return;
+      }
+      open(id);
     }
   }
   window.addEventListener("hashchange", fromHash);

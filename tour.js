@@ -248,15 +248,18 @@
     help = d.createElement("button");
     help.type = "button";
     help.className = "tour-help";
-    help.setAttribute("aria-label", "Тур по сайту");
-    help.title = "Тур по сайту";
+    var helpLabel = here() === "/" ? "Тур по сайту" : "Подсказки по этой странице";
+    help.setAttribute("aria-label", helpLabel);
+    help.title = helpLabel;
     help.innerHTML =
       '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9.2 9.3a2.9 2.9 0 1 1 4.3 2.5c-.9.5-1.5 1.1-1.5 2.1v.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.6" r="1.2" fill="currentColor"/></svg>';
     var theme = d.getElementById("themeSwitch");
     if (theme && theme.parentNode === inner) inner.insertBefore(help, theme);
     else inner.appendChild(help);
+    /* на главной - полный тур, на остальных страницах - короткий тур только по этой странице */
     help.addEventListener("click", function () {
-      start();
+      if (here() === "/") start();
+      else startPage();
     });
     return help;
   }
@@ -265,6 +268,36 @@
     var seen = ls(SEEN) === "1";
     if (startBtn) startBtn.hidden = seen;
     if (seen) makeHelp();
+  }
+
+  /* ---------- границы текущего тура: весь сайт (lo..hi = все шаги) или одна страница ---------- */
+  var lo = 0,
+    hi = STEPS.length - 1,
+    RANGE = "zoneTourRange";
+  function setRange(a, b) {
+    lo = a;
+    hi = b;
+    ss(RANGE, a === 0 && b === STEPS.length - 1 ? null : a + "," + b);
+  }
+  (function restoreRange() {
+    var r = /^(\d+),(\d+)$/.exec(ss(RANGE) || "");
+    if (r && +r[2] < STEPS.length) {
+      lo = +r[1];
+      hi = +r[2];
+    }
+  })();
+  function startPage() {
+    var p = here(),
+      a = -1,
+      b = -1;
+    STEPS.forEach(function (x, n) {
+      if (x.page !== p) return;
+      if (a < 0) a = n;
+      b = n;
+    });
+    if (a < 0) return start();
+    setRange(a, b);
+    show(a);
   }
 
   /* ---------- подсветка и окно шага ---------- */
@@ -293,7 +326,7 @@
       if (k === "close") finish();
       else if (k === "prev") go(i - 1);
       else if (k === "next") {
-        if (i < STEPS.length - 1) go(i + 1);
+        if (i < hi) go(i + 1);
         else finish();
       }
     });
@@ -311,7 +344,7 @@
       finish();
     } else if (!typing && e.key === "ArrowRight") {
       e.preventDefault();
-      if (i < STEPS.length - 1) go(i + 1);
+      if (i < hi) go(i + 1);
       else finish();
     } else if (!typing && e.key === "ArrowLeft" && i > 0) {
       e.preventDefault();
@@ -427,19 +460,17 @@
   }
 
   function render() {
+    /* один счётчик - внизу, по шагам текущего тура; вверху только название раздела */
     var s = STEPS[i],
       g = G[s.g],
-      last = i === STEPS.length - 1;
-    var inG = STEPS.filter(function (x) {
-        return x.g === s.g;
-      }),
-      k = inG.indexOf(s) + 1;
+      last = i === hi,
+      k = i - lo + 1,
+      total = hi - lo + 1;
     panel.style.setProperty("--tour-ac", g.color);
     spot.style.setProperty("--tour-ac", g.color);
     panel.innerHTML =
       '<div class="tp-top"><span class="tp-group"><i></i>' +
       esc(g.name) +
-      (inG.length > 1 ? " · " + k + "/" + inG.length : "") +
       "</span>" +
       '<button type="button" class="tp-close" data-tour="close" aria-label="Закрыть тур"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>' +
       '<h2 id="tourTitle">' +
@@ -458,15 +489,15 @@
           "</ul>"
         : "") +
       '<div class="tp-bar" aria-hidden="true"><i style="width:' +
-      Math.round(((i + 1) / STEPS.length) * 100) +
+      Math.round((k / total) * 100) +
       '%"></i></div>' +
       '<div class="tp-foot"><small>Шаг ' +
-      (i + 1) +
+      k +
       " из " +
-      STEPS.length +
+      total +
       '</small><div class="tp-nav">' +
       '<button type="button" class="tp-btn ghost" data-tour="prev"' +
-      (i === 0 ? " disabled" : "") +
+      (i === lo ? " disabled" : "") +
       ">Назад</button>" +
       '<button type="button" class="tp-btn" data-tour="next">' +
       (last ? "Готово" : STEPS[i + 1].page !== s.page ? "Далее: " + G[STEPS[i + 1].g].name : "Далее") +
@@ -504,7 +535,7 @@
     });
   }
   function go(n) {
-    if (n < 0 || n >= STEPS.length) return;
+    if (n < lo || n > hi) return;
     if (STEPS[n].page !== here()) {
       /* шаг на другой странице: запоминаем и переходим */
       ss(STEP, String(n));
@@ -515,6 +546,7 @@
     show(n);
   }
   function start() {
+    setRange(0, STEPS.length - 1);
     if (STEPS[0].page !== here()) {
       ss(STEP, "0");
       location.href = STEPS[0].page;
@@ -539,6 +571,7 @@
     if (!panel || closing) return;
     closing = true;
     ss(STEP, null);
+    setRange(0, STEPS.length - 1);
     var first = ls(SEEN) !== "1";
     ls(SEEN, "1");
     spot.classList.remove("on");

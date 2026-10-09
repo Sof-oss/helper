@@ -2,6 +2,7 @@ dist/
 node_modules/
 package-lock.json
 *.html
+!partials/*.html
 *.md
 top100/
 top100-data.js

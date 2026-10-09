@@ -33,3 +33,28 @@
     .querySelectorAll('.main-nav a[href="/info"], .tabbar a[href="/info"]')
     .forEach(a => a.setAttribute("href", url));
 })();
+
+/* вкладки (role="tablist": разделы «Информации», рейтинги Топ-100): стрелки влево/вправо, Home и End
+   переводят фокус на соседнюю вкладку и открывают её, как принято для вкладок */
+document.addEventListener("keydown", e => {
+  const tab = e.target.closest && e.target.closest('[role="tab"]');
+  if (!tab || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+  const tabs = [...tab.closest('[role="tablist"]').querySelectorAll('[role="tab"]')];
+  const i = tabs.indexOf(tab);
+  const next =
+    e.key === "Home"
+      ? tabs[0]
+      : e.key === "End"
+        ? tabs[tabs.length - 1]
+        : tabs[(i + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length];
+  e.preventDefault();
+  next.click();
+  /* вкладки Топ-100 перерисовываются при смене - фокус ставим на новую кнопку с тем же ключом */
+  setTimeout(() => {
+    const key = next.dataset.top100Tab || next.dataset.section;
+    const fresh = document.querySelector(
+      '[role="tab"][data-top100-tab="' + key + '"], [role="tab"][data-section="' + key + '"]'
+    );
+    (fresh || next).focus();
+  }, 60);
+});

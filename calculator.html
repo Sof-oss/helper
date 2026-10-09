@@ -9,26 +9,26 @@
 <title>Сердце Зоны - Калькулятор урона</title>
 <meta name="description" content="Калькулятор урона для игры «Сердце Зоны»: оружие, снаряжение и таланты.">
 <link rel="canonical" href="https://heart-of-the-zone.ru/calculator">
-<!-- превью ссылки: калькулятором делятся ссылками на билд (билд после #, его соцсети не видят), поэтому своё ироничное превью -->
+<!-- превью ссылки на сам калькулятор. Ссылки на билд ведут на /build (та же страница, её делает build.js) - там ироничное превью «Смотри мой билд» -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Сердце Зоны">
-<meta property="og:title" content="Смотри мой билд - Калькулятор урона «Сердце Зоны»">
-<meta property="og:description" content="Урон оружия с учётом уровня, снаряжения и талантов. Открой билд, сравни со своим и попробуй переплюнуть.">
+<meta property="og:title" content="Калькулятор урона «Сердце Зоны»">
+<meta property="og:description" content="Урон оружия за жетоны и бесплатных ударов с учётом уровня, снаряжения и талантов: древо талантов, расчёт по жетонам, ссылка на билд и сравнение.">
 <meta property="og:url" content="https://heart-of-the-zone.ru/calculator">
-<meta property="og:image" content="https://heart-of-the-zone.ru/assets/preview-build.jpg?v=2">
-<meta property="og:image:secure_url" content="https://heart-of-the-zone.ru/assets/preview-build.jpg?v=2">
+<meta property="og:image" content="https://heart-of-the-zone.ru/assets/preview-calculator.jpg?v=1">
+<meta property="og:image:secure_url" content="https://heart-of-the-zone.ru/assets/preview-calculator.jpg?v=1">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Я тут самый мощный сталкер! Билд в калькуляторе урона «Сердце Зоны»">
+<meta property="og:image:height" content="628">
+<meta property="og:image:alt" content="Калькулятор урона «Сердце Зоны»">
 <meta property="og:locale" content="ru_RU">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Смотри мой билд - Калькулятор урона «Сердце Зоны»">
-<meta name="twitter:description" content="Урон оружия с учётом уровня, снаряжения и талантов. Открой билд, сравни со своим и попробуй переплюнуть.">
-<meta name="twitter:image" content="https://heart-of-the-zone.ru/assets/preview-build.jpg?v=2">
-<meta name="twitter:image:alt" content="Я тут самый мощный сталкер!">
-<meta name="vk:image" content="https://heart-of-the-zone.ru/assets/preview-build.jpg?v=2">
-<link rel="image_src" href="https://heart-of-the-zone.ru/assets/preview-build.jpg?v=2">
+<meta name="twitter:title" content="Калькулятор урона «Сердце Зоны»">
+<meta name="twitter:description" content="Урон оружия за жетоны и бесплатных ударов с учётом уровня, снаряжения и талантов: древо талантов, расчёт по жетонам, ссылка на билд и сравнение.">
+<meta name="twitter:image" content="https://heart-of-the-zone.ru/assets/preview-calculator.jpg?v=1">
+<meta name="twitter:image:alt" content="Калькулятор урона «Сердце Зоны»">
+<meta name="vk:image" content="https://heart-of-the-zone.ru/assets/preview-calculator.jpg?v=1">
+<link rel="image_src" href="https://heart-of-the-zone.ru/assets/preview-calculator.jpg?v=1">
 <!-- структурированные данные для поисковиков: хлебные крошки и само приложение-калькулятор -->
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://heart-of-the-zone.ru/"}, {"@type": "ListItem", "position": 2, "name": "Калькулятор урона", "item": "https://heart-of-the-zone.ru/calculator"}]}, {"@type": "WebApplication", "name": "Калькулятор урона - Сердце Зоны", "url": "https://heart-of-the-zone.ru/calculator", "description": "Урон оружия за жетоны и бесплатных ударов в игре «Сердце Зоны» с учётом уровня, снаряжения и талантов: дерево талантов, расчёт жетонов на нужный урон, сравнение билдов по ссылке.", "applicationCategory": "GameApplication", "operatingSystem": "Any", "browserRequirements": "Requires JavaScript", "inLanguage": "ru-RU", "isAccessibleForFree": true, "image": "https://heart-of-the-zone.ru/assets/preview.jpg", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "RUB"}, "isPartOf": {"@type": "WebSite", "name": "Сердце Зоны", "url": "https://heart-of-the-zone.ru/"}}]}</script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -38,9 +38,11 @@
 <link rel="preload" href="assets/fonts/oswald-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="calculator.css">
 
 
   <link rel="stylesheet" href="tour.css">
+<link rel="stylesheet" href="calc-slots.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -62,11 +64,13 @@
 <!-- @include header active="/calculator" -->
 
 
-<div class="page">
-<aside class="sidebar">
-<section class="side-section level-section"><div class="side-title"><svg class="person-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2.6c-3.3 0-5.6 2.7-5.6 6.2v2.3c0 1.2.6 2.3 1.6 3l-2.1 1.3C4.1 16.3 3.4 18.2 3.4 21.4h17.2c0-3.2-.7-5.1-2.5-6l-2.1-1.3c1-.7 1.6-1.8 1.6-3V8.8c0-3.5-2.3-6.2-5.6-6.2zM9.3 10.6c.5-1.7 1.5-2.6 2.7-2.6s2.2.9 2.7 2.6v.6c0 1.5-1.2 2.7-2.7 2.7s-2.7-1.2-2.7-2.7z"/></svg><b>Уровень персонажа</b></div><div class="level-row"><button type="button" data-step="level" data-dir="-1">−</button><input id="level" type="number" inputmode="numeric" aria-label="Уровень персонажа" min="1" max="100" step="1" value="1"><button type="button" data-step="level" data-dir="1">+</button></div></section>
+<!-- заголовок стоит до настроек: на телефоне он виден первым, на компьютере сетка ставит его над результатами -->
+<main class="page" id="main">
+<div class="result-title calc-title"><svg class="target-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.8 8.4V3.8h4.6M15.6 3.8h4.6v4.6M20.2 15.6v4.6h-4.6M8.4 20.2H3.8v-4.6"/><circle cx="12" cy="12" r="4.3"/><path d="M12 6.2v2.4M12 15.4v2.4M6.2 12h2.4M15.4 12h2.4"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></g></svg><h1>Калькулятор урона</h1></div>
+<aside class="sidebar" aria-label="Настройки билда">
+<section class="side-section level-section"><div class="side-title"><svg class="person-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2.6c-3.3 0-5.6 2.7-5.6 6.2v2.3c0 1.2.6 2.3 1.6 3l-2.1 1.3C4.1 16.3 3.4 18.2 3.4 21.4h17.2c0-3.2-.7-5.1-2.5-6l-2.1-1.3c1-.7 1.6-1.8 1.6-3V8.8c0-3.5-2.3-6.2-5.6-6.2zM9.3 10.6c.5-1.7 1.5-2.6 2.7-2.6s2.2.9 2.7 2.6v.6c0 1.5-1.2 2.7-2.7 2.7s-2.7-1.2-2.7-2.7z"/></svg><b>Уровень персонажа</b></div><div class="level-row"><button type="button" data-step="level" data-dir="-1">−</button><input id="level" type="number" inputmode="numeric" aria-label="Уровень персонажа" min="1" max="100" step="1" value="1"><button type="button" data-step="level" data-dir="1">+</button></div><p class="level-hint" id="levelHint" aria-live="polite"></p></section>
 <section class="side-section talent-launcher"><div class="side-title"><span><svg class="ic" aria-hidden="true"><use href="#i-tree"/></svg></span><b>Таланты</b></div><button type="button" id="openTalents" class="talent-open"><span><svg class="ic" aria-hidden="true"><use href="#i-rank"/></svg></span><span>Открыть древо талантов</span><b id="talentPointsBadge">0 / 135</b></button><div class="talent-summary" id="talentSummary">Очки не распределены</div></section>
-<section class="side-section equipment-section"><div class="side-title"><span class="clothes-icon" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-mask"/></svg></span><b>Комплекты</b><button type="button" id="openGearInfo" class="gear-info-btn" aria-label="Бонусы снаряжения" title="Бонусы снаряжения"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span>Бонусы</span></button></div><button type="button" id="gearToggle" class="gear-toggle" aria-expanded="false" aria-controls="sets items"></button><div id="sets" class="options"></div><div class="items-divider"><span>•</span><b>Одиночные вещи</b></div><div id="items" class="options"></div></section>
+<section class="side-section equipment-section"><div class="side-title"><span class="clothes-icon" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-mask"/></svg></span><b>Комплекты</b><button type="button" id="openGearInfo" class="gear-info-btn" aria-label="Бонусы снаряжения" title="Бонусы снаряжения"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span>Бонусы</span></button></div><button type="button" id="gearToggle" class="gear-toggle" aria-expanded="false" aria-controls="sets items">Снаряжение</button><div id="sets" class="options"></div><div class="items-divider"><span>•</span><b>Одиночные вещи</b></div><div id="items" class="options"></div></section>
 <div class="side-actions">
 <label class="select-all"><input id="selectAllEquipment" type="checkbox"> <span>Выбрать всё снаряжение</span></label>
 <button type="button" class="side-btn" id="shareBuild"><svg class="ic" aria-hidden="true"><use href="#i-link"/></svg>Ссылка на билд</button>
@@ -74,14 +78,15 @@
 <button type="button" class="side-btn ghost" id="resetAll"><svg class="ic" aria-hidden="true"><use href="#i-reset"/></svg>Сбросить всё</button>
 </div>
 </aside>
-<main class="content">
+<div class="content">
 <noscript><section class="result-panel placeholder-panel"><p>Калькулятор считает урон оружия за жетоны и бесплатных ударов с учётом уровня, снаряжения и талантов. Для работы нужен включённый JavaScript.</p></section></noscript>
-<div class="result-title"><svg class="target-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.8 8.4V3.8h4.6M15.6 3.8h4.6v4.6M20.2 15.6v4.6h-4.6M8.4 20.2H3.8v-4.6"/><circle cx="12" cy="12" r="4.3"/><path d="M12 6.2v2.4M12 15.4v2.4M6.2 12h2.4M15.4 12h2.4"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></g></svg><h1>Калькулятор урона</h1></div>
-<section class="result-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-ammo"/></svg></span><b>Урон (оружие за жетоны)</b><button type="button" id="openTokens" class="tokens-btn">Расчёт по жетонам</button></div><div class="damage-grid" id="paidCards"></div><p class="damage-footnote">* Без учёта базового шанса критического удара и базовой прибавки критического урона</p></section>
-<section class="result-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-knife"/></svg></span><b>Урон (бесплатные удары)</b></div><div class="damage-grid" id="freeCards"></div><p class="damage-footnote">В скобках <span class="first-hit">зелёным</span> - урон первого бесплатного удара с бонусом от таланта «Засада»</p></section>
-<section class="result-panel extra-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-gauge"/></svg></span><b>Дополнительные характеристики</b></div><div class="extra-grid"><div><i class="delta" id="deltaNoCooldown"></i><span><svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg></span><small>Шанс удара без отката*</small><strong id="noCooldown">0%</strong></div><div><i class="delta" id="deltaCooldown"></i><span><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg></span><small>Сокращение отката</small><strong id="cooldown">0%</strong></div><div><i class="delta" id="deltaFirstFreeHit"></i><span><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg></span><small>Урон первого бесплатного удара</small><strong id="firstFreeHit">+0%</strong></div></div><p class="damage-footnote">* Без учёта базового шанса удара без отката</p></section>
-</main>
+<section class="result-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-ammo"/></svg></span><h2><b>Урон (оружие за жетоны)</b></h2><button type="button" id="openTokens" class="tokens-btn">Расчёт по жетонам</button></div><div class="damage-grid" id="paidCards"></div><p class="damage-footnote">* Без учёта базового шанса критического удара и базовой прибавки критического урона. Число в углу карточки - на сколько изменился урон после последней правки</p></section>
+<section class="result-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-knife"/></svg></span><h2><b>Урон (бесплатные удары)</b></h2></div><div class="damage-grid" id="freeCards"></div><p class="damage-footnote">В скобках <span class="first-hit">зелёным</span> - урон первого бесплатного удара с бонусом от таланта «Засада»</p></section>
+<section class="result-panel extra-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-gauge"/></svg></span><h2><b>Дополнительные характеристики</b></h2></div><div class="extra-grid"><div><i class="delta" id="deltaNoCooldown"></i><span><svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg></span><small>Шанс удара без отката*</small><strong id="noCooldown">0%</strong></div><div><i class="delta" id="deltaCooldown"></i><span><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg></span><small>Сокращение отката</small><strong id="cooldown">0%</strong></div><div><i class="delta" id="deltaFirstFreeHit"></i><span><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg></span><small>Урон первого бесплатного удара</small><strong id="firstFreeHit">+0%</strong></div></div><p class="damage-footnote">* Без учёта базового шанса удара без отката</p></section>
 </div>
+</main>
+<!-- мини-сводка урона для телефона: видна, пока карточки урона за краем экрана (app.js, updateDock) -->
+<button type="button" class="calc-dock" id="calcDock" hidden aria-label="Показать урон"></button>
 
 <div id="talentModal" class="talent-modal" aria-hidden="true">
   <div class="talent-backdrop" data-close-talents></div>
@@ -91,9 +96,9 @@
         <div><h2 id="talentModalTitle">Таланты</h2><p>Усиливай удары по боссам и открывай новые бонусы по цепочке</p></div>
         <div class="talent-game-actions"><span class="talent-points"><b id="modalSpentPoints">0</b> / <b id="modalMaxPoints">135</b></span><button type="button" class="talent-icon-button" data-close-talents aria-label="Закрыть">×</button></div>
       </header>
-      <div class="talent-game-body"><aside class="talent-game-sidebar" id="talentSidebar"></aside><main class="talent-flow-wrap"><div class="talent-flow" id="talentFlow"></div>
+      <div class="talent-game-body"><aside class="talent-game-sidebar" id="talentSidebar"></aside><div class="talent-flow-wrap"><div class="talent-flow" id="talentFlow"></div>
         <div class="talent-tip" id="talentTip" role="tooltip" hidden></div>
-      </main><div class="talent-detail-overlay" id="talentDetailOverlay"></div></div>
+      </div><div class="talent-detail-overlay" id="talentDetailOverlay"></div></div>
     </div>
   </section>
 </div>
@@ -168,5 +173,5 @@
 
 <!-- @include footer -->
 
-<script src="ui.js"></script><!-- калькулятор: src/calculator.js (app.js + polish.js + talents.js), собирается build.js в один файл --><script src="calculator.js"></script><script src="nav.js"></script>
-  <script src="tour.js"></script></body></html>
+<script src="ui.js" defer></script><!-- калькулятор: src/calculator.js (app.js + polish.js + talents.js), собирается build.js в один файл --><script src="calculator.js" defer></script><script src="nav.js" defer></script>
+  <script src="tour.js" defer></script></body></html>

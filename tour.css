@@ -16,7 +16,7 @@
   color: #fff;
   font-family: var(--f-display, inherit);
   font-weight: 500;
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   backdrop-filter: blur(4px);
@@ -277,7 +277,7 @@
 }
 .tour-panel p {
   margin: 0 0 10px;
-  font-size: 14px;
+  font-size: var(--fs-md);
   line-height: 1.5;
   color: #d3dde6;
 }
@@ -291,7 +291,7 @@
 .tour-panel li {
   position: relative;
   padding-left: 18px;
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   line-height: 1.45;
   color: #bccad6;
 }
@@ -325,7 +325,7 @@
   gap: 10px;
 }
 .tp-foot small {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #8ea3b5;
   white-space: nowrap;
 }
@@ -340,7 +340,7 @@
   cursor: pointer;
   font-family: var(--f-display, inherit);
   font-weight: 500;
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   letter-spacing: 0.07em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -372,7 +372,7 @@
 /* телефон: окно шага - панелью снизу, над нижним меню */
 @media (max-width: 760px) {
   .tour-start {
-    font-size: 12.5px;
+    font-size: var(--fs-xs);
     height: 38px;
   }
   .tour-panel:not(.center) {
@@ -386,7 +386,7 @@
     font-size: 17px;
   }
   .tour-panel p {
-    font-size: 13.5px;
+    font-size: var(--fs-sm);
   }
 }
 @media (prefers-reduced-motion: reduce) {

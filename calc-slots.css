@@ -1,0 +1,194 @@
+/* Сохранённые билды калькулятора (src/calc-slots.js): блок «Мои билды» в боковой панели.
+   Цвета - от темы оформления (--accent из styles.css), кнопки «Новый» и «Из ссылки» - общие .side-btn.ghost */
+.slots-section .side-title {
+  margin-bottom: 8px;
+}
+.slots-section .slot-title-ic {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.slot-count {
+  margin-left: auto;
+  font:
+    600 11px/1 "ZoneMono",
+    ui-monospace,
+    monospace;
+  color: #6f8496;
+}
+.slot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+  max-height: 268px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.slot {
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  border: 1px solid color-mix(in srgb, var(--accent, #54bfff) 14%, #1a2c3c);
+  border-radius: 6px;
+  background: rgba(6, 14, 22, 0.55);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+.slot:hover {
+  border-color: color-mix(in srgb, var(--accent, #54bfff) 35%, #1a2c3c);
+}
+.slot.on {
+  border-color: color-mix(in srgb, var(--accent, #54bfff) 70%, transparent);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent, #54bfff) 18%, transparent),
+    rgba(6, 14, 22, 0.55) 80%
+  );
+  box-shadow: inset 3px 0 0 var(--accent, #54bfff);
+}
+.slot-pick {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 4px 7px 10px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.slot-pick:focus-visible,
+.slot-ic:focus-visible {
+  outline: 2px solid var(--accent, #54bfff);
+  outline-offset: -2px;
+  border-radius: 5px;
+}
+.slot-pick > i {
+  flex: 0 0 9px;
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid #5d7489;
+  border-radius: 50%;
+}
+.slot.on .slot-pick > i {
+  border-color: var(--accent, #54bfff);
+  background: var(--accent, #54bfff);
+  box-shadow: 0 0 8px var(--accent, #54bfff);
+}
+.slot-pick > span {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.slot-pick b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #dfe9f2;
+}
+.slot.on .slot-pick b {
+  color: #fff;
+}
+.slot-pick small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11.5px;
+  color: #7f95a8;
+}
+.slot-acts {
+  display: flex;
+  align-items: center;
+  padding-right: 3px;
+}
+.slot-ic {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: none;
+  color: #9fb4c6;
+  cursor: pointer;
+}
+.slot-ic:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+.slot-ic.danger:hover {
+  color: #ff8a7a;
+}
+.slot-ic svg,
+.slot-btns svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.slot-rename,
+.slot-import {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+}
+.slot-import {
+  margin: 0 0 8px;
+  border: 1px dashed color-mix(in srgb, var(--accent, #54bfff) 35%, #1a2c3c);
+  border-radius: 6px;
+}
+.slot-rename input,
+.slot-import input {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  padding: 0 9px;
+  border: 1px solid color-mix(in srgb, var(--accent, #54bfff) 45%, #1f3d54);
+  border-radius: 5px;
+  background: #05101a;
+  color: #e7f0f8;
+  font: inherit;
+  font-size: 13.5px;
+}
+.slot-rename input:focus,
+.slot-import input:focus {
+  outline: none;
+  border-color: var(--accent, #54bfff);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent, #54bfff) 25%, transparent);
+}
+.slot-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.slot-btns .side-btn.ghost {
+  grid-column: auto;
+}
+.slot-btns .side-btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.slot-note {
+  margin: 7px 0 0;
+  font-size: 11.5px;
+  color: #6f8496;
+}

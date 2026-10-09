@@ -1,0 +1,64 @@
+/* Поле выбора игрока с подсказками (zone-players.js): «Моё место» в Топ-100 и сравнение игроков */
+.zp-suggest {
+  position: absolute;
+  z-index: 30;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  max-height: 300px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border: 1px solid color-mix(in srgb, var(--accent, #54bfff) 40%, #1f3d54);
+  border-radius: 6px;
+  background: #070c11;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.6);
+  text-align: left;
+}
+.zp-suggest[hidden] {
+  display: none;
+}
+.zp-suggest li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 36px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  color: #dfe7ee;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.zp-suggest li.on,
+.zp-suggest li:hover {
+  background: color-mix(in srgb, var(--accent, #54bfff) 18%, transparent);
+  color: #fff;
+}
+.zp-suggest li > i {
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--f);
+  box-shadow: 0 0 6px var(--f);
+}
+.zp-suggest li > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.zp-suggest small {
+  flex: 0 0 auto;
+  font-size: 11.5px;
+  color: #7f95a8;
+}
+.zp-suggest .zp-empty {
+  cursor: default;
+  color: #7f95a8;
+}
+.zp-suggest .zp-empty:hover {
+  background: none;
+}

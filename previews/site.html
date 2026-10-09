@@ -1,7 +1,8 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8">
-<!-- Общее превью сайта (assets/preview.jpg, 1200×628): открыть в Chrome при окне 1200×628 и сделать снимок. -->
+<!-- Общее превью сайта (assets/preview.jpg, 1200×628): открыть в Chrome при окне 1200×628 и сделать снимок.
+     Превью разделов (assets/preview-<раздел>.jpg) - та же страница с параметрами после # (JSON: k, h1, p, bg, on), их рисует build-logo.js -->
 <style>
-@font-face{font-family:G;src:url("../assets/fonts/graffiti-stalker.ttf")}
+@font-face{font-family:G;src:url("fonts/graffiti-stalker.ttf")}
 @font-face{font-family:R;src:url("../assets/fonts/rubik-cyrillic.woff2");font-weight:300 700}
 @font-face{font-family:R;src:url("../assets/fonts/rubik-latin.woff2");font-weight:300 700;unicode-range:U+0000-00FF}
 @font-face{font-family:M;src:url("../assets/fonts/mono-cyrillic.woff2")}
@@ -24,7 +25,7 @@ p{margin-top:24px;font:400 28px/1.35 R,sans-serif;color:rgba(255,255,255,.82);ma
 .nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.18);padding-top:24px}
 .nav div{font:500 19px/1.2 R,sans-serif;color:#fff;padding-right:32px;margin-right:32px;border-right:1px solid rgba(255,255,255,.18)}
 .nav div:last-child{border:0;margin:0;padding:0}
-.nav b{display:block;font:400 13px/1 M,monospace;letter-spacing:.16em;color:#b28cf5;margin-bottom:10px}
+.nav.sec div{color:rgba(255,255,255,.5)}.nav.sec div.on{color:#fff}.nav.sec div.on b{color:#e2ccff}.nav b{display:block;font:400 13px/1 M,monospace;letter-spacing:.16em;color:#b28cf5;margin-bottom:10px}
 </style></head><body><div class="f"><div class="bg"></div><div class="sh"></div>
 <div class="in">
  <div class="top"><img src="../assets/heart-logo.webp" alt="">heart-of-the-zone.ru</div>
@@ -39,4 +40,14 @@ p{margin-top:24px;font:400 28px/1.35 R,sans-serif;color:rgba(255,255,255,.82);ma
   <div><b>03</b>Задания и боссы</div>
   <div><b>04</b>Гайды игроков</div>
  </div>
-</div></div></body></html>
+</div></div>
+<script>
+/* превью раздела: #{"k":"…","h1":"…","p":"…","bg":"bg-dolg-1280","on":2} */
+(function(){try{var o=JSON.parse(decodeURIComponent(location.hash.slice(1)));
+if(o.k)document.querySelector(".k").textContent=o.k;
+if(o.h1){var h=document.querySelector("h1");h.innerHTML=o.h1;if(o.size)h.style.fontSize=o.size+"px"}
+if(o.p)document.querySelector(".mid p").innerHTML=o.p;
+if(o.bg)document.querySelector(".bg").style.backgroundImage="url(../assets/"+o.bg+".webp)";
+if(o.on){var n=document.querySelector(".nav");n.classList.add("sec");n.children[o.on-1].classList.add("on")}
+}catch(e){}addEventListener("hashchange",function(){location.reload()})})();
+</script></body></html>

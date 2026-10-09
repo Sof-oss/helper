@@ -11,7 +11,6 @@
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
-const { execFileSync } = require("child_process");
 
 const ROOT = __dirname;
 const OUT = path.join(ROOT, "dist");
@@ -36,9 +35,10 @@ const TABS = [...tabsSrc.matchAll(/key:\s*"(\w+)",\s*label:\s*"([^"]+)"[^}]*?acc
 }));
 const uiSrc = fs.readFileSync(path.join(ROOT, "ui.js"), "utf8");
 const GLYPHS = Object.fromEntries(
+  /* картинки эмблем (/assets/…) в превью открываются из previews/dossier.html - путь от неё */
   [...uiSrc.matchAll(/^\s*(merc|dolg|svoboda|science|monolith|rassvet|loners):\s*'(.*)',?\s*$/gm)].map(m => [
     m[1],
-    m[2]
+    m[2].replace(/href="\/assets\//g, 'href="../assets/')
   ])
 );
 const FACTION_KEY = Object.fromEntries(
@@ -124,46 +124,8 @@ function cardData(data, id) {
   };
 }
 
-function findChrome() {
-  const list = [process.env.CHROME_PATH];
-  if (process.platform === "win32") {
-    for (const base of [process.env.PROGRAMFILES, process.env["PROGRAMFILES(X86)"], process.env.LOCALAPPDATA].filter(
-      Boolean
-    ))
-      list.push(
-        base + "\\Google\\Chrome\\Application\\chrome.exe",
-        base + "\\Microsoft\\Edge\\Application\\msedge.exe"
-      );
-  } else {
-    list.push(
-      "/usr/bin/google-chrome",
-      "/usr/bin/google-chrome-stable",
-      "/usr/bin/chromium",
-      "/usr/bin/chromium-browser",
-      "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-    );
-    try {
-      list.push(execFileSync("which", ["chromium"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim());
-    } catch (e) {}
-  }
-  return list.find(f => f && fs.existsSync(f)) || null;
-}
-
-async function openBrowser() {
-  let pw;
-  try {
-    pw = require("playwright-core");
-  } catch (e) {
-    return { why: "нет playwright-core (npm install)" };
-  }
-  const exe = findChrome();
-  if (!exe) return { why: "не найден Chrome или Edge (можно указать путь в CHROME_PATH)" };
-  const browser = await pw.chromium.launch({
-    executablePath: exe,
-    args: ["--no-sandbox", "--force-color-profile=srgb"]
-  });
-  return { browser };
-}
+/* Chrome для картинок: общий с build-guide-images.js поиск браузера (build-chrome.js) */
+const { openBrowser } = require("./build-chrome.js");
 async function newShooter(browser) {
   const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
   await page.goto("file://" + path.join(ROOT, "previews", "dossier.html").replace(/\\/g, "/"));

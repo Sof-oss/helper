@@ -14,7 +14,7 @@
 <meta property="og:title" content="Сердце Зоны - Топ-100">
 <meta property="og:description" content="Топ-100 игроков «Сердце Зоны» по семи рейтингам: репутация, боссы, тайники, таланты, коллекции, экспедиции и защита лагеря. Поиск по нику, карточки игроков и динамика за период.">
 <meta property="og:url" content="https://heart-of-the-zone.ru/top100">
-<meta property="og:image" content="https://heart-of-the-zone.ru/assets/preview.jpg?v=3">
+<meta property="og:image" content="https://heart-of-the-zone.ru/assets/preview-top100.jpg?v=1">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="628">
 <meta property="og:image:alt" content="Сердце Зоны - Топ-100">
@@ -34,25 +34,30 @@
 
   <link rel="stylesheet" href="/tour.css">
 <link rel="stylesheet" href="/player-card.css">
+<link rel="stylesheet" href="/zone-players.css">
+<link rel="stylesheet" href="/my-place.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></symbol></defs></svg>
 <!-- @include header active="/top100" -->
 
 
-<main class="content top100-content">
+<main class="content top100-content" id="main">
 <div class="result-title"><svg class="target-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7.6 2.8h8.8l-2.9 6h-3z"/><circle cx="12" cy="14.8" r="5.9"/><path d="m12 11.6 1 2 2.2.3-1.6 1.5.4 2.2-2-1.1-2 1.1.4-2.2-1.6-1.5 2.2-.3z" fill="currentColor" stroke="none"/></g></svg><h1>Топ-100</h1></div>
 <section class="result-panel top100-panel">
   <!-- дату подставляет top100.js из top100-data.js в #top100Updated, руками не править -->
   <div class="section-heading t100-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></span><b>Рейтинг игроков</b><p class="top100-updated" id="top100UpdatedBox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>Обновлено</span><b id="top100Updated">-</b></p></div>
-  <div class="top100-tabs" id="top100Tabs"></div>
+  <div class="top100-tabs" id="top100Tabs" role="tablist" aria-label="Рейтинги"></div>
+  <!-- поиск, период и отряды: разметка совпадает с SHELL_HTML в top100.js, кнопки и подписи дописывает build.js и top100.js -->
+  <div class="t100-tools"><div class="t100-period" id="top100Period" role="group" aria-label="За какой период показывать изменения" hidden><span class="t100-period-title">Изменения</span><div class="t100-period-btns" id="top100PeriodBtns"></div><p class="t100-period-range" id="top100PeriodRange" aria-live="polite"></p></div><label class="t100-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="top100Search" type="search" placeholder="Найти ник" autocomplete="off" aria-label="Поиск по нику"></label><button type="button" class="t100-factions-toggle" id="top100FactionsToggle" aria-expanded="false" aria-controls="top100Factions">Отряды: <b id="top100FactionSummary">Все</b><svg class="t100-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="t100-factions" id="top100Factions"></div><button type="button" class="t100-find" id="pcOpenSearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.6-3.6 3.4-5.6 7-5.6s6.4 2 7 5.6"/></svg>Карточка игрока</button></div>
+  <!-- легенда над таблицей: приглушённые строки с 💤 - игроки, которые давно не заходили -->
+  <p class="damage-footnote top100-legend"><span class="t100-off" aria-hidden="true">💤</span>Приглушены сталкеры, которые не заходили в игру больше 5 дней</p>
   <noscript><p class="damage-footnote">Без JavaScript виден только раздел «Репутация». Чтобы переключать разделы и искать по нику, включите JavaScript.</p></noscript>
-  <div class="top100-table-wrap" id="top100TableWrap"></div>
-  <p class="damage-footnote top100-footnote">Отмечены красным - сталкеры, давно не заходившие в игру</p>
+  <div class="top100-table-wrap" id="top100TableWrap" role="tabpanel"></div>
 </section>
 </main>
 
 <!-- @include footer -->
 
-<script src="/ui.js"></script><script src="/top100-data.js"></script><script src="/top100.js"></script><script src="/player-card.js"></script><script src="/nav.js"></script>
-  <script src="/tour.js"></script></body></html>
+<script src="/ui.js" defer></script><script src="/top100-data.js" defer></script><script src="/top100.js" defer></script><script src="/player-card.js" defer></script><script src="/zone-players.js" defer></script><script src="/my-place.js" defer></script><script src="/nav.js" defer></script>
+  <script src="/tour.js" defer></script></body></html>

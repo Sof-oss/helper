@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#070d18">
+<script>/* тема до первой отрисовки, чтобы не мигало */(function(){try{var t=localStorage.getItem("zoneTheme");if(t)document.documentElement.dataset.theme=t}catch(e){}})();</script>
+<title>Нет связи - Сердце Зоны</title>
+<meta name="description" content="Нет соединения с интернетом. Открытые раньше разделы сайта работают без сети.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!-- свои шрифты (assets/fonts, @font-face в styles.css); Oswald нужен сразу - заголовки и меню -->
+<link rel="preload" href="/assets/fonts/oswald-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/notfound.css">
+
+</head>
+<body>
+<!-- @include header -->
+
+
+<!-- страница без сети: её отдаёт service worker (sw.js), когда нужной страницы нет в сохранённых -->
+<main class="content info-content page-narrow" id="main">
+<div class="result-title"><svg class="target-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11v10M8.5 21h7"/><circle cx="12" cy="9" r="1.6"/><path d="M8.6 5.6a4.8 4.8 0 0 0 0 6.8M15.4 5.6a4.8 4.8 0 0 1 0 6.8"/><path d="M4 3l16 16"/></g></svg><h1>Нет связи</h1></div>
+<section class="result-panel nf-panel">
+  <div class="nf-code" aria-hidden="true">off</div>
+  <p class="nf-text">Сеть сталкеров не отвечает: нет соединения с интернетом. Эта страница ещё не сохранена на устройстве, а разделы ниже работают и без сети.</p>
+  <div class="nf-links">
+    <a class="side-btn" href="/">На главную</a>
+    <a class="side-btn" href="/calculator">Калькулятор урона</a>
+    <a class="side-btn" href="/info">Информация</a>
+    <a class="side-btn" href="/top100">Топ-100</a>
+    <a class="side-btn" href="/guides">Гайды</a>
+  </div>
+</section>
+</main>
+
+<!-- @include footer -->
+
+<script src="/ui.js" defer></script><script src="/nav.js" defer></script></body></html>

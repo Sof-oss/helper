@@ -1,0 +1,543 @@
+/* «Моё место» (my-place.js): панель над таблицей Топ-100, подсветка своей строки, кнопки в карточке игрока
+   и блок на главной. Цвета - от темы оформления (--accent), цвета рейтингов (--c) - как у вкладок Топ-100 */
+
+/* ---------- общие кнопки ---------- */
+.mp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.mp-btn:hover {
+  background: color-mix(in srgb, var(--accent) 34%, transparent);
+}
+.mp-btn.ghost {
+  border-color: color-mix(in srgb, var(--accent) 30%, rgba(255, 255, 255, 0.08));
+  background: rgba(5, 10, 15, 0.45);
+  color: #d5e0ea;
+}
+.mp-btn.ghost:hover {
+  background: color-mix(in srgb, var(--accent) 14%, rgba(5, 10, 15, 0.6));
+  color: #fff;
+}
+.mp-btn.on {
+  border-color: #7fe0a0;
+  background: rgba(127, 224, 160, 0.14);
+  color: #b9f5cd;
+}
+.mp-btn svg,
+.mp-ic svg,
+.mp-bar-ic svg,
+.mp-home-title .news-icon svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mp-btn:focus-visible,
+.mp-ic:focus-visible,
+.mp-chip:focus-visible,
+.mp-tile:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.mp-ic {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  color: #9fb4c6;
+  cursor: pointer;
+}
+.mp-ic:hover {
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  color: #fff;
+}
+.mp-move {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.mp-move.up,
+.mp-home-meta .up,
+.mp-tile small .up {
+  color: #7fe0a0;
+}
+.mp-move.down,
+.mp-home-meta .down,
+.mp-tile small .down {
+  color: #ff8a7a;
+}
+.mp-move.new {
+  color: #ffd27a;
+  text-transform: uppercase;
+}
+.mp-move.same {
+  color: #7f95a8;
+}
+
+/* ---------- Топ-100: панель «Моё место» ---------- */
+.mp-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin: 0 0 12px;
+  padding: 8px 10px 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, rgba(255, 255, 255, 0.06));
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 12%, rgba(8, 11, 15, 0.9)), rgba(8, 11, 15, 0.6));
+}
+.mp-bar.empty {
+  border-left-style: dashed;
+}
+.mp-bar-ic {
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: color-mix(in srgb, var(--accent) 60%, #fff);
+}
+.mp-bar-text {
+  flex: 1 1 200px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.mp-bar-text b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  color: #fff;
+}
+.mp-bar-text small {
+  font-size: 12px;
+  color: #8ea3b5;
+}
+.mp-bar.set .mp-bar-text small {
+  font:
+    600 10.5px/1.2 "ZoneMono",
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent) 55%, #8ea3b5);
+}
+.mp-bar-place {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--c) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--c) 35%, transparent);
+}
+.mp-bar-place b {
+  font-family: var(--f-display);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--c);
+}
+.mp-bar-place small {
+  font-size: 12px;
+  color: #b8c6d2;
+}
+.mp-bar-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.mp-pick {
+  position: relative;
+  flex: 1 1 240px;
+  max-width: 420px;
+}
+.mp-pick input {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, #1f3d54);
+  border-radius: 4px;
+  background: #05090d;
+  color: #e7f0f8;
+  font: inherit;
+  font-size: 13.5px;
+}
+.mp-pick input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.mp-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: -4px 0 12px;
+  font-size: 13px;
+  color: #b8c6d2;
+}
+.mp-status[hidden] {
+  display: none;
+}
+.mp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid color-mix(in srgb, var(--c, var(--accent)) 45%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--c, var(--accent)) 12%, transparent);
+  color: #e7f0f8;
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.mp-chip b {
+  color: var(--c, #fff);
+}
+
+/* своя строка в таблице */
+.top100-table tr.mp-me td {
+  background: color-mix(in srgb, var(--accent) 20%, rgba(8, 11, 15, 0.6));
+  border-top: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.top100-table tr.mp-me td:first-child {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.top100-table tr.mp-me .t100-player {
+  font-weight: 700;
+  color: #fff;
+}
+.top100-table tr.mp-me .t100-player::after {
+  content: "вы";
+  display: inline-block;
+  margin-left: 7px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--accent);
+  color: var(--accent-ink, #000);
+  font:
+    700 10px/1.4 "ZoneMono",
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
+@keyframes mp-flash {
+  0%,
+  60% {
+    background: color-mix(in srgb, var(--accent) 55%, transparent);
+  }
+}
+.top100-table tr.mp-flash td {
+  animation: mp-flash 1.6s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .top100-table tr.mp-flash td {
+    animation: none;
+  }
+}
+/* шапка таблицы прилипает под шапкой сайта: строка при прокрутке не прячется под ней */
+.top100-table tr {
+  scroll-margin-top: calc(var(--t100-head, 64px) + 48px);
+}
+
+/* кнопки в карточке игрока */
+.mp-card-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: -6px 0 14px;
+}
+
+/* ---------- главная ---------- */
+.home-me {
+  position: relative;
+  margin: 28px 0 0;
+  padding: 20px 22px 18px;
+  border-radius: var(--r-lg, 8px);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, rgba(255, 255, 255, 0.07));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent) 8%, rgba(13, 16, 20, 0.9)),
+    rgba(7, 9, 12, 0.94)
+  );
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+.home-me[hidden] {
+  display: none;
+}
+.home-me::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-3), transparent);
+}
+.mp-home-title {
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.mp-home-title .news-icon {
+  color: color-mix(in srgb, var(--accent) 60%, #fff);
+}
+.mp-home-title .news-icon svg {
+  width: 18px;
+  height: 18px;
+}
+.mp-home-who {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  margin-left: auto;
+}
+.mp-home-who i {
+  align-self: center;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--f);
+  box-shadow: 0 0 6px var(--f);
+}
+.mp-home-who b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+  color: #fff;
+}
+.mp-home-who small {
+  font-size: 12px;
+  color: #8ea3b5;
+  white-space: nowrap;
+}
+.mp-home-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0 0 14px;
+  font-size: 12.5px;
+  color: #8ea3b5;
+}
+.mp-home-sum {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  color: #c9d5df;
+}
+.mp-home-sum i {
+  font-style: normal;
+  color: #55687a;
+}
+.mp-loading i {
+  width: 14px;
+  height: 14px;
+  border: 2px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: pc-spin 0.8s linear infinite;
+}
+@keyframes pc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.mp-tiles {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+.mp-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 12px 10px;
+  border: 1px solid color-mix(in srgb, var(--c) 28%, rgba(255, 255, 255, 0.05));
+  border-radius: 4px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 10%, rgba(6, 9, 12, 0.85)), rgba(6, 9, 12, 0.85));
+  color: inherit;
+  text-decoration: none;
+  overflow: hidden;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+.mp-tile::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: var(--c);
+  opacity: 0.8;
+}
+.mp-tile:hover {
+  border-color: color-mix(in srgb, var(--c) 60%, transparent);
+  transform: translateY(-1px);
+}
+.mp-tile.out {
+  opacity: 0.72;
+}
+.mp-tile.out::before {
+  opacity: 0.3;
+}
+.mp-tile-lbl {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font:
+    600 10.5px/1.2 "ZoneMono",
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--c) 70%, #b8c6d2);
+}
+.mp-tile-rank {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.mp-tile-rank b {
+  font-family: var(--f-display);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.05;
+  color: #fff;
+}
+.mp-tile.m1 .mp-tile-rank b {
+  color: #ffd27a;
+}
+.mp-tile.m2 .mp-tile-rank b {
+  color: #d5e0ea;
+}
+.mp-tile.m3 .mp-tile-rank b {
+  color: #e3a878;
+}
+.mp-tile small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: #8ea3b5;
+}
+.mp-invite {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+}
+.mp-invite p {
+  flex: 1 1 320px;
+  margin: 0;
+  font-size: 14px;
+  color: #b8c6d2;
+}
+.mp-home-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+@media (max-width: 1100px) {
+  .mp-tiles {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .home-me {
+    margin-top: 20px;
+    padding: 16px 14px 14px;
+  }
+  .mp-home-who {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
+  .mp-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .mp-tile-rank b {
+    font-size: 22px;
+  }
+  .mp-home-acts .mp-btn {
+    flex: 1 1 auto;
+  }
+  .mp-bar {
+    padding: 8px;
+  }
+  .mp-bar-text {
+    flex-basis: 120px;
+  }
+  .mp-bar-btns {
+    flex: 1 1 100%;
+    margin-left: 0;
+  }
+  .mp-bar-btns .mp-btn {
+    flex: 1 1 auto;
+    padding: 0 10px;
+  }
+  .mp-bar.empty .mp-btn {
+    flex: 1 1 100%;
+  }
+  .mp-pick {
+    max-width: none;
+  }
+  .mp-bar-btns {
+    gap: 4px;
+  }
+  .mp-bar-btns .mp-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 8px;
+  }
+  .mp-bar-btns .mp-ic {
+    flex: 0 0 32px;
+    width: 32px;
+  }
+}
+@media (max-width: 420px) {
+  .mp-bar-btns .mp-btn svg {
+    display: none;
+  }
+}

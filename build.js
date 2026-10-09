@@ -43,7 +43,7 @@ const MODULES = {
     "src/zone-bg.js",
     "src/zone-theme.js"
   ],
-  "calculator.js": ["src/calculator.js", "src/calc-core.js", "app.js", "polish.js", "talents.js"]
+  "calculator.js": ["src/calculator.js", "src/calc-core.js", "src/calc-slots.js", "app.js", "polish.js", "talents.js"]
 };
 
 /* в dist не попадает служебное и исходники сборки (выгрузка игроков и CSV рейтинга нужны только для build-top100.js) */
@@ -70,6 +70,8 @@ const SKIP = new Set([
   "build-previews.js",
   "build-logo.js",
   "build-changelog.js",
+  "build-guide-images.js",
+  "build-chrome.js",
   "previews",
   "test",
   "eslint.config.mjs",
@@ -123,6 +125,35 @@ const playerIds = (() => {
   } catch (e) {}
   return ids;
 })();
+/* размеры картинки из заголовка файла (WebP, PNG, JPEG, GIF), без сторонних пакетов; не разобрали - null */
+function imageSize(file) {
+  const b = fs.readFileSync(file);
+  const ascii = (a, n) => b.toString("latin1", a, a + n);
+  if (ascii(0, 4) === "RIFF" && ascii(8, 4) === "WEBP") {
+    const kind = ascii(12, 4);
+    if (kind === "VP8X") return { width: 1 + b.readUIntLE(24, 3), height: 1 + b.readUIntLE(27, 3) };
+    if (kind === "VP8 ") return { width: b.readUInt16LE(26) & 0x3fff, height: b.readUInt16LE(28) & 0x3fff };
+    if (kind === "VP8L") {
+      const v = b.readUInt32LE(21);
+      return { width: (v & 0x3fff) + 1, height: ((v >> 14) & 0x3fff) + 1 };
+    }
+  }
+  if (ascii(1, 3) === "PNG") return { width: b.readUInt32BE(16), height: b.readUInt32BE(20) };
+  if (ascii(0, 3) === "GIF") return { width: b.readUInt16LE(6), height: b.readUInt16LE(8) };
+  if (b[0] === 0xff && b[1] === 0xd8) {
+    for (let i = 2; i < b.length - 9;) {
+      if (b[i] !== 0xff) return null;
+      const m = b[i + 1],
+        len = b.readUInt16BE(i + 2);
+      if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc)
+        return { width: b.readUInt16BE(i + 7), height: b.readUInt16BE(i + 5) };
+      i += 2 + len;
+    }
+  }
+  return null;
+}
+/* ширина колонки гайда на компьютере (guides.css, .page-narrow) - для sizes у srcset */
+const GUIDE_IMG_SIZES = "(max-width: 900px) 100vw, 860px";
 const guides = [];
 if (fs.existsSync(GUIDES_DIR)) {
   for (const slug of fs.readdirSync(GUIDES_DIR)) {
@@ -139,6 +170,7 @@ if (fs.existsSync(GUIDES_DIR)) {
       fs.mkdirSync(path.join(OUT, "guide-img", slug), { recursive: true });
       imgs.forEach(f => fs.copyFileSync(path.join(GUIDES_DIR, slug, f), path.join(OUT, "guide-img", slug, f)));
     }
+    /* картинка -> адрес и размеры; уменьшенная копия <файл>-800w.webp (её делает build-guide-images.js) идёт в srcset */
     const image = src => {
       if (/^https?:\/\//i.test(src)) return src;
       const f = src.replace(/^\.\//, "");
@@ -146,9 +178,18 @@ if (fs.existsSync(GUIDES_DIR)) {
         console.warn("Предупреждение: guides/" + slug + ": нет картинки " + src);
         return null;
       }
-      return "/guide-img/" + slug + "/" + f;
+      const url = "/guide-img/" + slug + "/" + f;
+      const size = imageSize(path.join(GUIDES_DIR, slug, f));
+      if (!size) return url;
+      const small = f.replace(/\.\w+$/, "") + "-800w.webp";
+      const srcset =
+        size.width > 800 && imgs.includes(small)
+          ? "/guide-img/" + slug + "/" + small + " 800w, " + url + " " + size.width + "w"
+          : null;
+      return { src: url, width: size.width, height: size.height, srcset, sizes: GUIDE_IMG_SIZES };
     };
     const cover = GuideMD.firstImage(body);
+    const coverImg = cover ? image(cover) : null;
     guides.push({
       slug,
       title: meta.title,
@@ -156,7 +197,10 @@ if (fs.existsSync(GUIDES_DIR)) {
       date: meta.date || "",
       description: meta.description || GuideMD.excerpt(body, 160),
       html: GuideMD.render(body, { image, siteHost: "heart-of-the-zone.ru" }),
-      cover: cover ? image(cover) : null,
+      cover: coverImg && typeof coverImg === "object" ? coverImg.src : coverImg,
+      coverSize: coverImg && typeof coverImg === "object" ? coverImg : null,
+      /* обложка для соцсетей: og.jpg 1200×630 (build-guide-images.js), VK не показывает превью в WebP */
+      ogImage: imgs.includes("og.jpg") ? "/guide-img/" + slug + "/og.jpg" : null,
       authorId: meta.author ? playerIds[meta.author.toLowerCase()] : null
     });
   }
@@ -171,29 +215,44 @@ const authorMarkup = g =>
       : "<b>" + esc(g.author) + "</b>";
 function guidesListMarkup() {
   if (!guides.length) return '<p class="guides-empty">Пока здесь нет ни одного гайда, будьте первым!</p>';
-  return guides
-    .map(
-      g =>
-        '<a class="guide-card" href="/guide/' +
-        g.slug +
-        '">' +
-        (g.cover
-          ? '<span class="guide-card-img"><img src="' +
-            esc(g.cover) +
-            '" alt="" loading="lazy" decoding="async"></span>'
-          : '<span class="guide-card-img guide-card-noimg" aria-hidden="true"></span>') +
-        '<span class="guide-card-body"><b>' +
-        esc(g.title) +
-        "</b>" +
-        (g.description ? "<small>" + esc(g.description) + "</small>" : "") +
-        '<span class="guide-card-meta">' +
-        (g.author ? esc(g.author) : "") +
-        (g.author && g.date ? " · " : "") +
-        (g.date ? '<time datetime="' + esc(g.date) + '">' + ruDate(g.date) + "</time>" : "") +
-        "</span></span></a>"
-    )
-    .join("");
+  return (
+    guides
+      .map(
+        g =>
+          '<a class="guide-card" href="/guide/' +
+          g.slug +
+          '">' +
+          (g.cover
+            ? '<span class="guide-card-img"><img src="' +
+              esc(g.cover) +
+              '"' +
+              (g.coverSize && g.coverSize.srcset
+                ? ' srcset="' + esc(g.coverSize.srcset) + '" sizes="(max-width: 700px) 100vw, 420px"'
+                : "") +
+              (g.coverSize ? ' width="' + g.coverSize.width + '" height="' + g.coverSize.height + '"' : "") +
+              ' alt="" loading="lazy" decoding="async"></span>'
+            : '<span class="guide-card-img guide-card-noimg" aria-hidden="true"></span>') +
+          '<span class="guide-card-body"><b>' +
+          esc(g.title) +
+          "</b>" +
+          (g.description ? "<small>" + esc(g.description) + "</small>" : "") +
+          '<span class="guide-card-meta">' +
+          (g.author ? esc(g.author) : "") +
+          (g.author && g.date ? " · " : "") +
+          (g.date ? '<time datetime="' + esc(g.date) + '">' + ruDate(g.date) + "</time>" : "") +
+          "</span></span></a>"
+      )
+      .join("") + GUIDE_INVITE
+  );
 }
+/* последняя карточка списка - приглашение написать свой гайд (открывает форму, как кнопка «Отправить свой гайд») */
+const GUIDE_INVITE =
+  '<a class="guide-card guide-card-invite" href="#send">' +
+  '<span class="guide-card-img guide-card-invite-img" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
+  '<span class="guide-card-body"><b>Напишите свой гайд</b>' +
+  "<small>Поделитесь опытом - после проверки гайд появится здесь с вашей подписью. Идеи: «Как пройти Болота», " +
+  "«Билд для новичка», «Где копить жетоны на босса».</small>" +
+  '<span class="guide-card-meta">Открыть форму →</span></span></a>';
 
 /* ---------- 3D главной ----------
    src/home-3d.js - маленький загрузчик; заставка (zone-intro.js), живой фон (zone-bg.js) и общий кусок three.js
@@ -299,7 +358,7 @@ function runPageScripts(htmlSrc) {
   const sandbox = { document, console };
   sandbox.window = sandbox;
   vm.createContext(sandbox);
-  for (const m of htmlSrc.matchAll(/<script src="([^"]+)"><\/script>/g)) {
+  for (const m of htmlSrc.matchAll(/<script src="([^"]+)"(?: defer)?><\/script>/g)) {
     vm.runInContext(fs.readFileSync(path.join(ROOT, m[1]), "utf8"), sandbox, { filename: m[1] });
   }
   return els;
@@ -332,20 +391,37 @@ const PRERENDER = {
   /* «Что нового?» на главной уходит в HTML готовым, чтобы был виден сразу и поисковикам */
   "index.html": html => fill(html, "homeNews", runScripts(["changelog.js"]).homeNews.innerHTML),
   "info.html": (html, els) => {
-    html = fill(html, "infoTabs", els.infoTabs.innerHTML, ' data-view="' + els.infoTabs.dataset.view + '"');
+    /* содержимое разделов в метках <!--sec:…-->: на странице каждого раздела в HTML остаётся только его раздел
+       (см. INFO_SECTIONS ниже), остальные дорисовывает скрипт при переключении */
+    const mark = (k, inner) => "<!--sec:" + k + "-->" + inner + "<!--/sec:" + k + "-->";
+    html = fill(
+      html,
+      "infoTabs",
+      mark("levels", els.infoTabs.innerHTML),
+      ' data-view="' + els.infoTabs.dataset.view + '"'
+    );
     html = fill(
       html,
       "infoGroups",
-      els.infoGroups.innerHTML,
+      mark("levels", els.infoGroups.innerHTML),
       ' data-active="' + els.infoGroups.dataset.active + '" data-view="' + els.infoGroups.dataset.view + '"'
     );
-    html = fill(html, "tasksRoot", els.tasksRoot.innerHTML);
-    return fill(html, "bossesRoot", els.bossesRoot.innerHTML);
+    html = fill(html, "tasksRoot", mark("tasks", els.tasksRoot.innerHTML));
+    return fill(html, "bossesRoot", mark("bosses", els.bossesRoot.innerHTML));
   },
   /* у рейтинга в HTML уходит стартовая вкладка; остальные рисует JS по клику */
   "top100.html": (html, els) => {
     html = fill(html, "top100Tabs", els.top100Tabs.innerHTML);
     html = fill(html, "top100TableWrap", els.top100TableWrap.innerHTML);
+    /* период и отряды тоже сразу в HTML: если их дорисовывать скриптом, таблица под ними сдвигается (CLS) */
+    html = fill(html, "top100Factions", els.top100Factions.innerHTML);
+    html = fill(html, "top100FactionSummary", els.top100FactionSummary.textContent);
+    if (!els.top100Period.hidden) {
+      html = fill(html, "top100PeriodBtns", els.top100PeriodBtns.innerHTML);
+      html = fill(html, "top100PeriodRange", els.top100PeriodRange.innerHTML);
+      html = html.replace(/(id="top100Period"[^>]*?) hidden>/, "$1>");
+      if (els.top100PeriodBtns.hidden) html = html.replace('id="top100PeriodBtns"', 'id="top100PeriodBtns" hidden');
+    }
     return fill(html, "top100Updated", els.top100Updated.textContent);
   }
 };
@@ -458,6 +534,22 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".css"))) {
   fs.writeFileSync(file, css);
 }
 
+/* ---------- PWA: manifest и service worker ----------
+   На каждую страницу - ссылка на manifest.webmanifest и sw-register.js (регистрирует sw.js). В исходных html их нет,
+   чтобы не повторять в каждом файле; версии ?v= они получают ниже вместе со всеми. Сам sw.js собирается в конце */
+function pwaTags(html, from) {
+  if (!html.includes('rel="manifest"')) {
+    const tag = '<link rel="manifest" href="/manifest.webmanifest">\n';
+    const icon = /(<link rel="apple-touch-icon"[^>]*>\n?)/;
+    html = icon.test(html) ? html.replace(icon, "$1" + tag) : html.replace("</head>", tag + "</head>");
+  }
+  if (!html.includes("sw-register.js")) {
+    if (!html.includes("</body>")) throw new Error("PWA: в " + from + " нет </body>");
+    html = html.replace("</body>", '<script src="/sw-register.js" defer></script></body>');
+  }
+  return html;
+}
+
 /* ---------- html ---------- */
 let pages = 0;
 for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
@@ -466,10 +558,17 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
   /* обработчику с одним аргументом скрипты страницы не нужны - он сам решает, что прогнать */
   if (PRERENDER[name])
     html = PRERENDER[name].length > 1 ? PRERENDER[name](html, runPageScripts(html)) : PRERENDER[name](html);
-  html = html
+  html = pwaTags(html, name)
     .replace(/(<link\b[^>]*?\shref=")([^"]+)(")/g, (m, a, u, b) => a + version(u, name) + b)
     .replace(/(<script\b[^>]*?\ssrc=")([^"]+)(")/g, (m, a, u, b) => a + version(u, name) + b)
-    .replace(/(<img\b[^>]*?\ssrc=")(\/assets\/[^"]+)(")/g, (m, a, u, b) => a + version(u, name) + b);
+    .replace(/(<img\b[^>]*?\ssrc=")(\/(?:assets|guide-img)\/[^"]+)(")/g, (m, a, u, b) => a + version(u, name) + b)
+    .replace(/(<img\b[^>]*?\ssrcset=")([^"]+)(")/g, (m, a, list, b) => {
+      const out = list.split(/,\s*/).map(c => {
+        const [u, w] = c.trim().split(/\s+/);
+        return (u.startsWith("/") ? version(u, name) : u) + (w ? " " + w : "");
+      });
+      return a + out.join(", ") + b;
+    });
   fs.writeFileSync(path.join(OUT, name), html);
   pages++;
   console.log(name.padEnd(16), (before / 1024).toFixed(1) + " КБ -> " + (html.length / 1024).toFixed(1) + " КБ");
@@ -484,18 +583,24 @@ const INFO_SECTIONS = {
   tasks: {
     file: "info-tasks.html",
     name: "Задания",
+    h1: "Задания: награды локаций",
     title: "Сердце Зоны - Задания: награды локаций и калькулятор энергии",
     desc: "Задания всех локаций игры «Сердце Зоны»: этапы и число повторов, награда за прохождение, итог и выгода на единицу энергии, калькулятор энергии и энергетиков."
   },
   bosses: {
     file: "info-bosses.html",
     name: "Боссы",
+    h1: "Боссы: здоровье и награды",
     title: "Сердце Зоны - Боссы: здоровье, ключи и награды",
     desc: "Все боссы игры «Сердце Зоны»: здоровье, сколько ключей нужно для боя, награды за победу и комплекты вещей, которые могут выпасть."
   }
 };
+/* в HTML раздела остаётся только его содержимое: три страницы не дублируют друг друга для поисковиков */
+const onlySection = (html, key) =>
+  html.replace(/<!--sec:(\w+)-->([\s\S]*?)<!--\/sec:\1-->/g, (m, k, inner) => (k === key ? inner : ""));
 {
   const base = fs.readFileSync(path.join(OUT, "info.html"), "utf8");
+  fs.writeFileSync(path.join(OUT, "info.html"), onlySection(base, "levels"));
   for (const [key, sec] of Object.entries(INFO_SECTIONS)) {
     const url = SITE + "/" + sec.file.replace(/\.html$/, "");
     const attr = s => esc(s);
@@ -512,26 +617,59 @@ const INFO_SECTIONS = {
         /("item": "https:\/\/heart-of-the-zone\.ru\/info"\})\]/,
         '$1, {"@type": "ListItem", "position": 3, "name": "' + sec.name + '", "item": "' + url + '"}]'
       )
+      .replace(/(<h1 id="infoTitle">)[^<]*/, "$1" + attr(sec.h1))
       /* открытый раздел: кнопка и панель */
       .replace(
-        /<button type="button" class="top100-tab(?: active)?" data-section="(\w+)" aria-pressed="(?:true|false)"/g,
+        /<button type="button" class="top100-tab(?: active)?" data-section="(\w+)" role="tab" aria-selected="(?:true|false)"/g,
         (m, k) =>
           '<button type="button" class="top100-tab' +
           (k === key ? " active" : "") +
           '" data-section="' +
           k +
-          '" aria-pressed="' +
+          '" role="tab" aria-selected="' +
           (k === key) +
           '"'
       )
-      .replace(/<div data-section-panel="(\w+)"(?: hidden)?>/g, (m, k) =>
-        k === key ? '<div data-section-panel="' + k + '">' : '<div data-section-panel="' + k + '" hidden>'
+      .replace(/<div data-section-panel="(\w+)"([^>]*?)(?: hidden)?>/g, (m, k, rest) =>
+        k === key
+          ? '<div data-section-panel="' + k + '"' + rest + ">"
+          : '<div data-section-panel="' + k + '"' + rest + " hidden>"
       );
-    if (!html.includes('data-section="' + key + '" aria-pressed="true"'))
-      throw new Error(sec.file + ": не нашлась кнопка раздела " + key);
+    html = onlySection(html, key);
+    if (!html.includes('data-section="' + key + '" role="tab" aria-selected="true"') || !html.includes(sec.h1))
+      throw new Error(sec.file + ": не нашлась кнопка или заголовок раздела " + key);
     fs.writeFileSync(path.join(OUT, sec.file), html);
     pages++;
   }
+}
+
+/* ---------- /build: ссылка на билд ----------
+   Билд передаётся после # (его соцсети не видят), поэтому у ссылок на билд свой адрес /build с ироничным превью
+   «Смотри мой билд», а у самого калькулятора - обычное. Страница - копия калькулятора, закрыта от индексации
+   (canonical - /calculator); app.js после загрузки билда меняет адрес на /calculator */
+{
+  const BUILD_OG = {
+    title: "Смотри мой билд - Калькулятор урона «Сердце Зоны»",
+    desc: "Урон оружия с учётом уровня, снаряжения и талантов. Открой билд, сравни со своим и попробуй переплюнуть.",
+    image: SITE + "/assets/preview-build.jpg?v=" + fileHash("assets/preview-build.jpg"),
+    alt: "Я тут самый мощный сталкер! Билд в калькуляторе урона «Сердце Зоны»"
+  };
+  const html = fs
+    .readFileSync(path.join(OUT, "calculator.html"), "utf8")
+    .replace(/(<meta (?:property="og|name="twitter):title" content=")[^"]*/g, "$1" + esc(BUILD_OG.title))
+    .replace(/(<meta (?:property="og|name="twitter):description" content=")[^"]*/g, "$1" + esc(BUILD_OG.desc))
+    .replace(/(<meta (?:property="og|name="twitter):image:alt" content=")[^"]*/g, "$1" + esc(BUILD_OG.alt))
+    .replace(
+      /(<meta (?:property="og:image(?::secure_url)?|name="twitter:image|name="vk:image)" content="|<link rel="image_src" href=")[^"]*/g,
+      "$1" + BUILD_OG.image
+    )
+    .replace(/(<meta property="og:image:height" content=")[^"]*/, "$1630")
+    .replace(/(<meta property="og:url" content=")[^"]*/, "$1" + SITE + "/build")
+    .replace(/(<meta name="viewport"[^>]*>\n)/, '$1<meta name="robots" content="noindex, follow">\n');
+  if (!html.includes(BUILD_OG.title) || !html.includes("noindex"))
+    throw new Error("build.html: не удалось подставить превью");
+  fs.writeFileSync(path.join(OUT, "build.html"), html);
+  pages++;
 }
 
 /* ---------- страницы гайдов ----------
@@ -543,13 +681,19 @@ if (guides.length) {
     .readFileSync(path.join(OUT, "guides.html"), "utf8")
     .replace(/<meta name="robots"[^>]*>\n?/, "")
     .replace(/(\s(?:href|src)=")(?![a-z][a-z0-9+.-]*:|\/|#)/gi, "$1/")
-    .replace(/<script src="\/(?:guide-md|guides-config|guide-submit)\.js[^"]*"><\/script>/g, "");
+    .replace(/<script src="\/(?:guide-md|guides-config|guide-submit)\.js[^"]*"(?: defer)?><\/script>/g, "");
   fs.mkdirSync(path.join(OUT, "guide"), { recursive: true });
   for (const g of guides) {
     const url = SITE + "/guide/" + g.slug;
     const title = g.title + " - гайд «Сердце Зоны»";
     const desc = g.description || "Гайд по игре «Сердце Зоны»" + (g.author ? " от " + g.author : "");
-    const img = g.cover ? (/^https?:/.test(g.cover) ? g.cover : SITE + g.cover) : null;
+    const img = g.ogImage
+      ? SITE + version(g.ogImage, "guide/" + g.slug)
+      : g.cover
+        ? /^https?:/.test(g.cover)
+          ? g.cover
+          : SITE + g.cover
+        : null;
     const ld = {
       "@context": "https://schema.org",
       "@type": "Article",
@@ -575,13 +719,19 @@ if (guides.length) {
         "</head>",
         '<script type="application/ld+json">' + JSON.stringify(ld).replace(/</g, "\\u003c") + "</script>\n</head>"
       );
-    /* своя обложка: размеры общей картинки к ней не подходят */
-    if (img)
+    /* своя обложка: og.jpg 1200×630 - с размерами, у картинки из текста размеры неизвестны */
+    if (img) {
       html = html
         .replace(/(<meta property="og:image" content=")[^"]*/, "$1" + esc(img))
         .replace(/<meta property="og:image:(?:width|height)"[^>]*>\n?/g, "");
+      if (g.ogImage)
+        html = html.replace(
+          /(<meta property="og:image" content="[^"]*">\n?)/,
+          '$1<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n'
+        );
+    }
     const main =
-      '<main class="content info-content guide-page">\n' +
+      '<main class="content info-content guide-page" id="main">\n' +
       '<a class="guide-back" href="/guides"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 4l-8 8 8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Все гайды</a>\n' +
       '<article class="result-panel guide-article">\n<h1>' +
       esc(g.title) +
@@ -592,7 +742,7 @@ if (guides.length) {
       (g.date ? '<time datetime="' + esc(g.date) + '">' + ruDate(g.date) + "</time>" : "") +
       "</p>\n" +
       '<div class="guide-body">\n' +
-      g.html.replace(/(<img src=")(\/guide-img\/[^"]+)"/g, (m, a, u) => a + version(u, "guide/" + g.slug) + '"') +
+      g.html.replace(/\/guide-img\/[^"\s,?]+/g, u => version(u, "guide/" + g.slug)) +
       "\n</div>\n</article>\n" +
       '<p class="guide-write">Знаете, как пройти что-то лучше? <a href="/guides#send">Отправьте свой гайд</a></p>\n</main>';
     html = html.replace(/<main\b[\s\S]*?<\/main>/, () => main);
@@ -720,5 +870,83 @@ function addCsp(file) {
     else if (e.name.endsWith(".html")) addCsp(f);
   }
 })(OUT);
+
+/* ---------- service worker ----------
+   dist/sw.js = sw.js из корня + версия сборки и список «оболочки»: основные страницы, страница offline и всё,
+   что они подключают с ?v= (css, js, шрифты, картинки). Версия - хэш этих адресов и самих страниц, поэтому любая
+   правка сайта даёт новый sw.js: браузер ставит его и удаляет старый кэш оболочки. Картинки боссов входят в оболочку;
+   фоны тем, видео боссов, картинки гайдов и 3D главной - нет (тяжёлые), они кэшируются при первом показе */
+{
+  const SHELL_PAGES = [
+    "index.html",
+    "info.html",
+    "info-tasks.html",
+    "info-bosses.html",
+    "calculator.html",
+    "build.html",
+    "top100.html",
+    "guides.html",
+    "compare.html",
+    "offline.html"
+  ];
+  const urls = new Set(),
+    h = crypto.createHash("sha1");
+  for (const name of SHELL_PAGES) {
+    const file = path.join(OUT, name);
+    if (!fs.existsSync(file)) throw new Error("service worker: нет страницы " + name);
+    const html = fs.readFileSync(file, "utf8");
+    h.update(html);
+    urls.add(name === "index.html" ? "/" : "/" + name.replace(/\.html$/, ""));
+    for (const m of html.matchAll(/<(?:link|script|img)\b[^>]*?\s(?:href|src)="([^"]+\?v=[^"]+)"/g))
+      if (!/^([a-z]+:)?\/\//i.test(m[1])) urls.add(m[1].startsWith("/") ? m[1] : "/" + m[1]);
+  }
+  /* картинки и шрифты из стилей оболочки (иконки оружия, woff2), кроме фонов тем и запасных ttf/woff */
+  for (const u of [...urls].filter(x => /\.css\?/.test(x))) {
+    const css = fs.readFileSync(path.join(OUT, u.split("?")[0].slice(1)), "utf8");
+    for (const m of css.matchAll(/url\((["']?)([^"')]+\?v=[^"')]+)\1\)/g))
+      if (!/^([a-z]+:)?\/\//i.test(m[2]) && !/(^|\/)assets\/bg-|\.(ttf|woff)\?/.test(m[2]))
+        urls.add(m[2].startsWith("/") ? m[2] : "/" + m[2]);
+  }
+  /* картинки, которые страницы оболочки подключают без ?v (иконки наград, постеры и вещи боссов, ~0,2 МБ),
+     и все картинки раздела «Боссы»; видео боссов в оболочку не входят */
+  for (const name of SHELL_PAGES)
+    for (const m of fs
+      .readFileSync(path.join(OUT, name), "utf8")
+      .matchAll(/\s(?:src|poster)="\/?(assets\/[^"?#]+\.(?:webp|png|jpe?g|svg))"/g))
+      if (fs.existsSync(path.join(OUT, m[1]))) urls.add("/" + m[1]);
+  for (const f of fs
+    .readdirSync(path.join(OUT, "assets", "bosses"))
+    .filter(f => /\.webp$/.test(f))
+    .sort())
+    urls.add("/assets/bosses/" + f);
+  const list = [...urls];
+  h.update(list.join("\n"));
+  /* содержимое картинок без ?v тоже входит в версию: заменили картинку - обновится и кэш */
+  list
+    .filter(u => !u.includes("?") && /\.\w+$/.test(u))
+    .forEach(u => h.update(fs.readFileSync(path.join(OUT, u.slice(1)))));
+  const src = fs.readFileSync(path.join(ROOT, "sw.js"), "utf8");
+  if (!src.includes('"__SW_VERSION__"') || !src.includes('"__SW_PRECACHE__"'))
+    throw new Error("service worker: в sw.js нет меток __SW_VERSION__ / __SW_PRECACHE__");
+  const code = src
+    .replace('"__SW_VERSION__"', JSON.stringify(h.digest("hex").slice(0, 10)))
+    .replace('"__SW_PRECACHE__"', JSON.stringify(list));
+  fs.writeFileSync(
+    path.join(OUT, "sw.js"),
+    esbuild.transformSync(code, {
+      loader: "js",
+      minify: true,
+      target: "es2020",
+      legalComments: "none",
+      charset: "utf8"
+    }).code
+  );
+  const kb = list.reduce((a, u) => {
+    const f = path.join(OUT, u.split("?")[0] === "/" ? "index.html" : u.split("?")[0].slice(1));
+    const real = fs.existsSync(f) ? f : f + ".html";
+    return a + (fs.existsSync(real) ? fs.statSync(real).size : 0);
+  }, 0);
+  console.log("Service worker: оболочка " + list.length + " файлов, " + (kb / 1024).toFixed(0) + " КБ");
+}
 
 console.log("Готово: " + pages + " стр. в " + path.relative(process.cwd(), OUT));

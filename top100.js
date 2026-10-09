@@ -150,6 +150,8 @@ function metricDeltaMarkup(nick, tabKey) {
   );
 }
 
+/* «давно не заходил»: fetch-players.js ставит отметку, если игрок не заходил дольше OFFLINE_DAYS (5) дней */
+const INACTIVE_TITLE = "не заходил в игру больше 5 дней";
 /* rank - реальное место. plain - без медалей и подсветки (при сортировке по уровню места вразброс) */
 function top100RowMarkup(row, rank, plain, tabKey) {
   const [nick, level, value, inactive] = row;
@@ -157,7 +159,7 @@ function top100RowMarkup(row, rank, plain, tabKey) {
   return (
     '<tr class="' +
     (podium ? "top100-podium top100-podium-" + rank : "") +
-    (inactive ? " top100-inactive" : "") +
+    (inactive ? ' top100-inactive" title="' + INACTIVE_TITLE : "") +
     '"><td class="top100-rank"><div class="top100-rank-in">' +
     (plain ? '<span class="top100-rank-num">' + rank + "</span>" : rankCell(rank)) +
     rankMoveMarkup(nick, tabKey) +
@@ -167,7 +169,11 @@ function top100RowMarkup(row, rank, plain, tabKey) {
     escAttr(nick) +
     '" title="Карточка игрока">' +
     esc(nick) +
-    "</button></td><td>" +
+    "</button>" +
+    (inactive
+      ? '<span class="t100-off" aria-hidden="true">💤</span><span class="sr-only">, ' + INACTIVE_TITLE + "</span>"
+      : "") +
+    "</td><td>" +
     level +
     '</td><td class="top100-value">' +
     fmt(value) +
@@ -292,6 +298,10 @@ function renderTop100Tabs() {
     t =>
       '<button type="button" class="top100-tab' +
       (t.key === currentTop100Tab ? " active" : "") +
+      '" role="tab" aria-selected="' +
+      (t.key === currentTop100Tab) +
+      '" aria-controls="top100TableWrap" tabindex="' +
+      (t.key === currentTop100Tab ? 0 : -1) +
       '" data-top100-tab="' +
       t.key +
       '" style="--accent:' +
@@ -397,16 +407,18 @@ function shortStamp(s) {
   return m ? { day: m[1], time: m[2] } : { day: String(s), time: "" };
 }
 
-/* поиск, период и фильтр по отрядам вставляются между вкладками и таблицей один раз, top100.html менять не нужно */
+/* поиск, период и фильтр по отрядам стоят в top100.html (место под них занято сразу, таблица не прыгает);
+   если разметки нет (старая страница), вставляются между вкладками и таблицей */
+const SHELL_HTML =
+  '<div class="t100-tools"><div class="t100-period" id="top100Period" role="group" aria-label="За какой период показывать изменения" hidden><span class="t100-period-title">Изменения</span><div class="t100-period-btns" id="top100PeriodBtns"></div><p class="t100-period-range" id="top100PeriodRange" aria-live="polite"></p></div>' +
+  '<label class="t100-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="top100Search" type="search" placeholder="Найти ник" autocomplete="off" aria-label="Поиск по нику"></label>' +
+  '<button type="button" class="t100-factions-toggle" id="top100FactionsToggle" aria-expanded="false" aria-controls="top100Factions">Отряды: <b id="top100FactionSummary">Все</b><svg class="t100-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
+  '<div class="t100-factions" id="top100Factions"></div></div>';
+let shellReady = false;
 function ensureShell() {
-  if ($("top100Search")) return;
-  $("top100Tabs").insertAdjacentHTML(
-    "afterend",
-    '<div class="t100-tools"><div class="t100-period" id="top100Period" role="group" aria-label="За какой период показывать изменения" hidden><span class="t100-period-title">Изменения</span><div class="t100-period-btns" id="top100PeriodBtns"></div><p class="t100-period-range" id="top100PeriodRange" aria-live="polite"></p></div>' +
-      '<label class="t100-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="top100Search" type="search" placeholder="Поиск по нику" autocomplete="off" aria-label="Поиск по нику"></label>' +
-      '<button type="button" class="t100-factions-toggle" id="top100FactionsToggle" aria-expanded="false" aria-controls="top100Factions">Отряды: <b id="top100FactionSummary">Все</b><svg class="t100-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
-      '<div class="t100-factions" id="top100Factions"></div></div>'
-  );
+  if (shellReady) return;
+  shellReady = true;
+  if (!$("top100Search")) $("top100Tabs").insertAdjacentHTML("afterend", SHELL_HTML);
   $("top100Search").addEventListener("input", e => {
     top100Query = e.target.value;
     renderTop100Table();

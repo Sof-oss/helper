@@ -14,7 +14,7 @@
 <meta property="og:title" content="Сердце Зоны - Информация">
 <meta property="og:description" content="Стоимость улучшения талантов, опыт ПДА и персонажа по уровням, награды за задания по локациям, здоровье и награды боссов для игры «Сердце Зоны».">
 <meta property="og:url" content="https://heart-of-the-zone.ru/info">
-<meta property="og:image" content="https://heart-of-the-zone.ru/assets/preview.jpg?v=3">
+<meta property="og:image" content="https://heart-of-the-zone.ru/assets/preview-info.jpg?v=1">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="628">
 <meta property="og:image:alt" content="Сердце Зоны - Информация">
@@ -39,19 +39,20 @@
 <!-- @include header active="/info" -->
 
 
-<main class="content info-content">
-<div class="result-title"><svg class="target-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="2.5" width="13" height="19" rx="2.2"/><rect x="8" y="5.4" width="8" height="7.6" rx=".8"/><path d="m9.5 10.9 1.7-2.1 1.4 1.3 1.9-2.5"/><path d="M8.8 16.4h.01M12 16.4h.01M15.2 16.4h.01" stroke-width="2.3"/><path d="M9 19h6"/></g></svg><h1>Информация</h1></div>
+<main class="content info-content" id="main">
+<div class="result-title"><svg class="target-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="2.5" width="13" height="19" rx="2.2"/><rect x="8" y="5.4" width="8" height="7.6" rx=".8"/><path d="m9.5 10.9 1.7-2.1 1.4 1.3 1.9-2.5"/><path d="M8.8 16.4h.01M12 16.4h.01M15.2 16.4h.01" stroke-width="2.3"/><path d="M9 19h6"/></g></svg><div class="result-title-text"><span class="result-kicker">Информация</span><h1 id="infoTitle">Прогресс по уровням</h1></div></div>
 <section class="result-panel">
   <noscript><p class="damage-footnote">Разделы «Задания» и «Боссы» открываются только с включённым JavaScript.</p></noscript>
   <!-- разделы страницы; на телефоне внутри «Прогресса по уровням» свои вкладки (#infoTabs) -->
-  <div class="info-sections" id="infoSections">
-    <button type="button" class="top100-tab active" data-section="levels" aria-pressed="true" style="--accent:#54bfff">Прогресс по уровням</button>
-    <button type="button" class="top100-tab" data-section="tasks" aria-pressed="false" style="--accent:#ffb74d">Задания</button>
-    <button type="button" class="top100-tab" data-section="bosses" aria-pressed="false" style="--accent:#ff6b6f">Боссы</button>
+  <!-- цвет раздела - только у открытой вкладки (info-tasks.css), неактивные одного нейтрального цвета -->
+  <div class="info-sections" id="infoSections" role="tablist" aria-label="Разделы">
+    <button type="button" class="top100-tab active" data-section="levels" role="tab" aria-selected="true" aria-controls="infoPanelLevels">Прогресс по уровням</button>
+    <button type="button" class="top100-tab" data-section="tasks" role="tab" aria-selected="false" aria-controls="infoPanelTasks">Задания</button>
+    <button type="button" class="top100-tab" data-section="bosses" role="tab" aria-selected="false" aria-controls="infoPanelBosses">Боссы</button>
   </div>
 
-  <div data-section-panel="levels">
-    <div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></span><b>Прогресс по уровням</b></div>
+  <div data-section-panel="levels" id="infoPanelLevels" role="tabpanel">
+    <div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></span><h2><b>Прогресс по уровням</b></h2></div>
     <p class="info-lead">Стоимость улучшения таланта на уровень, опыт ПДА и опыт персонажа по уровням</p>
     <!-- отметка полученных уровней по данным калькулятора, заполняет info.js -->
     <p class="info-progress" id="infoProgress"></p>
@@ -66,14 +67,14 @@
     <div class="info-groups" id="infoGroups"></div>
   </div>
 
-  <div data-section-panel="tasks" hidden>
-    <div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></span><b>Задания</b></div>
+  <div data-section-panel="tasks" id="infoPanelTasks" role="tabpanel" hidden>
+    <div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></span><h2><b>Задания</b></h2></div>
     <p class="info-lead">Награды и затраты энергии по этапам заданий на каждой локации. Выгода - сколько ресурса приходится на единицу затраченной энергии</p>
     <div id="tasksRoot"></div>
   </div>
 
-  <div data-section-panel="bosses" hidden>
-    <div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></span><b>Боссы</b></div>
+  <div data-section-panel="bosses" id="infoPanelBosses" role="tabpanel" hidden>
+    <div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></span><h2><b>Боссы</b></h2></div>
     <p class="info-lead">Здоровье боссов, что нужно для боя, награды за победу и комплекты вещей, которые могут выпасть</p>
     <div id="bossesRoot"></div>
   </div>
@@ -82,5 +83,5 @@
 
 <!-- @include footer -->
 
-<script src="ui.js"></script><script src="info-data.js"></script><script src="info.js"></script><script src="tasks-data.js"></script><script src="info-tasks.js"></script><script src="info-bosses.js"></script><script src="nav.js"></script>
-  <script src="tour.js"></script></body></html>
+<script src="ui.js" defer></script><script src="info-data.js" defer></script><script src="info.js" defer></script><script src="tasks-data.js" defer></script><script src="info-tasks.js" defer></script><script src="info-bosses.js" defer></script><script src="nav.js" defer></script>
+  <script src="tour.js" defer></script></body></html>

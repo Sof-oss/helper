@@ -128,13 +128,6 @@ body::before {
   outline-offset: 2px;
 }
 
-/* ширина контейнера одна на всех страницах: 1400px.
-   Раньше у калькулятора (есть .page) она была 1600px, и шапка брала ту же ширину -
-   из-за этого при переходе на калькулятор и обратно логотип и меню уезжали на 100px */
-:root {
-  --wrap: 1400px;
-}
-
 /* ===== Шапка ===== */
 /* фон шапки на всю ширину, а содержимое в том же контейнере 1400px, что и страницы, чтобы логотип совпадал с краем контента */
 .header-inner {
@@ -207,9 +200,9 @@ body::before {
   font-weight: 100 800;
   font-style: normal;
   font-display: swap;
+  /* файл урезан до латиницы, цифр и знаков, которые встречаются на сайте (40 -> 17 КБ) */
   unicode-range:
-    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC,
-    U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    U+0020-007E, U+00A0-00BF, U+00D7, U+00F7, U+2010-2027, U+2030-203A, U+2191, U+2193, U+2212, U+FEFF, U+FFFD;
 }
 @font-face {
   font-family: "Caveat";
@@ -218,11 +211,12 @@ body::before {
   font-style: normal;
   font-display: swap;
 }
+/* шрифт логотипа урезан до букв «Сердце Зоны» (4 КБ вместо 41 КБ): им набраны только логотип и заголовок главной.
+   Полный шрифт лежит в previews/fonts/ - для картинок-превью, на сайт не попадает.
+   Нужны другие буквы - пересобрать: pyftsubset previews/fonts/graffiti-stalker.ttf --text="…" --flavor=woff2 */
 @font-face {
   font-family: "Graffiti1C";
-  src:
-    url("assets/fonts/graffiti-stalker.woff") format("woff"),
-    url("assets/fonts/graffiti-stalker.ttf") format("truetype");
+  src: url("assets/fonts/graffiti-logo.woff2") format("woff2");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -303,12 +297,12 @@ body::before {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
+  font-size: var(--fs-md);
   color: #cbd9e5;
   margin-bottom: 8px;
 }
 .side-title span {
-  font-size: 20px;
+  font-size: var(--fs-xl);
   color: #dbe9f6;
   width: 18px;
   text-align: center;
@@ -321,7 +315,7 @@ body::before {
   color: #dbe9f6;
 }
 .side-title .clothes-icon {
-  font-size: 16px;
+  font-size: var(--fs-lg);
   line-height: 18px;
   width: 18px;
   height: 18px;
@@ -357,11 +351,6 @@ body::before {
   font-variant-numeric: tabular-nums;
   -moz-appearance: textfield;
 }
-.level-row input::-webkit-inner-spin-button,
-.level-row input::-webkit-outer-spin-button {
-  appearance: none;
-  margin: 0;
-}
 
 .talent-open {
   width: 100%;
@@ -385,14 +374,14 @@ body::before {
   text-align: center;
 }
 .talent-open b {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: #73c8ff;
   font-weight: 600;
 }
 .talent-summary {
   margin-top: 6px;
   color: #71889b;
-  font-size: 10px;
+  font-size: var(--fs-xs);
   text-align: right;
 }
 
@@ -412,10 +401,10 @@ body::before {
   padding-top: 9px;
   border-top: 1px solid #193246;
   color: #cbd9e5;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 .items-divider span {
-  font-size: 16px;
+  font-size: var(--fs-lg);
   color: #dbe9f6;
   width: 18px;
   text-align: center;
@@ -430,7 +419,7 @@ body::before {
   gap: 9px;
   min-height: 22px;
   color: #a9baca;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   cursor: pointer;
 }
 .option input {
@@ -455,7 +444,7 @@ body::before {
   border: 1px solid #6cc8ff;
   background: linear-gradient(180deg, #2196f3, #0d5aa7);
   color: #f2f9ff;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   font-style: normal;
   line-height: 1;
@@ -478,12 +467,6 @@ body::before {
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
   transform: translateY(-1px);
 }
-.gear-info-btn:active {
-  transform: translateY(0);
-  box-shadow:
-    0 0 8px rgba(84, 191, 255, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-}
 
 .side-actions {
   padding: 10px 14px 14px;
@@ -496,16 +479,14 @@ body::before {
   gap: 8px;
   padding: 0 4px;
   color: #a9baca;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   cursor: pointer;
 }
 .select-all input {
   accent-color: #54bfff;
   cursor: pointer;
 }
-.select-all span {
-  user-select: none;
-}
+
 /* кнопки-«клавиши», при нажатии проседают */
 .side-btn {
   height: 42px;
@@ -514,7 +495,7 @@ body::before {
   border-radius: 6px;
   background: linear-gradient(180deg, #123049 0%, #0a1c2b 100%);
   color: #c3d4e2;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 700;
   letter-spacing: 0.3px;
   text-transform: uppercase;
@@ -563,7 +544,7 @@ svg.target-icon {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 16px;
+  font-size: var(--fs-lg);
   color: #cbd9e5;
   margin-bottom: 9px;
 }
@@ -577,7 +558,7 @@ svg.target-icon {
 .damage-footnote {
   margin: 10px 2px 0;
   color: #71889b;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   line-height: 1.4;
 }
 
@@ -628,7 +609,7 @@ svg.target-icon {
 }
 .damage-card h3 {
   margin: 1px 0 9px;
-  font-size: 16px;
+  font-size: var(--fs-lg);
   color: #dce7f0;
 }
 .damage-card strong {
@@ -651,12 +632,12 @@ svg.target-icon {
   gap: 2px;
 }
 .bd-cell small {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #7f95a8;
 }
 .bd-cell em {
   font-style: normal;
-  font-size: 16px;
+  font-size: var(--fs-lg);
   font-weight: 600;
   color: #a9bed0;
   font-variant-numeric: tabular-nums;
@@ -681,7 +662,7 @@ svg.target-icon {
   background: rgba(255, 90, 95, 0.12);
   border: 1px solid rgba(255, 90, 95, 0.35);
   color: #ffb3b5;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
@@ -692,7 +673,7 @@ svg.target-icon {
 .crit-chip-label {
   color: #ff5a5f;
   text-transform: uppercase;
-  font-size: 10px;
+  font-size: var(--fs-xs);
   letter-spacing: 0.4px;
   font-weight: 700;
 }
@@ -708,7 +689,7 @@ svg.target-icon {
   right: 14px;
   font-style: normal;
   font-weight: 700;
-  font-size: 14px;
+  font-size: var(--fs-md);
   opacity: 0;
   transform: translateY(4px);
   transition:
@@ -735,12 +716,12 @@ svg.target-icon {
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-variant-numeric: tabular-nums;
 }
 .data-table th {
   color: #7c93a6;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   text-align: right;
   padding: 5px 8px;
@@ -781,11 +762,11 @@ svg.target-icon {
 }
 .extra-grid small {
   color: #8196a9;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   line-height: 1.2;
 }
 .extra-grid strong {
-  font-size: 20px;
+  font-size: var(--fs-xl);
   color: #edf5fc;
   font-variant-numeric: tabular-nums;
 }
@@ -888,16 +869,6 @@ svg.target-icon {
   line-height: 1.55;
   flex: 1;
 }
-.home-card-badge {
-  margin-left: 8px;
-  padding: 2px 8px;
-  background: rgba(159, 220, 159, 0.14);
-  border: 1px solid rgba(159, 220, 159, 0.35);
-  color: #9fdc9f;
-  font-size: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
 .home-card-cta {
   display: inline-flex;
   align-items: center;
@@ -920,7 +891,7 @@ svg.target-icon {
 .info-lead {
   margin: 0 2px 14px;
   color: #8196a9;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   line-height: 1.5;
 }
 .info-groups {
@@ -993,7 +964,7 @@ svg.target-icon {
 }
 .info-table th {
   padding: 6px 6px 8px;
-  font-size: 10.5px;
+  font-size: var(--fs-xs);
   letter-spacing: 0.5px;
   text-transform: uppercase;
   border-bottom: 1px solid #23475f;
@@ -1002,7 +973,7 @@ svg.target-icon {
 }
 .info-table td {
   padding: 5px 6px;
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   border-top: 1px solid #12222f;
   text-align: center;
@@ -1029,7 +1000,7 @@ svg.target-icon {
 .info-notes {
   margin: 12px 0 0;
   padding-left: 0;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   line-height: 1.7;
   list-style: none;
   text-align: center;
@@ -1142,7 +1113,7 @@ svg.target-icon {
   height: 19px;
   flex: 0 0 19px;
   border-radius: 50%;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   line-height: 1;
   color: #0a1017;
 }
@@ -1172,18 +1143,6 @@ svg.target-icon {
 }
 
 /* ушедшие из отряда - красным, как delta.down и crit-chip */
-.top100-inactive td {
-  color: #ff9498;
-  font-style: italic;
-}
-.top100-inactive .top100-rank-num {
-  color: #ff9498;
-}
-.top100-footnote {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
 
 /* ===== Уведомление ===== */
 .toast {
@@ -1263,6 +1222,46 @@ svg.target-icon {
 .talent-detail-modal:focus {
   outline: none;
 }
+/* заголовок страницы с надзаголовком раздела сайта («Информация» над «Прогресс по уровням») */
+.result-title-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.result-kicker {
+  color: var(--accent-2);
+  font-family: var(--f-display);
+  font-size: var(--fs-sm);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+/* заголовок секции - h2 для структуры страницы (h1 → h2 → h3), вид прежний: текст внутри <b> */
+.section-heading h2 {
+  display: inline;
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+/* «К содержимому»: первая ссылка страницы для клавиатуры, видна только в фокусе (partials/header.html) */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 5000;
+  padding: 10px 16px;
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  background: #070b10;
+  color: #fff;
+  font-size: var(--fs-md);
+  text-decoration: none;
+  transform: translateY(-150%);
+}
+.skip-link:focus {
+  transform: none;
+}
 .sr-only {
   position: absolute;
   width: 1px;
@@ -1323,7 +1322,7 @@ svg.target-icon {
 .talent-game-header p {
   margin: 5px 0 0;
   color: #858b8f;
-  font-size: 12px;
+  font-size: var(--fs-xs);
 }
 .talent-game-actions {
   display: flex;
@@ -1335,7 +1334,7 @@ svg.target-icon {
   background: #151718;
   border: 1px solid #3b3f41;
   color: #aeb2b4;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 .talent-points b {
   color: #fff;
@@ -1374,21 +1373,6 @@ svg.target-icon {
     linear-gradient(90deg, rgba(72, 78, 84, 0.12) 1px, transparent 1px);
   background-size: 12px 12px;
   overflow: auto;
-}
-.talent-side-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-family: "Rubik", "Segoe UI", sans-serif;
-  font-size: 22px;
-  margin-bottom: 10px;
-}
-.talent-side-title b {
-  font:
-    600 13px "Segoe UI",
-    Arial,
-    sans-serif;
-  color: #aaa;
 }
 /* круговой индикатор очков талантов */
 .talent-gauge {
@@ -1445,7 +1429,7 @@ svg.target-icon {
 .talent-gauge-value small {
   margin-top: 4px;
   color: #8d9295;
-  font-size: 10px;
+  font-size: var(--fs-xs);
   letter-spacing: 0.5px;
 }
 .talent-side-stats {
@@ -1468,7 +1452,7 @@ svg.target-icon {
 }
 .talent-side-stats small {
   color: #777;
-  font-size: 11px;
+  font-size: var(--fs-xs);
 }
 .talent-last {
   border: 1px solid #34383a;
@@ -1479,14 +1463,14 @@ svg.target-icon {
 .talent-last small {
   display: block;
   color: #777;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   margin-bottom: 5px;
 }
 .talent-last-list {
   display: flex;
   flex-wrap: wrap;
   gap: 4px 12px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #aaa;
 }
 .talent-last-list b {
@@ -1526,7 +1510,7 @@ svg.target-icon {
   gap: 3px;
   padding: 12px 2px 14px;
   color: #777;
-  font-size: 12px;
+  font-size: var(--fs-xs);
 }
 .talent-branch-description b {
   font-size: 17px;
@@ -1534,7 +1518,7 @@ svg.target-icon {
 }
 .talent-side-hint {
   color: #777;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   line-height: 1.5;
   padding: 10px 2px 0;
   border-top: 1px solid #34383a;
@@ -1644,7 +1628,7 @@ svg.target-icon {
   padding-left: 12px;
   border-left: 1px solid #46494b;
   color: #8d9295;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 .td-desc {
   margin: 0 0 18px;
@@ -1654,7 +1638,7 @@ svg.target-icon {
 }
 .td-sec {
   margin: 0 0 8px;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 1.4px;
   text-transform: uppercase;
@@ -1669,14 +1653,14 @@ svg.target-icon {
 .td-effect small {
   display: block;
   margin-bottom: 5px;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: #a9adae;
 }
 .td-vals {
   display: flex;
   flex-wrap: wrap;
   gap: 0 6px;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: #8d9295;
   font-variant-numeric: tabular-nums;
@@ -1717,11 +1701,11 @@ svg.target-icon {
 }
 .td-req b {
   flex: 1;
-  font-size: 14px;
+  font-size: var(--fs-md);
   color: #f2f2ee;
 }
 .td-req span {
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 700;
   color: #8d9295;
 }
@@ -1730,7 +1714,7 @@ svg.target-icon {
 }
 .td-req.none {
   color: #8d9295;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 .td-actions {
   display: flex;
@@ -1743,13 +1727,13 @@ svg.target-icon {
   background: #242627;
   color: #6f7476;
   font: inherit;
-  font-size: 14px;
+  font-size: var(--fs-md);
   font-weight: 700;
 }
 .td-minus {
   width: 46px;
   color: #ddd !important;
-  font-size: 20px !important;
+  font-size: var(--fs-xl) !important;
   cursor: pointer;
 }
 .td-up {
@@ -1771,9 +1755,7 @@ svg.target-icon {
   justify-content: center;
   padding: 20px;
 }
-.talent-detail-overlay.show {
-  display: flex;
-}
+
 .talent-detail-backdrop {
   position: absolute;
   inset: 0;
@@ -1893,7 +1875,7 @@ svg.target-icon {
   inset: 0;
   display: grid;
   place-items: center;
-  font-size: 40px;
+  font-size: var(--fs-3xl);
   color: #ddd;
   background: #111;
   overflow: hidden;
@@ -1921,17 +1903,7 @@ svg.target-icon {
 }
 
 /* бонусы снаряжения, жетоны */
-.gear-info-window {
-  width: min(760px, 92vw);
-  height: auto;
-  max-height: 86vh;
-}
-.tokens-window {
-  width: min(1040px, 94vw);
-}
-.gear-info-dialog {
-  align-items: center;
-}
+
 .gear-info-body {
   flex: 1;
   min-height: 0;
@@ -1943,7 +1915,7 @@ svg.target-icon {
   background: #070908;
 }
 .gear-info-group-title {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #7c93a6;
   text-transform: uppercase;
   letter-spacing: 0.6px;
@@ -1965,7 +1937,7 @@ svg.target-icon {
 .gear-info-card b {
   display: block;
   color: #dce7f0;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   margin-bottom: 7px;
 }
 .gear-info-tags {
@@ -1982,7 +1954,7 @@ svg.target-icon {
   background: #0d1d2a;
   border: 1px solid #234157;
   color: #a9bed0;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   white-space: nowrap;
 }
 .gear-info-tag b {
@@ -2017,7 +1989,7 @@ svg.target-icon {
   background: linear-gradient(180deg, #2196f3, #0d5aa7);
   color: #f2f9ff;
   font: inherit;
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 0.2px;
   cursor: pointer;
@@ -2045,7 +2017,7 @@ svg.target-icon {
 }
 .tok-note {
   color: #71889b;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   line-height: 1.5;
 }
 
@@ -2056,7 +2028,7 @@ svg.target-icon {
   text-align: center;
   flex: 0 0 auto;
 }
-.site-footer span {
+.site-footer > span {
   display: inline-block;
   font-family: "Caveat", "Segoe UI", cursive;
   font-weight: 400;
@@ -2081,10 +2053,7 @@ svg.target-icon {
   .talent-dialog {
     inset: 0;
   }
-  .talent-game-sidebar {
-    flex-basis: 260px;
-    width: 260px;
-  }
+
   .talent-game-header {
     height: 58px;
     flex-basis: 58px;
@@ -2125,14 +2094,12 @@ svg.target-icon {
   .content {
     padding: 8px;
   }
-  .damage-grid {
-    grid-template-columns: 1fr;
-  }
+
   .toast {
     min-width: 0;
     width: calc(100% - 40px);
     padding: 22px 24px 25px;
-    font-size: 20px;
+    font-size: var(--fs-xl);
   }
   .toast::before {
     font-size: 50px;
@@ -2191,13 +2158,7 @@ svg.target-icon {
     display: block;
     overflow: auto;
   }
-  .talent-game-sidebar {
-    width: 100%;
-    height: auto;
-    max-height: 48%;
-    border-right: 0;
-    border-bottom: 1px solid #34383a;
-  }
+
   /* кнопки талантов липнут ко дну панели, иначе на телефоне уезжают за прокрутку списка статов */
   .talent-side-footer {
     position: sticky;
@@ -2209,15 +2170,11 @@ svg.target-icon {
   .talent-flow-wrap {
     height: 52%;
   }
-  .talent-detail-overlay {
-    padding: 12px;
-  }
+
   .talent-detail-modal {
     max-height: 82vh;
   }
-  .gear-info-window {
-    width: 94vw;
-  }
+
   .gear-info-body {
     padding: 14px;
   }
@@ -2226,14 +2183,14 @@ svg.target-icon {
     padding: 10px 14px 14px;
   }
   .data-table {
-    font-size: 12px;
+    font-size: var(--fs-xs);
   }
   .data-table th,
   .data-table td {
     padding: 6px 4px;
   }
   .tokens-btn {
-    font-size: 11px;
+    font-size: var(--fs-xs);
     padding: 0 12px;
     height: 30px;
   }
@@ -2261,23 +2218,20 @@ svg.target-icon {
     height: 50px;
   }
   .damage-card h3 {
-    font-size: 13px;
+    font-size: var(--fs-sm);
     margin-bottom: 5px;
   }
   .damage-card strong {
     font-size: 22px;
   }
   .bd-cell em {
-    font-size: 14px;
+    font-size: var(--fs-md);
   }
   .crit-chip {
-    font-size: 11px;
+    font-size: var(--fs-xs);
     padding: 3px 9px;
   }
-  .level-row button,
-  .level-row input {
-    height: 42px;
-  }
+
   .option {
     min-height: 36px;
   }
@@ -2294,25 +2248,13 @@ svg.target-icon {
   .talent-game-header h2 {
     font-size: 19px;
   }
-  .talent-points {
-    font-size: 11px;
-    padding: 5px 8px;
-  }
-  .talent-icon-button {
-    width: 32px;
-    height: 32px;
-    font-size: 20px;
-  }
+
   .talent-node-game {
     width: 82px;
     height: 82px;
   }
   .talent-node-art {
     font-size: 32px;
-  }
-  .talent-side-title {
-    font-size: 16px;
-    margin-bottom: 6px;
   }
   .talent-side-stats {
     gap: 18px;
@@ -2331,21 +2273,21 @@ svg.target-icon {
   }
   .talent-branch-tabs button {
     height: 34px;
-    font-size: 12px;
+    font-size: var(--fs-xs);
     padding: 0 10px;
   }
   .talent-branch-description {
     padding: 8px 2px 10px;
   }
   .talent-branch-description b {
-    font-size: 14px;
+    font-size: var(--fs-md);
   }
   .top100-table th:nth-child(3),
   .top100-table td:nth-child(3) {
     width: 36px;
   }
   .top100-nick {
-    font-size: 11.5px;
+    font-size: var(--fs-xs);
   }
 }
 
@@ -2369,7 +2311,7 @@ svg.target-icon {
   background: #081420;
   color: #e7f0f8;
   font: inherit;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 .cmp-tools input::placeholder {
   color: #7f95a8;
@@ -2382,7 +2324,7 @@ svg.target-icon {
   background: linear-gradient(180deg, #123049, #0a1c2b);
   color: #c3d4e2;
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
@@ -2390,13 +2332,10 @@ svg.target-icon {
 .cmp-btn:hover:not(:disabled) {
   background: linear-gradient(180deg, #173a5c, #0d2536);
 }
-.cmp-btn:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
+
 .cmp-note {
   color: #71889b;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   line-height: 1.5;
   margin: 8px 0 0;
 }
@@ -2439,7 +2378,7 @@ svg.target-icon {
   transform: translateY(-50%);
   margin-left: 5px;
   font-style: normal;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   line-height: 1;
   white-space: nowrap;
 }
@@ -2455,7 +2394,7 @@ svg.target-icon {
 .data-table tr.cmp-group td {
   padding-top: 16px;
   color: #7c93a6;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.6px;
@@ -2473,7 +2412,7 @@ svg.target-icon {
   border-radius: 8px;
   background: #10263a;
   padding: 10px 12px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #a9bed0;
 }
 .cmp-diff summary {
@@ -2491,7 +2430,7 @@ svg.target-icon {
   display: block;
   margin-bottom: 5px;
   color: #7c93a6;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -2513,7 +2452,7 @@ svg.target-icon {
     display: block;
     transform: none;
     margin: 3px 0 0;
-    font-size: 10px;
+    font-size: var(--fs-xs);
   }
 }
 
@@ -2532,19 +2471,13 @@ svg.target-icon {
     background: #0a1824;
     color: #cfe0ec;
     font: inherit;
-    font-size: 13px;
+    font-size: var(--fs-sm);
     font-weight: 600;
     cursor: pointer;
   }
   .equipment-section .options,
   .equipment-section .items-divider {
     display: none;
-  }
-  .equipment-section.gear-open .options {
-    display: grid;
-  }
-  .equipment-section.gear-open .items-divider {
-    display: flex;
   }
 }
 
@@ -2589,13 +2522,13 @@ svg.target-icon {
 
 /* --- читаемость: мельче 12px текста почти нет, цвет светлее --- */
 .talent-summary {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #9db2c4;
 }
 .damage-footnote,
 .tok-note,
 .cmp-note {
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   color: #9db2c4;
 }
 .talent-side-hint,
@@ -2603,44 +2536,38 @@ svg.target-icon {
 .talent-side-stats small,
 .talent-gauge-value small,
 .talent-branch-description {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #9db2c4;
 }
 .talent-game-header p {
   color: #9db2c4;
 }
 .bd-cell small {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #9db2c4;
 }
 .extra-grid small {
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: #a9bed0;
 }
 .data-table th {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #9db2c4;
 }
 .gear-info-group-title {
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   color: #9db2c4;
 }
 .gear-info-tag {
-  font-size: 12px;
+  font-size: var(--fs-xs);
 }
 .info-lead {
-  font-size: 13px;
+  font-size: var(--fs-sm);
   color: #a9bbc9;
 }
 
 /* --- кнопки сайдбара: компактные, без CAPS --- */
-.side-actions {
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.select-all {
-  grid-column: 1/-1;
-}
+
 .side-btn {
   height: 38px;
   display: flex;
@@ -2648,7 +2575,7 @@ svg.target-icon {
   justify-content: center;
   gap: 7px;
   padding: 0 8px;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   letter-spacing: 0;
   text-transform: none;
@@ -2753,7 +2680,7 @@ svg.target-icon {
   line-height: 1.2;
 }
 .option b {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: #dce7f0;
 }
@@ -2761,7 +2688,7 @@ svg.target-icon {
   color: #fff;
 }
 .option small {
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: #9db2c4;
   font-variant-numeric: tabular-nums;
 }
@@ -2831,7 +2758,6 @@ svg.target-icon {
    Rubik Dirt (грязный, очень жирный) заменён на Rubik 500–600: кириллица читается чисто, начертание остаётся «игровым».
    Размеры из styles.css не трогаем (кроме двух заголовков), чтобы работали его media-запросы */
 .talent-game-header h2,
-.talent-side-title,
 .talent-gauge-value b,
 .td-head h3 {
   font-family: "Rubik", "Segoe UI", Arial, sans-serif;
@@ -2841,9 +2767,6 @@ svg.target-icon {
   font-weight: 600;
   line-height: 1.15;
   letter-spacing: 0.1px;
-}
-.talent-side-title {
-  font-weight: 500;
 }
 .talent-gauge-value b {
   font-weight: 600;
@@ -2858,7 +2781,7 @@ svg.target-icon {
     font-size: 18px;
   }
   .td-head h3 {
-    font-size: 20px;
+    font-size: var(--fs-xl);
   }
 }
 
@@ -2882,9 +2805,7 @@ svg.target-icon {
 /* ===== Окно «Расчёт по жетонам» =====
    Панель ввода компактная: иконка + подпись + узкое поле; ниже три карточки
    оружия с полоской выгоды. Самое выгодное оружие - рамкой и зелёной полоской. */
-.tokens-body {
-  padding: 18px 20px 22px;
-}
+
 /* ===== Окно «Сравнение билдов» =====
    Сверху - две карточки билдов с главными числами, в таблице у каждого значения
    полоска: сразу видно, насколько один билд сильнее другого */
@@ -2915,25 +2836,25 @@ svg.target-icon {
 }
 .cmp-card small {
   color: #8fb3cc;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 .cmp-card b {
   color: #eaf6ff;
-  font-size: 16px;
+  font-size: var(--fs-lg);
   font-weight: 600;
 }
 .cmp-card span {
   color: #a9bccc;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   line-height: 1.35;
 }
 .cmp-vs {
   align-self: center;
   color: #6f8496;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   text-transform: uppercase;
   letter-spacing: 0.6px;
   white-space: nowrap;
@@ -2951,7 +2872,7 @@ svg.target-icon {
 .cmp-table tbody th[scope="row"] {
   text-align: left;
   white-space: normal;
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   color: #cbd9e5;
 }
@@ -2973,7 +2894,7 @@ svg.target-icon {
   transform: none;
   margin: 2px 0 0;
   font-style: normal;
-  font-size: 10.5px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 0.2px;
   white-space: nowrap;
@@ -3000,7 +2921,7 @@ svg.target-icon {
 }
 .cmp-table tr.cmp-group td {
   padding-top: 14px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 0.4px;
   text-transform: uppercase;
@@ -3022,10 +2943,10 @@ svg.target-icon {
     padding: 10px 11px;
   }
   .cmp-card b {
-    font-size: 14px;
+    font-size: var(--fs-md);
   }
   .cmp-card span {
-    font-size: 11.5px;
+    font-size: var(--fs-xs);
   }
   .cmp-table .cmp-cell {
     padding: 7px 6px 16px !important;
@@ -3068,7 +2989,7 @@ svg.target-icon {
   stroke-width: 1.6;
 }
 .tok-inp-lbl {
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   color: #9fb3c4;
   white-space: nowrap;
 }
@@ -3115,7 +3036,7 @@ svg.target-icon {
 }
 .tok-hint {
   margin: 10px 0 0;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: #6f8496;
   text-align: center;
 }
@@ -3159,7 +3080,7 @@ svg.target-icon {
 .tok-card-head small {
   display: block;
   margin-top: 2px;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: #8ea3b5;
 }
 .tok-card-big {
@@ -3173,7 +3094,7 @@ svg.target-icon {
   font-variant-numeric: tabular-nums;
 }
 .tok-card-unit {
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: #8ea3b5;
   margin: 4px 0 10px;
 }
@@ -3203,7 +3124,7 @@ svg.target-icon {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   color: #a9bccc;
 }
 .tok-card-rows div b {
@@ -3223,19 +3144,11 @@ svg.target-icon {
   border-radius: 0 8px 8px 0;
   background: rgba(84, 191, 255, 0.05);
   color: #9db2c4;
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   line-height: 1.6;
 }
 
-@media (max-width: 900px) {
-  .tok-cards {
-    grid-template-columns: 1fr;
-  }
-}
 @media (max-width: 650px) {
-  .tokens-body {
-    padding: 14px 12px 18px;
-  }
   .tok-inputs {
     display: flex;
     flex-direction: column;
@@ -3249,11 +3162,6 @@ svg.target-icon {
   .tok-inp input,
   .tok-inp:last-of-type input {
     width: 11ch;
-  }
-  .tok-inp-sep {
-    width: auto;
-    height: 1px;
-    margin: 0 12px;
   }
 }
 
@@ -3393,7 +3301,7 @@ svg.target-icon {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: #a9bccc;
 }
 .talent-legend i {
@@ -3429,29 +3337,29 @@ svg.target-icon {
 }
 .talent-tip b {
   display: block;
-  font-size: 14px;
+  font-size: var(--fs-md);
   color: #eaf6ff;
   margin-bottom: 5px;
 }
 .talent-tip p {
   margin: 0 0 8px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #a9bccc;
   line-height: 1.45;
 }
 .talent-tip-eff {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   line-height: 1.45;
   color: #9fb3c4;
 }
 .talent-tip-eff b {
   display: inline;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #bff0c4;
 }
 .talent-tip-rank {
   margin-top: 7px;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: #7e93a5;
 }
 
@@ -3465,7 +3373,7 @@ svg.target-icon {
   display: flex;
   justify-content: space-between;
   gap: 8px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #c5c8ca;
   margin-bottom: 5px;
 }
@@ -3501,23 +3409,10 @@ svg.target-icon {
 
 /* ===== Окно таланта: без повторной анимации при прокачке =====
    polish.js ставит .rerender, пока окно уже открыто и его содержимое перерисовывается */
-.talent-detail-overlay.rerender .talent-detail-modal {
-  animation: none;
-}
 
 /* ===== Мелкий текст и тач-цели ===== */
 .crit-chip-label {
-  font-size: 11.5px;
-}
-@media (max-width: 760px) {
-  .gear-info-btn {
-    width: 36px;
-    height: 36px;
-    flex-basis: 36px;
-  }
-  .level-row {
-    grid-template-columns: 44px 1fr 44px;
-  }
+  font-size: var(--fs-xs);
 }
 
 /* ===== Окно «Бонусы снаряжения» =====
@@ -3526,11 +3421,7 @@ svg.target-icon {
    Внутри карточки - три строки по оружию с полоской вклада; шкала общая для
    комплектов и вещей, поэтому видно, насколько вещи слабее комплектов.
    Цвет полоски и рейки: янтарный - бесплатные удары, синий - оружие за жетоны */
-#gearInfoModal .gear-info-window {
-  width: min(1180px, 94vw);
-  height: min(88vh, 900px);
-  max-height: none;
-}
+
 #gearInfoBody {
   padding: 0;
   gap: 0;
@@ -3562,7 +3453,7 @@ svg.target-icon {
   background: transparent;
   color: #9fb3c4;
   font: inherit;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   padding: 7px 14px;
   cursor: pointer;
@@ -3579,7 +3470,7 @@ svg.target-icon {
 }
 .gi-note {
   margin: 0;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: #6f8496;
 }
 .gi-section {
@@ -3588,7 +3479,7 @@ svg.target-icon {
   gap: 9px;
   margin: 18px 0 10px;
   color: #cbd9e5;
-  font-size: 13px;
+  font-size: var(--fs-sm);
   font-weight: 700;
   letter-spacing: 0.4px;
   text-transform: uppercase;
@@ -3601,14 +3492,14 @@ svg.target-icon {
 }
 .gi-section b {
   color: #e8f0f7;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 .gi-section small {
   text-transform: none;
   letter-spacing: 0;
   font-weight: 400;
   color: #6f8496;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
 }
 .gi-grid {
   display: grid;
@@ -3660,31 +3551,9 @@ svg.target-icon {
 .gi-head b {
   min-width: 0;
   color: #e8f0f7;
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   line-height: 1.25;
-}
-.gi-row {
-  display: grid;
-  grid-template-columns: 82px minmax(0, 1fr) 54px;
-  align-items: center;
-  gap: 9px;
-  margin-bottom: 6px;
-}
-.gi-row small {
-  font-size: 11.5px;
-  color: #8ea3b5;
-}
-.gi-row b {
-  text-align: right;
-  color: #e7f1f9;
-  font:
-    700 12.5px/1 "ZoneMono",
-    ui-monospace,
-    "Cascadia Mono",
-    Consolas,
-    monospace;
-  font-variant-numeric: tabular-nums;
 }
 .gi-bar {
   height: 7px;
@@ -3713,7 +3582,7 @@ svg.target-icon {
   border-radius: 14px;
   background: #0a1a26;
   color: #a9bccc;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   white-space: nowrap;
 }
 .gi-chip b {
@@ -3732,7 +3601,7 @@ svg.target-icon {
 .gi-total-title {
   margin-bottom: 10px;
   color: #73c8ff;
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   font-weight: 700;
 }
 .gi-total-row {
@@ -3749,7 +3618,7 @@ svg.target-icon {
 .gi-total-row > small {
   padding-top: 5px;
   color: #8fb3cc;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -3768,7 +3637,7 @@ svg.target-icon {
   border-radius: 999px;
   background: #0a1a26;
   color: #a9bccc;
-  font-size: 12px;
+  font-size: var(--fs-xs);
 }
 .gi-pill b {
   color: #eaf6ff;
@@ -3784,10 +3653,6 @@ svg.target-icon {
   .gi-grid {
     grid-template-columns: 1fr;
   }
-  .gi-row {
-    grid-template-columns: 74px minmax(0, 1fr) 50px;
-    gap: 7px;
-  }
 }
 @media (max-width: 650px) {
   /* ===== Окно талантов на телефоне =====
@@ -3799,17 +3664,7 @@ svg.target-icon {
     flex-direction: column;
     overflow: hidden;
   }
-  .talent-game-sidebar {
-    width: 100%;
-    height: auto;
-    max-height: none;
-    flex: 0 0 auto;
-    overflow: visible;
-    padding: 10px 12px 12px;
-    border-right: 0;
-    border-bottom: 1px solid #34383a;
-  }
-  .talent-side-title,
+
   .talent-gauge,
   .talent-side-stats,
   .talent-side-hint,
@@ -3827,7 +3682,7 @@ svg.target-icon {
     min-width: 0;
   }
   .talent-branch-progress > div {
-    font-size: 11px;
+    font-size: var(--fs-xs);
     margin-bottom: 4px;
   }
   .talent-branch-bar {
@@ -3846,7 +3701,7 @@ svg.target-icon {
     text-align: center;
     border: 1px solid #373a3d;
     border-radius: 8px;
-    font-size: 12.5px;
+    font-size: var(--fs-xs);
   }
   .talent-branch-tabs button.active {
     background: #deded8;
@@ -3880,7 +3735,7 @@ svg.target-icon {
     padding: 8px 10px;
   }
   .talent-legend span {
-    font-size: 10.5px;
+    font-size: var(--fs-xs);
     gap: 6px;
   }
   .talent-legend i {
@@ -3892,10 +3747,7 @@ svg.target-icon {
     width: min(260px, calc(100% - 16px));
   }
   /* карточка таланта - шторка снизу */
-  .talent-detail-overlay {
-    align-items: flex-end;
-    padding: 0;
-  }
+
   .talent-detail-modal {
     width: 100%;
     max-width: 100%;
@@ -3908,9 +3760,6 @@ svg.target-icon {
     padding: 16px 16px 20px;
   }
 
-  #gearInfoModal .gear-info-window {
-    height: 92vh;
-  }
   .gi-scroll {
     padding: 12px 14px 16px;
   }
@@ -3931,19 +3780,11 @@ svg.target-icon {
 .confirm-modal {
   z-index: 2100;
 }
-.confirm-modal .confirm-window {
-  width: min(440px, 92vw);
-  height: auto;
-  max-height: 86vh;
-}
-.confirm-modal .confirm-body {
-  gap: 16px;
-  padding: 18px 20px 20px;
-}
+
 .confirm-text {
   margin: 0;
   color: #c3d4e2;
-  font-size: 14px;
+  font-size: var(--fs-md);
   line-height: 1.5;
 }
 .confirm-actions {
@@ -3952,10 +3793,7 @@ svg.target-icon {
   gap: 10px;
   flex-wrap: wrap;
 }
-.confirm-actions .cmp-btn {
-  height: 40px;
-  min-width: 110px;
-}
+
 .confirm-actions .cmp-btn.confirm-danger {
   border-color: #7a2f35;
   background: linear-gradient(180deg, #4a171c, #2a0d10);
@@ -3965,21 +3803,12 @@ svg.target-icon {
   background: linear-gradient(180deg, #5c1d23, #341013);
   border-color: #c2444e;
 }
-@media (max-width: 760px) {
-  .confirm-modal .talent-dialog {
-    align-items: center;
-    padding: 0 4vw;
-  }
-  .confirm-actions .cmp-btn {
-    flex: 1 1 0;
-  }
-}
 
 /* ---------- «Бонусы снаряжения»: компактные карточки ----------
    подгруппы по семейству оружия, одна полоска силы и три плитки со значениями вместо трёх почти одинаковых полосок */
 .gi-section {
   margin: 20px 0 4px;
-  font-size: 14px;
+  font-size: var(--fs-md);
   letter-spacing: 0.08em;
 }
 .gi-section .ic {
@@ -3993,7 +3822,7 @@ svg.target-icon {
   align-items: center;
   gap: 8px;
   margin: 12px 0 9px;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -4075,7 +3904,7 @@ svg.target-icon {
 .gi-stat small {
   display: block;
   margin-bottom: 4px;
-  font-size: 10.5px;
+  font-size: var(--fs-xs);
   color: #8ea3b5;
   white-space: nowrap;
   overflow: hidden;
@@ -4097,7 +3926,7 @@ svg.target-icon {
   padding-top: 9px;
 }
 .gi-chip {
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   padding: 3px 8px;
   border-color: color-mix(in srgb, var(--ac) 30%, #1a3346);
   background: color-mix(in srgb, var(--ac) 7%, #0a1218);
@@ -4106,7 +3935,7 @@ svg.target-icon {
   margin-top: 22px;
 }
 .gi-total-title {
-  font-size: 14px;
+  font-size: var(--fs-md);
   letter-spacing: 0.04em;
 }
 
@@ -4118,11 +3947,26 @@ svg.target-icon {
    Всё, что двигается, отключается при prefers-reduced-motion.
    ============================================================================ */
 
-/* ---------- 1. Палитра тем ----------
+/* ---------- 1. Палитра тем и общие токены ----------
+   Все переменные :root и тем собраны здесь (раньше были в пяти местах файла).
    data-theme ставится на <html> скриптом в <head> (до первой отрисовки),
    чтобы не мигало; выбор хранится в localStorage ключом zoneTheme.
-   Значения в :root повторяют тему «Наёмники» - она включена по умолчанию. */
+   Значения в :root повторяют тему «Наёмники» - она включена по умолчанию.
+   Фон по ширине экрана (--bg-img) задаётся в начале файла вместе с media-запросами. */
 :root {
+  color-scheme: dark;
+  /* ширина контейнера одна на всех страницах: 1400px.
+     Раньше у калькулятора (есть .page) она была 1600px, и шапка брала ту же ширину -
+     из-за этого при переходе на калькулятор и обратно логотип и меню уезжали на 100px */
+  --wrap: 1400px;
+  /* шкала размеров текста: вспомогательный текст не мельче 12px (--fs-xs), основной - от 14px */
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 20px;
+  --fs-2xl: 28px;
+  --fs-3xl: 40px;
   --accent: #5f8ac9;
   --accent-2: #aec8ec;
   --accent-3: #9fb3c8; /* второй тон с эмблемы */
@@ -4137,10 +3981,42 @@ svg.target-icon {
   --glass: rgba(10, 18, 26, 0.04); /* почти без вуали: фото видно как есть */
   --glass-line: rgba(160, 190, 235, 0.18);
   --tabbar-h: 58px;
+  /* токены редизайна «ПДА сталкера»: шрифт заголовков, текст, металл, радиусы, уголки-скобы */
+  --f-display: "Oswald", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
+  --ink: #e9eef2;
+  --ink-2: #aab6c0;
+  --ink-3: #7f8b95;
+  --metal: #0b0f13;
+  --metal-2: #080b0e;
+  --r-lg: 6px;
+  --r-md: 5px;
+  --r-sm: 4px;
+  --line: color-mix(in srgb, var(--accent) 24%, rgba(255, 255, 255, 0.07));
+  --line-strong: color-mix(in srgb, var(--accent) 55%, rgba(255, 255, 255, 0.1));
+  --brk-c: color-mix(in srgb, var(--accent) 85%, #fff 0%);
+  --brk-s: 12px;
+  /* четыре уголка-скобы: слои фона, без псевдоэлементов */
+  --brackets:
+    linear-gradient(var(--brk-c), var(--brk-c)) left top/var(--brk-s) 2px no-repeat,
+    linear-gradient(var(--brk-c), var(--brk-c)) left top/2px var(--brk-s) no-repeat,
+    linear-gradient(var(--brk-c), var(--brk-c)) right top/var(--brk-s) 2px no-repeat,
+    linear-gradient(var(--brk-c), var(--brk-c)) right top/2px var(--brk-s) no-repeat,
+    linear-gradient(var(--brk-c), var(--brk-c)) left bottom/var(--brk-s) 2px no-repeat,
+    linear-gradient(var(--brk-c), var(--brk-c)) left bottom/2px var(--brk-s) no-repeat,
+    linear-gradient(var(--brk-c), var(--brk-c)) right bottom/var(--brk-s) 2px no-repeat,
+    linear-gradient(var(--brk-c), var(--brk-c)) right bottom/2px var(--brk-s) no-repeat;
+  --panel-fill: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--accent) 7%, rgba(13, 17, 21, 0.92)),
+    rgba(8, 11, 14, 0.94)
+  );
+  --sh-panel: 0 18px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --bg-dim: 0.42;
 }
 /* цвета группировок сняты с эмблем (вики S.T.A.L.K.E.R.) и осветлены под тёмный интерфейс:
    accent - основной тон нашивки, accent-3 - второй цвет с той же эмблемы;
-   panel/panel-2/wash - в какую сторону уходит вся тёмная часть интерфейса */
+   panel/panel-2/wash - в какую сторону уходит вся тёмная часть интерфейса (темнее и «металличнее»);
+   bg-dim - насколько гасится яркость фоновой картинки этой темы */
 :root[data-theme="merc"] {
   --accent: #5f8ac9;
   --accent-2: #aec8ec;
@@ -4148,6 +4024,10 @@ svg.target-icon {
   --accent-ink: #070d18;
   --glass-line: rgba(160, 190, 235, 0.18);
   --wash: rgba(95, 138, 201, 0.13);
+  --panel: #0c1218;
+  --panel-2: #080c10;
+  --panel-line: #1c2733;
+  --bg-dim: 0.38;
 }
 :root[data-theme="dolg"] {
   --accent: #d9483f;
@@ -4156,6 +4036,10 @@ svg.target-icon {
   --accent-ink: #1a0606;
   --glass-line: rgba(240, 140, 135, 0.2);
   --wash: rgba(217, 72, 63, 0.16);
+  --panel: #140c0c;
+  --panel-2: #0d0808;
+  --panel-line: #3a1f1d;
+  --bg-dim: 0.5;
 }
 :root[data-theme="svoboda"] {
   --accent: #4fb058;
@@ -4164,6 +4048,10 @@ svg.target-icon {
   --accent-ink: #061506;
   --glass-line: rgba(150, 220, 155, 0.18);
   --wash: rgba(79, 176, 88, 0.15);
+  --panel: #0b130e;
+  --panel-2: #070c09;
+  --panel-line: #1e3324;
+  --bg-dim: 0.58;
 }
 :root[data-theme="science"] {
   --accent: #57c4f0;
@@ -4172,6 +4060,10 @@ svg.target-icon {
   --accent-ink: #041420;
   --glass-line: rgba(140, 215, 255, 0.18);
   --wash: rgba(87, 196, 240, 0.12);
+  --panel: #08121a;
+  --panel-2: #060d13;
+  --panel-line: #14303f;
+  --bg-dim: 0.34;
 }
 :root[data-theme="monolith"] {
   --accent: #d9a52c;
@@ -4180,6 +4072,10 @@ svg.target-icon {
   --accent-ink: #1a1205;
   --glass-line: rgba(225, 190, 120, 0.2);
   --wash: rgba(217, 165, 44, 0.15);
+  --panel: #141007;
+  --panel-2: #0d0a05;
+  --panel-line: #3a2f15;
+  --bg-dim: 0.5;
 }
 :root[data-theme="rassvet"] {
   --accent: #3d7bf0;
@@ -4188,6 +4084,10 @@ svg.target-icon {
   --accent-ink: #06121f;
   --glass-line: rgba(140, 195, 240, 0.2);
   --wash: rgba(61, 123, 240, 0.15);
+  --panel: #0a111a;
+  --panel-2: #070b11;
+  --panel-line: #1d3047;
+  --bg-dim: 0.42;
 }
 :root[data-theme="loners"] {
   --accent: #e0b83a;
@@ -4196,9 +4096,10 @@ svg.target-icon {
   --accent-ink: #1a1505;
   --glass-line: rgba(225, 195, 120, 0.2);
   --wash: rgba(224, 184, 58, 0.14);
-}
-:root {
-  color-scheme: dark;
+  --panel: #13100b;
+  --panel-2: #0c0a07;
+  --panel-line: #3a2f22;
+  --bg-dim: 0.45;
 }
 
 /* ---------- 2. Второй цвет темы в интерфейсе ----------
@@ -4488,7 +4389,7 @@ input[type="number"]:focus,
   text-align: left;
 }
 .tp-text small {
-  font-size: 9.5px;
+  font-size: var(--fs-xs);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-3);
@@ -4531,7 +4432,7 @@ input[type="number"]:focus,
   justify-content: flex-start;
   font-family: var(--f-display);
   font-weight: 500;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   letter-spacing: 0.2em;
   color: var(--ink-2);
   padding: 4px 6px 12px;
@@ -4539,7 +4440,7 @@ input[type="number"]:focus,
 .tl-head span {
   margin-left: auto;
   font-family: "ZoneMono", ui-monospace, Consolas, monospace;
-  font-size: 10px;
+  font-size: var(--fs-xs);
   letter-spacing: 0.05em;
   color: var(--ink-3);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -4654,7 +4555,7 @@ input[type="number"]:focus,
 .ti-text b {
   font-family: var(--f-display);
   font-weight: 500;
-  font-size: 16px;
+  font-size: var(--fs-lg);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #fff;
@@ -4938,7 +4839,8 @@ input[type="number"]:focus,
   }
   .tabbar {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr; /* сколько пунктов в partials/header.html, столько и колонок */
     position: fixed;
     left: 0;
     right: 0;
@@ -4958,7 +4860,7 @@ input[type="number"]:focus,
     gap: 3px;
     color: #8fa3b4;
     text-decoration: none;
-    font-size: 10.5px;
+    font-size: var(--fs-xs);
     font-weight: 600;
     padding-top: 6px;
     line-height: 1.1;
@@ -4999,7 +4901,7 @@ input[type="number"]:focus,
 .t100-delta {
   display: block;
   margin-top: 2px;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.2px;
@@ -5024,7 +4926,7 @@ input[type="number"]:focus,
   display: block;
   margin-top: 1px;
   font-style: normal;
-  font-size: 10.5px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   line-height: 1.15;
   font-variant-numeric: tabular-nums;
@@ -5043,10 +4945,10 @@ input[type="number"]:focus,
 }
 @media (max-width: 430px) {
   .t100-delta {
-    font-size: 10.5px;
+    font-size: var(--fs-xs);
   }
   .t100-move {
-    font-size: 10px;
+    font-size: var(--fs-xs);
   }
 }
 
@@ -5174,13 +5076,7 @@ select:focus-visible {
   border-radius: 6px;
 }
 
-/* 5. Главная: описание карточек контрастнее, карточка «Скоро» визуально неактивна */
-.home-card:has(.home-card-badge) {
-  opacity: 0.72;
-}
-.home-card:has(.home-card-badge):hover {
-  opacity: 1;
-}
+/* 5. Главная: описание карточек контрастнее */
 @media (min-width: 1000px) {
   .home-content {
     display: flex;
@@ -5236,83 +5132,6 @@ select:focus-visible {
    у каждой группировки свой фон. Блок подключается последним и переопределяет
    всё, что выше. Изображения талантов, оружия и ресурсов не меняются.
    ============================================================================ */
-
-/* ---------- R1. Токены ---------- */
-:root {
-  --f-display: "Oswald", "Arial Narrow", "Roboto Condensed", system-ui, sans-serif;
-  --ink: #e9eef2;
-  --ink-2: #aab6c0;
-  --ink-3: #7f8b95;
-  --metal: #0b0f13;
-  --metal-2: #080b0e;
-  --r-lg: 6px;
-  --r-md: 5px;
-  --r-sm: 4px;
-  --line: color-mix(in srgb, var(--accent) 24%, rgba(255, 255, 255, 0.07));
-  --line-strong: color-mix(in srgb, var(--accent) 55%, rgba(255, 255, 255, 0.1));
-  --brk-c: color-mix(in srgb, var(--accent) 85%, #fff 0%);
-  --brk-s: 12px;
-  /* четыре уголка-скобы: слои фона, без псевдоэлементов */
-  --brackets:
-    linear-gradient(var(--brk-c), var(--brk-c)) left top/var(--brk-s) 2px no-repeat,
-    linear-gradient(var(--brk-c), var(--brk-c)) left top/2px var(--brk-s) no-repeat,
-    linear-gradient(var(--brk-c), var(--brk-c)) right top/var(--brk-s) 2px no-repeat,
-    linear-gradient(var(--brk-c), var(--brk-c)) right top/2px var(--brk-s) no-repeat,
-    linear-gradient(var(--brk-c), var(--brk-c)) left bottom/var(--brk-s) 2px no-repeat,
-    linear-gradient(var(--brk-c), var(--brk-c)) left bottom/2px var(--brk-s) no-repeat,
-    linear-gradient(var(--brk-c), var(--brk-c)) right bottom/var(--brk-s) 2px no-repeat,
-    linear-gradient(var(--brk-c), var(--brk-c)) right bottom/2px var(--brk-s) no-repeat;
-  --panel-fill: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--accent) 7%, rgba(13, 17, 21, 0.92)),
-    rgba(8, 11, 14, 0.94)
-  );
-  --sh-panel: 0 18px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  --bg-dim: 0.42;
-}
-/* поверхности темы - темнее и «металличнее»; яркость фона гасится под каждую картинку */
-:root[data-theme="merc"] {
-  --panel: #0c1218;
-  --panel-2: #080c10;
-  --panel-line: #1c2733;
-  --bg-dim: 0.38;
-}
-:root[data-theme="dolg"] {
-  --panel: #140c0c;
-  --panel-2: #0d0808;
-  --panel-line: #3a1f1d;
-  --bg-dim: 0.5;
-}
-:root[data-theme="svoboda"] {
-  --panel: #0b130e;
-  --panel-2: #070c09;
-  --panel-line: #1e3324;
-  --bg-dim: 0.58;
-}
-:root[data-theme="science"] {
-  --panel: #08121a;
-  --panel-2: #060d13;
-  --panel-line: #14303f;
-  --bg-dim: 0.34;
-}
-:root[data-theme="monolith"] {
-  --panel: #141007;
-  --panel-2: #0d0a05;
-  --panel-line: #3a2f15;
-  --bg-dim: 0.5;
-}
-:root[data-theme="rassvet"] {
-  --panel: #0a111a;
-  --panel-2: #070b11;
-  --panel-line: #1d3047;
-  --bg-dim: 0.42;
-}
-:root[data-theme="loners"] {
-  --panel: #13100b;
-  --panel-2: #0c0a07;
-  --panel-line: #3a2f22;
-  --bg-dim: 0.45;
-}
 
 html,
 body {
@@ -5653,12 +5472,6 @@ body::after {
   height: 15px;
   color: var(--accent);
 }
-.items-divider b {
-  font-family: var(--f-display);
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
 
 /* ---------- R7. Карточки, поля, кнопки ---------- */
 .damage-card,
@@ -5697,7 +5510,7 @@ body::after {
 .dmg-main strong {
   font-family: var(--f-display);
   font-weight: 600;
-  font-size: 40px;
+  font-size: var(--fs-3xl);
   letter-spacing: 0.01em;
   color: #fff;
   text-shadow: 0 0 18px color-mix(in srgb, var(--accent) 35%, transparent);
@@ -5737,9 +5550,7 @@ body::after {
 .cmp-btn:active {
   transform: translateY(1px);
 }
-.gear-info-btn {
-  border-radius: 50%;
-}
+
 .level-row button,
 .level-row input {
   border-radius: var(--r-sm);
@@ -5760,15 +5571,15 @@ body::after {
 }
 .info-sections button {
   border-radius: var(--r-sm);
-  font-size: 14px;
+  font-size: var(--fs-md);
 }
 .top100-tab {
   border-radius: var(--r-sm);
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
 }
 .t100-chip {
   border-radius: 3px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
 }
 
 /* ---------- R8. Таблицы ---------- */
@@ -5776,7 +5587,7 @@ body::after {
   font-family: var(--f-display);
   font-weight: 500;
   letter-spacing: 0.12em;
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   text-transform: uppercase;
 }
 .data-table td {
@@ -5812,12 +5623,7 @@ body::after {
 }
 
 /* поля, счётчик уровня, кнопка древа, разделители - в тон группировки */
-.side-section {
-  border-bottom-color: var(--line);
-}
-.items-divider {
-  border-color: var(--line);
-}
+
 .level-row button {
   background: linear-gradient(
     180deg,
@@ -5837,19 +5643,10 @@ body::after {
   background: rgba(5, 7, 9, 0.75);
   border: 1px solid var(--line);
   font-family: var(--f-display);
-  font-size: 20px;
+  font-size: var(--fs-xl);
   font-weight: 500;
 }
-.talent-open {
-  border-radius: var(--r-sm);
-  border-color: var(--line-strong);
-  color: #fff;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 16%, #0d1115), #080a0d);
-}
-.talent-open:hover {
-  border-color: var(--accent);
-  box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 25%, transparent);
-}
+
 .side-btn.ghost {
   border-color: var(--line);
   background: rgba(6, 8, 10, 0.5);
@@ -5869,10 +5666,7 @@ input[type="checkbox"] {
   border-color: var(--line-strong);
   background-color: #07090b;
 }
-.select-all input:checked {
-  background-color: var(--accent);
-  border-color: var(--accent);
-}
+
 .data-table td,
 .data-table th,
 .top100-table td,
@@ -5894,7 +5688,7 @@ th.top100-sort {
   font-family: "ZoneMono", ui-monospace, "Cascadia Mono", Consolas, monospace;
   font-weight: 600;
   letter-spacing: 0.18em;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   border: 1px solid var(--line-strong);
   background: rgba(6, 8, 10, 0.72);
   padding: 7px 14px;
@@ -5916,7 +5710,7 @@ th.top100-sort {
     0 10px 40px rgba(0, 0, 0, 0.9);
 }
 .home-hero p {
-  font-size: 16px;
+  font-size: var(--fs-lg);
   line-height: 1.6;
   color: #d3dbe1;
   max-width: 640px;
@@ -5988,25 +5782,20 @@ th.top100-sort {
 }
 .home-card small {
   color: #b4bfc8;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 .home-card-cta {
   font-family: var(--f-display);
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 .home-card-cta svg {
   transition: transform 0.2s;
 }
 .home-card:hover .home-card-cta svg {
   transform: translateX(4px);
-}
-.home-card-badge {
-  border-radius: 3px;
-  font-family: var(--f-display);
-  letter-spacing: 0.12em;
 }
 
 /* ---------- R10. Гайды, футер, нижнее меню ---------- */
@@ -6033,8 +5822,8 @@ th.top100-sort {
     transform: rotate(360deg);
   }
 }
-.site-footer span {
-  font-size: 14px;
+.site-footer > span {
+  font-size: var(--fs-md);
   opacity: 0.38;
   color: #9aa6b0;
 }
@@ -6052,7 +5841,13 @@ th.top100-sort {
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    font-size: 10.5px;
+    font-size: var(--fs-xs);
+  }
+  /* шесть пунктов на узком экране: подписи без разрядки, чтобы «Калькулятор» и «Сравнить» не слипались */
+  @media (max-width: 420px) {
+    .tabbar a span {
+      letter-spacing: 0;
+    }
   }
   .tabbar a.active:after {
     width: 36px;
@@ -6065,7 +5860,7 @@ th.top100-sort {
 @media (max-width: 1200px) {
   .main-nav a {
     padding: 0 9px;
-    font-size: 13.5px;
+    font-size: var(--fs-sm);
     letter-spacing: 0.06em;
   }
   .header-inner {
@@ -6105,13 +5900,13 @@ th.top100-sort {
     padding: 14px 12px;
   }
   .home-hero h1 {
-    font-size: 40px;
+    font-size: var(--fs-3xl);
   }
   .home-hero p {
     font-size: 14.5px;
   }
   .home-card::after {
-    font-size: 28px;
+    font-size: var(--fs-2xl);
   }
   .damage-card strong,
   .page .damage-card strong,
@@ -6149,8 +5944,6 @@ th.top100-sort {
     letter-spacing: 0.06em;
   }
 }
-.talent-side-title,
-.talent-side-title b,
 .talent-game-header h2 {
   font-family: var(--f-display);
   font-weight: 500;
@@ -6158,9 +5951,7 @@ th.top100-sort {
   text-transform: uppercase;
 }
 /* значок «Комплекты» окрашен в цвет темы, как остальные заголовки */
-.side-title .clothes-icon {
-  filter: none;
-}
+
 /* без синей вспышки системной подсветки касания на телефонах; отклик - лёгкое затемнение пункта */
 .tabbar a,
 .main-nav a,
@@ -6174,7 +5965,7 @@ th.top100-sort {
 /* ---------- Топ-100 на телефоне: заголовки помещаются, цифры не у края ---------- */
 @media (max-width: 760px) {
   .top100-table thead th {
-    font-size: 11px;
+    font-size: var(--fs-xs);
     letter-spacing: 0.05em;
     line-height: 1.15;
     white-space: normal;
@@ -6197,7 +5988,7 @@ th.top100-sort {
   }
   .top100-table .top100-sort i {
     margin-left: 2px;
-    font-size: 8px;
+    font-size: var(--fs-xs);
   }
   .top100-table th:nth-child(4),
   .top100-table td:nth-child(4) {
@@ -6220,14 +6011,14 @@ th.top100-sort {
     width: 104px;
   }
   .top100-table thead th {
-    font-size: 10.5px;
+    font-size: var(--fs-xs);
     letter-spacing: 0.04em;
   }
   .top100-table td:nth-child(4) {
-    font-size: 14px;
+    font-size: var(--fs-md);
   }
-  .site-footer span {
-    font-size: 12px;
+  .site-footer > span {
+    font-size: var(--fs-xs);
   }
 }
 
@@ -6518,57 +6309,51 @@ th.top100-sort {
   }
 }
 
-/* ---------- 14. Пометка «неофициальный фан-сайт» на главной ----------
-   Мелкая приглушённая строка под карточками, проявляется при наведении. Рядом «Правовая информация» -
+/* ---------- 14. Пометка «неофициальный фан-сайт» в подвале (partials/footer.html) ----------
+   Мелкая строка над подписью автора, на всех страницах. Цвет без прозрачности: контраст не ниже 4,5:1. Рядом «Правовая информация» -
    <details>: по клику под строкой раскрывается оговорка о правообладателях */
-.home-note {
+.site-note {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: center;
   gap: 2px 8px;
   max-width: 640px;
-  margin: 36px auto 0;
+  margin: 20px auto 6px;
   padding: 0 12px;
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   line-height: 1.5;
-  color: #9aa6b0;
+  color: #a3afba;
   text-align: center;
-  opacity: 0.55;
-  transition: opacity 0.25s ease;
 }
-.home-note:hover,
-.home-note:focus-within,
-.home-note:has(details[open]) {
-  opacity: 0.9;
-}
-.home-note p {
+.site-note p {
   margin: 0;
 }
-.home-note i {
+.site-note i {
   font-style: italic;
 }
-.home-note > p > span {
+.site-note > p > span {
   margin: 0 8px;
   opacity: 0.7;
 }
-.home-note > p > span:last-child {
+.site-note > p > span:last-child {
   margin-right: 0;
 }
-.home-note a {
+.site-note a {
   display: inline-flex;
   align-items: center;
   gap: 2px;
+  min-height: 24px;
   color: inherit;
   text-decoration: none;
   border-bottom: 1px dotted currentColor;
   transition: color 0.2s ease;
 }
-.home-note a:hover,
-.home-note a:focus-visible {
+.site-note a:hover,
+.site-note a:focus-visible {
   color: var(--accent-2);
 }
-.home-note a svg {
+.site-note a svg {
   width: 11px;
   height: 11px;
   fill: none;
@@ -6577,54 +6362,53 @@ th.top100-sort {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.home-note details {
+.site-note details {
   display: contents;
 }
-.home-note summary {
+.site-note summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
   list-style: none;
   cursor: pointer;
   border-bottom: 1px dotted currentColor;
   transition: color 0.2s ease;
 }
-.home-note summary::-webkit-details-marker {
+.site-note summary::-webkit-details-marker {
   display: none;
 }
-.home-note summary:hover,
-.home-note summary:focus-visible {
+.site-note summary:hover,
+.site-note summary:focus-visible {
   color: var(--accent-2);
 }
-.home-note details > p {
+.site-note details > p {
   flex: 1 0 100%;
   margin: 8px 0 0;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   line-height: 1.55;
   text-wrap: pretty;
 }
 @media (max-width: 760px) {
-  .home-note {
+  .site-note {
     margin-top: 26px;
-    font-size: 12px;
+    font-size: var(--fs-xs);
     flex-direction: column;
     align-items: center;
   }
-  .home-note > p > span:last-child {
+  .site-note > p > span:last-child {
     display: none;
   }
-  .home-note details > p {
-    font-size: 11px;
+  .site-note details > p {
+    font-size: var(--fs-xs);
   }
 }
-/* на широком экране строка прижата к низу, над подписью автора; карточки остаются в центре свободного места */
+/* на широком экране карточки главной стоят в центре свободного места, подвал прижат к низу */
 @media (min-width: 1000px) {
-  .home-content:has(.home-note) {
+  .home-content {
     padding-bottom: 10px;
   }
-  .home-content:has(.home-note) .home-hero {
+  .home-content .home-hero {
     margin-top: auto;
-  }
-  .home-note {
-    margin-top: auto;
-    padding-top: 36px;
   }
 }
 
@@ -6650,7 +6434,7 @@ th.top100-sort {
   }
   .main-nav a {
     padding: 0 8px;
-    font-size: 13px;
+    font-size: var(--fs-sm);
     letter-spacing: 0.05em;
   }
   .main-nav {
@@ -6660,9 +6444,7 @@ th.top100-sort {
     display: none;
   }
   /* калькулятор: компактнее карточки урона, разбивка 2×2 */
-  .damage-grid {
-    gap: 12px;
-  }
+
   .damage-card {
     padding: 14px;
     grid-template-columns: 48px minmax(0, 1fr);
@@ -6686,27 +6468,14 @@ th.top100-sort {
   .breakdown {
     grid-template-columns: 1fr 1fr;
   }
-  .side-actions .side-btn {
-    font-size: 12px;
-    letter-spacing: 0.02em;
-    padding: 0 4px;
-    gap: 5px;
-    white-space: nowrap;
-  }
 }
 /* узкий планшет: карточки урона в столбик, разбивка в строку */
 @media (min-width: 761px) and (max-width: 900px) {
-  .damage-grid {
-    grid-template-columns: 1fr;
-  }
   .damage-card {
     min-height: auto;
   }
   .breakdown {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  .extra-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -6809,7 +6578,7 @@ th.top100-sort {
 }
 .info-progress {
   margin: -6px 2px 14px;
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   color: #a9bbc9;
   min-height: 1em;
 }
@@ -6855,7 +6624,7 @@ th.top100-sort {
   border-radius: 4px;
   border: 1px solid color-mix(in srgb, var(--grp) 30%, transparent);
   background: color-mix(in srgb, var(--grp) 8%, transparent);
-  font-size: 12.5px;
+  font-size: var(--fs-xs);
   color: #c9d6e0;
 }
 .info-progress-line b {
@@ -6885,7 +6654,7 @@ th.top100-sort {
   content: "✓";
   position: absolute;
   left: 7px;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 800;
   opacity: 0.85;
 }
@@ -6901,7 +6670,7 @@ th.top100-sort {
 }
 .info-table tbody tr.info-current td:first-child::before {
   content: "▶";
-  font-size: 9px;
+  font-size: var(--fs-xs);
   opacity: 1;
 }
 
@@ -6942,7 +6711,7 @@ th.top100-sort {
   margin: 0;
   font-family: var(--f-display);
   font-weight: 500;
-  font-size: 20px;
+  font-size: var(--fs-xl);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #fff;
@@ -6971,7 +6740,7 @@ th.top100-sort {
   background: var(--accent);
   color: var(--accent-ink);
   font-family: var(--f-display);
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 600;
   letter-spacing: 0.14em;
   box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 60%, transparent);
@@ -7027,7 +6796,7 @@ th.top100-sort {
 }
 .news-head time {
   font-family: "ZoneMono", ui-monospace, "Cascadia Mono", Consolas, monospace;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   letter-spacing: 0.06em;
   color: color-mix(in srgb, var(--accent) 55%, #fff);
 }
@@ -7046,7 +6815,7 @@ th.top100-sort {
   display: flex;
   align-items: baseline;
   gap: 9px;
-  font-size: 13.5px;
+  font-size: var(--fs-sm);
   line-height: 1.45;
   color: #c4ced6;
 }
@@ -7063,7 +6832,7 @@ th.top100-sort {
   box-sizing: border-box;
   padding: 2px 6px;
   border-radius: 3px;
-  font-size: 10px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -7096,7 +6865,7 @@ th.top100-sort {
   background: transparent;
   color: var(--accent-2);
   font-family: var(--f-display);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -7134,7 +6903,7 @@ th.top100-sort {
   .news-items li {
     flex-direction: column;
     gap: 3px;
-    font-size: 13px;
+    font-size: var(--fs-sm);
   }
   .news-tag {
     flex: 0 0 auto;
@@ -7187,7 +6956,7 @@ th.top100-sort {
   background: color-mix(in srgb, var(--grp) 14%, #080a0d) !important;
   color: color-mix(in srgb, var(--grp) 55%, #e6eef5) !important;
   border-bottom: 1px solid color-mix(in srgb, var(--grp) 40%, transparent) !important;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   padding: 9px 6px;
 }
 .info-table td {
@@ -7280,14 +7049,14 @@ th.top100-sort {
 }
 .ipl-sub {
   margin-top: 6px;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: #9fb0be;
 }
 .ipl-sub b {
   color: #fff;
 }
 .info-progress-done {
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 .info-bar {
   position: relative;
@@ -7313,7 +7082,7 @@ th.top100-sort {
   background: color-mix(in srgb, var(--grp) 10%, transparent);
   color: color-mix(in srgb, var(--grp) 60%, #fff);
   font: inherit;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -7333,73 +7102,12 @@ th.top100-sort {
     padding: 14px 10px 12px;
   }
   .info-table thead th {
-    font-size: 10.5px;
+    font-size: var(--fs-xs);
   }
 }
 
 /* ---------- кнопка «Бонусы» у раздела «Комплекты» и кнопка снаряжения на телефоне: заметнее ---------- */
-.side-title .gear-info-btn {
-  position: relative;
-  width: auto;
-  height: 30px;
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 0 13px 0 10px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--accent) 85%, #fff);
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--accent) 75%, #fff 8%),
-    color-mix(in srgb, var(--accent) 55%, #05090f)
-  );
-  color: #fff;
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent),
-    0 0 16px color-mix(in srgb, var(--accent) 40%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
-}
-.side-title .gear-info-btn span {
-  width: auto;
-  height: auto;
-  display: inline;
-  background: none;
-  border: 0;
-  box-shadow: none;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  line-height: 1;
-}
-.side-title .gear-info-btn .ic {
-  width: 15px;
-  height: 15px;
-  color: #fff;
-}
-.side-title .gear-info-btn::after {
-  content: "";
-  position: absolute;
-  inset: -4px;
-  border-radius: inherit;
-  border: 1px solid var(--accent);
-  opacity: 0;
-  pointer-events: none;
-  animation: gi-ping 2.8s ease-out infinite;
-}
-.side-title .gear-info-btn:hover {
-  transform: translateY(-1px);
-  border-color: #fff;
-  box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent),
-    0 0 24px color-mix(in srgb, var(--accent) 60%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-.side-title .gear-info-btn:hover::after {
-  animation: none;
-}
+
 @keyframes gi-ping {
   0% {
     opacity: 0.7;
@@ -7411,17 +7119,8 @@ th.top100-sort {
     transform: scale(1.18);
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .side-title .gear-info-btn::after {
-    animation: none;
-  }
-}
+
 @media (max-width: 760px) {
-  .side-title .gear-info-btn {
-    width: auto;
-    height: 34px;
-    flex-basis: auto;
-  }
   .gear-toggle {
     position: relative;
     height: 46px;
@@ -7431,7 +7130,7 @@ th.top100-sort {
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    font-size: 13px;
+    font-size: var(--fs-sm);
     color: #fff;
     border: 1px solid color-mix(in srgb, var(--accent) 70%, #1d3a4f);
     border-left: 3px solid var(--accent);
@@ -7500,6 +7199,9 @@ main.content.page-narrow {
   font-weight: 600;
   letter-spacing: 0.8px;
   text-align: left;
+  /* текст всегда светлый на непрозрачном фоне: контраст выше 10:1 в любой теме */
+  color: #f4f7f6;
+  background: #0d171b;
 }
 .toast::after {
   inset: 3px;
@@ -7525,7 +7227,7 @@ main.content.page-narrow {
     width: auto;
     max-width: none;
     padding: 11px 14px;
-    font-size: 14px;
+    font-size: var(--fs-md);
   }
   .toast::before,
   .toast.ok::before,
@@ -7535,9 +7237,9 @@ main.content.page-narrow {
     font-size: 22px;
   }
 }
-/* подвал главной: на узком экране «Правовая информация» уходит на новую строку - разделитель перед ней не нужен */
+/* подвал: на узком экране «Правовая информация» уходит на новую строку - разделитель перед ней не нужен */
 @media (max-width: 520px) {
-  .home-note p > span[aria-hidden="true"]:last-child {
+  .site-note p > span[aria-hidden="true"]:last-child {
     display: none;
   }
 }
@@ -7565,7 +7267,7 @@ main.content.page-narrow {
   padding: 0 5px;
   border: 1px solid color-mix(in srgb, var(--accent, #54bfff) 35%, transparent);
   border-radius: 3px;
-  font-size: 10.5px;
+  font-size: var(--fs-xs);
   line-height: 15px;
   color: #c7d6e2;
 }
@@ -7574,12 +7276,6 @@ main.content.page-narrow {
   align-items: stretch;
 }
 /* «Ссылка на билд» и «Сравнить» помещаются в одну строку */
-.side-actions .side-btn {
-  white-space: nowrap;
-  letter-spacing: 0.3px;
-  padding: 0 6px;
-  gap: 6px;
-}
 
 /* планшет 761–1100px: колонка настроек без собственной прокрутки,
    заголовок «Урон (оружие за жетоны)» не переносится - кнопка уходит на свою строку */
@@ -7592,11 +7288,8 @@ main.content.page-narrow {
     flex-wrap: wrap;
     row-gap: 10px;
   }
-  .result-panel > .section-heading > b {
+  .result-panel > .section-heading > h2 > b {
     white-space: nowrap;
-  }
-  .result-panel > .section-heading > .tokens-btn {
-    margin-left: auto;
   }
 }
 
@@ -7721,7 +7414,7 @@ main.content.page-narrow {
   width: 42px;
   transform: translateY(-50%);
   margin-top: 10px;
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: #6f8698;
   text-align: right;
 }
@@ -7745,7 +7438,7 @@ main.content.page-narrow {
 .ich-x span {
   position: absolute;
   transform: translateX(-50%);
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: #6f8698;
 }
 .ich-me,
@@ -7771,7 +7464,7 @@ main.content.page-narrow {
   border-radius: 5px;
   border: 1px solid color-mix(in srgb, var(--ich) 45%, transparent);
   background: #081420e6;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--ich);
   white-space: nowrap;
   pointer-events: none;
@@ -7824,7 +7517,7 @@ main.content.page-narrow {
   border: 1px solid var(--ich);
   background: #081420f2;
   box-shadow: 0 6px 18px #0009;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #a9bbc9;
   white-space: nowrap;
   pointer-events: none;
@@ -7843,7 +7536,7 @@ main.content.page-narrow {
 }
 .ich-tip b {
   color: #fff;
-  font-size: 13px;
+  font-size: var(--fs-sm);
 }
 .ich-tip em {
   font-style: normal;
@@ -7874,7 +7567,7 @@ main.content.page-narrow {
 }
 .ich-card span {
   display: block;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #8ea3b4;
 }
 .ich-card b {
@@ -7898,7 +7591,7 @@ main.content.page-narrow {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #8ea3b4;
 }
 .ich-plan input {
@@ -7922,7 +7615,7 @@ main.content.page-narrow {
   text-align: right;
 }
 .ich-plan-res span {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: #8ea3b4;
 }
 .ich-plan-res b {

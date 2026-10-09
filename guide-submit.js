@@ -70,13 +70,13 @@
       '<form id="gfForm" novalidate>' +
       '<div class="gf-row"><label class="gf-field"><span>Заголовок</span><input id="gfTitle" maxlength="' +
       LIM.title +
-      '" placeholder="Например: Как обогнать Ымгыра за 24 часа" autocomplete="off" required></label>' +
+      '" placeholder="Например: Как пройти Болота" autocomplete="off" required></label>' +
       '<label class="gf-field gf-author"><span>Ваш ник в игре</span><input id="gfAuthor" maxlength="' +
       LIM.author +
       '" placeholder="Подпись автора" autocomplete="nickname" required></label></div>' +
       '<label class="gf-field gf-desc"><span>Краткое описание <i>- необязательно</i></span><input id="gfDesc" maxlength="' +
       LIM.description +
-      '" placeholder="1–2 предложения о том, что в гайде. Если не заполнить, в списке покажется начало текста" autocomplete="off"></label>' +
+      '" placeholder="1–2 предложения о гайде" autocomplete="off" aria-describedby="gfDescHint"><small class="gf-hint" id="gfDescHint">Если не заполнить, в списке гайдов покажется начало текста</small></label>' +
       '<div class="gf-editor">' +
       '<div class="gf-bar"><div class="gf-tools" role="toolbar" aria-label="Оформление">' +
       TOOLS.map(
@@ -94,7 +94,7 @@
       '</div><div class="gf-tabs" role="tablist"><button type="button" role="tab" class="active" aria-selected="true" data-tab="edit">Текст</button><button type="button" role="tab" aria-selected="false" data-tab="preview">Предпросмотр</button></div></div>' +
       '<textarea id="gfText" maxlength="' +
       LIM.text +
-      '" rows="16" placeholder="Текст гайда. Пустая строка - новый абзац. ## в начале строки - подзаголовок, - - пункт списка, **жирный**, *курсив*. Картинки - кнопкой на панели." required></textarea>' +
+      '" rows="16" placeholder="Текст гайда. Пустая строка - новый абзац, «## » в начале строки - подзаголовок, «- » в начале строки - пункт списка, **жирный**, *курсив*. Картинки - кнопкой на панели." required></textarea>' +
       '<div class="gf-preview guide-body" id="gfPreview" hidden></div>' +
       '<div class="gf-foot"><span id="gfCount"></span><span>Оформление: <b>## Подзаголовок</b>, <b>**жирный**</b>, <b>- список</b>, <b>[текст](ссылка)</b></span></div></div>' +
       '<div class="gf-images"><div class="gf-images-list" id="gfImages"></div>' +
@@ -148,6 +148,9 @@
         else if (tried && !c.ok) c.el.setAttribute("aria-invalid", "true");
         else c.el.removeAttribute("aria-invalid");
       });
+      /* пока не всё готово, кнопка выглядит неактивной (но нажимается: по нажатию подсвечиваются пропуски) */
+      const missing = list.some(c => !c.ok);
+      $("gfSubmit").classList.toggle("is-incomplete", missing);
       return list;
     };
     refreshTodo = drawTodo;

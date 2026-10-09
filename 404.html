@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#070d18">
 <script>/* тема до первой отрисовки, чтобы не мигало */(function(){try{var t=localStorage.getItem("zoneTheme");if(t)document.documentElement.dataset.theme=t}catch(e){}})();</script>
+<script>/* старые и «кривые» адреса: /p/<id> игрока, которого уже нет в Топ-100, -> карточка в Топ-100 (/top100#p=<id>);
+   адрес раздела со слешем на конце (/calculator/) -> без слеша. Остальное - обычная страница 404 */(function(){var p=location.pathname,m=/^\/p\/([^\/]+)\/?$/.exec(p);if(m){location.replace("/top100#p="+m[1]);return}var q=p.replace(/\/+$/,"").replace(/\.html$/,"");if(q!==p&&/^\/(calculator|build|top100|info|info-tasks|info-bosses|guides|guide\/[a-z0-9-]+)$/.test(q))location.replace(q+location.search+location.hash)})();</script>
 <title>Страница не найдена - Сердце Зоны</title>
 <meta name="description" content="Такой страницы нет. Вернитесь на главную или откройте нужный раздел.">
 <meta name="robots" content="noindex">
@@ -22,7 +24,7 @@
 <!-- @include header -->
 
 
-<main class="content info-content page-narrow">
+<main class="content info-content page-narrow" id="main">
 <div class="result-title"><svg class="target-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 11v10M8.5 21h7"/><circle cx="12" cy="9" r="1.6"/><path d="M8.6 5.6a4.8 4.8 0 0 0 0 6.8M15.4 5.6a4.8 4.8 0 0 1 0 6.8M5.8 2.8a8.8 8.8 0 0 0 0 12.4"/><path d="m16.6 2.6 3.8 3.8M20.4 2.6l-3.8 3.8"/></g></svg><h1>Страница не найдена</h1></div>
 <section class="result-panel nf-panel">
   <div class="nf-code" aria-hidden="true">404</div>
@@ -39,4 +41,4 @@
 
 <!-- @include footer -->
 
-<script src="/ui.js"></script><script src="/nav.js"></script></body></html>
+<script src="/ui.js" defer></script><script src="/nav.js" defer></script></body></html>
