@@ -1,0 +1,209 @@
+/* Оформление «Сектор»: язык карточек главной (СЕКТОР 01-04, полосы опасности, цвет раздела)
+   на внутренних страницах. Подключается последним, чтобы перекрыть styles.css.
+   Номер и цвет сектора берутся из data-sector / data-zone у .result-title (ставятся в html страницы). */
+
+:root {
+  --sec-acc: #5aa2ff;
+  --sec-acc-rgb: 90, 162, 255;
+  --sec-line: rgba(140, 170, 220, 0.22);
+}
+/* цвета как у карточек на главной */
+body:has(.result-title[data-sector="01"]) {
+  --sec-acc: #e3a82b;
+  --sec-acc-rgb: 227, 168, 43;
+}
+body:has(.result-title[data-sector="02"]) {
+  --sec-acc: #6fcf6a;
+  --sec-acc-rgb: 111, 207, 106;
+}
+body:has(.result-title[data-sector="03"]) {
+  --sec-acc: #5aa2ff;
+  --sec-acc-rgb: 90, 162, 255;
+}
+body:has(.result-title[data-sector="04"]) {
+  --sec-acc: #b08cff;
+  --sec-acc-rgb: 176, 140, 255;
+}
+
+/* Заголовок страницы: плашка «СЕКТОР 03 // КАЛЬКУЛЯТОР» */
+html body .result-title[data-sector] {
+  position: relative;
+  padding-top: 28px !important;
+}
+html body .result-title[data-sector]::before {
+  content: "Сектор " attr(data-sector) "  //  " attr(data-zone);
+  position: absolute;
+  top: 0;
+  left: 0;
+  font:
+    600 11px/1 "ZoneMono",
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--sec-acc);
+  border: 1px solid var(--sec-acc);
+  padding: 5px 8px;
+  background: rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+}
+
+/* Панели: стекло, тонкая рамка и полоса опасности цвета сектора */
+html body .result-panel,
+html body .sidebar {
+  position: relative;
+  background: linear-gradient(180deg, rgba(18, 26, 40, 0.88), rgba(10, 14, 22, 0.92)) !important;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--sec-line) !important;
+  border-radius: 4px !important;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+html body .result-panel::before,
+html body .sidebar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  height: 6px;
+  background: repeating-linear-gradient(-45deg, var(--sec-acc) 0 14px, transparent 14px 26px);
+  opacity: 0.85;
+  border-radius: 4px 4px 0 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Заголовки блоков */
+html body .section-heading {
+  border-bottom: 1px dashed var(--sec-line) !important;
+  padding-bottom: 12px !important;
+  margin-bottom: 16px !important;
+}
+html body .section-heading > span {
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid var(--sec-acc) !important;
+  color: var(--sec-acc) !important;
+  border-radius: 3px !important;
+}
+html body .section-heading b {
+  letter-spacing: 0.08em;
+}
+
+/* Вкладки как карточки-секторы; активная - с цветной линией снизу */
+html body .top100-tab {
+  position: relative;
+  border-radius: 3px !important;
+  border: 1px solid var(--sec-line) !important;
+  background: rgba(6, 10, 16, 0.7) !important;
+  letter-spacing: 0.12em !important;
+  min-height: 44px;
+}
+html body .top100-tab:hover {
+  border-color: rgba(var(--sec-acc-rgb), 0.6) !important;
+}
+html body .top100-tab.active {
+  background: linear-gradient(180deg, rgba(var(--sec-acc-rgb), 0.2), rgba(var(--sec-acc-rgb), 0.04)) !important;
+  border-color: var(--sec-acc) !important;
+  color: #fff !important;
+  box-shadow: inset 0 -3px 0 var(--sec-acc) !important;
+}
+/* нумера разделов «Информации»: 01 Прогресс, 02 Задания, 03 Боссы */
+html body .info-sections {
+  counter-reset: sec;
+}
+html body .info-sections .top100-tab::before {
+  content: "0" counter(sec);
+  counter-increment: sec;
+  font:
+    600 10px "ZoneMono",
+    ui-monospace,
+    monospace;
+  color: var(--sec-acc);
+  margin-right: 10px;
+  opacity: 0.9;
+}
+html body .info-view {
+  border-radius: 3px !important;
+}
+
+/* Карточки урона */
+html body .damage-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 3px !important;
+  border: 1px solid var(--sec-line) !important;
+  background: linear-gradient(160deg, rgba(30, 44, 66, 0.75), rgba(8, 12, 18, 0.9)) !important;
+}
+html body .damage-card::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--sec-acc), transparent);
+  pointer-events: none;
+}
+html body .damage-card strong {
+  color: #fff;
+  text-shadow: 0 0 18px rgba(var(--sec-acc-rgb), 0.35);
+}
+
+/* Модальные окна (древо талантов, жетоны, бонусы, сравнение, подтверждение) */
+html body .talent-game-window {
+  position: relative;
+  border: 1px solid var(--sec-acc) !important;
+  border-radius: 4px !important;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(0, 0, 0, 0.6) !important;
+}
+html body .talent-game-window::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 6px;
+  z-index: 3;
+  pointer-events: none;
+  background: repeating-linear-gradient(-45deg, var(--sec-acc) 0 14px, #0b0f16 14px 26px);
+}
+html body .talent-game-header {
+  padding-top: 18px !important;
+  border-bottom: 1px dashed var(--sec-line) !important;
+}
+
+/* Удобство: заметный фокус с клавиатуры */
+html body :is(button, a, input, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--sec-acc) !important;
+  outline-offset: 2px;
+}
+
+/* Телефон */
+@media (max-width: 720px) {
+  html body .result-title[data-sector] {
+    padding-top: 26px !important;
+  }
+  html body .result-title[data-sector]::before {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    padding: 4px 6px;
+  }
+  html body .result-panel,
+  html body .sidebar {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  html body .info-sections .top100-tab::before {
+    margin-right: 6px;
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  html body .result-panel,
+  html body .sidebar {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}

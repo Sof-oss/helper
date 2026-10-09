@@ -36,6 +36,7 @@
 <link rel="stylesheet" href="/player-card.css">
 <link rel="stylesheet" href="/zone-players.css">
 <link rel="stylesheet" href="/my-place.css">
+<link rel="stylesheet" href="/sector.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></symbol></defs></svg>
@@ -43,7 +44,7 @@
 
 
 <main class="content top100-content" id="main">
-<div class="result-title"><svg class="target-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7.6 2.8h8.8l-2.9 6h-3z"/><circle cx="12" cy="14.8" r="5.9"/><path d="m12 11.6 1 2 2.2.3-1.6 1.5.4 2.2-2-1.1-2 1.1.4-2.2-1.6-1.5 2.2-.3z" fill="currentColor" stroke="none"/></g></svg><h1>Топ-100</h1><a class="t100-vs-link" href="/compare"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h11M11.5 3.5 15 7l-3.5 3.5M20 17H9M12.5 13.5 9 17l3.5 3.5"/></svg>Сравнить игроков</a></div>
+<div class="result-title" data-sector="02" data-zone="Топ-100"><svg class="target-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7.6 2.8h8.8l-2.9 6h-3z"/><circle cx="12" cy="14.8" r="5.9"/><path d="m12 11.6 1 2 2.2.3-1.6 1.5.4 2.2-2-1.1-2 1.1.4-2.2-1.6-1.5 2.2-.3z" fill="currentColor" stroke="none"/></g></svg><h1>Топ-100</h1><a class="t100-vs-link" href="/compare"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h11M11.5 3.5 15 7l-3.5 3.5M20 17H9M12.5 13.5 9 17l3.5 3.5"/></svg>Сравнить игроков</a></div>
 <section class="result-panel top100-panel">
   <!-- дату подставляет top100.js из top100-data.js в #top100Updated, руками не править -->
   <div class="section-heading t100-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg></span><b>Рейтинг игроков</b><p class="top100-updated" id="top100UpdatedBox"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>Обновлено</span><b id="top100Updated">-</b></p></div>

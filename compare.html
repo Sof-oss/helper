@@ -33,6 +33,7 @@
 <link rel="stylesheet" href="/zone-players.css">
 <link rel="stylesheet" href="/my-place.css">
 <link rel="stylesheet" href="/compare.css">
+<link rel="stylesheet" href="/sector.css">
 </head>
 <body>
 <!-- @include header active="/top100" -->
@@ -40,7 +41,7 @@
 
 <!-- Сравнение двух игроков: /compare?a=<ID>&b=<ID> (ID - как в /p/<ID>). Всё содержимое рисует compare.js из top100-players.json -->
 <main class="content info-content page-narrow vs-content" id="main">
-<div class="result-title"><svg class="target-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11M11.5 3.5 15 7l-3.5 3.5"/><path d="M20 17H9M12.5 13.5 9 17l3.5 3.5"/></g></svg><div class="result-title-text"><a class="result-kicker vs-crumb" href="/top100">Топ-100</a><h1>Сравнение игроков</h1></div></div>
+<div class="result-title" data-sector="02" data-zone="Сравнение"><svg class="target-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h11M11.5 3.5 15 7l-3.5 3.5"/><path d="M20 17H9M12.5 13.5 9 17l3.5 3.5"/></g></svg><div class="result-title-text"><a class="result-kicker vs-crumb" href="/top100">Топ-100</a><h1>Сравнение игроков</h1></div></div>
 <p class="vs-lead">Два «Личных дела» рядом: места и показатели игроков во всех семи рейтингах Топ-100 - репутация, боссы, тайники, таланты, коллекции, экспедиции и защита лагеря. Найдите двух игроков по нику и поделитесь ссылкой на сравнение.</p>
 <section class="result-panel vs-panel" id="vsRoot">
   <noscript><p class="damage-footnote">Для сравнения игроков нужен включённый JavaScript.</p></noscript>

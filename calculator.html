@@ -43,6 +43,7 @@
 
   <link rel="stylesheet" href="tour.css">
 <link rel="stylesheet" href="calc-slots.css">
+<link rel="stylesheet" href="sector.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
@@ -66,7 +67,7 @@
 
 <!-- заголовок стоит до настроек: на телефоне он виден первым, на компьютере сетка ставит его над результатами -->
 <main class="page" id="main">
-<div class="result-title calc-title"><svg class="target-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.8 8.4V3.8h4.6M15.6 3.8h4.6v4.6M20.2 15.6v4.6h-4.6M8.4 20.2H3.8v-4.6"/><circle cx="12" cy="12" r="4.3"/><path d="M12 6.2v2.4M12 15.4v2.4M6.2 12h2.4M15.4 12h2.4"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></g></svg><h1>Калькулятор урона</h1></div>
+<div class="result-title calc-title" data-sector="03" data-zone="Калькулятор"><svg class="target-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.8 8.4V3.8h4.6M15.6 3.8h4.6v4.6M20.2 15.6v4.6h-4.6M8.4 20.2H3.8v-4.6"/><circle cx="12" cy="12" r="4.3"/><path d="M12 6.2v2.4M12 15.4v2.4M6.2 12h2.4M15.4 12h2.4"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></g></svg><h1>Калькулятор урона</h1></div>
 <aside class="sidebar" aria-label="Настройки билда">
 <!-- «Мои билды»: содержимое рисует src/calc-slots.js, место занято заранее (calc-slots.css) -->
 <section class="side-section slots-section" id="calcSlots" aria-label="Мои билды"></section>
