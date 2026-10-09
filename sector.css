@@ -93,7 +93,7 @@ html body .section-heading b {
 }
 
 /* Вкладки как карточки-секторы; активная - с цветной линией снизу */
-html body .top100-tab {
+html body .top100-tab:not(.ec-loc) {
   position: relative;
   border-radius: 3px !important;
   border: 1px solid var(--sec-line) !important;
@@ -101,10 +101,10 @@ html body .top100-tab {
   letter-spacing: 0.12em !important;
   min-height: 44px;
 }
-html body .top100-tab:hover {
+html body .top100-tab:not(.ec-loc):hover {
   border-color: rgba(var(--sec-acc-rgb), 0.6) !important;
 }
-html body .top100-tab.active {
+html body .top100-tab.active:not(.ec-loc) {
   background: linear-gradient(180deg, rgba(var(--sec-acc-rgb), 0.2), rgba(var(--sec-acc-rgb), 0.04)) !important;
   border-color: var(--sec-acc) !important;
   color: #fff !important;
