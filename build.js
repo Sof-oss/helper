@@ -250,8 +250,8 @@ const GUIDE_INVITE =
   '<a class="guide-card guide-card-invite" href="#send">' +
   '<span class="guide-card-img guide-card-invite-img" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
   '<span class="guide-card-body"><b>Напишите свой гайд</b>' +
-  "<small>Поделитесь опытом - после проверки гайд появится здесь с вашей подписью. Идеи: «Как пройти Болота», " +
-  "«Билд для новичка», «Где копить жетоны на босса».</small>" +
+  "<small>Поделитесь опытом - после проверки гайд появится здесь с вашей подписью. Идеи: «Как пройти экспедицию», " +
+  "«Билд для новичка», «Как лучше копить жетоны»</small>" +
   '<span class="guide-card-meta">Открыть форму →</span></span></a>';
 
 /* ---------- 3D главной ----------
@@ -406,6 +406,8 @@ const PRERENDER = {
       mark("levels", els.infoGroups.innerHTML),
       ' data-active="' + els.infoGroups.dataset.active + '" data-view="' + els.infoGroups.dataset.view + '"'
     );
+    /* подсказка «Укажите уровень… в калькуляторе» - сразу в HTML, иначе графики под ней сдвигаются (CLS) */
+    if (els.infoProgress && els.infoProgress.innerHTML) html = fill(html, "infoProgress", els.infoProgress.innerHTML);
     html = fill(html, "tasksRoot", mark("tasks", els.tasksRoot.innerHTML));
     return fill(html, "bossesRoot", mark("bosses", els.bossesRoot.innerHTML));
   },

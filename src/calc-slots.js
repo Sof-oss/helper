@@ -180,9 +180,15 @@ function addSlot(hash, name) {
 }
 
 function init() {
-  const anchor = document.querySelector(".sidebar .level-section");
-  if (!anchor || $("calcSlots")) return;
-  anchor.insertAdjacentHTML("beforebegin", '<section class="side-section slots-section" id="calcSlots"></section>');
+  /* место под «Мои билды» занято в calculator.html заранее (иначе панель под ним сдвигается - CLS);
+     на странице без этой разметки блок вставляется перед «Уровнем персонажа» */
+  const mount = $("calcSlots");
+  if (mount && mount.childElementCount) return;
+  if (!mount) {
+    const anchor = document.querySelector(".sidebar .level-section");
+    if (!anchor) return;
+    anchor.insertAdjacentHTML("beforebegin", '<section class="side-section slots-section" id="calcSlots"></section>');
+  }
   slots = load();
   /* слот и текущий билд могли разойтись (например, правили в другой вкладке без слотов): главный - текущий */
   active().hash = buildHash();

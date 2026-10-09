@@ -93,18 +93,10 @@ function periodPhrase() {
   return p ? p.label.charAt(0).toLowerCase() + p.label.slice(1) : "с прошлого обновления";
 }
 
-/* ☢ вместо медалей для 1–3 мест, цвет по месту */
+/* медали 1–3 мест: жетон на колодке (assets/medal-N.svg), номер места - текстом поверх */
 function rankCell(rank) {
   if (rank > 3) return '<span class="top100-rank-num">' + rank + "</span>";
-  return (
-    '<span class="top100-medal top100-medal-' +
-    rank +
-    '" title="' +
-    rank +
-    ' место">☢</span><span class="top100-rank-num">' +
-    rank +
-    "</span>"
-  );
+  return '<span class="top100-medal top100-medal-' + rank + '" title="' + rank + ' место">' + rank + "</span>";
 }
 const dotMarkup = (f, cls) =>
   f ? '<i class="' + cls + '" style="--f:' + escAttr(f.color) + '" title="' + escAttr(f.label) + '"></i>' : "";

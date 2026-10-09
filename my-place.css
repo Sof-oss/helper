@@ -541,3 +541,22 @@
     display: none;
   }
 }
+
+/* медали 1–3 мест (assets/medal-N.svg) перед местом в плитке «Моё место» */
+.mp-tile.m1 .mp-tile-rank b::before,
+.mp-tile.m2 .mp-tile-rank b::before,
+.mp-tile.m3 .mp-tile-rank b::before {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  height: 21px;
+  margin-right: 5px;
+  vertical-align: -2px;
+  background: url("assets/medal-1.svg") center/contain no-repeat;
+}
+.mp-tile.m2 .mp-tile-rank b::before {
+  background-image: url("assets/medal-2.svg");
+}
+.mp-tile.m3 .mp-tile-rank b::before {
+  background-image: url("assets/medal-3.svg");
+}

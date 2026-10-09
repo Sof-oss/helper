@@ -70,7 +70,7 @@
       '<form id="gfForm" novalidate>' +
       '<div class="gf-row"><label class="gf-field"><span>Заголовок</span><input id="gfTitle" maxlength="' +
       LIM.title +
-      '" placeholder="Например: Как пройти Болота" autocomplete="off" required></label>' +
+      '" placeholder="Как догнать Ымгыра без доната за 24 часа" autocomplete="off" required></label>' +
       '<label class="gf-field gf-author"><span>Ваш ник в игре</span><input id="gfAuthor" maxlength="' +
       LIM.author +
       '" placeholder="Подпись автора" autocomplete="nickname" required></label></div>' +

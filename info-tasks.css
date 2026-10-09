@@ -1210,3 +1210,25 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* заголовок раздела внутри панели повторял H1 страницы и активную вкладку («Прогресс по уровням» трижды подряд):
+   на экране его больше нет, для экранного диктора h2 остаётся */
+[data-section-panel] > .section-heading {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+[data-section-panel] > .info-lead {
+  margin-top: 16px;
+}
+
+/* график: ещё не пройденная часть кривой - в приглушённом цвете блока, а не серым (легенда и линия совпадают) */
+.ich-line {
+  stroke: color-mix(in srgb, var(--ich, #54bfff) 55%, #54728a);
+}

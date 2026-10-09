@@ -1105,29 +1105,30 @@ svg.target-icon {
   word-break: break-word;
 }
 
-/* ☢-медали 1–3 места, в тон логотипа */
+/* медали 1–3 места: жетон на колодке (assets/medal-N.svg), номер - текстом поверх, цвет металла */
 .top100-medal {
   display: inline-grid;
   place-items: center;
-  width: 19px;
-  height: 19px;
-  flex: 0 0 19px;
-  border-radius: 50%;
-  font-size: var(--fs-xs);
+  width: 28px;
+  height: 32px;
+  flex: 0 0 28px;
+  padding-top: 7px;
+  box-sizing: border-box;
+  background: url("assets/medal-1.svg") center/contain no-repeat;
+  font-family: var(--f-display);
+  font-size: 14px;
+  font-weight: 600;
   line-height: 1;
-  color: #0a1017;
-}
-.top100-medal-1 {
-  background: radial-gradient(circle at 35% 30%, #ffe08a, #e8ae3d);
-  box-shadow: 0 0 8px rgba(232, 174, 61, 0.55);
+  color: #ffe08a;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
 .top100-medal-2 {
-  background: radial-gradient(circle at 35% 30%, #eef2f4, #a9bac6);
-  box-shadow: 0 0 8px rgba(169, 186, 198, 0.45);
+  background-image: url("assets/medal-2.svg");
+  color: #eef2f4;
 }
 .top100-medal-3 {
-  background: radial-gradient(circle at 35% 30%, #e3a878, #b3703f);
-  box-shadow: 0 0 8px rgba(179, 112, 63, 0.45);
+  background-image: url("assets/medal-3.svg");
+  color: #f0b07e;
 }
 .top100-podium td {
   background: rgba(255, 183, 77, 0.05);
@@ -5104,11 +5105,6 @@ select:focus-visible {
   height: 44px;
   box-sizing: border-box;
 }
-@media (max-width: 600px) {
-  .top100-rank-in:has(.top100-medal) .top100-rank-num {
-    display: none;
-  }
-}
 
 /* 8. Гайды: заглушка шире и заметнее */
 .placeholder-panel {
@@ -5842,12 +5838,6 @@ th.top100-sort {
     letter-spacing: 0.06em;
     text-transform: uppercase;
     font-size: var(--fs-xs);
-  }
-  /* шесть пунктов на узком экране: подписи без разрядки, чтобы «Калькулятор» и «Сравнить» не слипались */
-  @media (max-width: 420px) {
-    .tabbar a span {
-      letter-spacing: 0;
-    }
   }
   .tabbar a.active:after {
     width: 36px;

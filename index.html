@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#070d18">
-<script>/* тема до первой отрисовки, чтобы не мигало */(function(){try{var t=localStorage.getItem("zoneTheme");if(t)document.documentElement.dataset.theme=t}catch(e){}})();</script>
+<script>/* тема до первой отрисовки, чтобы не мигало; кнопку «Тур по сайту» тому, кто его уже прошёл, прячем сразу - иначе разделы подскакивают, когда её скрывает tour.js */(function(){try{var t=localStorage.getItem("zoneTheme");if(t)document.documentElement.dataset.theme=t;if(localStorage.getItem("zoneTourSeen")==="1")document.documentElement.classList.add("tour-seen")}catch(e){}})();</script>
 <script>/* адрес без .html: /calculator.html -> /calculator, /index.html -> / (на GitHub Pages нет серверных переадресаций, канонический адрес указан в rel=canonical) */(function(){var p=location.pathname;if(/\.html$/.test(p))history.replaceState(null,"",p.replace(/(^|\/)index\.html$/,"$1").replace(/\.html$/,"")+location.search+location.hash)})();</script>
 <title>Сердце Зоны - сайт-помощник</title>
 <meta name="description" content="Неофициальный сайт-помощник для игры «Сердце Зоны»: калькулятор урона с древом талантов, Топ-100 по семи рейтингам с поиском и карточками игроков, справочные таблицы и гайды игроков.">
@@ -31,6 +31,7 @@
 <link rel="stylesheet" href="styles.css">
 
 <link rel="stylesheet" href="zone3d.css">
+<link rel="stylesheet" href="home.css">
 <link rel="stylesheet" href="tour.css">
 <link rel="stylesheet" href="my-place.css">
 </head>
@@ -40,11 +41,15 @@
 
 <main class="content home-content" id="main">
   <div class="home-hero">
+    <span class="home-hero-frame" aria-hidden="true"></span>
+    <span class="home-hero-meta" aria-hidden="true"><i>Сеть сталкеров</i><i>Приём</i></span>
     <span class="home-eyebrow"><i></i>Онлайн-помощник Зоны</span>
     <h1>Сердце Зоны</h1>
     <p>Помощник сталкера: расчёт урона по оружию, снаряжению и талантам, справочные таблицы по уровням и гайды</p>
+    <ul class="home-status" aria-label="Коротко о сайте"><li>Без регистрации</li><li>Топ-100 - каждый день</li><li>Работает без сети</li></ul>
     <button type="button" class="tour-start" id="tourStart" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2.3 4.7-4.7 2.3 2.3-4.7z"/></g></svg>Тур по сайту за 1 минуту</button>
   </div>
+  <div class="home-tape" aria-hidden="true"><span>☢ Зона отчуждения</span></div>
   <div class="home-grid">
     <a class="home-card" href="/info" style="--accent:#ffb74d;--accent-bg:rgba(255,183,77,.12);--accent-border:rgba(255,183,77,.35)">
       <div class="home-card-body">

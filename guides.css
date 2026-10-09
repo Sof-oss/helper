@@ -784,3 +784,15 @@
   content: "Для отправки:";
   color: #6d8091;
 }
+
+/* телефон: у карточки-приглашения нет обложки - вместо пустой «картинки» на 200 px узкая полоса со значком */
+@media (max-width: 760px) {
+  .guide-card-invite .guide-card-invite-img {
+    height: 84px;
+    aspect-ratio: auto;
+  }
+  .guide-card-invite-img svg {
+    width: 40px;
+    height: 40px;
+  }
+}

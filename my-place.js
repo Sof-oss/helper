@@ -97,10 +97,12 @@
     const wrap = $("top100TableWrap"),
       tools = document.querySelector(".top100-panel .t100-tools");
     if (!wrap || !tools) return;
-    tools.insertAdjacentHTML(
-      "afterend",
-      '<div class="mp-bar" id="mpBar" role="region" aria-label="Моё место"></div><p class="mp-status" id="mpStatus" aria-live="polite" hidden></p>'
-    );
+    /* в top100.html место под панель занято заранее (иначе таблица под ней сдвигается - CLS) */
+    if (!$("mpBar"))
+      tools.insertAdjacentHTML(
+        "afterend",
+        '<div class="mp-bar" id="mpBar" role="region" aria-label="Моё место"></div><p class="mp-status" id="mpStatus" aria-live="polite" hidden></p>'
+      );
     const bar = $("mpBar"),
       status = $("mpStatus");
     let picking = false;

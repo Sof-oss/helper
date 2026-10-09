@@ -196,7 +196,9 @@ function renderTalentDetails(t) {
         .join("")
     : '<div class="td-req none">Нет требований</div>';
   return (
-    '<div class="talent-detail"><div class="td-head"><h3>' +
+    '<div class="talent-detail"><div class="td-head"><span class="td-art" aria-hidden="true">' +
+    (TALENT_ASSETS[t[0]] ? '<img src="assets/' + TALENT_ASSETS[t[0]] + '" alt="" width="200" height="200">' : "") +
+    "</span><h3>" +
     t[2] +
     '</h3><button type="button" class="td-close" data-close-talent-detail aria-label="Закрыть">×</button></div><div class="td-rank"><div class="td-pips">' +
     pips +
@@ -525,8 +527,7 @@ function renderTalents() {
           mid = (y1 + y2) / 2,
           met = talentRank(req) >= 5,
           onPath = pathSet.has(t[0]),
-          stroke = onPath ? "#54bfff" : met ? "#d8d8d2" : "rgba(190,190,184,.32)",
-          width = onPath ? 2.6 : met ? 2 : 1.35;
+          cls = onPath ? "te-path" : met ? "te-met" : "te-off";
         return (
           '<path d="M' +
           x1 +
@@ -544,11 +545,9 @@ function renderTalents() {
           x2 +
           " " +
           y2 +
-          '" fill="none" stroke="' +
-          stroke +
-          '" stroke-width="' +
-          width +
-          '" stroke-linecap="round" stroke-linejoin="round"></path>'
+          '" class="' +
+          cls +
+          '" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>'
         );
       })
     )
@@ -600,26 +599,7 @@ function renderTalents() {
     branchSpent[t[1]] = (branchSpent[t[1]] || 0) + (talentRank(t[0]) || 0);
     branchMax[t[1]] = (branchMax[t[1]] || 0) + 5;
   });
-  const branchRows =
-    '<div class="talent-branches">' +
-    branches
-      .map(b => {
-        const got = branchSpent[b.code] || 0,
-          all = branchMax[b.code] || 1;
-        return (
-          '<div class="talent-branch-progress"><div><span>' +
-          b.name +
-          "</span><b>" +
-          got +
-          " / " +
-          all +
-          '</b></div><span class="talent-branch-bar"><i style="width:' +
-          Math.round((got / all) * 100) +
-          '%"></i></span></div>'
-        );
-      })
-      .join("") +
-    "</div>";
+  const maxedCount = TALENTS.filter(t => talentRank(t[0]) >= 5).length;
   const last =
     lastTalentChange && lastTalentChange.length
       ? '<div class="talent-last"><small>Последнее изменение</small><div class="talent-last-list">' +
@@ -633,42 +613,52 @@ function renderTalents() {
   /* кнопки в .talent-side-footer, на телефоне он липнет ко дну панели (styles.css) */
   /* легенда состояний живёт в панели, а не поверх дерева: иначе она перекрывает крайние узлы */
   const legend =
-    '<div class="talent-legend" aria-hidden="true"><span><i class="lg-maxed"></i>Изучено до максимума</span><span><i class="lg-ready"></i>Можно прокачать</span><span><i class="lg-open"></i>Открыт, очков нет</span><span><i class="lg-locked"></i>Закрыт требованием</span></div>';
+    '<div class="talent-legend" aria-hidden="true"><span><i class="lg-maxed"></i>Изучен полностью</span><span><i class="lg-ready"></i>Можно прокачать</span><span><i class="lg-open"></i>Открыт, очков нет</span><span><i class="lg-locked"></i>Закрыт требованием</span></div>';
   $("talentSidebar").innerHTML =
     /* «Таланты N / 135» уже есть в шапке окна - здесь не повторяем */
     '<div class="talent-gauge" style="--pct:' +
     pct +
     '"><div class="talent-gauge-ticks"></div><div class="talent-gauge-value"><b>' +
-    pct +
-    '</b><small>%</small></div></div><div class="talent-side-stats"><div><b>' +
     Math.max(0, MAX_TALENT_POINTS - spent) +
-    "</b><small>свободно</small></div><div><b>" +
+    "</b><small>свободно</small></div></div>" +
+    '<div class="talent-side-stats"><div><b>' +
     spent +
-    "</b><small>распределено</small></div></div>" +
-    branchRows +
+    "</b><small>распределено</small></div><div><b>" +
+    maxedCount +
+    "<em>/" +
+    TALENTS.length +
+    "</em></b><small>изучено полностью</small></div></div>" +
     last +
+    /* ветки: кнопка выбора сразу показывает, сколько очков в ней вложено */
     '<div class="talent-branch-tabs">' +
     branches
-      .map(
-        b =>
+      .map(b => {
+        const got = branchSpent[b.code] || 0,
+          all = branchMax[b.code] || 1;
+        return (
           '<button type="button" class="' +
           (b.code === currentTalentBranch ? "active" : "") +
           '" aria-pressed="' +
           (b.code === currentTalentBranch) +
           '" data-talent-branch="' +
           b.code +
-          '">' +
+          '"><span class="tb-name">' +
           b.name +
-          "</button>"
-      )
+          '</span><b class="tb-count">' +
+          got +
+          " / " +
+          all +
+          '</b><small class="tb-desc">' +
+          b.desc +
+          '</small><span class="talent-branch-bar"><i style="width:' +
+          Math.round((got / all) * 100) +
+          '%"></i></span></button>'
+        );
+      })
       .join("") +
-    '</div><div class="talent-branch-description"><b>' +
-    branch.name +
-    "</b><span>" +
-    branch.desc +
-    "</span></div>" +
+    "</div>" +
     legend +
-    '<div class="talent-side-hint">Нажми на узел дерева, чтобы открыть описание и прокачку</div><div class="talent-side-footer"><button type="button" class="talent-hide talent-hide-reset" data-reset-talents ' +
+    '<div class="talent-side-hint">Нажмите на талант в дереве, чтобы открыть описание и прокачку</div><div class="talent-side-footer"><button type="button" class="talent-hide talent-hide-reset" data-reset-talents ' +
     (spent ? "" : "disabled") +
     ">↻ Сбросить таланты</button></div>";
   const detailOverlay = $("talentDetailOverlay"),
@@ -1049,6 +1039,9 @@ function calc() {
   ["Grenade", "Gl", "Gauss"].forEach(K => {
     set("crit" + K, (r["crit" + K] * 100).toFixed(0) + "%");
     set("critDmg" + K, fmt(r["critDmg" + K]));
+    /* пока крита нет (0% и 0), плашка приглушённая, а не тревожно-красная */
+    const chip = $("crit" + K) && $("crit" + K).closest(".crit-chip");
+    if (chip) chip.classList.toggle("is-zero", !r["crit" + K] && !r["critDmg" + K]);
   });
   set("noCooldown", (r.noCooldown * 100).toFixed(0) + "%");
   set("cooldown", (r.cooldown * 100).toFixed(0) + "%");
