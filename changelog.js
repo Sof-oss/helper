@@ -67,18 +67,29 @@ window.CHANGELOG=[
 (function(){
  const root=document.getElementById("homeNews");
  if(!root||!Array.isArray(window.CHANGELOG)||!window.CHANGELOG.length)return;
- const SEEN_KEY="gameHelperNewsSeen",SHOW=3;
+ const SEEN_KEY="gameHelperNewsSeen";
  const TYPES={new:"Новое",up:"Улучшено",fix:"Исправлено"};
  const MONTHS=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
  const fmtDate=d=>{const[y,m,day]=d.split("-").map(Number);return day+" "+MONTHS[m-1]+" "+y};
  const list=window.CHANGELOG,latest=list[0].date;
- const entry=(e,i)=>'<li class="news-entry'+(i>=SHOW?' news-more':'')+'"><div class="news-head"><time datetime="'+e.date+'">'+fmtDate(e.date)+'</time><b>'+e.title+'</b></div><ul class="news-items">'+
-  e.items.map(([t,text])=>'<li><span class="news-tag news-tag-'+t+'">'+(TYPES[t]||t)+'</span><span>'+text+'</span></li>').join("")+'</ul></li>';
+ /* компактно: последняя запись целиком (до ITEMS пунктов), ещё COMPACT записей - одной строкой «дата + заголовок»,
+    раскрываются по нажатию; остальное - под кнопкой «Вся история» */
+ const COMPACT=2,ITEMS=3;
+ const plural=n=>n%10==1&&n%100!=11?"изменение":n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?"изменения":"изменений";
+ const entry=(e,i)=>{
+  const compact=i>0,cls="news-entry"+(compact?" news-compact":"")+(i>COMPACT?" news-more":"");
+  const head=compact
+   ?'<button type="button" class="news-head" aria-expanded="false"><time datetime="'+e.date+'">'+fmtDate(e.date)+'</time><b>'+e.title+'</b><span class="news-count">'+e.items.length+" "+plural(e.items.length)+'</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>'
+   :'<div class="news-head"><time datetime="'+e.date+'">'+fmtDate(e.date)+'</time><b>'+e.title+'</b></div>';
+  const items=e.items.map(([t,text],k)=>'<li'+(!compact&&k>=ITEMS?' class="news-extra"':'')+'><span class="news-tag news-tag-'+t+'">'+(TYPES[t]||t)+'</span><span>'+text+'</span></li>').join("");
+  const more=!compact&&e.items.length>ITEMS?'<button type="button" class="news-extra-btn">Ещё '+(e.items.length-ITEMS)+'</button>':'';
+  return '<li class="'+cls+'">'+head+'<ul class="news-items">'+items+'</ul>'+more+'</li>';
+ };
  let seen="";try{seen=localStorage.getItem(SEEN_KEY)||""}catch{}
  root.innerHTML='<div class="news-title"><span class="news-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3.2"/></svg></span><h2>Что нового?</h2>'+
   (seen&&seen<latest?'<span class="news-badge">NEW</span>':'')+'</div>'+
   '<ol class="news-list" id="homeNewsList">'+list.map(entry).join("")+'</ol>'+
-  (list.length>SHOW?'<button type="button" class="news-toggle" aria-expanded="false" aria-controls="homeNewsList"><span>Вся история</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>':'');
+  (list.length>COMPACT+1?'<button type="button" class="news-toggle" aria-expanded="false" aria-controls="homeNewsList"><span>Вся история</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>':'');
  /* первый визит тоже запоминаем: метку NEW покажем, когда появится следующая запись */
  try{if(seen!==latest)localStorage.setItem(SEEN_KEY,latest)}catch{}
  const btn=root.querySelector(".news-toggle");
@@ -86,5 +97,14 @@ window.CHANGELOG=[
   const open=root.classList.toggle("open");
   btn.setAttribute("aria-expanded",open);
   btn.querySelector("span").textContent=open?"Свернуть":"Вся история";
+ });
+ /* раскрыть одну запись или остаток пунктов последней */
+ if(root.addEventListener)root.addEventListener("click",ev=>{
+  const t=ev.target&&ev.target.closest?ev.target.closest(".news-compact > .news-head, .news-extra-btn"):null;
+  if(!t)return;
+  const li=t.closest(".news-entry");
+  if(t.classList.contains("news-extra-btn")){li.classList.add("show-all");t.remove();return}
+  const on=li.classList.toggle("expanded");
+  t.setAttribute("aria-expanded",on);
  });
 })();
