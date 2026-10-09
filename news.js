@@ -46,7 +46,7 @@ window.ZONE_NEWS = [
   };
   const EVENTS = {
     halloween:
-      '<div class="zn-event" aria-hidden="true"><img src="assets/event-halloween-600.webp" srcset="assets/event-halloween-600.webp 600w, assets/event-halloween-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-eye zn-ev-l"></span><span class="zn-ev-eye zn-ev-r"></span><svg class="zn-ev-izlom" viewBox="0 0 80 140"><g class="body"><ellipse cx="41" cy="27" rx="7" ry="8"/><path d="M35 33C27 44 29 64 36 80L56 80C61 64 58 44 47 33Z"/><path d="M39 78 34 128H40L46 94 51 128H57L55 78Z"/><path d="M53 42C63 54 66 68 62 86H58C60 72 56 60 49 50Z"/><path d="M36 40C18 54 11 88 13 120L7 131 13 128 15 134 19 128 24 133 24 121C23 95 28 70 41 50Z"/></g><g class="eyes"><circle cx="38" cy="26" r="1.5"/><circle cx="44.5" cy="26.5" r="1.5"/></g></svg><span class="zn-ev-soon">Скоро</span></div>'
+      '<div class="zn-event" aria-hidden="true"><img src="assets/event-halloween-600.webp" srcset="assets/event-halloween-600.webp 600w, assets/event-halloween-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-eye zn-ev-l"></span><span class="zn-ev-eye zn-ev-r"></span><span class="zn-ev-izlom"><img src="assets/event-izlom-shadow.webp" width="366" height="320" alt="" loading="lazy" decoding="async"><i class="zn-ev-ie zn-ev-ie1"></i><i class="zn-ev-ie zn-ev-ie2"></i></span><span class="zn-ev-soon">Скоро</span></div>'
   };
   const item = (n, i) =>
     '<li class="zn-item' +

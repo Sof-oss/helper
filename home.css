@@ -786,19 +786,40 @@ html.tour-seen .home-hero .tour-start {
 .zn-ev-izlom {
   position: absolute;
   z-index: 1;
-  left: 63%;
-  bottom: 4%;
-  height: 82%;
-  width: auto;
+  left: 60%;
+  bottom: -6%;
+  height: 104%;
+  aspect-ratio: 366 / 320;
   opacity: 0;
-  filter: blur(0.6px);
+  filter: blur(0.5px);
+  /* ноги уходят в туман */
+  -webkit-mask: linear-gradient(180deg, #000 62%, transparent 96%);
+  mask: linear-gradient(180deg, #000 62%, transparent 96%);
 }
-.zn-ev-izlom .body {
-  fill: #040506;
+.zn-ev-izlom img {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
-.zn-ev-izlom .eyes {
-  fill: #ff2a1a;
-  filter: drop-shadow(0 0 2px #ff2a1a) drop-shadow(0 0 5px #ff0000);
+/* глаза Излома - в % кадра event-izlom-shadow.webp */
+.zn-ev-ie {
+  position: absolute;
+  width: 1.9%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #ff3b24;
+  box-shadow:
+    0 0 3px 1px #ff2a1a,
+    0 0 8px 3px rgba(255, 0, 0, 0.6);
+  transform: translate(-50%, -50%);
+}
+.zn-ev-ie1 {
+  left: 8.3%;
+  top: 5.8%;
+}
+.zn-ev-ie2 {
+  left: 11.6%;
+  top: 6.1%;
 }
 @media (prefers-reduced-motion: no-preference) {
   .zn-ev-eye {
@@ -810,7 +831,7 @@ html.tour-seen .home-hero .tour-start {
   .zn-ev-izlom {
     animation: zn-izlom 19s ease-in-out 3s infinite;
   }
-  .zn-ev-izlom .eyes {
+  .zn-ev-ie {
     animation: zn-izlom-eyes 19s linear 3s infinite;
   }
 }
