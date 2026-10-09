@@ -27,10 +27,10 @@
   if (!inSeason()) return;
 
   var LEVELS = [
-    ["off", "Выкл", "обычный сайт"],
-    ["quiet", "Тихо", "тыквы и вороны"],
-    ["season", "Сезон", "вся нечисть Зоны"],
-    ["surge", "Выброс", "чаще, темнее, с фонариком"]
+    ["off", "Выкл", "обычный сайт", "🕯️"],
+    ["quiet", "Тихо", "тыквы и вороны", "🪶"],
+    ["season", "Сезон", "вся нечисть Зоны", "🎃"],
+    ["surge", "Выброс", "чаще, темнее, с фонариком", "☢️"]
   ];
   function pref() {
     var v = "season";
@@ -104,16 +104,18 @@
     menu.setAttribute("role", "menu");
     menu.hidden = true;
     menu.innerHTML =
-      '<div class="hw-menu-head">Хэллоуин в Зоне</div>' +
+      '<div class="hw-menu-head"><b>Хэллоуин в Зоне</b><small>сезонное оформление</small></div>' +
       LEVELS.map(function (l) {
         return (
           '<button type="button" role="menuitemradio" data-hw-level="' +
           l[0] +
-          '"><b>' +
+          '"><i class="hw-mi" aria-hidden="true">' +
+          l[3] +
+          "</i><span><b>" +
           l[1] +
           "</b><small>" +
           l[2] +
-          "</small></button>"
+          "</small></span></button>"
         );
       }).join("");
     function open(v) {

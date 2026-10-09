@@ -7662,7 +7662,8 @@ main.content.page-narrow {
   }
 }
 
-/* ---------- переключатель сезонного оформления «Хэллоуин в Зоне» (кнопку рисует season.js) ---------- */
+/* ---------- переключатель сезонного оформления «Хэллоуин в Зоне» (кнопку рисует season.js) ----------
+   тыква-фонарь: выключено - потухшая серая, включено - оранжевая с дрожащим свечным огнём внутри; меню - с паутиной */
 .hw-switch {
   position: relative;
   margin-left: auto;
@@ -7671,107 +7672,241 @@ main.content.page-narrow {
   margin-left: 8px;
 }
 .hw-toggle {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   padding: 0;
-  border: 1px solid #3a2c1c;
-  background: linear-gradient(180deg, rgba(26, 18, 10, 0.92), rgba(12, 9, 6, 0.94));
-  color: #8a7a66;
+  border: 1px solid #3b2a1a;
+  background:
+    radial-gradient(circle at 50% 62%, rgba(90, 60, 30, 0.35), transparent 62%),
+    linear-gradient(180deg, #17110b, #0b0806);
   cursor: pointer;
-  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
   transition:
-    color 0.2s,
-    border-color 0.2s;
+    border-color 0.25s,
+    background 0.25s;
 }
 .hw-toggle svg {
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
+  overflow: visible;
+  transition:
+    transform 0.25s,
+    filter 0.25s;
+}
+.hw-toggle .hw-t-stem {
   fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  stroke-linejoin: round;
+  stroke: #5a5040;
+  stroke-width: 1.8;
   stroke-linecap: round;
 }
-.hw-toggle .hw-t-face {
-  fill: currentColor;
-  stroke-width: 0.6;
+.hw-toggle .hw-t-body {
+  fill: #3b332b;
+  stroke: #6d6253;
+  stroke-width: 1;
 }
+.hw-toggle .hw-t-face {
+  fill: #14100c;
+}
+/* включено: горит */
 .hw-toggle[aria-pressed="true"] {
-  color: #f08a2c;
-  border-color: #7a4a1e;
+  border-color: #8a4515;
+  background:
+    radial-gradient(circle at 50% 62%, rgba(255, 120, 20, 0.32), transparent 64%),
+    linear-gradient(180deg, #24130a, #0d0805);
+}
+.hw-toggle[aria-pressed="true"] svg {
+  filter: drop-shadow(0 0 4px rgba(255, 120, 20, 0.55));
+}
+.hw-toggle[aria-pressed="true"] .hw-t-stem {
+  stroke: #6f9a3c;
+}
+.hw-toggle[aria-pressed="true"] .hw-t-body {
+  fill: #e0701c;
+  stroke: #ffa040;
 }
 .hw-toggle[aria-pressed="true"] .hw-t-face {
-  fill: #ffcf6a;
-  filter: drop-shadow(0 0 3px rgba(255, 160, 40, 0.9));
+  fill: #ffe08a;
+  animation: hw-candle 3.2s ease-in-out infinite;
+}
+@keyframes hw-candle {
+  0%,
+  100% {
+    fill: #ffe08a;
+    filter: drop-shadow(0 0 2px #ffb030);
+  }
+  30% {
+    fill: #ffc24a;
+    filter: drop-shadow(0 0 1px #ff8a20);
+  }
+  34% {
+    fill: #ffe9a8;
+    filter: drop-shadow(0 0 4px #ffc040);
+  }
+  62% {
+    fill: #ffd060;
+    filter: drop-shadow(0 0 2px #ff9a30);
+  }
 }
 .hw-toggle:hover,
-.hw-toggle:focus-visible {
-  color: #ffa24a;
-  border-color: #a8622a;
+.hw-toggle:focus-visible,
+.hw-toggle[aria-expanded="true"] {
+  border-color: #c06424;
 }
+.hw-toggle:hover svg,
+.hw-toggle:focus-visible svg {
+  transform: rotate(-8deg) scale(1.06);
+}
+
 .hw-menu {
   position: absolute;
   right: 0;
-  top: calc(100% + 8px);
+  top: calc(100% + 10px);
   z-index: 60;
   display: grid;
-  min-width: 220px;
-  padding: 6px;
-  border: 1px solid #4a3220;
-  background: rgba(10, 9, 7, 0.97);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+  gap: 2px;
+  min-width: 248px;
+  padding: 8px;
+  border: 1px solid #5a3216;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60' fill='none' stroke='%23c9b8a0' stroke-opacity='.28' stroke-width='.7'%3E%3Cpath d='M60 0 30 30M60 0 12 18M60 0 42 48M60 0 0 4M60 0 56 60'/%3E%3Cpath d='M48 0q2 8 12 12M36 0q2 18 24 24M24 0q4 28 36 36M12 0q4 38 48 48'/%3E%3C/svg%3E")
+      right top / 74px 74px no-repeat,
+    radial-gradient(120% 80% at 0 100%, rgba(224, 112, 28, 0.14), transparent 60%),
+    linear-gradient(180deg, #160e14, #0b0809);
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 140, 50, 0.18);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+.hw-menu::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #e0701c 30%, #8fbf4a 70%, transparent);
+  opacity: 0.8;
 }
 .hw-menu[hidden] {
   display: none;
 }
 .hw-menu-head {
-  padding: 4px 8px 8px;
-  color: #e0782f;
-  font: 600 11px/1.2 var(--mono, monospace);
-  letter-spacing: 0.08em;
+  display: grid;
+  gap: 2px;
+  padding: 6px 10px 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px dashed rgba(224, 112, 28, 0.3);
+}
+.hw-menu-head b {
+  color: #ff9a3c;
+  font: 700 15px/1.1 var(--f-display, inherit);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 8px rgba(255, 120, 20, 0.55),
+    0 0 1px #000;
+}
+.hw-menu-head small {
+  color: #8fae6a;
+  font: 500 10px/1.2 var(--mono, monospace);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 .hw-menu button {
   position: relative;
-  display: grid;
-  gap: 2px;
-  padding: 7px 10px 7px 26px;
-  border: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border: 1px solid transparent;
   background: none;
   color: #d8cdbd;
   text-align: left;
   cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
 }
-.hw-menu button::before {
-  content: "";
-  position: absolute;
-  left: 9px;
-  top: 11px;
-  width: 8px;
-  height: 8px;
-  border: 1px solid #6a5440;
+.hw-menu button span {
+  display: grid;
+  gap: 1px;
 }
-.hw-menu button[aria-checked="true"]::before {
-  background: #f08a2c;
-  border-color: #f08a2c;
-  box-shadow: 0 0 6px rgba(240, 138, 44, 0.8);
-}
-.hw-menu button:hover,
-.hw-menu button:focus-visible {
-  background: rgba(224, 120, 47, 0.12);
+.hw-mi {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border: 1px solid #3a2a1e;
+  border-radius: 50%;
+  background: radial-gradient(circle, #1f1610, #0c0907);
+  font-style: normal;
+  font-size: 15px;
+  filter: grayscale(0.85) brightness(0.75);
+  transition: filter 0.2s;
 }
 .hw-menu b {
   font-size: 13px;
+  letter-spacing: 0.02em;
 }
 .hw-menu small {
   color: #8f8270;
   font-size: 11px;
 }
+.hw-menu button:hover,
+.hw-menu button:focus-visible {
+  border-color: rgba(224, 112, 28, 0.3);
+  background: rgba(224, 112, 28, 0.08);
+}
+.hw-menu button:hover .hw-mi,
+.hw-menu button:focus-visible .hw-mi {
+  filter: none;
+}
+.hw-menu button[aria-checked="true"] {
+  border-color: rgba(224, 112, 28, 0.55);
+  background: linear-gradient(90deg, rgba(224, 112, 28, 0.2), rgba(143, 191, 74, 0.05));
+}
+.hw-menu button[aria-checked="true"] b {
+  color: #ffb25a;
+}
+.hw-menu button[aria-checked="true"] .hw-mi {
+  border-color: #e0701c;
+  filter: none;
+  box-shadow:
+    0 0 10px rgba(255, 120, 20, 0.5),
+    inset 0 0 6px rgba(255, 120, 20, 0.35);
+}
+.hw-menu button[aria-checked="true"]::after {
+  content: "";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffcf6a;
+  box-shadow: 0 0 8px #ff8a20;
+  transform: translateY(-50%);
+}
 @media (max-width: 720px) {
   .hw-toggle {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
+  }
+  .hw-toggle svg {
+    width: 24px;
+    height: 24px;
+  }
+  .hw-menu {
+    right: -48px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hw-toggle[aria-pressed="true"] .hw-t-face {
+    animation: none;
   }
 }

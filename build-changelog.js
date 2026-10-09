@@ -36,6 +36,11 @@ const SKIP = [
 ];
 /* гайды (адрес папки), которые не попадают в «Что нового?» */
 const SKIP_GUIDES = [];
+/* исправления опечаток в сообщениях коммитов: [что искать, на что заменить] */
+const TYPOS = [
+  [/хэллуин/g, "хэллоуин"],
+  [/Хэллуин/g, "Хэллоуин"]
+];
 const TAG = /^\s*(new|upd|update|up|fix)\s*:\s*(.+?)\s*$/i;
 /* upd: и update: - то же, что up: (частая опечатка) */
 const KIND = { new: "new", up: "up", upd: "up", update: "up", fix: "fix" };
@@ -65,7 +70,9 @@ try {
 /* коммиты -> записи {date, title, items} (git log идёт от новых к старым) */
 const groups = new Map();
 for (const raw of log.split("\x1e")) {
-  const [hash = "", date, body = ""] = raw.replace(/^\s+/, "").split("\x1f");
+  const [hash = "", date, rawBody = ""] = raw.replace(/^\s+/, "").split("\x1f");
+  /* опечатки в уже запушенных коммитах (история не переписывается) */
+  const body = TYPOS.reduce((s, [from, to]) => s.replace(from, to), rawBody);
   if (SKIP.some(h => h && hash.startsWith(h))) continue;
   if (!/^\d{4}-\d\d-\d\d$/.test(date || "")) continue;
   const lines = body

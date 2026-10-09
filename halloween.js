@@ -14,8 +14,7 @@
   var rm = window.matchMedia("(prefers-reduced-motion: reduce)");
   var narrow = window.matchMedia("(max-width: 720px)");
   var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
-  var PERCH =
-    ".home-card, .home-news, .hc-live, .result-panel, .info-lead, .result-title, .section-heading, .guide-card, .t100-tools";
+  var PERCH = ".home-card, .home-news, .hc-live, .result-panel, .info-lead, .guide-card, .t100-tools";
 
   function level() {
     return root.dataset.hw || "season";
@@ -53,13 +52,22 @@
   var layer, sky, fog, light;
   var crows = [];
 
-  /* видимые блоки страницы, на которые можно сесть и поставить тыкву */
+  /* блок с настоящим верхним краем: есть рамка или фон, он виден и не спрятан под шапкой */
+  function solid(e) {
+    if (!e || !e.isConnected || e.closest("[hidden], dialog, .modal")) return false;
+    var r = e.getBoundingClientRect();
+    if (r.width < 200 || r.height < 40) return false;
+    var s = getComputedStyle(e);
+    if (s.visibility === "hidden" || +s.opacity < 0.5 || s.display === "none") return false;
+    var bg = s.backgroundColor;
+    var hasBg = bg && bg !== "transparent" && !/rgba\([^)]*,\s*0(\.0+)?\)$/.test(bg);
+    return parseFloat(s.borderTopWidth) > 0 || hasBg || s.backgroundImage !== "none";
+  }
+  /* видимые блоки страницы, на которые можно сесть и поставить тыкву (вложенные друг в друга - только внешний) */
   function perches() {
-    var list = [].slice.call(d.querySelectorAll(PERCH)).filter(function (e) {
-      var r = e.getBoundingClientRect();
-      return r.width > 200 && r.height > 40 && !e.closest("[hidden], dialog, .modal");
+    return [].slice.call(d.querySelectorAll(PERCH)).filter(function (e) {
+      return solid(e) && !(e.parentElement && e.parentElement.closest(PERCH));
     });
-    return list;
   }
   function pageXY(e, fx) {
     var r = e.getBoundingClientRect();
@@ -94,13 +102,19 @@
     crow.fx = (at.x - at.r.left - window.scrollX) / at.r.width;
     crow.flip = Math.random() < 0.5;
     crow.node.classList.toggle("flip", crow.flip);
-    place(crow);
+    crow.node.style.transform = "translate(" + Math.round(at.x) + "px," + Math.round(at.y) + "px)";
     return true;
   }
   function place(crow) {
-    if (!crow.perch || !crow.perch.isConnected) return;
+    if (!crow.sitting) return;
+    /* блок исчез, свернулся или стал прозрачным - ворона не остаётся висеть в воздухе */
+    if (!solid(crow.perch)) {
+      if (!seat(crow, [])) crow.node.classList.add("gone");
+      return;
+    }
     var at = pageXY(crow.perch, crow.fx);
     crow.node.style.transform = "translate(" + Math.round(at.x) + "px," + Math.round(at.y) + "px)";
+    crow.node.classList.remove("gone");
   }
   function crowCount() {
     if (narrow.matches) return 3;
@@ -228,12 +242,33 @@
     placePumpkins();
   }
   function placePumpkins() {
-    pumpkins.forEach(function (k) {
-      if (!k.perch.isConnected) return;
+    /* тыква не должна залезать на монолитовца-мишень в калькуляторе: ставим её в другой угол, а если и там тесно - прячем */
+    var busy = mono && mono.classList.contains("hw-target") ? mono.getBoundingClientRect() : null;
+    function hits(n) {
+      if (!busy) return false;
+      var r = n.getBoundingClientRect();
+      var pad = 12;
+      return (
+        r.right > busy.left - pad && r.left < busy.right + pad && r.bottom > busy.top - pad && r.top < busy.bottom + pad
+      );
+    }
+    function put(k) {
       var r = k.perch.getBoundingClientRect();
       var x = r.left + window.scrollX + r.width * k.fx,
         y = r.top + window.scrollY + r.height;
+      k.node.classList.toggle("l", k.fx === 0);
       k.node.style.transform = "translate(" + Math.round(x) + "px," + Math.round(y) + "px)";
+    }
+    pumpkins.forEach(function (k) {
+      if (!k.perch.isConnected) return;
+      if (k.home === undefined) k.home = k.fx;
+      k.fx = k.home;
+      k.node.style.visibility = "";
+      put(k);
+      if (!hits(k.node)) return;
+      k.fx = 1 - k.home;
+      put(k);
+      if (hits(k.node)) k.node.style.visibility = "hidden";
     });
   }
 
@@ -454,6 +489,11 @@
     /* блоки страницы дорисовываются скриптами - сверяем положение ещё пару раз */
     later(relayout, 800);
     later(relayout, 2500);
+    /* блоки могут сворачиваться и прятаться (вкладки, «Все новости») - регулярно сверяем жёрдочки */
+    (function watch() {
+      relayout();
+      later(watch, 1500);
+    })();
   }
   function stop() {
     if (!running) return;
