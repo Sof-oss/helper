@@ -584,7 +584,30 @@ function pwaTags(html, from) {
     if (!html.includes("</body>")) throw new Error("PWA: в " + from + " нет </body>");
     html = html.replace("</body>", '<script src="/sw-register.js" defer></script></body>');
   }
+  /* сезонное оформление (season.js сам решает, включать ли его) - тоже на каждую страницу */
+  if (!html.includes("season.js") && fs.existsSync(path.join(OUT, "season.js")))
+    html = html.replace("</body>", '<script src="/season.js" defer></script></body>');
   return html;
+}
+
+/* версия сезонного оформления: halloween.css/js и картинки assets/halloween подключает season.js сам,
+   поэтому его метка __HW_V__ заменяется хэшем их содержимого (до того, как сам season.js получит ?v=) */
+if (fs.existsSync(path.join(OUT, "season.js"))) {
+  const hh = crypto.createHash("sha256");
+  const hwDir = path.join(OUT, "assets", "halloween");
+  const hwFiles = ["halloween.css", "halloween.js"]
+    .map(f => path.join(OUT, f))
+    .concat(
+      fs.existsSync(hwDir)
+        ? fs
+            .readdirSync(hwDir)
+            .sort()
+            .map(f => path.join(hwDir, f))
+        : []
+    );
+  hwFiles.filter(f => fs.existsSync(f)).forEach(f => hh.update(fs.readFileSync(f)));
+  const seasonFile = path.join(OUT, "season.js");
+  fs.writeFileSync(seasonFile, fs.readFileSync(seasonFile, "utf8").replace("__HW_V__", hh.digest("hex").slice(0, 10)));
 }
 
 /* ---------- html ---------- */

@@ -7661,3 +7661,117 @@ main.content.page-narrow {
     transform: none;
   }
 }
+
+/* ---------- переключатель сезонного оформления «Хэллоуин в Зоне» (кнопку рисует season.js) ---------- */
+.hw-switch {
+  position: relative;
+  margin-left: auto;
+}
+.hw-switch + .theme-pick {
+  margin-left: 8px;
+}
+.hw-toggle {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid #3a2c1c;
+  background: linear-gradient(180deg, rgba(26, 18, 10, 0.92), rgba(12, 9, 6, 0.94));
+  color: #8a7a66;
+  cursor: pointer;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+}
+.hw-toggle svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.hw-toggle .hw-t-face {
+  fill: currentColor;
+  stroke-width: 0.6;
+}
+.hw-toggle[aria-pressed="true"] {
+  color: #f08a2c;
+  border-color: #7a4a1e;
+}
+.hw-toggle[aria-pressed="true"] .hw-t-face {
+  fill: #ffcf6a;
+  filter: drop-shadow(0 0 3px rgba(255, 160, 40, 0.9));
+}
+.hw-toggle:hover,
+.hw-toggle:focus-visible {
+  color: #ffa24a;
+  border-color: #a8622a;
+}
+.hw-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 60;
+  display: grid;
+  min-width: 220px;
+  padding: 6px;
+  border: 1px solid #4a3220;
+  background: rgba(10, 9, 7, 0.97);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+}
+.hw-menu[hidden] {
+  display: none;
+}
+.hw-menu-head {
+  padding: 4px 8px 8px;
+  color: #e0782f;
+  font: 600 11px/1.2 var(--mono, monospace);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.hw-menu button {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 7px 10px 7px 26px;
+  border: 0;
+  background: none;
+  color: #d8cdbd;
+  text-align: left;
+  cursor: pointer;
+}
+.hw-menu button::before {
+  content: "";
+  position: absolute;
+  left: 9px;
+  top: 11px;
+  width: 8px;
+  height: 8px;
+  border: 1px solid #6a5440;
+}
+.hw-menu button[aria-checked="true"]::before {
+  background: #f08a2c;
+  border-color: #f08a2c;
+  box-shadow: 0 0 6px rgba(240, 138, 44, 0.8);
+}
+.hw-menu button:hover,
+.hw-menu button:focus-visible {
+  background: rgba(224, 120, 47, 0.12);
+}
+.hw-menu b {
+  font-size: 13px;
+}
+.hw-menu small {
+  color: #8f8270;
+  font-size: 11px;
+}
+@media (max-width: 720px) {
+  .hw-toggle {
+    width: 34px;
+    height: 34px;
+  }
+}
