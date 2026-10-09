@@ -383,6 +383,34 @@ function runScripts(files) {
   return els;
 }
 
+/* «живые» строки на плашках разделов главной: считаются из данных сайта при каждой сборке.
+   Калькулятор и «сегодня/вчера» у Топ-100 дописывает в браузере home-live.js */
+function plural(n, one, few, many) {
+  const m10 = n % 10,
+    m100 = n % 100;
+  return n + " " + (m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many);
+}
+function homeLive(html) {
+  const bosses = (fs.readFileSync(path.join(ROOT, "info-bosses.js"), "utf8").match(/^ {6}key: "/gm) || []).length;
+  if (bosses) html = fill(html, "hcInfo", plural(bosses, "босс", "босса", "боссов") + " · задания · уровни");
+  const upd = /TOP100_UPDATED="(\d\d)\.(\d\d)\.(\d{4}) (\d\d):(\d\d)/.exec(
+    fs.readFileSync(path.join(ROOT, "top100-data.js"), "utf8")
+  );
+  if (upd)
+    html = fill(
+      html,
+      "hcTop",
+      "Обновлён " + upd[1] + "." + upd[2] + " в " + upd[4] + ":" + upd[5],
+      ' data-day="' + upd[3] + "-" + upd[2] + "-" + upd[1] + '" data-time="' + upd[4] + ":" + upd[5] + '"'
+    );
+  if (guides.length) {
+    const g = guides.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)))[0];
+    const short = String(g.title).split(":")[0].trim();
+    html = fill(html, "hcGuides", plural(guides.length, "гайд", "гайда", "гайдов") + " · новый: «" + esc(short) + "»");
+  }
+  return html;
+}
+
 const PRERENDER = {
   /* список гайдов; пока гайдов нет, страница закрыта от индексации */
   "guides.html": html => {
@@ -394,6 +422,7 @@ const PRERENDER = {
   "index.html": html => {
     const els = runScripts(["changelog.js", "news.js"]);
     html = fill(html, "homeNews", els.homeNews.innerHTML);
+    html = homeLive(html);
     return els.zoneNews && els.zoneNews.innerHTML ? fill(html, "zoneNews", els.zoneNews.innerHTML) : html;
   },
   "info.html": (html, els) => {

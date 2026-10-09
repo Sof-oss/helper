@@ -474,111 +474,6 @@ html.tour-seen .home-hero .tour-start {
     margin-top: 0;
   }
 }
-.home-event {
-  --ev: #e0782f;
-  position: relative;
-  display: block;
-  width: 100%;
-  max-width: 560px;
-  aspect-ratio: 4 / 1;
-  margin: 14px auto 0;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--ev) 40%, rgba(255, 255, 255, 0.08));
-  border-radius: 4px;
-  background: #07090c;
-  box-shadow:
-    0 14px 34px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.6);
-  opacity: 0.88;
-  pointer-events: none;
-  user-select: none;
-}
-@media (min-width: 1780px) {
-  .home-event {
-    position: absolute;
-    top: 0;
-    left: calc(100% + 22px);
-    width: 290px;
-    max-width: none;
-    aspect-ratio: 2 / 1;
-    margin: 0;
-  }
-}
-.home-event img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 30% 55%;
-  filter: saturate(0.7) brightness(0.72) contrast(0.95);
-}
-/* затемнение под подписью и строки развёртки, как на экране ПДА */
-.home-event::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px),
-    linear-gradient(90deg, transparent 35%, rgba(4, 6, 8, 0.85));
-}
-/* уголки, как у рамки первого экрана */
-.home-event::after {
-  content: "";
-  position: absolute;
-  inset: 6px;
-  --c: color-mix(in srgb, var(--ev) 70%, #fff);
-  background:
-    linear-gradient(var(--c), var(--c)) 0 0 / 10px 1px,
-    linear-gradient(var(--c), var(--c)) 0 0 / 1px 10px,
-    linear-gradient(var(--c), var(--c)) 100% 100% / 10px 1px,
-    linear-gradient(var(--c), var(--c)) 100% 100% / 1px 10px;
-  background-repeat: no-repeat;
-  opacity: 0.6;
-}
-.home-event-text {
-  position: absolute;
-  right: 14px;
-  bottom: 12px;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-  text-align: right;
-}
-.home-event-soon {
-  padding: 4px 8px;
-  border: 1px solid var(--ev);
-  background: rgba(0, 0, 0, 0.55);
-  color: var(--ev);
-  font: 600 11px/1 var(--mono);
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-}
-.home-event-text b {
-  font-family: var(--f-display);
-  font-weight: 500;
-  font-size: 17px;
-  line-height: 1.1;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #e8dfd4;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
-}
-@media (max-width: 760px) {
-  .home-event-text {
-    bottom: 9px;
-    gap: 4px;
-  }
-  .home-event-soon {
-    font-size: 10px;
-    padding: 3px 6px;
-  }
-  .home-event-text b {
-    font-size: 14px;
-  }
-}
-
 /* ---------- «Новости Зоны» и «Новости сайта»: две колонки на широком экране ---------- */
 .home-feeds {
   display: grid;
@@ -696,4 +591,285 @@ html.tour-seen .home-hero .tour-start {
 }
 .zn-link:hover svg {
   transform: translate(2px, -2px);
+}
+
+/* ---------- плашки разделов: компактные, с «живой» строкой (home-live.js, build.js) ----------
+   Вся плашка - ссылка, поэтому «Открыть» скрыто визуально, но остаётся для экранных дикторов */
+.home-grid {
+  gap: 14px;
+}
+.home-grid .home-card-body {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  column-gap: 14px;
+  row-gap: 2px;
+  align-items: center;
+  padding: 18px 16px 14px;
+}
+.home-grid .home-card-icon {
+  grid-row: 1 / span 2;
+  width: 42px;
+  height: 42px;
+  margin: 0;
+}
+.home-grid .home-card b {
+  grid-column: 2;
+  margin: 0;
+  font-size: 18px;
+  padding-right: 84px;
+}
+.home-grid .home-card small {
+  grid-column: 2;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+}
+.home-grid .home-card-cta {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.home-grid .home-card::after {
+  top: 12px;
+  right: 12px;
+  bottom: auto;
+  font-size: 10px;
+  padding: 3px 6px 2px;
+}
+.hc-live {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 10px 0 2px;
+  font: 600 11px/1.3 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--accent) 75%, #fff);
+}
+.hc-live i {
+  flex: 0 0 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+.hc-live span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hc-live i {
+    animation: hc-blink 2.4s ease-in-out infinite;
+  }
+}
+@keyframes hc-blink {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (max-width: 760px) {
+  .home-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .home-grid .home-card-body {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+    padding: 14px 12px 12px;
+  }
+  .home-grid .home-card-icon {
+    grid-row: auto;
+    width: 36px;
+    height: 36px;
+  }
+  .home-grid .home-card b {
+    grid-column: 1;
+    grid-row: auto;
+    font-size: 16px;
+    padding-right: 0;
+  }
+  .home-grid .home-card small {
+    grid-column: 1;
+    font-size: 12px;
+  }
+  .home-grid .home-card::after {
+    content: "0" counter(hc);
+    content: "0" counter(hc) / "";
+    top: 10px;
+    right: 10px;
+  }
+  .hc-live {
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    margin-top: 4px;
+    align-items: flex-start;
+  }
+  .hc-live i {
+    margin-top: 3px;
+  }
+  .hc-live span {
+    white-space: normal;
+  }
+}
+
+/* ---------- баннер ивента внутри новости (news.js, поле event) ----------
+   Заглушённый и некликабельный. Хэллоуин: глаза тыквы периодически вспыхивают,
+   в тумане ненадолго появляется силуэт Излома с красными глазами. Координаты глаз - в % кадра event-halloween-*.webp */
+.zn-event {
+  --ev: #e0782f;
+  position: relative;
+  aspect-ratio: 1200 / 375;
+  margin: 2px 0 12px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--ev) 40%, rgba(255, 255, 255, 0.08));
+  border-radius: 3px;
+  background: #07090c;
+  opacity: 0.9;
+  pointer-events: none;
+  user-select: none;
+}
+.zn-event img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.7) brightness(0.72) contrast(0.95);
+}
+/* строки развёртки и затемнение справа под меткой */
+.zn-event::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px),
+    linear-gradient(90deg, transparent 55%, rgba(4, 6, 8, 0.55));
+}
+.zn-ev-soon {
+  position: absolute;
+  right: 10px;
+  bottom: 9px;
+  z-index: 4;
+  padding: 4px 8px;
+  border: 1px solid var(--ev);
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--ev);
+  font: 600 11px/1 var(--mono);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+.zn-ev-eye {
+  position: absolute;
+  z-index: 2;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #fff3c4, #ffb347 35%, rgba(255, 120, 20, 0.55) 60%, transparent);
+  mix-blend-mode: screen;
+  opacity: 0;
+}
+.zn-ev-l {
+  left: 25.6%;
+  top: 34%;
+  width: 6.4%;
+  height: 16%;
+}
+.zn-ev-r {
+  left: 32.6%;
+  top: 36%;
+  width: 3.6%;
+  height: 14%;
+}
+.zn-ev-izlom {
+  position: absolute;
+  z-index: 1;
+  left: 63%;
+  bottom: 4%;
+  height: 82%;
+  width: auto;
+  opacity: 0;
+  filter: blur(0.6px);
+}
+.zn-ev-izlom .body {
+  fill: #040506;
+}
+.zn-ev-izlom .eyes {
+  fill: #ff2a1a;
+  filter: drop-shadow(0 0 2px #ff2a1a) drop-shadow(0 0 5px #ff0000);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .zn-ev-eye {
+    animation: zn-pumpkin 7s ease-in-out infinite;
+  }
+  .zn-ev-r {
+    animation-delay: 0.08s;
+  }
+  .zn-ev-izlom {
+    animation: zn-izlom 19s ease-in-out 3s infinite;
+  }
+  .zn-ev-izlom .eyes {
+    animation: zn-izlom-eyes 19s linear 3s infinite;
+  }
+}
+@keyframes zn-pumpkin {
+  0%,
+  58%,
+  100% {
+    opacity: 0;
+  }
+  64% {
+    opacity: 0.95;
+  }
+  67% {
+    opacity: 0.45;
+  }
+  70% {
+    opacity: 1;
+  }
+  84% {
+    opacity: 0.9;
+  }
+  92% {
+    opacity: 0;
+  }
+}
+@keyframes zn-izlom {
+  0%,
+  40%,
+  100% {
+    opacity: 0;
+    transform: translateX(-6%);
+  }
+  48% {
+    opacity: 0.85;
+  }
+  60% {
+    opacity: 0.85;
+    transform: translateX(0);
+  }
+  66% {
+    opacity: 0;
+    transform: translateX(2%);
+  }
+}
+@keyframes zn-izlom-eyes {
+  0%,
+  46%,
+  66%,
+  100% {
+    opacity: 0;
+  }
+  50%,
+  61% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 0.4;
+  }
+  56% {
+    opacity: 1;
+  }
 }
