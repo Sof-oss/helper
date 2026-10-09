@@ -8,7 +8,7 @@
    - данные Топ-100 (top100-data.js, top100-players.json): всегда сначала сеть, кэш - только без сети;
    - файлы с ?v=, шрифты и куски 3D (/3d/*-хэш.js): из кэша, их содержимое по этому адресу не меняется;
    - остальное своё (картинки гайдов, фоны): из кэша сразу, в фоне обновляем.
-   Чужие адреса (капча, приём гайдов) и не-GET запросы не трогаем */
+   Чужие адреса (капча, приём гайдов), не-GET запросы, видео и запросы с Range не трогаем */
 "use strict";
 const VERSION = "__SW_VERSION__";
 const PRECACHE = "__SW_PRECACHE__";
@@ -45,9 +45,12 @@ function pageKey(url) {
   return url.origin + (p || "/");
 }
 async function put(cacheName, key, res) {
-  if (!res || !res.ok || res.type !== "basic") return;
-  const c = await caches.open(cacheName);
-  await c.put(key, res);
+  /* 206 (часть файла) cache.put не принимает и бросает ошибку, поэтому кэшируем только полные ответы */
+  if (!res || res.status !== 200 || res.type !== "basic") return;
+  try {
+    const c = await caches.open(cacheName);
+    await c.put(key, res);
+  } catch {}
 }
 async function trim(cacheName, max) {
   const c = await caches.open(cacheName),
@@ -120,6 +123,8 @@ self.addEventListener("fetch", e => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin || url.pathname === "/sw.js") return;
+  /* видео и любые запросы с Range (браузер просит файл кусками) отдаём браузеру как есть */
+  if (req.headers.has("range") || req.destination === "video" || req.destination === "audio") return;
   if (req.mode === "navigate") {
     e.respondWith(page(req, url));
     return;
