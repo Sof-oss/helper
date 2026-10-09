@@ -484,10 +484,22 @@ html.tour-seen .home-hero .tour-start {
 .home-feeds > .home-news {
   margin: 0;
 }
+/* в свёрнутом виде обе колонки одной высоты, кнопки «Все новости / Вся история» на одной линии внизу;
+   раскрытая колонка растёт сама, не растягивая соседнюю */
 @media (min-width: 960px) {
   .home-feeds {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+  .home-feeds:has(> .home-news.open) {
     align-items: start;
+  }
+  .home-feeds > .home-news {
+    display: flex;
+    flex-direction: column;
+  }
+  .home-feeds > .home-news > :is(ol, ul) {
+    flex: 1 0 auto;
   }
 }
 .zone-news {

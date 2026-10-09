@@ -31,7 +31,7 @@ window.ZONE_NEWS = [
   const root = document.getElementById("zoneNews");
   const list = Array.isArray(window.ZONE_NEWS) ? window.ZONE_NEWS.filter(n => n && n.title) : [];
   if (!root || !list.length) return;
-  const SHOW = 3,
+  const SHOW = 1,
     FRESH_DAYS = 3;
   const MONTHS = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
