@@ -439,7 +439,7 @@ html.tour-seen .home-hero .tour-start {
 .home-news .news-extra-btn:hover {
   text-decoration: underline;
 }
-.home-news:not(.open) .news-entry:nth-child(3)::after {
+.home-news:not(.open) .news-entry.news-last::after {
   display: none;
 }
 @media (max-width: 760px) {

@@ -421,13 +421,49 @@ window.CHANGELOG=[
   btn.setAttribute("aria-expanded",open);
   btn.querySelector("span").textContent=open?"Свернуть":"Вся история";
  });
+ /* Свёрнутый вид на широком экране: колонки одной высоты, и если «Новости Зоны» выше (баннер ивента),
+    под тремя записями оставалась пустота. Добираем записи из «Всей истории», пока они влезают в высоту соседней
+    колонки (пока «Все новости» слева не раскрыты); last - запись, у которой не рисуется хвост линии времени */
+ const wide=window.matchMedia?window.matchMedia("(min-width: 960px)"):null;
+ const other=document.getElementById("zoneNews");
+ let fitting=false,raf=0;
+ function fit(){
+  if(fitting||!root.querySelectorAll)return;
+  fitting=true;
+  const entries=[...root.querySelectorAll(".news-list > .news-entry")];
+  entries.forEach(e=>e.classList.remove("news-fit","news-last"));
+  if(!root.classList.contains("open")&&wide&&wide.matches&&other&&other.children.length&&!other.classList.contains("open")){
+   /* обе колонки - по своей высоте, без растягивания по соседу */
+   root.style.alignSelf=other.style.alignSelf="start";
+   const target=other.offsetHeight;
+   for(const e of entries){
+    if(!e.classList.contains("news-more"))continue;
+    e.classList.add("news-fit");
+    if(root.offsetHeight>target){e.classList.remove("news-fit");break}
+   }
+   root.style.alignSelf=other.style.alignSelf="";
+  }
+  const shown=entries.filter(e=>!e.classList.contains("news-more")||e.classList.contains("news-fit"));
+  if(shown.length)shown[shown.length-1].classList.add("news-last");
+  fitting=false;
+ }
+ const refit=()=>{if(!raf)raf=requestAnimationFrame(()=>{raf=0;fit()})};
+ fit();
+ if(window.addEventListener)window.addEventListener("resize",refit);
+ if(wide&&wide.addEventListener)wide.addEventListener("change",refit);
+ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(refit);
+ /* «Новости Зоны» рисует news.js, они раскрываются и сворачиваются - подстраиваемся */
+ if(other&&window.MutationObserver)new MutationObserver(refit).observe(other,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});
+ if(other&&other.addEventListener)other.addEventListener("load",refit,true);
+ if(btn&&btn.addEventListener)btn.addEventListener("click",refit);
  /* раскрыть одну запись или остаток пунктов последней */
  if(root.addEventListener)root.addEventListener("click",ev=>{
   const t=ev.target&&ev.target.closest?ev.target.closest(".news-compact > .news-head, .news-extra-btn"):null;
   if(!t)return;
   const li=t.closest(".news-entry");
-  if(t.classList.contains("news-extra-btn")){li.classList.add("show-all");t.remove();return}
+  if(t.classList.contains("news-extra-btn")){li.classList.add("show-all");t.remove();refit();return}
   const on=li.classList.toggle("expanded");
   t.setAttribute("aria-expanded",on);
+  refit();
  });
 })();

@@ -106,6 +106,29 @@ body {
     --bg-img: url("assets/bg-loners-m.webp");
   }
 }
+/* размытая заглушка фона (32×18, ~150 байт в самом css): рисуется под фотографией сразу, пока та грузится
+   и декодируется при переходе между страницами, - вместо чёрного экрана. Пересобрать: фон -1280 -> 32x18 webp */
+:root {
+  --bg-lq: url("data:image/webp;base64,UklGRoAAAABXRUJQVlA4IHQAAADwBACdASogABIAPtFSoUuoJKMhsAgBABoJYwClrBueCIzyHaeTkzxjHSeBzYvVPLAA/ukl7AwnT7DWgbyD2ngiRwR175pLv232N/wMTkgsNDYXjKVZr4qhqQIhJsILCetGwkAIGFFlp8Dr8CV5hbg6dAAAAA==");
+}
+:root[data-theme="dolg"] {
+  --bg-lq: url("data:image/webp;base64,UklGRnYAAABXRUJQVlA4IGoAAACQBACdASogABIAPtFUokuoJKMhsAgBABoJQBhQBDwyuud+mEkpavT8/GhEYAAA/vE1GyCy6PRpmIttxd9yJrwJbqqqq/uLPKdxcC1TULpoxeUHD/xnJBk1jjTN2xqBIWvT505oRexHYAAA");
+}
+:root[data-theme="svoboda"] {
+  --bg-lq: url("data:image/webp;base64,UklGRnwAAABXRUJQVlA4IHAAAADwBACdASogABIAPtFapE0oJSOosBgIARAaCUAXYAaQJ6zJHA8SmCxa86rBsSpkJgAA/vVwJLtc++zFwA0SMxwD9RLSSW8OkmkbEwDZdCqK19Pas/rIa/kE1sVp5ZhUxh8M6Qylj6kKIJCTj14gAAAA");
+}
+:root[data-theme="science"] {
+  --bg-lq: url("data:image/webp;base64,UklGRowAAABXRUJQVlA4IIAAAADwBACdASogABIAPtFepEyoJaOiMBgIAQAaCUAWdekQGk+iFaJHHnu17HwX5iv1aBAA/svn7Fs3ppQX5rYdqmhyfVjP3YTOpiN2pSMe9yPpMjU3gGUy5/vEehQ8OBRy4SjFz5fIxyZfTLN5cKOlwyTVL+XFbiSwAM7npXlBZDIAAA==");
+}
+:root[data-theme="monolith"] {
+  --bg-lq: url("data:image/webp;base64,UklGRogAAABXRUJQVlA4IHwAAAAwBQCdASogABIAPslSnkunpKKhsAwA8BkJQBOgA3SpBWhIVLGz+SJ6ehWWBuIMoPqIAAD+9DLYL1W/GSxlBBPlJ0cOhX9q6crNiOUdhq3PWlGq3YmQJ8wYURTvN9aR26Md/R1PTTJr9osBDjhGZwj2eKUQp4G+KCtoMkAA");
+}
+:root[data-theme="rassvet"] {
+  --bg-lq: url("data:image/webp;base64,UklGRooAAABXRUJQVlA4IH4AAADwBACdASogABIAPs1Wo0unpKMhsBgMAPAZiWIAqPQ0cCiy3SIEeoIfpBiGOqFbRxAA/vVzUBoKVIAJwYuBkYaGE4O6KrEXBX2ov4mZlBpghBWGK/d9MJLdNXukrZM+lvECaXO76pIo111Aa54obPpO/fCYE1pqHg+tAdgAAAA=");
+}
+:root[data-theme="loners"] {
+  --bg-lq: url("data:image/webp;base64,UklGRm4AAABXRUJQVlA4IGIAAADwAwCdASogABIAPtFWo0uoJKMhsAgBABoJZQDImCHXYyv3yOq6aDiAAP7NY/1GMXFS2jet5hVwqhUC9P5TJvRi8qgazyPeoqKsPICkuEKuoWzOMh/tS7kuZxl9aLAxBU4AAA==");
+}
 /* фон закреплён за окном, а не за страницей: слой фиксированной высоты в экран, поэтому картинка одинаковая на всех страницах
    и не растягивается, не едет при прокрутке и не прыгает при смене высоты контента (вкладки, поиск, фильтры).
    100lvh - чтобы на телефоне фон не дёргался, когда браузер прячет адресную строку; 100vh - запасной вариант.
@@ -5159,12 +5182,13 @@ body::before {
       rgba(4, 6, 8, calc(var(--bg-dim) + 0.15)) 70%,
       #05070a 100%
     ),
-    radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.55) 100%), var(--bg-img);
+    radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.55) 100%), var(--bg-img), var(--bg-lq, none);
   background-position:
     0 0,
     0 0,
+    center center,
     center center;
-  background-size: auto, auto, cover;
+  background-size: auto, auto, cover, cover;
   transition: background-image 0.6s ease;
 }
 body::after {
@@ -6771,10 +6795,11 @@ th.top100-sort {
   box-shadow: 0 0 8px var(--accent);
 }
 .news-list > .news-entry:last-child::after,
-.home-news:not(.open) .news-entry:nth-child(3)::after {
+.home-news:not(.open) .news-entry.news-last::after {
   display: none;
 }
-.home-news:not(.open) .news-more {
+/* «Вся история» свёрнута: лишние записи скрыты, кроме добранных под высоту соседней колонки (changelog.js) */
+.home-news:not(.open) .news-more:not(.news-fit) {
   display: none;
 }
 .news-head {

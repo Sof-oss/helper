@@ -572,6 +572,32 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".css"))) {
   fs.writeFileSync(file, css);
 }
 
+/* ---------- фон темы - с первых миллисекунд ----------
+   Фото темы задано в css (body::before), и браузер узнаёт о нём только после разбора стилей - при переходе
+   между страницами это давало чёрный экран. Встроенный скрипт сразу после скрипта темы ставит preload той же
+   картинки (тема из localStorage, размер - по тем же границам, что в начале styles.css: 760 и 1366 px).
+   Адреса с ?v= - те же, что в styles.css, поэтому браузер скачивает картинку один раз */
+{
+  const THEMES = ["merc", "dolg", "svoboda", "science", "monolith", "rassvet", "loners"];
+  const map = {};
+  for (const t of THEMES)
+    map[t] = ["", "-1280", "-m"].map(s => "/" + version("assets/bg-" + t + s + ".webp", "фоны тем"));
+  const tag =
+    "<script>/* preload фона темы (build.js) */(function(){try{var M=" +
+    JSON.stringify(map) +
+    ',t=document.documentElement.dataset.theme,m=M[t]||M.merc,w=window.innerWidth,l=document.createElement("link");' +
+    'l.rel="preload";l.as="image";l.href=w<=760?m[2]:w<=1366?m[1]:m[0];l.setAttribute("fetchpriority","high");' +
+    "document.head.appendChild(l)}catch(e){}})();</script>\n";
+  for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
+    const file = path.join(OUT, name);
+    const html = fs.readFileSync(file, "utf8");
+    if (html.includes("preload фона темы")) continue;
+    const at = html.search(/<link rel="stylesheet"/);
+    if (at < 0) continue;
+    fs.writeFileSync(file, html.slice(0, at) + tag + html.slice(at));
+  }
+}
+
 /* ---------- PWA: manifest и service worker ----------
    На каждую страницу - ссылка на manifest.webmanifest и sw-register.js (регистрирует sw.js). В исходных html их нет,
    чтобы не повторять в каждом файле; версии ?v= они получают ниже вместе со всеми. Сам sw.js собирается в конце */
