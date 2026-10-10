@@ -1,6 +1,7 @@
 /* «Хэллоуин в Зоне» - сезонная нечисть. Подгружается из season.js, только когда оформление включено.
    Уровни (html[data-hw]): quiet - тыквы и вороны; season - всё; surge - всё чаще + фонарик.
    Все создания не ловят клики (pointer-events: none) - кроме тыквы-пасхалки и бюрера, который прячется от курсора.
+   Тыквы (и декор, и пасхалка) не ставятся на ссылки, кнопки и карточки-ссылки.
    При prefers-reduced-motion ничего не движется: только сидящие вороны и тыквы. На телефоне существ меньше и ничего
    не закрывает нижнее меню. */
 (function () {
@@ -15,9 +16,15 @@
   var narrow = window.matchMedia("(max-width: 720px)");
   var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
   var PERCH = ".home-card, .home-news, .hc-live, .result-panel, .info-lead, .guide-card, .t100-tools";
+  /* всё, по чему можно кликнуть: на таких блоках тыкв нет, чтобы клик по тыкве не открывал ссылку */
+  var CLICKABLE =
+    "a, button, summary, label, select, input, textarea, [role=button], [role=link], [onclick], [tabindex]";
+  function clickable(e) {
+    return !!(e && e.closest(CLICKABLE));
+  }
 
   function level() {
-    return root.dataset.hw || "season";
+    return root.dataset.hw || "quiet";
   }
   function full() {
     return level() !== "quiet" && !rm.matches;
@@ -128,7 +135,21 @@
       })
       .map(function (e) {
         return e.getBoundingClientRect();
-      });
+      })
+      /* закреплённые кнопки (например, нижняя панель калькулятора на телефоне) тоже ездят вместе с экраном */
+      .concat(
+        occupiedControls
+          .filter(function (o) {
+            for (var e = o.node; e && e !== d.body; e = e.parentElement) {
+              var p = getComputedStyle(e).position;
+              if (p === "fixed" || p === "sticky") return (o.fixed = true);
+            }
+            return false;
+          })
+          .map(function (o) {
+            return o.rect;
+          })
+      );
   }
   function crowRect(p, fx) {
     var r = p.getBoundingClientRect();
@@ -148,6 +169,7 @@
       })
     )
       return false;
+    if (eggSpot && intersects(r, eggRect(eggSpot), 14)) return false;
     return !crows.some(function (c) {
       return c !== crow && c.perch && solid(c.perch) && intersects(r, crowRect(c.perch, c.fx), 18);
     });
@@ -317,7 +339,7 @@
   var pumpkins = [];
   function spawnPumpkins() {
     var ps = perches().filter(function (p) {
-      return !p.classList.contains("site-header");
+      return !p.classList.contains("site-header") && !clickable(p);
     });
     var n = Math.min(ps.length, narrow.matches ? 2 : 4);
     var kinds = PUMPKINS.slice().sort(function () {
@@ -335,15 +357,28 @@
     placePumpkins();
   }
   function placePumpkins() {
-    /* тыква не должна залезать на монолитовца-мишень в калькуляторе: ставим её в другой угол, а если и там тесно - прячем */
+    /* Тыква не залезает на монолитовца-мишень, кнопки, ссылки, пасхалку и соседние тыквы:
+       сначала свой угол, потом противоположный, а если тесно и там - прячем */
     var busy = mono && mono.classList.contains("hw-target") ? mono.getBoundingClientRect() : null;
-    function hits(n) {
-      if (!busy) return false;
-      var r = n.getBoundingClientRect();
-      var pad = 12;
-      return (
-        r.right > busy.left - pad && r.left < busy.right + pad && r.bottom > busy.top - pad && r.top < busy.bottom + pad
-      );
+    var placed = [];
+    function box(k) {
+      var r = k.node.getBoundingClientRect();
+      var h = r.height || r.width;
+      return { left: r.left, right: r.right, top: r.top, bottom: r.top + h };
+    }
+    function blocked(k) {
+      var r = box(k);
+      if (busy && intersects(r, busy, 12)) return true;
+      if (eggSpot && intersects(r, eggRect(eggSpot), 12)) return true;
+      if (
+        occupiedControls.some(function (o) {
+          return intersects(r, o.rect, 12);
+        })
+      )
+        return true;
+      return placed.some(function (b) {
+        return intersects(r, b, 8);
+      });
     }
     function put(k) {
       var r = k.perch.getBoundingClientRect();
@@ -358,17 +393,19 @@
       k.fx = k.home;
       k.node.style.visibility = "";
       put(k);
-      if (hits(k.node)) {
+      if (blocked(k)) {
         k.fx = 1 - k.home;
         put(k);
       }
+      var r = box(k);
       if (
-        hits(k.node) ||
+        blocked(k) ||
         fixedChrome.some(function (f) {
-          return intersects(k.node.getBoundingClientRect(), f, 6);
+          return intersects(r, f, 6);
         })
       )
         k.node.style.visibility = "hidden";
+      else placed.push(r);
     });
   }
 
@@ -389,12 +426,128 @@
       return [];
     }
   }
+  /* Где прятать: любой видимый некликабельный блок страницы (панели, подвал, вложенные секции).
+     Тыква встаёт в пустой угол блока или посередине нижнего края - не поверх текста, картинок,
+     кнопок и ссылок. Место выбирается случайно при каждом заходе, поэтому её приходится искать. */
+  var EGG_SPOTS = PERCH + ", .site-footer, main section, main aside, main article, .panel, .card";
+  var EGG_W = 28,
+    EGG_H = 34,
+    EGG_IN = 10;
+  var eggSpot = null;
+  function contentRects(a) {
+    var out = [];
+    var w = d.createTreeWalker(a, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        return /\S/.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    var range = d.createRange();
+    for (var n = w.nextNode(); n; n = w.nextNode()) {
+      range.selectNodeContents(n);
+      [].push.apply(out, [].slice.call(range.getClientRects()));
+    }
+    a.querySelectorAll("img, svg, video, canvas, picture, iframe, input, select, textarea, button, a").forEach(
+      function (e) {
+        if (!e.closest(".hw-layer")) out.push(e.getBoundingClientRect());
+      }
+    );
+    /* иконки и картинки, нарисованные фоном (div с background-image), - тоже содержимое */
+    a.querySelectorAll("*").forEach(function (e) {
+      if (e.closest(".hw-layer") || getComputedStyle(e).backgroundImage === "none") return;
+      var r = e.getBoundingClientRect();
+      if (r.width * r.height < ar(a) * 0.5) out.push(r);
+    });
+    return out;
+  }
+  function ar(e) {
+    var r = e.getBoundingClientRect();
+    return r.width * r.height;
+  }
+  function eggRect(spot) {
+    var r = spot.a.getBoundingClientRect();
+    var left = spot.x === 0.5 ? r.left + (r.width - EGG_W) / 2 : spot.x ? r.right - EGG_W - EGG_IN : r.left + EGG_IN;
+    var top = spot.y ? r.bottom - EGG_H - EGG_IN : r.top + EGG_IN;
+    return { left: left, top: top, right: left + EGG_W, bottom: top + EGG_H };
+  }
+  /* подписи вида «ПДА // ЭФИР» нарисованы через ::before/::after - их не видно в тексте блока,
+     поэтому у блоков с такими подписями верхние углы не используем */
+  function pseudoText(e) {
+    return ["::before", "::after"].some(function (ps) {
+      var c = getComputedStyle(e, ps).content;
+      return c && c !== "none" && c !== "normal" && !/^["']\s*["']$/.test(c);
+    });
+  }
+  function labeledTop(a) {
+    return pseudoText(a) || [].slice.call(a.children).some(pseudoText);
+  }
+  function eggFits(spot, full) {
+    var a = spot.a;
+    if (!a.isConnected || clickable(a) || a.closest("[hidden], dialog, .modal, .hw-layer")) return false;
+    var ar = a.getBoundingClientRect();
+    if (ar.width < 140 || ar.height < 70) return false;
+    var s = getComputedStyle(a);
+    if (s.visibility === "hidden" || s.display === "none" || +s.opacity < 0.5) return false;
+    /* только внутри видимой панели (рамка или фон) или в подвале - не на голых полях страницы */
+    if (!a.classList.contains("site-footer") && !solid(a)) return false;
+    var r = eggRect(spot);
+    if (r.left < 4 || r.right > window.innerWidth - 4) return false;
+    var hit = function (b, pad) {
+      return b.width !== 0 && intersects(r, b, pad);
+    };
+    /* кнопки, текст и картинки проверяем при выборе места; при прокрутке они не сдвигаются относительно блока,
+       а закреплённые на экране панели только прячут тыкву (см. placeEgg) */
+    if (!full) return true;
+    if (!spot.y && labeledTop(a)) return false;
+    if (
+      occupiedControls.some(function (o) {
+        return !o.fixed && hit(o.rect, 12);
+      })
+    )
+      return false;
+    return !contentRects(a).some(function (b) {
+      return hit(b, 6);
+    });
+  }
+  function pickEggSpot() {
+    var spots = [];
+    [].slice.call(d.querySelectorAll(EGG_SPOTS)).forEach(function (a) {
+      [
+        [0, 0],
+        [1, 0],
+        [0, 1],
+        [1, 1],
+        [0.5, 1]
+      ].forEach(function (c) {
+        var spot = { a: a, x: c[0], y: c[1] };
+        if (eggFits(spot, true)) spots.push(spot);
+      });
+    });
+    /* подвал широкий и в нём всегда есть пустые углы - если на странице есть другие места, он выпадает редко */
+    var inside = spots.filter(function (sp) {
+      return !sp.a.classList.contains("site-footer");
+    });
+    if (inside.length && Math.random() < 0.85) spots = inside;
+    return spots.length ? pick(spots) : null;
+  }
+  function placeEgg() {
+    if (!egg || !egg.classList.contains("free")) return;
+    if (!eggSpot || !eggFits(eggSpot, false)) eggSpot = pickEggSpot();
+    if (!eggSpot) {
+      egg.style.visibility = "hidden";
+      return;
+    }
+    var r = eggRect(eggSpot);
+    egg.style.transform =
+      "translate(" + Math.round(r.left + window.scrollX) + "px," + Math.round(r.top + window.scrollY) + "px)";
+    egg.classList.toggle("bl", eggSpot.x !== 1);
+    egg.classList.toggle("br", eggSpot.x === 1);
+    egg.style.visibility = fixedChrome.some(function (f) {
+      return intersects(r, f, 6);
+    })
+      ? "hidden"
+      : "";
+  }
   function spawnEgg() {
-    var footer = d.querySelector(".site-footer");
-    if (!footer || footer.closest("a, button, [role=button]")) return;
-    var host = el("div", "hw-egg-slot");
-    host.classList.add(Math.random() < 0.5 ? "left" : "right");
-    footer.appendChild(host);
     egg = el("button", "hw-egg", '<img alt="" src="' + img(pick(PUMPKINS)) + '"><span class="hw-bubble"></span>');
     egg.type = "button";
     egg.setAttribute("aria-label", "Тыква");
@@ -410,12 +563,38 @@
       var says = ["Ух-ух!", "Бу!", "Сталкер, артефакт не трожь!", "У-у-ух!", "Фонишь, братишка…"];
       var msg = pick(says);
       if (page) msg += " Тыкв найдено: " + list.length + " из " + EGG_PAGES.length;
-      if (list.length >= EGG_PAGES.length && page) msg = "Все тыквы Зоны собраны! Настоящий сталкер 🎃";
+      if (list.length >= EGG_PAGES.length && page) {
+        /* награда - звание «Тыквенный сталкер» в своей карточке игрока (рисует my-place.js) */
+        var me = null;
+        try {
+          me = JSON.parse(localStorage.getItem("zoneMyPlayer") || "null");
+        } catch (e) {}
+        msg =
+          me && me.n
+            ? "Все тыквы Зоны собраны! В вашем личном деле - звание «Тыквенный сталкер» 🎃"
+            : "Все тыквы Зоны собраны! Отметьте себя в Топ-100 («Это я») - и в карточке появится звание 🎃";
+      }
       egg.querySelector(".hw-bubble").textContent = msg;
       egg.classList.remove("boo");
       void egg.offsetWidth;
       egg.classList.add("boo");
     });
+    eggSpot = pickEggSpot();
+    if (eggSpot) {
+      egg.classList.add("free");
+      layer.appendChild(egg);
+      placeEgg();
+      return;
+    }
+    /* свободного угла нигде нет - старое место: отдельная строка в подвале */
+    var footer = d.querySelector(".site-footer");
+    if (!footer || clickable(footer)) {
+      egg = null;
+      return;
+    }
+    var host = el("div", "hw-egg-slot");
+    host.classList.add(Math.random() < 0.5 ? "left" : "right");
+    footer.appendChild(host);
     host.appendChild(egg);
     egg.classList.add(host.classList.contains("left") ? "bl" : "br");
   }
@@ -551,6 +730,7 @@
     raf = requestAnimationFrame(function () {
       raf = 0;
       refreshObstacles();
+      placeEgg();
       crows.forEach(place);
       placePumpkins();
     });
@@ -572,9 +752,9 @@
       d.body.appendChild(light);
     }
     refreshObstacles();
+    spawnEgg();
     spawnCrows();
     spawnPumpkins();
-    spawnEgg();
     if (full()) {
       spawnBurer();
       spawnMonolith();
@@ -595,6 +775,8 @@
     later(relayout, 2500);
     /* блоки могут сворачиваться и прятаться (вкладки, «Все новости») - регулярно сверяем жёрдочки */
     (function watch() {
+      /* содержимое блока могло дорисоваться поверх тыквы-пасхалки - тогда она перепрятывается */
+      if (eggSpot && egg && egg.classList.contains("free") && !eggFits(eggSpot, true)) eggSpot = null;
       relayout();
       later(watch, 1500);
     })();
@@ -609,7 +791,7 @@
     d.querySelectorAll(".hw-egg-slot").forEach(function (n) {
       n.remove();
     });
-    light = burer = mono = egg = null;
+    light = burer = mono = egg = eggSpot = null;
     crows = [];
     pumpkins = [];
     d.querySelectorAll(".hw-tk, .hw-flick").forEach(function (n) {

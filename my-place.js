@@ -327,6 +327,26 @@
     initCard();
   }
 
+  /* ---------- награда «Хэллоуина в Зоне»: все тыквы-пасхалки найдены (halloween.js, localStorage.hotzHwFound) ----------
+     Звание видно только в своей карточке («Это я») и только в этом браузере - находки хранятся у посетителя.
+     Остаётся и после сезона. HW_EGG_PAGES - столько же, сколько EGG_PAGES в halloween.js */
+  const HW_FOUND_KEY = "hotzHwFound";
+  const HW_EGG_PAGES = 6;
+  function pumpkinHunter() {
+    try {
+      const list = JSON.parse(localStorage.getItem(HW_FOUND_KEY) || "[]");
+      return Array.isArray(list) && new Set(list).size >= HW_EGG_PAGES;
+    } catch {
+      return false;
+    }
+  }
+  const HW_RANK =
+    '<div class="hw-rank" title="Все тыквы Зоны найдены - награда за Хэллоуин в Зоне">' +
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="hw-rank-stem" d="M12 6.2c0-1.6.6-2.8 2-3.6"/>' +
+    '<path class="hw-rank-body" d="M12 6.4c-1.4-.9-3.6-1-5.3 0C4.3 7.8 3 10.4 3 13.4 3 17.6 5.8 21 9.4 21c1 0 1.9-.3 2.6-.7.7.4 1.6.7 2.6.7 3.6 0 6.4-3.4 6.4-7.6 0-3-1.3-5.6-3.7-7-1.7-1-3.9-.9-5.3 0Z"/>' +
+    '<path class="hw-rank-face" d="M7.6 11.6 9.6 13l-2 .6zM16.4 11.6 14.4 13l2 .6zM7.8 16.2l1.5.9 1.3-.9 1.4.9 1.4-.9 1.3.9 1.5-.9"/></svg>' +
+    "<span><small>Особое звание · Хэллоуин</small><b>Тыквенный сталкер</b></span></div>";
+
   /* ---------- карточка игрока (player-card.js): «Это я» и «Сравнить» под шапкой «Личного дела» ---------- */
   function initCard() {
     const curId = () => {
@@ -341,6 +361,9 @@
       if (!id || !h2) return;
       const me = ZP.getMe(),
         mine = !!me && (me.id === id || (!me.id && me.n === h2.textContent));
+      const oldRank = head.querySelector(".hw-rank");
+      if (oldRank) oldRank.remove();
+      if (mine && pumpkinHunter()) h2.insertAdjacentHTML("afterend", HW_RANK);
       head.insertAdjacentHTML(
         "afterend",
         '<div class="mp-card-acts"><button type="button" class="mp-btn' +

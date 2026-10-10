@@ -560,3 +560,107 @@
 .mp-tile.m3 .mp-tile-rank b::before {
   background-image: url("assets/medal-3.svg");
 }
+
+/* ---------- звание «Тыквенный сталкер» в своей карточке игрока (все тыквы-пасхалки Хэллоуина найдены) ----------
+   плашка-нашивка с паутиной в углу, тыква-фонарь со свечным огнём внутри */
+.hw-rank {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin: -4px 0 10px;
+  padding: 5px 14px 5px 8px;
+  border: 1px solid #a2521a;
+  background:
+    radial-gradient(circle at 0 0, transparent 9px, rgba(255, 255, 255, 0.16) 10px, transparent 11px),
+    radial-gradient(circle at 0 0, transparent 15px, rgba(255, 255, 255, 0.1) 16px, transparent 17px),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0 1px, transparent 1px) 0 0 / 18px 18px no-repeat,
+    radial-gradient(circle at 18px 50%, rgba(255, 120, 20, 0.35), transparent 60%),
+    linear-gradient(180deg, #2a1509, #120a05);
+  box-shadow:
+    0 0 16px rgba(255, 110, 20, 0.25),
+    inset 0 0 0 1px rgba(255, 170, 70, 0.08);
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+.hw-rank svg {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  overflow: visible;
+  filter: drop-shadow(0 0 4px rgba(255, 120, 20, 0.6));
+  animation: hw-rank-sway 3.6s ease-in-out infinite alternate;
+  transform-origin: 50% 90%;
+}
+.hw-rank-stem {
+  fill: none;
+  stroke: #6f9a3c;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+.hw-rank-body {
+  fill: #e0701c;
+  stroke: #ffa040;
+  stroke-width: 1;
+}
+.hw-rank-face {
+  fill: #ffe08a;
+  animation: hw-rank-candle 3.2s ease-in-out infinite;
+}
+.hw-rank span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.hw-rank small {
+  font:
+    600 9.5px/1 "ZoneMono",
+    ui-monospace,
+    "Cascadia Mono",
+    Consolas,
+    monospace;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #c98a4e;
+}
+.hw-rank b {
+  font-family: var(--f-display);
+  font-size: var(--fs-md);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffb45a;
+  text-shadow:
+    0 0 10px rgba(255, 120, 20, 0.55),
+    0 1px 0 rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+}
+@keyframes hw-rank-candle {
+  0%,
+  100% {
+    fill: #ffe08a;
+  }
+  30% {
+    fill: #ffc24a;
+  }
+  34% {
+    fill: #fff0b8;
+  }
+  62% {
+    fill: #ffd060;
+  }
+}
+@keyframes hw-rank-sway {
+  from {
+    transform: rotate(-6deg);
+  }
+  to {
+    transform: rotate(6deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hw-rank svg,
+  .hw-rank-face {
+    animation: none;
+  }
+}
