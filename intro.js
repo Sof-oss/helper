@@ -232,21 +232,17 @@
   /* финал: две зелёные строки и кнопка «Войти» - сайт открывается только по ней (или по «Пропустить») */
   function finish() {
     later(function () {
-      /* лог гаснет, итог - отдельным блоком по центру экрана */
+      /* лог гаснет, итог - две строки и «Войти» разом, отдельным блоком по центру экрана */
       log.classList.add("pda-log--done");
       var fin = el("div", "pda-final");
-      screen.insertBefore(fin, log.nextSibling);
       fin.appendChild(el("div", "pda-win", "Авторизация прошла успешно!"));
-      later(function () {
-        fin.appendChild(el("div", "pda-win pda-win--big", "Добро пожаловать, Сталкер!"));
-        later(function () {
-          enter = el("button", "pda-open pda-enter", "Войти");
-          enter.type = "button";
-          enter.addEventListener("click", close);
-          fin.appendChild(enter);
-          enter.focus({ preventScroll: true });
-        }, 900);
-      }, 1000);
+      fin.appendChild(el("div", "pda-win pda-win--big", "Добро пожаловать, Сталкер!"));
+      enter = el("button", "pda-open pda-enter", "Войти");
+      enter.type = "button";
+      enter.addEventListener("click", close);
+      fin.appendChild(enter);
+      screen.insertBefore(fin, log.nextSibling);
+      enter.focus({ preventScroll: true });
     }, 600);
   }
 
