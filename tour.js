@@ -322,6 +322,7 @@
 
   /* ---------- подсветка и окно шага ---------- */
   var spot,
+    block,
     panel,
     i = -1,
     targets = [],
@@ -329,6 +330,20 @@
     closing = false;
   function build() {
     if (panel) return;
+    /* прозрачный слой под окном тура: клики по сайту не доходят до кнопок и ссылок (иначе тур ломался -
+       открывались окна, менялись разделы, уходили со страницы). Прокрутка колесом и пальцем работает.
+       Клик мимо окна - окно слегка «вздрагивает», подсказывая, где управлять туром */
+    block = d.createElement("div");
+    block.className = "tour-block";
+    block.setAttribute("aria-hidden", "true");
+    block.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (!panel || closing) return;
+      panel.classList.remove("nudge");
+      void panel.offsetWidth;
+      panel.classList.add("nudge");
+    });
+    d.body.appendChild(block);
     spot = d.createElement("div");
     spot.className = "tour-spot";
     spot.setAttribute("aria-hidden", "true");
@@ -358,6 +373,16 @@
     if (!panel || closing) return;
     var t = e.target,
       typing = t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName);
+    /* Tab не уводит фокус на спрятанный под слоем сайт - ходит по кнопкам окна тура */
+    if (e.key === "Tab") {
+      var list = [].slice.call(panel.querySelectorAll("button:not([disabled])"));
+      if (!list.length) return;
+      var at = list.indexOf(d.activeElement);
+      e.preventDefault();
+      var next = e.shiftKey ? (at <= 0 ? list.length - 1 : at - 1) : at < 0 || at === list.length - 1 ? 0 : at + 1;
+      list[next].focus({ preventScroll: true });
+      return;
+    }
     if (e.key === "Escape") {
       e.preventDefault();
       e.stopPropagation();
@@ -579,9 +604,10 @@
     removeEventListener("scroll", queue);
     removeEventListener("resize", queue);
     d.removeEventListener("keydown", onKey, true);
+    if (block) block.remove();
     if (spot) spot.remove();
     if (panel) panel.remove();
-    spot = panel = null;
+    block = spot = panel = null;
     targets = [];
     i = -1;
     closing = false;

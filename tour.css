@@ -125,7 +125,30 @@
   }
 }
 
-/* подсветка: всё вокруг затемняется огромной тенью, рамка пульсирует. Клики проходят сквозь - сайтом можно пользоваться */
+/* пока идёт тур, сайт под ним не кликается (tour.js): прозрачный слой ниже подсветки и окна */
+.tour-block {
+  position: fixed;
+  inset: 0;
+  z-index: 8999;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+/* клик мимо окна - окно «вздрагивает» */
+.tour-panel.nudge {
+  animation: tour-nudge 0.4s ease;
+}
+@keyframes tour-nudge {
+  20%,
+  60% {
+    translate: -6px 0;
+  }
+  40%,
+  80% {
+    translate: 6px 0;
+  }
+}
+
+/* подсветка: всё вокруг затемняется огромной тенью, рамка пульсирует */
 .tour-spot {
   --tour-ac: #54bfff;
   position: fixed;
