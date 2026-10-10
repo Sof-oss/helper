@@ -789,6 +789,31 @@
           .join("") +
         "</ul>"
       : "";
+    /* особые нашивки, выданные вручную (awards.js): ID игрока -> список нашивок */
+    const AW = window.ZONE_AWARDS || {};
+    const awardList = ((AW.players && AW.players[cur]) || [])
+      .map(k => AW.types && AW.types[k])
+      .filter(a => a && a.name && a.icon);
+    const awards = awardList.length
+      ? '<ul class="pc-awards" aria-label="Особые нашивки">' +
+        awardList
+          .map(
+            a =>
+              '<li class="pc-award" style="--c:' +
+              escAttr(a.color || "#e3b53c") +
+              '"' +
+              (a.desc ? ' title="' + escAttr(a.desc) + '"' : "") +
+              '><img src="' +
+              escAttr(a.icon) +
+              '" alt="" width="40" height="45" decoding="async"><span><b>' +
+              esc(a.name) +
+              "</b>" +
+              (a.desc ? "<small>" + esc(a.desc) + "</small>" : "") +
+              "</span></li>"
+          )
+          .join("") +
+        "</ul>"
+      : "";
     const stampTxt = !best
       ? ""
       : best.r === 1
@@ -830,6 +855,7 @@
       "</dl></div>" +
       (stampTxt ? '<div class="pc-stamp" aria-hidden="true">' + stampTxt + "</div>" : "") +
       "</div>" +
+      awards +
       patches +
       "</header>" +
       periodBtns +
