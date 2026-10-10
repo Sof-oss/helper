@@ -63,7 +63,7 @@ export default [
   },
   /* скрипты сборки и выгрузки - Node.js */
   {
-    files: ["build*.js", "fetch-players.js", "yandex/**/*.js", "guide-md.js", "test/**"],
+    files: ["build*.js", "dev.js", "fetch-players.js", "yandex/**/*.js", "guide-md.js", "test/**"],
     languageOptions: { globals: { ...globals.node } }
   }
 ];

@@ -57,6 +57,8 @@ const SKIP = new Set([
   "build-top100.js",
   "build-players.js",
   "build-top100.bat",
+  "dev.js",
+  "dev.bat",
   "package.json",
   "package-lock.json",
   "fetch-players.js",
