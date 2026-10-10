@@ -184,7 +184,7 @@ html:not(.hw) :is(.hw-layer, .hw-sky, .hw-fog, .hw-light, .hw-burer, .hw-walker,
   bottom: calc(100% + 8px);
   left: 50%;
   width: max-content;
-  max-width: 220px;
+  max-width: 240px;
   padding: 6px 10px;
   border: 1px solid rgba(224, 120, 47, 0.6);
   background: rgba(10, 14, 8, 0.94);
@@ -498,8 +498,10 @@ html.hw .zn-event {
 
 /* Пасхалка в пустом углу некликабельного блока (позицию ставит halloween.js) */
 .hw-egg.free {
+  /* left/top ставит halloween.js */
   left: 0;
   top: 0;
+  right: auto;
   bottom: auto;
   width: 28px;
   pointer-events: auto;

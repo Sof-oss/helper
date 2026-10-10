@@ -411,23 +411,68 @@
     });
   }
 
-  /* пасхалка: на каждой странице прячется маленькая тыква, по клику она ухает и засчитывается */
+  /* пасхалка: в каждом из шести разделов прячется маленькая тыква, по клику она ухает и засчитывается.
+     Подстраницы считаются за свой раздел: «Задания» и «Боссы» - Информация, ссылка на билд - Калькулятор,
+     гайд - Гайды. На страницах вне разделов (404, нет сети) тыквы нет, чтобы не было «пустых» находок */
   var EGG_PAGES = ["/", "/info", "/top100", "/compare", "/calculator", "/guides"];
+  var EGG_NAMES = {
+    "/": "Главная",
+    "/info": "Информация",
+    "/top100": "Топ-100",
+    "/compare": "Сравнение игроков",
+    "/calculator": "Калькулятор урона",
+    "/guides": "Гайды"
+  };
   var EGG_KEY = "hotzHwFound";
   var egg;
   function eggPage() {
     var p = location.pathname.replace(/\.html$/, "").replace(/\/index$/, "/");
     if (p.length > 1) p = p.replace(/\/$/, "");
     if (/^\/guide\//.test(p)) p = "/guides";
+    if (/^\/info-/.test(p)) p = "/info";
+    if (p === "/build") p = "/calculator";
     return EGG_PAGES.indexOf(p) >= 0 ? p : null;
   }
+  /* только настоящие разделы и без повторов - старые записи вида "/info-tasks" не мешают счёту */
   function found() {
     try {
-      return JSON.parse(localStorage.getItem(EGG_KEY) || "[]");
+      var list = JSON.parse(localStorage.getItem(EGG_KEY) || "[]");
+      return Array.isArray(list)
+        ? list.filter(function (p, i) {
+            return EGG_PAGES.indexOf(p) >= 0 && list.indexOf(p) === i;
+          })
+        : [];
     } catch (e) {
       return [];
     }
   }
+  var SAYS = [
+    "Ух-ух!",
+    "Бу!",
+    "У-у-ух!",
+    "Сталкер, артефакт не трожь!",
+    "Фонишь, братишка…",
+    "Кто тут шастает?",
+    "Тише, контролёр рядом…",
+    "Опять выброс, что ли?",
+    "Я не мутант, я овощ!",
+    "Хабар есть? Делись!",
+    "Сначала болты кидай, потом трогай!",
+    "Меня бюрер в простыне потерял…",
+    "Счётчик трещит, не к добру…",
+    "Иди своей дорогой, сталкер",
+    "Ты меня не видел. Я тебя тоже",
+    "Здесь была аномалия. Теперь я",
+    "Тыкву в рюкзак - и на Кордон!",
+    "Чую, кровосос за углом…",
+    "Не смотри мне в глаза - выгоришь!",
+    "Монолит велел сторожить…",
+    "Хорошей охоты, сталкер",
+    "Свечка внутри - из «Пси-шлема»!",
+    "Долг ищет, Свобода прячет",
+    "Тут поблизости тайник. Или нет",
+    "Зона не любит торопливых"
+  ];
   /* Где прятать: любой видимый некликабельный блок страницы (панели, подвал, вложенные секции).
      Тыква встаёт в пустой угол блока или посередине нижнего края - не поверх текста, картинок,
      кнопок и ссылок. Место выбирается случайно при каждом заходе, поэтому её приходится искать. */
@@ -539,8 +584,10 @@
       return;
     }
     var r = eggRect(eggSpot);
-    egg.style.transform =
-      "translate(" + Math.round(r.left + window.scrollX) + "px," + Math.round(r.top + window.scrollY) + "px)";
+    /* позиция - через left/top, а не transform: transform занят анимацией «ух» и увеличением при наведении,
+       иначе на время анимации тыква улетала в угол страницы и будто пропадала */
+    egg.style.left = Math.round(r.left + window.scrollX) + "px";
+    egg.style.top = Math.round(r.top + window.scrollY) + "px";
     egg.classList.toggle("bl", eggSpot.x !== 1);
     egg.classList.toggle("br", eggSpot.x === 1);
     egg.style.visibility = fixedChrome.some(function (f) {
@@ -550,31 +597,48 @@
       : "";
   }
   function spawnEgg() {
+    if (!eggPage()) return;
     egg = el("button", "hw-egg", '<img alt="" src="' + img(pick(PUMPKINS)) + '"><span class="hw-bubble"></span>');
     egg.type = "button";
     egg.setAttribute("aria-label", "Тыква");
     egg.addEventListener("click", function () {
       var page = eggPage();
       var list = found();
-      if (page && list.indexOf(page) < 0) {
+      var fresh = page && list.indexOf(page) < 0;
+      if (fresh) {
         list.push(page);
         try {
           localStorage.setItem(EGG_KEY, JSON.stringify(list));
         } catch (e) {}
       }
-      var says = ["Ух-ух!", "Бу!", "Сталкер, артефакт не трожь!", "У-у-ух!", "Фонишь, братишка…"];
-      var msg = pick(says);
-      if (page) msg += " Тыкв найдено: " + list.length + " из " + EGG_PAGES.length;
-      if (list.length >= EGG_PAGES.length && page) {
+      var total = EGG_PAGES.length;
+      var msg = pick(SAYS) + " ";
+      msg += fresh
+        ? "Тыква найдена: " + list.length + " из " + total
+        : "Эта уже найдена: " + list.length + " из " + total;
+      /* подсказка, где искать остальные, когда их осталось немного */
+      var left = EGG_PAGES.filter(function (p) {
+        return list.indexOf(p) < 0;
+      });
+      if (left.length && left.length <= 2)
+        msg +=
+          ". Ещё прячется: " +
+          left
+            .map(function (p) {
+              return EGG_NAMES[p];
+            })
+            .join(", ");
+      if (list.length >= total) {
         /* награда - звание «Тыквенный сталкер» в своей карточке игрока (рисует my-place.js) */
         var me = null;
         try {
           me = JSON.parse(localStorage.getItem("zoneMyPlayer") || "null");
         } catch (e) {}
         msg =
-          me && me.n
-            ? "Все тыквы Зоны собраны! В вашем личном деле - звание «Тыквенный сталкер» 🎃"
-            : "Все тыквы Зоны собраны! Отметьте себя в Топ-100 («Это я») - и в карточке появится звание 🎃";
+          (fresh ? "Все тыквы Зоны собраны! " : pick(SAYS) + " Все " + total + " из " + total + " собраны! ") +
+          (me && me.n
+            ? "В вашем личном деле - звание «Тыквенный сталкер» 🎃"
+            : "Отметьте себя в Топ-100 («Это я») - и в карточке появится звание 🎃");
       }
       egg.querySelector(".hw-bubble").textContent = msg;
       egg.classList.remove("boo");
