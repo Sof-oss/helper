@@ -477,8 +477,8 @@
      Тыква встаёт в пустой угол блока или посередине нижнего края - не поверх текста, картинок,
      кнопок и ссылок. Место выбирается случайно при каждом заходе, поэтому её приходится искать. */
   var EGG_SPOTS = PERCH + ", .site-footer, main section, main aside, main article, .panel, .card";
-  var EGG_W = 28,
-    EGG_H = 34,
+  var EGG_W = 20,
+    EGG_H = 24,
     EGG_IN = 10;
   var eggSpot = null;
   function contentRects(a) {
@@ -611,39 +611,60 @@
           localStorage.setItem(EGG_KEY, JSON.stringify(list));
         } catch (e) {}
       }
+      /* облачко из трёх частей: фраза тыквы, счёт находок, подсказка (где искать / про звание) */
       var total = EGG_PAGES.length;
-      var msg = pick(SAYS) + " ";
-      msg += fresh
-        ? "Тыква найдена: " + list.length + " из " + total
-        : "Эта уже найдена: " + list.length + " из " + total;
-      /* подсказка, где искать остальные, когда их осталось немного */
+      var say = pick(SAYS),
+        count,
+        hint = "";
       var left = EGG_PAGES.filter(function (p) {
         return list.indexOf(p) < 0;
       });
-      if (left.length && left.length <= 2)
-        msg +=
-          ". Ещё прячется: " +
-          left
-            .map(function (p) {
-              return EGG_NAMES[p];
-            })
-            .join(", ");
       if (list.length >= total) {
         /* награда - звание «Тыквенный сталкер» в своей карточке игрока (рисует my-place.js) */
         var me = null;
         try {
           me = JSON.parse(localStorage.getItem("zoneMyPlayer") || "null");
         } catch (e) {}
-        msg =
-          (fresh ? "Все тыквы Зоны собраны! " : pick(SAYS) + " Все " + total + " из " + total + " собраны! ") +
-          (me && me.n
+        count = fresh
+          ? "Все тыквы Зоны собраны! " + total + " из " + total
+          : "Все тыквы собраны: " + total + " из " + total;
+        hint =
+          me && me.n
             ? "В вашем личном деле - звание «Тыквенный сталкер» 🎃"
-            : "Отметьте себя в Топ-100 («Это я») - и в карточке появится звание 🎃");
+            : "Отметьте себя в Топ-100 («Это я») - и в карточке появится звание 🎃";
+      } else {
+        count = (fresh ? "Тыква найдена: " : "Эта уже найдена: ") + list.length + " из " + total;
+        /* где искать остальные - когда их осталось немного */
+        if (left.length <= 2)
+          hint =
+            "Ещё прячется: " +
+            left
+              .map(function (p) {
+                return EGG_NAMES[p];
+              })
+              .join(", ");
       }
-      egg.querySelector(".hw-bubble").textContent = msg;
+      var bubble = egg.querySelector(".hw-bubble");
+      bubble.textContent = "";
+      [
+        ["hw-say", say],
+        ["hw-count", count],
+        ["hw-hint", hint]
+      ].forEach(function (part) {
+        if (!part[1]) return;
+        var line = d.createElement("span");
+        line.className = part[0];
+        line.textContent = part[1];
+        bubble.appendChild(line);
+      });
       egg.classList.remove("boo");
       void egg.offsetWidth;
       egg.classList.add("boo");
+      /* фраза висит 6,4 с (hw-say в halloween.css), потом тыква снова тускнеет */
+      clearTimeout(egg.booTimer);
+      egg.booTimer = setTimeout(function () {
+        if (egg) egg.classList.remove("boo");
+      }, 6400);
     });
     eggSpot = pickEggSpot();
     if (eggSpot) {
