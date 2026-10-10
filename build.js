@@ -573,8 +573,8 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".css"))) {
 }
 
 /* ---------- интро для новичков (intro.js / intro.css) ----------
-   Встроенный скрипт в <head> до стилей решает, показывать ли ПДА: при первом визите (нет zoneIntroSeen),
-   не ботам и не превью соцсетей/мессенджеров, не во фрейме; ?intro в адресе - показать принудительно.
+   Встроенный скрипт в <head> до стилей решает, показывать ли ПДА: при первом визите (нет zonePdaSeen,
+   и 3D-заставку главной - метка zoneIntroSeen - человек тоже ещё не видел), не ботам и не превью соцсетей/мессенджеров, не во фрейме; ?intro в адресе - показать принудительно.
    Тогда <html class="intro">, и intro.css прячет сайт ещё до первой отрисовки. Страховка: если intro.js
    не появился за 6 с (не загрузился), класс снимается и сайт виден как обычно. Нет на 404 и offline */
 function introPage(name) {
@@ -582,9 +582,9 @@ function introPage(name) {
 }
 const INTRO_FLAG =
   "<script>/* интро ПДА (build.js) */(function(){try{var h=document.documentElement,n=navigator,f=/[?&]intro(=|&|$)/.test(location.search);" +
-  'if(!f){if(localStorage.getItem("zoneIntroSeen")||n.webdriver||window.top!==window.self)return;' +
+  'if(!f){if(localStorage.getItem("zonePdaSeen")||localStorage.getItem("zoneIntroSeen")||n.webdriver||window.top!==window.self)return;' +
   'if(/bot|crawl|spider|slurp|google(-|other|web)|mediapartners|yandex|bing|baidu|duckduck|facebookexternalhit|vkshare|whatsapp|telegram|discord|skype|slack|lighthouse|headless|phantom|prerender|preview|pinterest|twitter|embed/i.test(n.userAgent||""))return}' +
-  'h.classList.add("intro");setTimeout(function(){if(!document.querySelector(".pda-intro"))h.classList.remove("intro")},6000)}catch(e){}})();</script>\n';
+  'h.classList.add("intro");setTimeout(function(){if(!document.querySelector(".pda-intro")){h.classList.remove("intro");window.dispatchEvent(new Event("zone-intro-done"))}},6000)}catch(e){}})();</script>\n';
 
 /* ---------- фон темы - с первых миллисекунд ----------
    Фото темы задано в css (body::before), и браузер узнаёт о нём только после разбора стилей - при переходе

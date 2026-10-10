@@ -898,5 +898,15 @@
   }
 
   window.HOTZ_HW = { start: restart, stop: stop };
-  if (root.classList.contains("hw")) start();
+  /* пока открыт ПДА новичка (intro.js), сайт спрятан и тыквам/воронам/пасхалке не на что сесть -
+     запускаемся, когда он закроется */
+  if (root.classList.contains("intro"))
+    window.addEventListener(
+      "zone-intro-done",
+      function () {
+        if (root.classList.contains("hw")) start();
+      },
+      { once: true }
+    );
+  else if (root.classList.contains("hw")) start();
 })();

@@ -55,6 +55,9 @@ const whenIdle = () =>
 
 async function main() {
   if (reduce || bot || weak || !hasGL()) return;
+  /* сначала ПДА новичка (intro.js): пока он открыт, сайт спрятан - заставка идёт после «Войти» */
+  if (document.documentElement.classList.contains("intro"))
+    await new Promise(ok => addEventListener("zone-intro-done", ok, { once: true }));
   /* и заставка, и фон - только когда страница уже загрузилась: на скорость первой отрисовки они не влияют */
   await whenIdle();
   if (!introSeen()) {
