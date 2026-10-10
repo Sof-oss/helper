@@ -71,6 +71,7 @@ const SKIP = new Set([
   "build-previews.js",
   "build-logo.js",
   "build-changelog.js",
+  "site-news.json",
   "build-guide-images.js",
   "build-chrome.js",
   "previews",

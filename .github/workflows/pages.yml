@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write # сохранить автоматически импортированные новости в site-news.json
   pages: write
   id-token: write
 
@@ -42,7 +42,20 @@ jobs:
         run: npm test && npm run lint
 
       - name: Build
-        run: node build-changelog.js && node build-guide-images.js && node build.js && node build-previews.js # build-changelog.js дописывает «Что нового?» из коммитов, build-guide-images.js - копии картинок гайдов для телефонов
+        run: node build-changelog.js && node build-guide-images.js && node build.js && node build-previews.js # build-changelog.js импортирует новости в site-news.json и готовит блок «Новости сайта», build-guide-images.js - копии картинок гайдов для телефонов
+
+      # Сохраняем только редактируемые новости, а не сгенерированные файлы сайта.
+      # [skip ci] не даёт запускать ещё одну сборку на служебный коммит.
+      # Обычный push (без force): если main уже изменился, он не затрёт новые правки.
+      - name: Save imported site news
+        run: |
+          if ! git diff --quiet -- site-news.json; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -- site-news.json
+            git commit -m "Сохранены новости сайта [skip news] [skip ci]"
+            git push origin HEAD:main
+          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5

@@ -1,35 +1,47 @@
-/* build-changelog.js - автоматическое пополнение «Что нового?» из сообщений коммитов.
-   Запускается в GitHub Actions перед build.js (см. .github/workflows/pages.yml) и дописывает записи
-   в changelog.js только в копии для сборки - в репозиторий ничего не коммитится.
-
-   Как писать коммит, чтобы он попал на главную:
-     1-я строка - заголовок записи (например «Темы группировок»);
-     первая буква заголовка и пунктов сама становится заглавной, точка в конце пункта убирается (многоточие остаётся);
-     дальше строки-пункты с метками:
-       new: текст  - Новое
-       up: текст   - Улучшено (upd: и update: тоже понимаются)
-       fix: текст  - Исправлено
-   Коммиты без таких строк («Fix», «Update visual.css») пропускаются.
-   Если 1-я строка сама начинается с метки, заголовок будет «Обновление».
-   Коммиты одного дня с одинаковым заголовком склеиваются в одну запись.
-   Запись, которая уже есть в changelog.js руками (та же дата и заголовок), не дублируется.
-   В тексте можно ставить ссылки: <a href="/top100">Топ-100</a>.
-
-   Убрать запись уже запушенного коммита (история не переписывается): добавьте начало его хеша
-   (7+ символов) в SKIP ниже - с комментарием, почему.
-
-   Гайды: каждый опубликованный гайд (guides/<адрес>/index.md без draft: true) сам даёт пункт
-   «new: Добавлен гайд «Название». Автор - ник» в запись «Новый гайд» в день, когда index.md попал в main
-   (для гайдов из формы - день слияния pull request). Если гайд уже упомянут (ссылкой /guide/<адрес> или «Названием») в коммите
-   или в changelog.js, второй пункт не появится. Убрать пункт - добавьте адрес папки в SKIP_GUIDES.
-
-   Проверить локально: node build-changelog.js --dry */
+/* «Новости сайта»: импорт новых коммитов в site-news.json и подготовка changelog.js для страницы.
+   Редактируйте только site-news.json: date, title, items. Импорт НЕ меняет существующие записи.
+   importedSources - служебная память импорта: не удаляйте её (она защищает от дублей и возвращения удалённых новостей).
+   hidden: true скрывает запись. Можно также удалять запись из entries.
+   node build-changelog.js --dry - проверить без записи файлов.
+   GitHub Actions сохраняет изменённый site-news.json в репозитории, чтобы его можно было править на GitHub.
+*/
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
 
 const FILE = path.join(__dirname, "changelog.js");
 const DRY = process.argv.includes("--dry");
+const NEWS_FILE = path.join(__dirname, "site-news.json");
+const news = JSON.parse(fs.readFileSync(NEWS_FILE, "utf8"));
+function validate(data) {
+  if (data.version !== 1 || !Array.isArray(data.entries) || !Array.isArray(data.importedSources))
+    throw new Error("site-news.json: нужны version: 1, entries и importedSources");
+  if (!data.importedSources.every(x => typeof x === "string"))
+    throw new Error("site-news.json: importedSources должен содержать только строки");
+  for (const e of data.entries) {
+    if (
+      !e ||
+      typeof e.date !== "string" ||
+      !/^\d{4}-\d\d-\d\d$/.test(e.date) ||
+      !Number.isFinite(Date.parse(e.date)) ||
+      new Date(e.date).toISOString().slice(0, 10) !== e.date
+    )
+      throw new Error("site-news.json: неверная дата, ожидается ГГГГ-ММ-ДД");
+    if (
+      typeof e.title !== "string" ||
+      !e.title.trim() ||
+      !Array.isArray(e.items) ||
+      !e.items.every(
+        i => Array.isArray(i) && i.length === 2 && ["new", "up", "fix"].includes(i[0]) && typeof i[1] === "string"
+      )
+    )
+      throw new Error("site-news.json: нужны заголовок title и items: [[тип, текст]] (new/up/fix)");
+    if (e.hidden !== undefined && typeof e.hidden !== "boolean")
+      throw new Error("site-news.json: hidden должен быть true или false");
+  }
+}
+validate(news);
+const imported = new Set(news.importedSources);
 /* коммиты, которые не попадают в «Что нового?» */
 const SKIP = [
   "4f0c2d1" // «Задания» - тот же пункт вошёл в «Раздел «Информация»» (3033095)
@@ -64,7 +76,6 @@ try {
   });
 } catch (e) {
   console.log("build-changelog: нет истории git, пропускаю");
-  process.exit(0);
 }
 
 /* коммиты -> записи {date, title, items} (git log идёт от новых к старым) */
@@ -73,7 +84,7 @@ for (const raw of log.split("\x1e")) {
   const [hash = "", date, rawBody = ""] = raw.replace(/^\s+/, "").split("\x1f");
   /* опечатки в уже запушенных коммитах (история не переписывается) */
   const body = TYPOS.reduce((s, [from, to]) => s.replace(from, to), rawBody);
-  if (SKIP.some(h => h && hash.startsWith(h))) continue;
+  if (imported.has(hash) || SKIP.some(h => h && hash.startsWith(h))) continue;
   if (!/^\d{4}-\d\d-\d\d$/.test(date || "")) continue;
   const lines = body
     .split(/\r?\n/)
@@ -87,26 +98,25 @@ for (const raw of log.split("\x1e")) {
   if (!items.length) continue;
   const title = lines[0] && !TAG.test(lines[0]) ? quotes(capital(lines[0])) : "Обновление";
   const key = date + "\n" + title;
-  if (!groups.has(key)) groups.set(key, { date, title, items: [] });
+  if (!groups.has(key)) groups.set(key, { date, title, items: [], sources: [] });
   /* внутри записи - в порядке коммитов: старые пункты выше */
   groups.get(key).items.unshift(...items);
+  groups.get(key).sources.push(hash);
 }
 
 let src = fs.readFileSync(FILE, "utf8");
-const START = "window.CHANGELOG=[\n";
-if (!src.includes(START)) {
-  console.error("build-changelog: не нашёл window.CHANGELOG=[ в changelog.js");
-  process.exit(1);
-}
+const DATA_RE = /window\.CHANGELOG\s*=\s*\[[\s\S]*?\];(?=\s*\(function)/;
+if (!DATA_RE.test(src)) throw new Error("build-changelog: нет массива CHANGELOG в changelog.js");
 
 /* опубликованные гайды -> пункты «Добавлен гайд» */
 const GuideMD = require("./guide-md.js");
 const GUIDES_DIR = path.join(__dirname, "guides");
 const guideDays = new Map();
-const mentioned = src + [...groups.values()].map(g => g.items.map(i => i[1]).join("\n")).join("\n");
+const mentioned =
+  JSON.stringify(news.entries) + [...groups.values()].map(g => g.items.map(i => i[1]).join("\n")).join("\n");
 for (const slug of fs.existsSync(GUIDES_DIR) ? fs.readdirSync(GUIDES_DIR).sort() : []) {
   const md = path.join(GUIDES_DIR, slug, "index.md");
-  if (SKIP_GUIDES.includes(slug) || !fs.existsSync(md)) continue;
+  if (imported.has("guide:" + slug) || SKIP_GUIDES.includes(slug) || !fs.existsSync(md)) continue;
   const { meta } = GuideMD.parse(fs.readFileSync(md, "utf8"));
   if (!meta.title || /^(true|yes|da|да)$/i.test(meta.draft || "")) continue;
   /* день, когда index.md появился в main (по first-parent: merge-коммит PR = публикация) */
@@ -126,7 +136,10 @@ for (const slug of fs.existsSync(GUIDES_DIR) ? fs.readdirSync(GUIDES_DIR).sort()
   if (!date) continue;
   /* гайд уже упомянут в коммите или в changelog.js руками - второй раз не пишем */
   const name = meta.title.replace(/^[«"]|[»"]$/g, "");
-  if (mentioned.includes("/guide/" + slug + '"') || mentioned.includes("«" + quotes(name) + "»")) continue;
+  if (mentioned.includes("/guide/" + slug) || mentioned.includes("«" + quotes(name) + "»")) {
+    imported.add("guide:" + slug);
+    continue;
+  }
   const esc = s => GuideMD.esc(String(s).trim());
   const text =
     'Добавлен гайд <a href="/guide/' +
@@ -135,44 +148,47 @@ for (const slug of fs.existsSync(GUIDES_DIR) ? fs.readdirSync(GUIDES_DIR).sort()
     esc(quotes(name)) +
     "»</a>" +
     (meta.author ? ". Автор - " + esc(meta.author) : "");
-  if (!guideDays.has(date)) guideDays.set(date, []);
-  guideDays.get(date).push(["new", text]);
+  if (!guideDays.has(date)) guideDays.set(date, { items: [], sources: [] });
+  guideDays.get(date).items.push(["new", text]);
+  guideDays.get(date).sources.push("guide:" + slug);
 }
-for (const [date, items] of guideDays) {
-  const title = items.length > 1 ? "Новые гайды" : "Новый гайд";
-  groups.set(date + "\n" + title, { date, title, items });
+for (const [date, g] of guideDays) {
+  const title = g.items.length > 1 ? "Новые гайды" : "Новый гайд";
+  const key = date + "\n" + title;
+  if (groups.has(key)) {
+    groups.get(key).items.push(...g.items);
+    groups.get(key).sources.push(...g.sources);
+  } else groups.set(key, { date, title, items: g.items, sources: g.sources });
 }
 
-const manual = new Set(
-  [...src.matchAll(/\{date:"(\d{4}-\d\d-\d\d)",title:("(?:[^"\\]|\\.)*")/g)].map(m => m[1] + "\n" + JSON.parse(m[2]))
-);
-const auto = [...groups.values()]
-  .filter(g => !manual.has(g.date + "\n" + g.title))
+/* Первый импорт связывает прежние ручные записи с историей. После него идентификаторы коммитов,
+   а не дата/заголовок, защищают ваши правки от повторного импорта. */
+const manual = new Set(news.entries.map(e => e.date + "\n" + e.title));
+const added = [];
+for (const g of groups.values()) {
+  g.sources.forEach(s => imported.add(s));
+  if (!news.migrated && manual.has(g.date + "\n" + g.title)) continue;
+  added.push({ date: g.date, title: g.title, items: g.items });
+}
+news.entries.unshift(...added.sort((a, b) => b.date.localeCompare(a.date)));
+news.importedSources = [...imported].sort();
+news.migrated = true;
+validate(news);
+/* Сортируется только выдача сайта. Ручной порядок/форматирование JSON не трогаем, если импорт ничего не добавил. */
+const visible = news.entries
+  .filter(e => !e.hidden)
+  .slice()
   .sort((a, b) => b.date.localeCompare(a.date));
-if (!auto.length) {
-  console.log("build-changelog: новых записей нет");
-  process.exit(0);
+const data = visible.map(({ date, title, items }) => ({ date, title, items }));
+const output = "window.CHANGELOG=" + JSON.stringify(data, null, 2) + ";";
+const json = JSON.stringify(news, null, 2) + "\n";
+console.log("build-changelog: новых записей " + added.length + ", опубликовано " + data.length);
+if (DRY) console.log(json);
+else {
+  const before = JSON.parse(fs.readFileSync(NEWS_FILE, "utf8"));
+  if (JSON.stringify(before) !== JSON.stringify(news)) fs.writeFileSync(NEWS_FILE, json);
+  fs.writeFileSync(
+    FILE,
+    src.replace(DATA_RE, () => output)
+  );
 }
-
-const toJs = g =>
-  ' {date:"' +
-  g.date +
-  '",title:' +
-  JSON.stringify(g.title) +
-  ",items:[\n" +
-  g.items.map(([t, text]) => "  [" + JSON.stringify(t) + "," + JSON.stringify(text) + "]").join(",\n") +
-  "\n ]},\n";
-
-/* каждую запись ставим перед первой ручной с той же или более ранней датой - список остаётся по убыванию */
-for (const g of auto.slice().reverse()) {
-  const body = src.slice(src.indexOf(START) + START.length);
-  const m = [...body.matchAll(/^ \{date:"(\d{4}-\d\d-\d\d)"/gm)].find(x => x[1] <= g.date);
-  const at = src.indexOf(START) + START.length + (m ? m.index : body.search(/^\];/m));
-  src = src.slice(0, at) + toJs(g) + src.slice(at);
-}
-
-console.log(
-  "build-changelog: добавлено записей - " + auto.length + ": " + auto.map(g => g.date + " «" + g.title + "»").join(", ")
-);
-if (DRY) console.log(src.slice(0, src.indexOf("];") + 2));
-else fs.writeFileSync(FILE, src);
