@@ -1,7 +1,7 @@
 /* «Хэллоуин в Зоне» - сезонная нечисть. Подгружается из season.js, только когда оформление включено.
    Уровни (html[data-hw]): quiet - тыквы и вороны; season - всё; surge - всё чаще + фонарик.
    Все создания не ловят клики (pointer-events: none) - кроме тыквы-пасхалки и бюрера, который прячется от курсора.
-   Тыквы (и декор, и пасхалка) не ставятся на ссылки, кнопки и карточки-ссылки.
+   Пасхалка не ставится на ссылки, кнопки и карточки-ссылки; декоративные тыквы клики пропускают и только не закрывают кнопки.
    При prefers-reduced-motion ничего не движется: только сидящие вороны и тыквы. На телефоне существ меньше и ничего
    не закрывает нижнее меню. */
 (function () {
@@ -339,7 +339,7 @@
   var pumpkins = [];
   function spawnPumpkins() {
     var ps = perches().filter(function (p) {
-      return !p.classList.contains("site-header") && !clickable(p);
+      return !p.classList.contains("site-header");
     });
     var n = Math.min(ps.length, narrow.matches ? 2 : 4);
     var kinds = PUMPKINS.slice().sort(function () {
@@ -372,7 +372,9 @@
       if (eggSpot && intersects(r, eggRect(eggSpot), 12)) return true;
       if (
         occupiedControls.some(function (o) {
-          return intersects(r, o.rect, 12);
+          /* декор не ловит клики, поэтому может сидеть на карточках-ссылках (своей и соседней);
+             не закрываем только обычные кнопки и ссылки */
+          return !o.node.matches(PERCH) && !o.node.contains(k.perch) && intersects(r, o.rect, 2);
         })
       )
         return true;
