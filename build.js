@@ -572,6 +572,20 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".css"))) {
   fs.writeFileSync(file, css);
 }
 
+/* ---------- интро для новичков (intro.js / intro.css) ----------
+   Встроенный скрипт в <head> до стилей решает, показывать ли ПДА: при первом визите (нет zoneIntroSeen),
+   не ботам и не превью соцсетей/мессенджеров, не во фрейме; ?intro в адресе - показать принудительно.
+   Тогда <html class="intro">, и intro.css прячет сайт ещё до первой отрисовки. Страховка: если intro.js
+   не появился за 6 с (не загрузился), класс снимается и сайт виден как обычно. Нет на 404 и offline */
+function introPage(name) {
+  return name !== "404.html" && name !== "offline.html" && fs.existsSync(path.join(OUT, "intro.js"));
+}
+const INTRO_FLAG =
+  "<script>/* интро ПДА (build.js) */(function(){try{var h=document.documentElement,n=navigator,f=/[?&]intro(=|&|$)/.test(location.search);" +
+  'if(!f){if(localStorage.getItem("zoneIntroSeen")||n.webdriver||window.top!==window.self)return;' +
+  'if(/bot|crawl|spider|slurp|google(-|other|web)|mediapartners|yandex|bing|baidu|duckduck|facebookexternalhit|vkshare|whatsapp|telegram|discord|skype|slack|lighthouse|headless|phantom|prerender|preview|pinterest|twitter|embed/i.test(n.userAgent||""))return}' +
+  'h.classList.add("intro");setTimeout(function(){if(!document.querySelector(".pda-intro"))h.classList.remove("intro")},6000)}catch(e){}})();</script>\n';
+
 /* ---------- фон темы - с первых миллисекунд ----------
    Фото темы задано в css (body::before), и браузер узнаёт о нём только после разбора стилей - при переходе
    между страницами это давало чёрный экран. Встроенный скрипт сразу после скрипта темы ставит preload той же
@@ -594,7 +608,7 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".css"))) {
     if (html.includes("preload фона темы")) continue;
     const at = html.search(/<link rel="stylesheet"/);
     if (at < 0) continue;
-    fs.writeFileSync(file, html.slice(0, at) + tag + html.slice(at));
+    fs.writeFileSync(file, html.slice(0, at) + tag + (introPage(name) ? INTRO_FLAG : "") + html.slice(at));
   }
 }
 
@@ -614,6 +628,11 @@ function pwaTags(html, from) {
   /* сезонное оформление (season.js сам решает, включать ли его) - тоже на каждую страницу */
   if (!html.includes("season.js") && fs.existsSync(path.join(OUT, "season.js")))
     html = html.replace("</body>", '<script src="/season.js" defer></script></body>');
+  /* интро для новичков: стили - в <head> (прячут сайт до первой отрисовки), скрипт - в конце */
+  if (introPage(from) && !html.includes("intro.js")) {
+    html = html.replace("</head>", '<link rel="stylesheet" href="/intro.css">\n</head>');
+    html = html.replace("</body>", '<script src="/intro.js" defer></script></body>');
+  }
   return html;
 }
 
