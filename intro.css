@@ -11,16 +11,16 @@ html.intro body > :not(.pda-intro) {
   --pda-g: #8dffa8;
   --pda-g2: #43d97a;
   --pda-dim: rgba(141, 255, 168, 0.55);
+  /* зерно пластика корпуса */
+  --pda-grain: url("assets/pda-grain.svg");
   position: fixed;
   inset: 0;
   z-index: 2147483000;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 18px;
-  padding: 16px 12px 84px;
-  background: radial-gradient(ellipse at 50% 45%, rgba(4, 10, 8, 0.35), rgba(2, 5, 6, 0.75) 75%), rgba(3, 7, 9, 0.35);
+  padding: 34px 16px 56px;
+  background: radial-gradient(ellipse at 50% 45%, rgba(4, 10, 8, 0.25), rgba(2, 5, 6, 0.8) 75%), rgba(3, 7, 9, 0.3);
   -webkit-backdrop-filter: blur(3px);
   backdrop-filter: blur(3px);
   transition:
@@ -37,126 +37,246 @@ html.intro body > :not(.pda-intro) {
 /* ---------- корпус ---------- */
 .pda {
   position: relative;
-  width: min(500px, 94vw);
-  padding: 14px 16px 16px;
-  border-radius: 26px 26px 34px 34px;
+  width: min(940px, 94vw);
+  padding: 12px 22px 22px;
+  border-radius: 30px;
   background:
-    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.018) 0 2px, transparent 2px 5px),
-    linear-gradient(160deg, #3d4433 0%, #2a2f24 45%, #1c1f18 100%);
+    var(--pda-grain), radial-gradient(ellipse at 30% 0%, rgba(255, 255, 240, 0.09), transparent 55%),
+    linear-gradient(165deg, #4d533d 0%, #373c2c 40%, #262a1f 75%, #1c1f17 100%);
+  background-size:
+    160px 160px,
+    auto,
+    auto;
   box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.12),
-    inset 0 -3px 0 rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.6),
-    0 0 0 2px #11130e,
-    0 24px 60px rgba(0, 0, 0, 0.75),
-    0 0 90px rgba(67, 217, 122, 0.08);
-  animation: pda-rise 0.7s cubic-bezier(0.2, 0.9, 0.25, 1.15) both;
+    inset 0 2px 1px rgba(255, 255, 230, 0.16),
+    inset 0 -4px 2px rgba(0, 0, 0, 0.55),
+    inset 3px 0 2px rgba(255, 255, 230, 0.05),
+    inset -3px 0 2px rgba(0, 0, 0, 0.35),
+    0 0 0 2px #0e100b,
+    0 2px 0 3px #2e3226,
+    0 30px 70px rgba(0, 0, 0, 0.8),
+    0 0 120px rgba(67, 217, 122, 0.07);
+  animation: pda-rise 0.8s cubic-bezier(0.2, 0.9, 0.25, 1.12) both;
 }
 @keyframes pda-rise {
   from {
-    transform: translateY(26px) scale(0.96);
+    transform: translateY(30px) scale(0.95);
     opacity: 0;
   }
 }
-.pda-top {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 10px;
-  font:
-    600 11px/1 "ZoneMono",
-    ui-monospace,
-    monospace;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: #a7ae96;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.7);
+/* потёртости по краю корпуса */
+.pda::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 27px;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 230, 0.06);
+  background:
+    linear-gradient(100deg, transparent 12%, rgba(255, 255, 230, 0.05) 12.4%, transparent 13%) 0 0 / 100% 100%,
+    linear-gradient(80deg, transparent 71%, rgba(255, 255, 230, 0.04) 71.3%, transparent 71.8%);
 }
-.pda-led {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #6a1d12;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.6);
+/* антенна */
+.pda-ant {
+  position: absolute;
+  left: 46px;
+  bottom: calc(100% - 4px);
+  width: 22px;
+  height: 30px;
+  border-radius: 9px 9px 3px 3px;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.35) 0 2px, transparent 2px 5px),
+    linear-gradient(90deg, #121410, #2a2d24 45%, #15170f);
+  box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.06) inset;
 }
-.pda-led:first-child {
-  background: #ff5a3c;
-  box-shadow:
-    0 0 8px #ff5a3c,
-    inset 0 -1px 1px rgba(0, 0, 0, 0.4);
-  animation: pda-blink 1.4s steps(1) infinite;
+/* резиновые бамперы на углах */
+.pda-bump {
+  position: absolute;
+  width: 54px;
+  height: 54px;
+  border: 7px solid #15160f;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.06));
 }
-.pda-on .pda-led--2 {
-  background: var(--pda-g2);
-  box-shadow: 0 0 8px var(--pda-g2);
+.pda-bump--tl {
+  left: -4px;
+  top: -4px;
+  border-right: 0;
+  border-bottom: 0;
+  border-radius: 32px 0 0 0;
 }
-@keyframes pda-blink {
-  50% {
-    opacity: 0.25;
-  }
+.pda-bump--tr {
+  right: -4px;
+  top: -4px;
+  border-left: 0;
+  border-bottom: 0;
+  border-radius: 0 32px 0 0;
+}
+.pda-bump--bl {
+  left: -4px;
+  bottom: -4px;
+  border-right: 0;
+  border-top: 0;
+  border-radius: 0 0 0 32px;
+}
+.pda-bump--br {
+  right: -4px;
+  bottom: -4px;
+  border-left: 0;
+  border-top: 0;
+  border-radius: 0 0 32px 0;
 }
 .pda-screw {
   position: absolute;
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #8b9180, #3a3e33 70%);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: radial-gradient(circle at 35% 35%, #9a9f8c, #3a3e33 70%);
+  box-shadow:
+    0 0 0 2px rgba(0, 0, 0, 0.35),
+    0 1px 0 2px rgba(255, 255, 255, 0.05);
 }
 .pda-screw::after {
   content: "";
   position: absolute;
   left: 1px;
   right: 1px;
-  top: 4px;
+  top: 4.5px;
   height: 1px;
-  background: #23261e;
+  background: #1f221a;
   transform: rotate(35deg);
 }
 .pda-screw--tl {
-  left: 12px;
-  top: 12px;
+  left: 18px;
+  top: 16px;
 }
 .pda-screw--tr {
-  right: 12px;
-  top: 12px;
+  right: 18px;
+  top: 16px;
 }
 .pda-screw--bl {
-  left: 14px;
-  bottom: 14px;
+  left: 18px;
+  bottom: 16px;
 }
 .pda-screw--br {
-  right: 14px;
-  bottom: 14px;
+  right: 18px;
+  bottom: 16px;
+}
+.pda-screw--tr::after,
+.pda-screw--bl::after {
+  transform: rotate(-60deg);
+}
+
+/* шильдик и индикаторы */
+.pda-head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  height: 30px;
+  margin-bottom: 8px;
+  font:
+    600 11px/1 "ZoneMono",
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #9ea58c;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 230, 0.1),
+    0 -1px 0 rgba(0, 0, 0, 0.7);
+}
+.pda-brand {
+  padding: 5px 14px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.22);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.6),
+    0 1px 0 rgba(255, 255, 230, 0.07);
+}
+.pda-ledbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  color: #7d846c;
+}
+.pda-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3a1610;
+  box-shadow:
+    inset 0 1px 1px rgba(0, 0, 0, 0.7),
+    0 0 0 2px rgba(0, 0, 0, 0.3);
+}
+.pda-led--pwr {
+  background: radial-gradient(circle at 40% 35%, #ffb09c, #ff4a2c 55%);
+  box-shadow:
+    0 0 10px #ff4a2c,
+    0 0 0 2px rgba(0, 0, 0, 0.3);
+  animation: pda-blink 1.4s steps(1) infinite;
+}
+.pda-led--net {
+  background: #10301a;
+}
+.pda-net-on .pda-led--net {
+  background: radial-gradient(circle at 40% 35%, #d4ffe0, #43d97a 55%);
+  box-shadow:
+    0 0 10px #43d97a,
+    0 0 0 2px rgba(0, 0, 0, 0.3);
+}
+.pda-booting .pda-led--pwr {
+  animation: none;
+}
+@keyframes pda-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.pda-body {
+  display: grid;
+  grid-template-columns: 1fr 150px;
+  gap: 22px;
+  align-items: stretch;
 }
 
 /* ---------- экран ---------- */
+.pda-bezel {
+  padding: 12px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #0c0e0a, #171a13);
+  box-shadow:
+    inset 0 3px 6px rgba(0, 0, 0, 0.9),
+    inset 0 -1px 0 rgba(255, 255, 230, 0.08),
+    0 1px 0 rgba(255, 255, 230, 0.1),
+    0 -1px 0 rgba(0, 0, 0, 0.6);
+}
 .pda-screen {
   position: relative;
-  height: min(470px, 64vh);
+  height: min(520px, 62vh);
   overflow: hidden;
-  border-radius: 12px;
-  border: 3px solid #0b0d09;
+  border-radius: 8px;
   background:
-    radial-gradient(ellipse at 50% 40%, rgba(67, 217, 122, 0.13), transparent 70%),
-    linear-gradient(180deg, #06140c, #030a06);
+    radial-gradient(ellipse at 50% 40%, rgba(67, 217, 122, 0.14), transparent 70%),
+    linear-gradient(180deg, #071a0e, #030b06);
   box-shadow:
-    inset 0 0 40px rgba(0, 0, 0, 0.85),
-    inset 0 0 0 1px rgba(141, 255, 168, 0.08),
-    0 1px 0 rgba(255, 255, 255, 0.08);
+    inset 0 0 60px rgba(0, 0, 0, 0.9),
+    inset 0 0 0 1px rgba(141, 255, 168, 0.07);
   color: var(--pda-g);
   font-family: "ZoneMono", ui-monospace, monospace;
   text-shadow: 0 0 6px rgba(141, 255, 168, 0.45);
 }
-/* сканлайны, блик стекла и бегущая полоса развёртки */
+/* сетка пикселей, сканлайны и бегущая полоса развёртки */
 .pda-scan {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
     linear-gradient(transparent 0 50%, rgba(0, 0, 0, 0.22) 50%) 0 0 / 100% 3px,
-    linear-gradient(125deg, rgba(255, 255, 255, 0.07), transparent 35%);
+    linear-gradient(90deg, transparent 0 66%, rgba(0, 0, 0, 0.12) 66%) 0 0 / 3px 100%;
   animation: pda-flicker 5s infinite;
 }
 .pda-scan::after {
@@ -168,6 +288,17 @@ html.intro body > :not(.pda-intro) {
   height: 30%;
   background: linear-gradient(transparent, rgba(141, 255, 168, 0.06), transparent);
   animation: pda-sweep 4.5s linear infinite;
+}
+/* стекло: блик и лёгкая выпуклость */
+.pda-glass {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(118deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.02) 30%, transparent 31%),
+    radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(0, 0, 0, 0.45) 100%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 @keyframes pda-sweep {
   to {
@@ -193,10 +324,11 @@ html.intro body > :not(.pda-intro) {
 .pda-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
+  gap: 12px;
+  height: 40px;
+  padding: 0 16px;
   border-bottom: 1px solid rgba(141, 255, 168, 0.18);
-  font-size: 12px;
+  font-size: 13px;
   color: var(--pda-dim);
 }
 .pda-net {
@@ -208,7 +340,7 @@ html.intro body > :not(.pda-intro) {
   display: inline-flex;
   align-items: flex-end;
   gap: 2px;
-  height: 12px;
+  height: 13px;
 }
 .pda-sig i {
   width: 3px;
@@ -233,8 +365,8 @@ html.intro body > :not(.pda-intro) {
 }
 .pda-bat {
   position: relative;
-  width: 22px;
-  height: 11px;
+  width: 24px;
+  height: 12px;
   border: 1px solid var(--pda-dim);
   border-radius: 2px;
   padding: 1px;
@@ -245,7 +377,7 @@ html.intro body > :not(.pda-intro) {
   right: -4px;
   top: 3px;
   width: 2px;
-  height: 3px;
+  height: 4px;
   background: var(--pda-dim);
 }
 .pda-bat i {
@@ -258,12 +390,12 @@ html.intro body > :not(.pda-intro) {
 /* заставка */
 .pda-idle {
   position: absolute;
-  inset: 38px 0 0;
+  inset: 40px 0 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 14px;
   padding: 16px;
   text-align: center;
 }
@@ -271,40 +403,39 @@ html.intro body > :not(.pda-intro) {
 .pda-log[hidden] {
   display: none;
 }
-.pda-logo {
-  width: 104px;
-  height: 104px;
-  filter: drop-shadow(0 0 18px rgba(141, 255, 168, 0.35)) saturate(0.9);
-  animation: pda-pulse 2.6s ease-in-out infinite;
+/* сердце на знаке радиации - копия логотипа шапки */
+.pda-mark {
+  width: 180px;
+  height: 180px;
+  text-shadow: none;
 }
-@keyframes pda-pulse {
-  50% {
-    transform: scale(1.04);
-    filter: drop-shadow(0 0 28px rgba(141, 255, 168, 0.55)) saturate(1);
-  }
+.pda-mark .rad-logo,
+.pda-mark .rad-logo img,
+.pda-mark > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.pda-mark .rad-logo {
+  filter: drop-shadow(0 0 22px rgba(255, 96, 30, 0.4));
 }
 .pda-title {
   font:
-    600 26px/1.1 var(--f-display, "Oswald"),
+    600 32px/1.1 var(--f-display, "Oswald"),
     sans-serif;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
-.pda-sub {
-  font-size: 12px;
-  color: rgba(141, 255, 168, 0.75);
-  animation: pda-blink 1.6s steps(1) infinite;
-}
 .pda-open {
-  margin-top: 14px;
-  min-width: 190px;
-  padding: 13px 28px;
+  margin-top: 10px;
+  min-width: 210px;
+  padding: 14px 30px;
   border: 1px solid var(--pda-g);
   border-radius: 6px;
   background: rgba(141, 255, 168, 0.1);
   color: var(--pda-g);
   font:
-    600 17px/1 var(--f-display, "Oswald"),
+    600 18px/1 var(--f-display, "Oswald"),
     sans-serif;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -333,12 +464,12 @@ html.intro body > :not(.pda-intro) {
 /* лог загрузки */
 .pda-log {
   position: absolute;
-  inset: 38px 0 0;
+  inset: 40px 0 0;
   overflow: hidden;
-  padding: 12px 14px 16px;
-  font-size: 12.5px;
-  line-height: 1.55;
-  animation: pda-boot 0.35s ease both;
+  padding: 16px 20px 18px;
+  font-size: 14px;
+  line-height: 1.6;
+  animation: pda-boot 0.4s ease both;
 }
 @keyframes pda-boot {
   from {
@@ -348,16 +479,7 @@ html.intro body > :not(.pda-intro) {
 }
 .pda-line {
   display: flex;
-  gap: 8px;
-  animation: pda-type 0.25s steps(6) both;
-}
-@keyframes pda-type {
-  from {
-    clip-path: inset(0 100% 0 0);
-  }
-  to {
-    clip-path: inset(0 0 0 0);
-  }
+  gap: 10px;
 }
 .pda-prompt {
   color: var(--pda-dim);
@@ -365,6 +487,17 @@ html.intro body > :not(.pda-intro) {
 .pda-text {
   flex: 1;
   min-width: 0;
+}
+/* мигающий курсор, пока строка печатается */
+.pda-line.typing .pda-text::after {
+  content: "";
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: var(--pda-g);
+  box-shadow: 0 0 6px rgba(141, 255, 168, 0.6);
 }
 .pda-st {
   flex: none;
@@ -379,19 +512,26 @@ html.intro body > :not(.pda-intro) {
   text-shadow: 0 0 6px rgba(255, 107, 90, 0.6);
 }
 .pda-win {
-  margin-top: 12px;
+  margin-top: 16px;
   font:
-    600 15px/1.3 var(--f-display, "Oswald"),
+    600 18px/1.3 var(--f-display, "Oswald"),
     sans-serif;
   letter-spacing: 0.06em;
   color: #5dff8a;
   text-shadow: 0 0 10px rgba(93, 255, 138, 0.7);
-  animation: pda-win 0.5s ease both;
+  animation: pda-win 0.6s ease both;
 }
 .pda-win--big {
   margin-top: 6px;
-  font-size: 22px;
+  font-size: 30px;
   text-transform: uppercase;
+}
+.pda-enter {
+  display: block;
+  margin: 20px 0 0;
+  animation:
+    pda-win 0.6s ease both,
+    pda-glow 1.8s ease-in-out 0.6s infinite;
 }
 @keyframes pda-win {
   from {
@@ -400,51 +540,153 @@ html.intro body > :not(.pda-intro) {
     filter: brightness(2);
   }
 }
+@keyframes pda-glow {
+  50% {
+    box-shadow:
+      0 0 30px rgba(141, 255, 168, 0.45),
+      inset 0 0 18px rgba(141, 255, 168, 0.22);
+  }
+}
 
-/* низ корпуса */
-.pda-foot {
+/* ---------- панель кнопок (декор) ---------- */
+.pda-side {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px 2px;
+  padding: 6px 0 4px;
 }
-.pda-key {
-  width: 44px;
-  height: 14px;
-  border-radius: 7px;
-  background: linear-gradient(#1a1d16, #2c3126);
+.pda-spk {
+  width: 92px;
+  height: 46px;
+  border-radius: 10px;
+  background: radial-gradient(circle, #070806 1.6px, transparent 2.2px) 0 0 / 9px 9px;
   box-shadow:
-    inset 0 1px 2px rgba(0, 0, 0, 0.8),
-    0 1px 0 rgba(255, 255, 255, 0.08);
+    inset 0 1px 2px rgba(0, 0, 0, 0.5),
+    0 1px 0 rgba(255, 255, 230, 0.06);
+  opacity: 0.9;
 }
-.pda-grill {
+.pda-dpad {
+  position: relative;
+  width: 116px;
+  height: 116px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #2a2e22, #15170f 70%);
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.8),
+    0 1px 0 rgba(255, 255, 230, 0.09);
+}
+.pda-dp {
+  position: absolute;
+  background: linear-gradient(180deg, #3b4031, #22251b);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 230, 0.14),
+    0 2px 2px rgba(0, 0, 0, 0.6);
+}
+.pda-dp--u,
+.pda-dp--dn {
+  left: 42px;
+  width: 32px;
+  height: 34px;
+}
+.pda-dp--u {
+  top: 10px;
+  border-radius: 7px 7px 2px 2px;
+}
+.pda-dp--dn {
+  bottom: 10px;
+  border-radius: 2px 2px 7px 7px;
+}
+.pda-dp--l,
+.pda-dp--r {
+  top: 42px;
+  width: 34px;
+  height: 32px;
+}
+.pda-dp--l {
+  left: 10px;
+  border-radius: 7px 2px 2px 7px;
+}
+.pda-dp--r {
+  right: 10px;
+  border-radius: 2px 7px 7px 2px;
+}
+.pda-dp--c {
+  left: 42px;
+  top: 42px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #474d3b, #262a1f);
+}
+.pda-keys {
   display: flex;
-  gap: 5px;
+  flex-direction: column;
+  gap: 12px;
 }
-.pda-grill i {
-  width: 4px;
-  height: 18px;
-  border-radius: 2px;
-  background: #11130e;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.9);
+.pda-k {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pda-k i {
+  width: 40px;
+  height: 15px;
+  border-radius: 8px;
+  background: linear-gradient(#2d3226, #171a12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 230, 0.12),
+    0 2px 2px rgba(0, 0, 0, 0.6),
+    0 0 0 2px rgba(0, 0, 0, 0.25);
+}
+.pda-k b {
+  font:
+    600 9px/1 "ZoneMono",
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a917a;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.7);
+}
+/* наклейка-предупреждение, слегка потёртая */
+.pda-sticker {
+  width: 124px;
+  padding: 6px 6px 6px 8px;
+  border-radius: 3px;
+  transform: rotate(-3deg);
+  background:
+    repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.85) 0 5px, transparent 5px 10px) top / 100% 5px no-repeat,
+    linear-gradient(180deg, #d8b23a, #b18a22);
+  color: #1d1a0e;
+  font:
+    700 8px/1.25 "ZoneMono",
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding-top: 10px;
+  opacity: 0.82;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  -webkit-mask: radial-gradient(circle at 85% 80%, transparent 6px, #000 7px);
+  mask: radial-gradient(circle at 85% 80%, transparent 6px, #000 7px);
 }
 
-/* «Пропустить» - внизу экрана */
+/* «Пропустить» - маленькая, в правом нижнем углу */
 .pda-skip {
   position: absolute;
-  left: 50%;
-  bottom: max(20px, env(safe-area-inset-bottom));
-  transform: translateX(-50%);
-  padding: 9px 22px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  padding: 6px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
-  background: rgba(8, 12, 14, 0.55);
-  color: rgba(230, 236, 230, 0.8);
+  background: rgba(8, 12, 14, 0.5);
+  color: rgba(230, 236, 230, 0.6);
   font:
-    500 14px/1 "Rubik",
+    500 12px/1 "Rubik",
     system-ui,
     sans-serif;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   cursor: pointer;
   transition:
     color 0.2s,
@@ -454,7 +696,7 @@ html.intro body > :not(.pda-intro) {
 .pda-skip:hover,
 .pda-skip:focus-visible {
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.45);
   background: rgba(8, 12, 14, 0.8);
   outline: none;
 }
@@ -467,41 +709,174 @@ html.intro body > :not(.pda-intro) {
   backdrop-filter: blur(0);
 }
 .pda-out .pda {
-  transform: scale(1.12);
+  transform: scale(1.1);
   transition: transform 0.6s ease-in;
 }
 .pda-out .pda-skip {
   opacity: 0;
 }
 
-@media (max-width: 480px) {
+/* ---------- телефоны и узкие окна: ПДА вертикальный, кнопки под экраном ---------- */
+@media (max-width: 760px) {
+  .pda-intro {
+    padding: 30px 8px 46px;
+  }
   .pda {
-    padding: 12px 10px 12px;
-    border-radius: 20px 20px 28px 28px;
+    width: min(520px, 96vw);
+    padding: 10px 12px 14px;
+    border-radius: 24px;
+  }
+  .pda::before {
+    border-radius: 21px;
+  }
+  .pda-ant {
+    left: 34px;
+  }
+  .pda-bump {
+    width: 40px;
+    height: 40px;
+    border-width: 6px;
+  }
+  .pda-head {
+    gap: 14px;
+    height: 26px;
+    margin-bottom: 6px;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+  }
+  .pda-ledbox span {
+    display: none;
+  }
+  .pda-body {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .pda-bezel {
+    padding: 8px;
+    border-radius: 12px;
   }
   .pda-screen {
-    height: min(460px, 66vh);
+    height: min(560px, calc(100dvh - 230px));
+  }
+  .pda-side {
+    flex-direction: row;
+    padding: 0 10px;
+  }
+  .pda-spk {
+    width: 52px;
+    height: 34px;
+  }
+  .pda-dpad {
+    width: 76px;
+    height: 76px;
+    transform: none;
+  }
+  .pda-dp--u,
+  .pda-dp--dn {
+    left: 27px;
+    width: 22px;
+    height: 23px;
+  }
+  .pda-dp--u {
+    top: 6px;
+  }
+  .pda-dp--dn {
+    bottom: 6px;
+  }
+  .pda-dp--l,
+  .pda-dp--r {
+    top: 27px;
+    width: 23px;
+    height: 22px;
+  }
+  .pda-dp--l {
+    left: 6px;
+  }
+  .pda-dp--r {
+    right: 6px;
+  }
+  .pda-dp--c {
+    left: 27px;
+    top: 27px;
+    width: 22px;
+    height: 22px;
+  }
+  .pda-keys {
+    gap: 8px;
+  }
+  .pda-k i {
+    width: 30px;
+    height: 12px;
+  }
+  .pda-sticker {
+    display: none;
+  }
+  .pda-screw--tl,
+  .pda-screw--tr {
+    top: 12px;
+  }
+  .pda-screw--bl,
+  .pda-screw--br {
+    bottom: 12px;
+  }
+  .pda-screw--tl,
+  .pda-screw--bl {
+    left: 13px;
+  }
+  .pda-screw--tr,
+  .pda-screw--br {
+    right: 13px;
+  }
+  .pda-bar {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+  .pda-idle,
+  .pda-log {
+    inset: 36px 0 0;
+  }
+  .pda-mark {
+    width: 140px;
+    height: 140px;
+  }
+  .pda-title {
+    font-size: 26px;
   }
   .pda-log {
-    font-size: 11px;
-    padding: 10px;
+    padding: 12px 12px 14px;
+    font-size: 12px;
+    line-height: 1.55;
+  }
+  .pda-win {
+    font-size: 16px;
   }
   .pda-win--big {
-    font-size: 19px;
+    font-size: 22px;
   }
 }
-@media (max-height: 560px) {
-  .pda-intro {
-    padding-bottom: 64px;
+@media (max-width: 380px) {
+  .pda-log {
+    font-size: 11px;
   }
+  .pda-head .pda-brand {
+    letter-spacing: 0.1em;
+  }
+}
+/* низкие окна (ноутбук с маленьким экраном, телефон боком) */
+@media (max-height: 620px) and (min-width: 761px) {
   .pda-screen {
-    height: 58vh;
+    height: calc(100vh - 150px);
   }
-  .pda-logo {
-    width: 64px;
-    height: 64px;
+  .pda-mark {
+    width: 110px;
+    height: 110px;
   }
-  .pda-foot {
+  .pda-dpad {
+    width: 96px;
+    height: 96px;
+  }
+  .pda-sticker {
     display: none;
   }
 }

@@ -1,8 +1,8 @@
 /* Интро для новичков: при первом заходе вместо сайта - ПДА сталкера. По кнопке «Открыть» на экране бегут
-   системные строки (подключение к сети, обновление данных, авторизация), после «Добро пожаловать» открывается сайт.
+   системные строки (подключение к сети, обновление данных, авторизация), после «Добро пожаловать» - кнопка «Войти».
    Показывать ли интро, решает встроенный скрипт в <head> (build.js): он ставит <html class="intro"> только
    живым посетителям при первом визите (не ботам, не превью, не во фрейме), а intro.css сразу прячет сайт.
-   Повторно посмотреть - добавить к адресу ?intro. Пропустить можно только кнопкой «Пропустить» */
+   Повторно посмотреть - добавить к адресу ?intro. Сайт открывают только кнопки «Войти» и «Пропустить» */
 (function () {
   "use strict";
   if (typeof window === "undefined" || typeof document === "undefined") return;
@@ -17,19 +17,21 @@
 
   /* строки загрузки: текст, длительность (мс), итог: ok / err / progress / свой текст в скобках */
   var STEPS = [
-    ["ПДА-ОС v4.17: загрузка ядра", 520, "ok"],
-    ["Проверка аккумулятора", 380, "87%"],
-    ["Калибровка счётчика Гейгера", 460, "ok"],
-    ["Поиск сети сталкеров", 820, "ok"],
-    ["Сигнал: ретранслятор «Кордон-3»", 360, "ok"],
-    ["Подключение к сети сталкеров", 700, "ok"],
-    ["Синхронизация карты Зоны", 950, "progress"],
-    ["Обновление данных: рейтинг, гайды, боссы", 900, "progress"],
-    ["Загрузка прогноза выбросов", 420, "ok"],
-    ["Ожидание ответа сервера", 980, "ok"],
-    ["Попытка авторизации", 760, "err"],
-    ["Повторная попытка авторизации", 900, "ok"]
+    ["ПДА-ОС v4.17: загрузка ядра", 580, "ok"],
+    ["Проверка аккумулятора", 430, "87%"],
+    ["Калибровка счётчика Гейгера", 540, "ok"],
+    ["Поиск сети сталкеров", 940, "ok"],
+    ["Сигнал: ретранслятор «Кордон-3»", 400, "ok"],
+    ["Подключение к сети сталкеров", 790, "ok"],
+    ["Синхронизация карты Зоны", 1080, "progress"],
+    ["Обновление данных: рейтинг, гайды, боссы", 1010, "progress"],
+    ["Загрузка прогноза выбросов", 500, "ok"],
+    ["Ожидание ответа сервера", 1080, "ok"],
+    ["Попытка авторизации", 790, "err"],
+    ["Повторная попытка авторизации", 940, "ok"]
   ];
+  /* скорость «печати» строки, мс на символ */
+  var TYPE = 18;
 
   function el(tag, cls, text) {
     var e = d.createElement(tag);
@@ -50,16 +52,27 @@
   wrap.setAttribute("aria-modal", "true");
   wrap.setAttribute("aria-label", "ПДА сталкера: вход на сайт");
 
+  /* корпус: антенна, резиновые углы, шильдик с индикаторами, экран в рамке и панель кнопок */
   var pda = el("div", "pda");
-  var top = el("div", "pda-top");
-  top.appendChild(el("span", "pda-led"));
-  top.appendChild(el("span", "pda-brand", "ПДА · Сердце Зоны"));
-  top.appendChild(el("span", "pda-led pda-led--2"));
-  pda.appendChild(top);
+  pda.appendChild(el("i", "pda-ant"));
   ["tl", "tr", "bl", "br"].forEach(function (c) {
+    pda.appendChild(el("i", "pda-bump pda-bump--" + c));
     pda.appendChild(el("i", "pda-screw pda-screw--" + c));
   });
+  var head = el("div", "pda-head");
+  var led1 = el("span", "pda-ledbox");
+  led1.appendChild(el("i", "pda-led pda-led--pwr"));
+  led1.appendChild(el("span", "", "PWR"));
+  var led2 = el("span", "pda-ledbox");
+  led2.appendChild(el("i", "pda-led pda-led--net"));
+  led2.appendChild(el("span", "", "NET"));
+  head.appendChild(led1);
+  head.appendChild(el("span", "pda-brand", "ПДА-7 · Сердце Зоны"));
+  head.appendChild(led2);
+  pda.appendChild(head);
 
+  var body = el("div", "pda-body");
+  var bezel = el("div", "pda-bezel");
   var screen = el("div", "pda-screen");
   var bar = el("div", "pda-bar");
   var now = new Date();
@@ -77,16 +90,19 @@
   bar.appendChild(bat);
   screen.appendChild(bar);
 
-  /* заставка с кнопкой «Открыть» */
+  /* заставка: сердце на знаке радиации - копия логотипа из шапки (тот же живой SVG) */
   var idle = el("div", "pda-idle");
-  var logo = el("img", "pda-logo");
-  logo.src = "/assets/heart-core.webp";
-  logo.alt = "";
-  logo.width = 104;
-  logo.height = 104;
-  idle.appendChild(logo);
+  var mark = el("div", "pda-mark");
+  var src = d.querySelector(".site-header .rad-logo") || d.querySelector(".rad-logo");
+  if (src) mark.appendChild(src.cloneNode(true));
+  else {
+    var img = el("img");
+    img.src = "/assets/heart-core.webp";
+    img.alt = "";
+    mark.appendChild(img);
+  }
+  idle.appendChild(mark);
   idle.appendChild(el("div", "pda-title", "ПДА сталкера"));
-  idle.appendChild(el("div", "pda-sub", "Входящее сообщение · 1 непрочитанное"));
   var open = el("button", "pda-open", "Открыть");
   open.type = "button";
   idle.appendChild(open);
@@ -98,31 +114,64 @@
   log.hidden = true;
   screen.appendChild(log);
   screen.appendChild(el("div", "pda-scan"));
-  pda.appendChild(screen);
+  screen.appendChild(el("div", "pda-glass"));
+  bezel.appendChild(screen);
+  body.appendChild(bezel);
 
-  var foot = el("div", "pda-foot");
-  foot.appendChild(el("span", "pda-key"));
-  var grill = el("span", "pda-grill");
-  for (var g = 0; g < 5; g++) grill.appendChild(el("i"));
-  foot.appendChild(grill);
-  foot.appendChild(el("span", "pda-key"));
-  pda.appendChild(foot);
+  var side = el("div", "pda-side");
+  side.setAttribute("aria-hidden", "true");
+  var spk = el("span", "pda-spk");
+  side.appendChild(spk);
+  var dpad = el("span", "pda-dpad");
+  ["u", "r", "dn", "l", "c"].forEach(function (k) {
+    dpad.appendChild(el("i", "pda-dp pda-dp--" + k));
+  });
+  side.appendChild(dpad);
+  var keys = el("span", "pda-keys");
+  ["Меню", "Карта", "Связь"].forEach(function (k) {
+    var kk = el("span", "pda-k");
+    kk.appendChild(el("i"));
+    kk.appendChild(el("b", "", k));
+    keys.appendChild(kk);
+  });
+  side.appendChild(keys);
+  side.appendChild(el("span", "pda-sticker", "☢ Собственность сети сталкеров"));
+  body.appendChild(side);
+  pda.appendChild(body);
   wrap.appendChild(pda);
 
   var skip = el("button", "pda-skip", "Пропустить");
   skip.type = "button";
   wrap.appendChild(skip);
+  var enter = null;
 
   /* ---------- поведение ---------- */
-  function line(text) {
+  /* строка «печатается» по буквам, потом справа - статус */
+  function line(text, cb) {
     var row = el("div", "pda-line");
     row.appendChild(el("span", "pda-prompt", ">"));
-    row.appendChild(el("span", "pda-text", text));
+    var tx = el("span", "pda-text");
+    row.appendChild(tx);
     var st = el("span", "pda-st");
     row.appendChild(st);
     log.appendChild(row);
     log.scrollTop = log.scrollHeight;
-    return st;
+    if (reduce) {
+      tx.textContent = text;
+      return cb(st);
+    }
+    row.classList.add("typing");
+    var n = 0;
+    (function tick() {
+      if (done) return;
+      n++;
+      tx.textContent = text.slice(0, n);
+      if (n < text.length) timers.push(setTimeout(tick, TYPE));
+      else {
+        row.classList.remove("typing");
+        cb(st);
+      }
+    })();
   }
 
   function spin(st) {
@@ -157,40 +206,47 @@
     if (done) return;
     if (idx >= STEPS.length) return finish();
     var s = STEPS[idx];
-    var st = line(s[0]);
-    var stop = s[2] === "progress" ? progress(st, s[1]) : spin(st);
-    if (idx === 4) net.textContent = "Кордон-3";
-    later(function () {
-      stop();
-      if (s[2] === "err") {
-        st.textContent = "[ОТКАЗ]";
-        st.className = "pda-st pda-st--err";
-      } else if (s[2] === "ok" || s[2] === "progress") {
-        st.textContent = "[OK]";
-        st.className = "pda-st pda-st--ok";
-        if (idx === 5) sig.classList.add("on");
-      } else {
-        st.textContent = "[" + s[2] + "]";
-        st.className = "pda-st pda-st--ok";
-      }
+    line(s[0], function (st) {
+      var stop = s[2] === "progress" ? progress(st, s[1]) : spin(st);
+      if (idx === 4) net.textContent = "Кордон-3";
       later(function () {
-        run(idx + 1);
-      }, 90);
-    }, s[1]);
+        stop();
+        if (s[2] === "err") {
+          st.textContent = "[ОТКАЗ]";
+          st.className = "pda-st pda-st--err";
+        } else {
+          st.textContent = s[2] === "ok" || s[2] === "progress" ? "[OK]" : "[" + s[2] + "]";
+          st.className = "pda-st pda-st--ok";
+          if (idx === 5) {
+            sig.classList.add("on");
+            pda.classList.add("pda-net-on");
+          }
+        }
+        later(function () {
+          run(idx + 1);
+        }, 160);
+      }, s[1]);
+    });
   }
 
+  /* финал: две зелёные строки и кнопка «Войти» - сайт открывается только по ней (или по «Пропустить») */
   function finish() {
     later(function () {
-      var a = el("div", "pda-win", "Авторизация прошла успешно!");
-      log.appendChild(a);
+      log.appendChild(el("div", "pda-win", "Авторизация прошла успешно!"));
       log.scrollTop = log.scrollHeight;
       later(function () {
-        var b = el("div", "pda-win pda-win--big", "Добро пожаловать, Сталкер!");
-        log.appendChild(b);
+        log.appendChild(el("div", "pda-win pda-win--big", "Добро пожаловать, Сталкер!"));
         log.scrollTop = log.scrollHeight;
-        later(close, 1900);
-      }, 700);
-    }, 250);
+        later(function () {
+          enter = el("button", "pda-open pda-enter", "Войти");
+          enter.type = "button";
+          enter.addEventListener("click", close);
+          log.appendChild(enter);
+          log.scrollTop = log.scrollHeight;
+          enter.focus({ preventScroll: true });
+        }, 900);
+      }, 1000);
+    }, 500);
   }
 
   function close() {
@@ -227,6 +283,7 @@
     if (open.disabled) return;
     open.disabled = true;
     wrap.classList.add("pda-on");
+    pda.classList.add("pda-booting");
     idle.hidden = true;
     log.hidden = false;
     skip.focus();
@@ -239,8 +296,8 @@
   /* фокус не уходит со вкладки на спрятанный сайт; Esc и клики мимо кнопок интро не закрывают */
   wrap.addEventListener("keydown", function (e) {
     if (e.key !== "Tab") return;
-    var list = [open, skip].filter(function (b) {
-      return !b.disabled && b.offsetParent !== null;
+    var list = [open, enter, skip].filter(function (b) {
+      return b && !b.disabled && b.offsetParent !== null;
     });
     if (!list.length) return;
     var at = list.indexOf(d.activeElement);
