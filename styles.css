@@ -7679,7 +7679,9 @@ main.content.page-narrow {
   }
   /* на узком экране подсказка не ездит за точкой (не влезает), а стоит в левом верхнем углу графика */
   .ich-tip,
-  .ich-tip.ich-tip-left {
+  .ich-tip.ich-tip-left,
+  .ich-tip.ich-tip-low,
+  .ich-tip.ich-tip-left.ich-tip-low {
     top: 0 !important;
     left: 0 !important;
     margin: 0;
