@@ -9,7 +9,7 @@
    build.js подключает этот файл на все страницы и подставляет версию оформления вместо __HW_V__ */
 (function () {
   "use strict";
-  var SEASON = { mode: "on", from: "10-20", to: "11-03" };
+  var SEASON = { mode: "auto", from: "10-20", to: "11-03" };
 
   var KEY = "hotzHalloween";
   var V = "__HW_V__";
