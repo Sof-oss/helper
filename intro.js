@@ -10,7 +10,7 @@
   var root = d.documentElement;
   if (!root.classList.contains("intro")) return;
 
-  /* своя метка: zoneIntroSeen - у 3D-заставки главной (src/zone-intro.js), она идёт после ПДА */
+  /* zoneIntroSeen - метка бывшей 3D-заставки главной, её тоже проверяет скрипт в <head> */
   var KEY = "zonePdaSeen";
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var timers = [];
@@ -268,7 +268,7 @@
       }
     } catch (e) {}
     root.classList.remove("intro");
-    /* сайт снова виден - сезонное оформление и 3D-заставка главной ждут этого события */
+    /* сайт снова виден - сезонное оформление и 3D-фон главной ждут этого события */
     try {
       window.dispatchEvent(new Event("zone-intro-done"));
     } catch (e) {}

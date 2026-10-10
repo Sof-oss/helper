@@ -18,79 +18,8 @@
   opacity: 1;
 }
 
-/* заставка - прозрачный слой поверх уже открытой страницы: не закрывает содержимое и не перехватывает клики
-   (pointer-events:none), кликается только «Пропустить». Запускается после загрузки страницы, роботам не показывается */
-.zone-intro {
-  position: fixed;
-  inset: 0;
-  z-index: 3000;
-  pointer-events: none;
-  background: radial-gradient(circle at 50% 50%, rgba(8, 4, 6, 0.8), rgba(4, 5, 8, 0.58) 42%, rgba(4, 5, 8, 0.4));
-  transition:
-    background 0.7s ease,
-    opacity 0.35s ease;
-  animation: zi-in 0.5s ease-out backwards;
-}
-@keyframes zi-in {
-  from {
-    opacity: 0;
-  }
-}
-.zone-intro canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.zone-intro.flying {
-  background: transparent;
-}
-.zone-intro.out {
-  opacity: 0;
-}
-.zone-intro-skip {
-  pointer-events: auto;
-  position: absolute;
-  right: 20px;
-  bottom: calc(20px + env(safe-area-inset-bottom));
-  padding: 9px 16px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
-  background: rgba(5, 7, 10, 0.55);
-  color: #cfdbe6;
-  font:
-    600 12px/1 "Oswald",
-    sans-serif;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-.zone-intro-skip:hover {
-  border-color: var(--accent);
-  color: #fff;
-}
-.zone-intro.flying .zone-intro-skip {
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-/* логотип в шапке «принимает» прилетевшее сердце: та же картинка, только вспыхивает и гаснет свечение */
-@keyframes intro-land {
-  0% {
-    filter: drop-shadow(0 0 16px rgba(255, 90, 50, 0.95));
-  }
-}
-.rad-logo.intro-wait {
-  opacity: 0;
-}
-.rad-logo.intro-land {
-  animation: intro-land 0.8s cubic-bezier(0.2, 0.8, 0.3, 1);
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .zone-bg,
-  .zone-intro {
+  .zone-bg {
     display: none;
   }
 }

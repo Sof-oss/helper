@@ -35,14 +35,7 @@ const OUT = path.join(ROOT, "dist");
 /* модули: файл в dist -> точка входа и все исходники (по ним же считается дата страницы в sitemap).
    Исходники модулей в dist не копируются - на сайт попадает только собранный файл */
 const MODULES = {
-  "home-3d.js": [
-    "src/home-3d.js",
-    "src/zone-intro.js",
-    "src/zone-heart.js",
-    "src/zone-sign.js",
-    "src/zone-bg.js",
-    "src/zone-theme.js"
-  ],
+  "home-3d.js": ["src/home-3d.js", "src/zone-bg.js", "src/zone-theme.js"],
   "calculator.js": ["src/calculator.js", "src/calc-core.js", "src/calc-slots.js", "app.js", "polish.js", "talents.js"]
 };
 
@@ -257,7 +250,7 @@ const GUIDE_INVITE =
   '<span class="guide-card-meta">Открыть форму →</span></span></a>';
 
 /* ---------- 3D главной ----------
-   src/home-3d.js - маленький загрузчик; заставка (zone-intro.js), живой фон (zone-bg.js) и общий кусок three.js
+   src/home-3d.js - маленький загрузчик; живой фон (zone-bg.js) и общий кусок three.js
    собираются в отдельные файлы dist/3d/*-<хэш>.js и скачиваются только когда нужны. Хэш в имени - защита от старого кэша.
    Из three.js попадает только используемое */
 {
@@ -573,8 +566,8 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".css"))) {
 }
 
 /* ---------- интро для новичков (intro.js / intro.css) ----------
-   Встроенный скрипт в <head> до стилей решает, показывать ли ПДА: при первом визите (нет zonePdaSeen,
-   и 3D-заставку главной - метка zoneIntroSeen - человек тоже ещё не видел), не ботам и не превью соцсетей/мессенджеров, не во фрейме; ?intro в адресе - показать принудительно.
+   Встроенный скрипт в <head> до стилей решает, показывать ли ПДА: при первом визите (нет zonePdaSeen;
+   zoneIntroSeen - метка бывшей 3D-заставки главной: кто видел её, тот не новичок), не ботам и не превью соцсетей/мессенджеров, не во фрейме; ?intro в адресе - показать принудительно.
    Тогда <html class="intro">, и intro.css прячет сайт ещё до первой отрисовки. Страховка: если intro.js
    не появился за 6 с (не загрузился), класс снимается и сайт виден как обычно. Нет на 404 и offline */
 function introPage(name) {

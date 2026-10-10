@@ -1,8 +1,6 @@
-/* Главная: 3D-заставка при первом заходе и живой фон Зоны.
+/* Главная: живой фон Зоны.
    Подключается только на главной (<script type="module" src="home-3d.js">), собирается build.js.
-   Сам этот файл крошечный: он только решает, что нужно, и догружает части по требованию (папка 3d/ в dist):
-   - заставка (zone-intro) скачивается лишь при первом заходе и идёт прозрачным слоем поверх уже открытой страницы -
-     содержимое не закрывается, поэтому первая отрисовка и поисковые роботы её не ждут; роботам она не показывается вовсе;
+   Сам этот файл крошечный: он только решает, нужен ли фон, и догружает его по требованию (папка 3d/ в dist):
    - живой фон (zone-bg) не скачивается на очень слабых устройствах, при экономии трафика и медленной сети - там остаётся обычный CSS-фон;
    - фон стартует, когда страница уже загрузилась и браузер свободен, чтобы не мешать первой отрисовке.
    three.js - общий кусок, браузер скачивает его один раз и берёт из кэша.
@@ -37,13 +35,6 @@ const bot =
   navigator.webdriver === true ||
   (/bot|crawl|spider|slurp|lighthouse|pagespeed|headless|prerender|mediapartners|inspectiontool/i.test(ua) &&
     !/cubot/i.test(ua));
-const introSeen = () => {
-  try {
-    return !!localStorage.getItem("zoneIntroSeen");
-  } catch (e) {
-    return true;
-  }
-};
 /* после загрузки страницы и в свободную минуту браузера */
 const whenIdle = () =>
   new Promise(ok => {
@@ -55,15 +46,11 @@ const whenIdle = () =>
 
 async function main() {
   if (reduce || bot || weak || !hasGL()) return;
-  /* сначала ПДА новичка (intro.js): пока он открыт, сайт спрятан - заставка идёт после «Войти» */
+  /* пока открыт ПДА новичка (intro.js), сайт спрятан - фон запускаем после «Войти» */
   if (document.documentElement.classList.contains("intro"))
     await new Promise(ok => addEventListener("zone-intro-done", ok, { once: true }));
-  /* и заставка, и фон - только когда страница уже загрузилась: на скорость первой отрисовки они не влияют */
+  /* фон - только когда страница уже загрузилась: на скорость первой отрисовки он не влияет */
   await whenIdle();
-  if (!introSeen()) {
-    const { runIntro } = await import("./zone-intro.js");
-    await runIntro();
-  }
   const { startBackground } = await import("./zone-bg.js");
   startBackground();
 }
