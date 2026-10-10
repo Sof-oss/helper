@@ -495,3 +495,32 @@ html.hw .zn-event {
     opacity: 1;
   }
 }
+
+/* Пасхалка в отдельной свободной строке подвала, не внутри ссылок/карточек и не поверх кнопок. */
+.hw-egg-slot {
+  display: flex;
+  align-items: center;
+  min-height: 68px;
+  padding: 18px 12px;
+  margin-top: 12px;
+  position: relative;
+  clear: both;
+}
+.hw-egg-slot.left {
+  justify-content: flex-start;
+}
+.hw-egg-slot.right {
+  justify-content: flex-end;
+}
+.hw-egg-slot .hw-egg {
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  flex: none;
+  width: 28px;
+  min-height: 36px;
+}
+html:not(.hw) .hw-egg-slot {
+  display: none;
+}

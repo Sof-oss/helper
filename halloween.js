@@ -90,30 +90,116 @@
     c.setAttribute("aria-hidden", "true");
     return c;
   }
-  function seat(crow, used) {
-    var ps = perches().filter(function (p) {
-      return used.indexOf(p) < 0;
+  /* Безопасные места: свободный участок верхнего края, вдали от кнопок и других птиц.
+     Если мест меньше, чем ворон, лишние ждут за экраном, а не садятся друг на друга. */
+  var occupiedControls = [];
+  var fixedChrome = [];
+  function intersects(a, b, pad) {
+    pad = pad || 0;
+    return a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
+  }
+  function refreshObstacles() {
+    occupiedControls = [].slice
+      .call(d.querySelectorAll("a, button, input, select, textarea, summary, [role=button], [tabindex]"))
+      .filter(function (e) {
+        if (e.closest(".hw-switch, .hw-egg, .site-header, .tabbar, [hidden]")) return false;
+        var style = getComputedStyle(e);
+        var hiddenMenu = e.closest(".theme-list");
+        return (
+          e.getClientRects().length &&
+          style.visibility !== "hidden" &&
+          style.pointerEvents !== "none" &&
+          (!hiddenMenu ||
+            (hiddenMenu.closest(".theme-pick") && hiddenMenu.closest(".theme-pick").classList.contains("open")))
+        );
+      })
+      .map(function (e) {
+        return { node: e, rect: e.getBoundingClientRect() };
+      });
+    fixedChrome = [].slice
+      .call(d.querySelectorAll(".site-header, .tabbar"))
+      .filter(function (e) {
+        var style = getComputedStyle(e);
+        return (
+          (style.position === "fixed" || style.position === "sticky") &&
+          style.display !== "none" &&
+          e.getClientRects().length
+        );
+      })
+      .map(function (e) {
+        return e.getBoundingClientRect();
+      });
+  }
+  function crowRect(p, fx) {
+    var r = p.getBoundingClientRect();
+    var w = narrow.matches ? 48 : 64,
+      h = narrow.matches ? 36 : 48;
+    var x = r.left + r.width * fx;
+    var y = r.top - h + 2;
+    return { left: x - w / 2, right: x + w / 2, top: y, bottom: y + h };
+  }
+  function freeSeat(p, fx, crow) {
+    var r = crowRect(p, fx);
+    if (r.left < 6 || r.right > window.innerWidth - 6) return false;
+    /* Не блокируем саму карточку-ссылку: лапы заходят на её рамку лишь на 2px. Остальные кнопки - с запасом. */
+    if (
+      occupiedControls.some(function (o) {
+        return o.node !== p && intersects(r, o.rect, 10);
+      })
+    )
+      return false;
+    return !crows.some(function (c) {
+      return c !== crow && c.perch && solid(c.perch) && intersects(r, crowRect(c.perch, c.fx), 18);
     });
-    if (!ps.length) ps = perches();
-    if (!ps.length) return false;
-    var p = pick(ps);
-    var at = pageXY(p, rnd(0.12, 0.88));
-    crow.perch = p;
-    crow.fx = (at.x - at.r.left - window.scrollX) / at.r.width;
+  }
+  function seat(crow, used) {
+    var ps = perches();
+    /* предпочитаем ещё не использованные карточки, но можно занять другой свободный участок той же */
+    ps.sort(function (a, b) {
+      return (used.indexOf(a) >= 0 ? 1 : 0) - (used.indexOf(b) >= 0 ? 1 : 0);
+    });
+    var slots = [];
+    ps.forEach(function (p) {
+      var r = p.getBoundingClientRect();
+      for (var x = 46; x < r.width - 38; x += narrow.matches ? 68 : 86) {
+        var fx = x / r.width;
+        if (freeSeat(p, fx, crow)) slots.push({ p: p, fx: fx, preferred: used.indexOf(p) < 0 });
+      }
+    });
+    if (!slots.length) {
+      crow.perch = null;
+      crow.node.classList.add("gone");
+      return false;
+    }
+    var preferred = slots.filter(function (slot) {
+      return slot.preferred;
+    });
+    var slot = pick(preferred.length ? preferred : slots);
+    crow.perch = slot.p;
+    crow.fx = slot.fx;
     crow.flip = Math.random() < 0.5;
     crow.node.classList.toggle("flip", crow.flip);
-    crow.node.style.transform = "translate(" + Math.round(at.x) + "px," + Math.round(at.y) + "px)";
+    moveCrow(crow);
     return true;
+  }
+  function moveCrow(crow) {
+    if (!crow.perch) return;
+    var at = pageXY(crow.perch, crow.fx);
+    crow.node.style.transform = "translate(" + Math.round(at.x) + "px," + Math.round(at.y) + "px)";
+    /* Прокрутка: под шапкой и нижней навигацией птицу не показываем. Жёрдочка остаётся на месте. */
+    var r = crowRect(crow.perch, crow.fx);
+    crow.node.style.visibility = fixedChrome.some(function (f) {
+      return intersects(r, f, 6);
+    })
+      ? "hidden"
+      : "";
   }
   function place(crow) {
     if (!crow.sitting) return;
-    /* блок исчез, свернулся или стал прозрачным - ворона не остаётся висеть в воздухе */
-    if (!solid(crow.perch)) {
-      if (!seat(crow, [])) crow.node.classList.add("gone");
-      return;
+    if (!solid(crow.perch) || !freeSeat(crow.perch, crow.fx, crow)) {
+      if (!seat(crow, [])) return;
     }
-    var at = pageXY(crow.perch, crow.fx);
-    crow.node.style.transform = "translate(" + Math.round(at.x) + "px," + Math.round(at.y) + "px)";
+    moveCrow(crow);
     crow.node.classList.remove("gone");
   }
   function crowCount() {
@@ -124,8 +210,8 @@
     var used = [];
     for (var i = 0; i < crowCount(); i++) {
       var c = { node: crowNode("sit"), sitting: true };
-      if (!seat(c, used)) break;
-      used.push(c.perch);
+      seat(c, used);
+      if (c.perch) used.push(c.perch);
       layer.appendChild(c.node);
       crows.push(c);
     }
@@ -166,7 +252,13 @@
     );
   }
   function returnCrow(crow) {
-    if (!seat(crow, [])) return;
+    refreshObstacles();
+    if (!seat(crow, [])) {
+      later(function () {
+        returnCrow(crow);
+      }, 5000);
+      return;
+    }
     var r = crow.perch.getBoundingClientRect();
     var tx = r.left + r.width * crow.fx,
       ty = r.top;
@@ -194,7 +286,7 @@
           c.node.classList.remove("gone");
           c.sitting = true;
         });
-      }
+      } else c.sitting = true;
     }
     later(hop, rnd(15000, 30000) * speed());
   }
@@ -202,6 +294,7 @@
     if (rm.matches) return;
     crows.forEach(function (c) {
       if (!c.sitting) return;
+      if (getComputedStyle(c.node).visibility === "hidden") return;
       var r = c.node.getBoundingClientRect();
       var dx = r.left + r.width / 2 - px,
         dy = r.top + r.height / 2 - py;
@@ -265,10 +358,17 @@
       k.fx = k.home;
       k.node.style.visibility = "";
       put(k);
-      if (!hits(k.node)) return;
-      k.fx = 1 - k.home;
-      put(k);
-      if (hits(k.node)) k.node.style.visibility = "hidden";
+      if (hits(k.node)) {
+        k.fx = 1 - k.home;
+        put(k);
+      }
+      if (
+        hits(k.node) ||
+        fixedChrome.some(function (f) {
+          return intersects(k.node.getBoundingClientRect(), f, 6);
+        })
+      )
+        k.node.style.visibility = "hidden";
     });
   }
 
@@ -290,9 +390,11 @@
     }
   }
   function spawnEgg() {
-    var spots = [].slice.call(d.querySelectorAll(".site-footer, .result-panel, .home-card, .info-lead, .guide-card"));
-    if (!spots.length) return;
-    var host = spots.length > 2 ? spots[1 + Math.floor(Math.random() * (spots.length - 1))] : spots[0];
+    var footer = d.querySelector(".site-footer");
+    if (!footer || footer.closest("a, button, [role=button]")) return;
+    var host = el("div", "hw-egg-slot");
+    host.classList.add(Math.random() < 0.5 ? "left" : "right");
+    footer.appendChild(host);
     egg = el("button", "hw-egg", '<img alt="" src="' + img(pick(PUMPKINS)) + '"><span class="hw-bubble"></span>');
     egg.type = "button";
     egg.setAttribute("aria-label", "Тыква");
@@ -315,8 +417,7 @@
       egg.classList.add("boo");
     });
     host.appendChild(egg);
-    if (getComputedStyle(host).position === "static") host.classList.add("hw-egg-host");
-    egg.classList.add(Math.random() < 0.5 ? "bl" : "br");
+    egg.classList.add(host.classList.contains("left") ? "bl" : "br");
   }
 
   /* ---------- бюрер в простыне ---------- */
@@ -449,6 +550,7 @@
     if (raf) return;
     raf = requestAnimationFrame(function () {
       raf = 0;
+      refreshObstacles();
       crows.forEach(place);
       placePumpkins();
     });
@@ -469,6 +571,7 @@
       light.setAttribute("aria-hidden", "true");
       d.body.appendChild(light);
     }
+    refreshObstacles();
     spawnCrows();
     spawnPumpkins();
     spawnEgg();
@@ -482,6 +585,7 @@
     d.addEventListener("pointermove", onMove, { passive: true });
     d.addEventListener("pointerdown", onDown, { passive: true });
     window.addEventListener("resize", relayout);
+    window.addEventListener("scroll", relayout, { passive: true });
     if (window.ResizeObserver) {
       ro = new ResizeObserver(relayout);
       ro.observe(d.body);
@@ -502,6 +606,9 @@
     [layer, sky, fog, light, burer, mono, egg].forEach(function (n) {
       if (n) n.remove();
     });
+    d.querySelectorAll(".hw-egg-slot").forEach(function (n) {
+      n.remove();
+    });
     light = burer = mono = egg = null;
     crows = [];
     pumpkins = [];
@@ -511,6 +618,9 @@
     d.removeEventListener("pointermove", onMove);
     d.removeEventListener("pointerdown", onDown);
     window.removeEventListener("resize", relayout);
+    window.removeEventListener("scroll", relayout);
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
     if (ro) ro.disconnect();
   }
   function restart() {
