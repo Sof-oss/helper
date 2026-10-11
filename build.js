@@ -388,9 +388,13 @@ function plural(n, one, few, many) {
     m100 = n % 100;
   return n + " " + (m10 === 1 && m100 !== 11 ? one : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? few : many);
 }
+/* у живых строк есть короткий вариант data-short - его показывает телефон, где плашки в две колонки (home.css) */
 function homeLive(html) {
   const bosses = (fs.readFileSync(path.join(ROOT, "info-bosses.js"), "utf8").match(/^ {6}key: "/gm) || []).length;
-  if (bosses) html = fill(html, "hcInfo", plural(bosses, "босс", "босса", "боссов") + " · задания · уровни");
+  if (bosses) {
+    const b = plural(bosses, "босс", "босса", "боссов");
+    html = fill(html, "hcInfo", b + " · задания · уровни", ' data-short="' + b + ' · задания"');
+  }
   const upd = /TOP100_UPDATED="(\d\d)\.(\d\d)\.(\d{4}) (\d\d):(\d\d)/.exec(
     fs.readFileSync(path.join(ROOT, "top100-data.js"), "utf8")
   );
@@ -399,13 +403,39 @@ function homeLive(html) {
       html,
       "hcTop",
       "Обновлён " + upd[1] + "." + upd[2] + " в " + upd[4] + ":" + upd[5],
-      ' data-day="' + upd[3] + "-" + upd[2] + "-" + upd[1] + '" data-time="' + upd[4] + ":" + upd[5] + '"'
+      ' data-day="' +
+        upd[3] +
+        "-" +
+        upd[2] +
+        "-" +
+        upd[1] +
+        '" data-time="' +
+        upd[4] +
+        ":" +
+        upd[5] +
+        '" data-short="' +
+        upd[1] +
+        "." +
+        upd[2] +
+        " в " +
+        upd[4] +
+        ":" +
+        upd[5] +
+        '"'
     );
   if (guides.length) {
     const g = guides.slice().sort((a, b) => String(b.date).localeCompare(String(a.date)))[0];
     const short = String(g.title).split(":")[0].trim();
-    html = fill(html, "hcGuides", plural(guides.length, "гайд", "гайда", "гайдов") + " · новый: «" + esc(short) + "»");
+    const n = plural(guides.length, "гайд", "гайда", "гайдов");
+    html = fill(html, "hcGuides", n + " · новый: «" + esc(short) + "»", ' data-short="' + n + ' от игроков"');
   }
+  const fx = require("./build-factions.js")(ROOT);
+  if (fx.count)
+    html = fill(
+      html,
+      "hcFactions",
+      plural(fx.count, "группировка", "группировки", "группировок") + (fx.hiring ? " · набор у " + fx.hiring : "")
+    );
   return html;
 }
 

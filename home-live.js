@@ -9,8 +9,14 @@
       now = new Date();
     now.setHours(0, 0, 0, 0);
     const diff = Math.round((now - d) / 864e5);
-    if (diff === 0) top.textContent = "Обновлён сегодня в " + top.dataset.time;
-    else if (diff === 1) top.textContent = "Обновлён вчера в " + top.dataset.time;
+    /* data-short - короткий вариант для телефона (home.css) */
+    if (diff === 0) {
+      top.textContent = "Обновлён сегодня в " + top.dataset.time;
+      top.dataset.short = "Сегодня в " + top.dataset.time;
+    } else if (diff === 1) {
+      top.textContent = "Обновлён вчера в " + top.dataset.time;
+      top.dataset.short = "Вчера в " + top.dataset.time;
+    }
   }
   const calc = document.getElementById("hcCalc");
   if (!calc) return;
@@ -22,5 +28,6 @@
     if (!items && !sets) return;
     const lvl = parseInt(s.level, 10);
     calc.textContent = "Ваш билд сохранён" + (lvl > 0 ? " · ур. " + lvl : "");
+    calc.dataset.short = lvl > 0 ? "Билд · ур. " + lvl : "Билд сохранён";
   } catch {}
 })();

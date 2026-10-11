@@ -6,8 +6,9 @@
  *  - top100/factions.json - цвета группировок, ui.js - эмблемы основных группировок (как в карточках игроков);
  *  - factions-info.json - то, чего нет в API: девиз, объявление о наборе, группа ВК, контакты (правится вручную);
  *    "hidden": true убирает группировку со страницы (служебные, например админская «О-Сознание»).
- * Возвращает { stats, list, history } - разметку для #factionsStats и #factionsList в factions.html и версию выгрузки
- * игроков (для карточек игроков: тот же адрес top100-players.json, что на странице Топ-100, - файл качается один раз) */
+ * Возвращает { stats, list, history, count, hiring } - разметку для #factionsStats и #factionsList в factions.html и версию выгрузки
+ * игроков (для карточек игроков: тот же адрес top100-players.json, что на странице Топ-100, - файл качается один раз),
+ * а также число группировок и сколько из них ведут набор (живая строка плашки на главной) */
 const fs = require("fs");
 const path = require("path");
 
@@ -257,5 +258,11 @@ module.exports = function factionsMarkup(ROOT) {
   try {
     history = (hist && JSON.parse(hist[1]).id) || "";
   } catch (e) {}
-  return { stats, list: cards.join("\n"), history };
+  return {
+    stats,
+    list: cards.join("\n"),
+    history,
+    count: list.length,
+    hiring: list.filter(f => (info[f.c.name] || {}).recruit).length
+  };
 };

@@ -906,3 +906,81 @@ html.tour-seen .home-hero .tour-start {
     opacity: 1;
   }
 }
+
+/* пять разделов: на компьютере (от 1180px) в один ряд, уже - 3 + 2 (второй ряд шире), на телефоне 2 + 2 + последний во всю ширину */
+@media (min-width: 1180px) {
+  .home-content .home-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+  }
+  /* плашки узкие: значок над названием, чтобы «Калькулятор урона» и подписи помещались в строку */
+  .home-content .home-grid .home-card-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr auto;
+    align-items: start;
+    flex: 1;
+    row-gap: 6px;
+    padding: 16px 14px 12px;
+  }
+  /* живая строка прижата к низу: у соседних плашек она на одной линии */
+  .home-content .home-grid .hc-live {
+    align-self: end;
+  }
+  .home-content .home-grid .home-card-icon {
+    grid-row: auto;
+    width: 38px;
+    height: 38px;
+  }
+  .home-content .home-grid .home-card b {
+    grid-column: 1;
+    padding-right: 0;
+  }
+  .home-content .home-grid .home-card small {
+    grid-column: 1;
+  }
+  /* живая строка в одну строку: шрифт чуть мельче и плотнее, чтобы «6 боссов · задания · уровни» и подобное
+     помещались целиком; если всё же длиннее (например, длинное название нового гайда) - многоточие */
+  .home-content .hc-live {
+    gap: 6px;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+  }
+  .home-content .hc-live i {
+    flex-basis: 6px;
+    height: 6px;
+  }
+}
+@media (min-width: 761px) and (max-width: 1179px) {
+  .home-content .home-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .home-content .home-grid > .home-card {
+    grid-column: span 2;
+  }
+  .home-content .home-grid > .home-card:nth-child(n + 4) {
+    grid-column: span 3;
+  }
+}
+@media (max-width: 760px) {
+  .home-content .home-grid > .home-card:nth-child(5) {
+    grid-column: 1 / -1;
+  }
+}
+
+/* телефон, плашки в две колонки: живая строка тоже в одну строку - вместо полной фразы короткая из data-short
+   (её ставят build.js и home-live.js). Полный текст остаётся в разметке для поисковиков и экранных дикторов */
+@media (max-width: 560px) {
+  .home-content .hc-live span {
+    white-space: nowrap;
+  }
+  .home-content .hc-live span[data-short] {
+    font-size: 0;
+    letter-spacing: 0;
+  }
+  .home-content .hc-live span[data-short]::before {
+    content: attr(data-short);
+    content: attr(data-short) / "";
+    font-size: 10px;
+    letter-spacing: 0.04em;
+  }
+}
