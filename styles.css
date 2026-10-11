@@ -6426,6 +6426,17 @@ th.top100-sort {
   }
 }
 
+/* узкие планшеты: шесть пунктов меню не влезают с обычными отступами - сжимаем отступы, разрядку и логотип */
+@media (min-width: 761px) and (max-width: 900px) {
+  html body .main-nav a {
+    padding: 0 6px;
+    letter-spacing: 0.02em;
+  }
+  html body .logo-title {
+    font-size: 19px;
+  }
+}
+
 /* ---------- 15. Планшеты (761–1100px, iPad в портрете) ---------- */
 @media (min-width: 761px) and (max-width: 1100px) {
   /* шапка: логотип в одну строку, меню без иконок, чтобы влез переключатель группировок */

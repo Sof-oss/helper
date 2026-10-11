@@ -69,6 +69,8 @@ const SKIP = new Set([
   "site-news.json",
   "build-guide-images.js",
   "build-chrome.js",
+  "build-factions.js",
+  "factions-info.json",
   "previews",
   "test",
   "eslint.config.mjs",
@@ -412,6 +414,12 @@ const PRERENDER = {
   "guides.html": html => {
     html = fill(html, "guidesList", guidesListMarkup());
     return guides.length ? html.replace(/<meta name="robots" content="noindex, follow">\n?/, "") : html;
+  },
+  /* «Группировки»: карточки, лидеры и составы собирает build-factions.js из выгрузки игроков и factions-info.json */
+  "factions.html": html => {
+    const f = require("./build-factions.js")(ROOT);
+    html = html.replace('id="main" data-history=""', 'id="main" data-history="' + f.history + '"');
+    return fill(fill(html, "factionsStats", f.stats), "factionsList", f.list);
   },
   /* «Новости сайта» и «Новости Зоны» на главной уходят в HTML готовыми, чтобы были видны сразу и поисковикам;
      пустой список новостей Зоны допустим - тогда блок просто скрыт */
@@ -899,7 +907,7 @@ if (fs.existsSync(smSrc)) {
       /* у списка гайдов дата - ещё и последний коммит папок гайдов */
       const deps =
         page === "guides.html" ? [...pageDeps(page), ...guides.map(g => "guides/" + g.slug)] : pageDeps(page);
-      const date = (page === "top100.html" && top100Date()) || gitDate(deps);
+      const date = ((page === "top100.html" || page === "factions.html") && top100Date()) || gitDate(deps);
       return "<url><loc>" + loc + "</loc><lastmod>" + date + "</lastmod></url>";
     });
   /* гайды: страница списка и каждый гайд, дата - последний коммит папки гайда */
@@ -988,6 +996,7 @@ function addCsp(file) {
     "build.html",
     "top100.html",
     "guides.html",
+    "factions.html",
     "compare.html",
     "offline.html"
   ];

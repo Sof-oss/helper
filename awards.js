@@ -12,6 +12,7 @@ window.ZONE_AWARDS = {
     }
   },
   players: {
-    3085: ["first-tester"]
+    3085: ["first-tester"],
+    746: ["first-tester"]
   }
 };

@@ -1,5 +1,6 @@
-/* Карточки игроков на странице «Топ-100».
-   Открываются кликом по нику в рейтинге, кнопкой «Найти игрока» или по ссылке /top100#p=<ID> или /p/<ID>.
+/* Карточки игроков на странице «Топ-100» (и на других страницах - например, в составах «Группировок»).
+   Открываются кликом по нику в рейтинге, кнопкой «Найти игрока» или по ссылке /top100#p=<ID> или /p/<ID>;
+   на любой странице - кликом по ссылке с data-pc-open="<ID>" (без JS она ведёт на /p/<ID>).
    Данные - top100-players.json (собирает build-players.js при обновлении рейтинга),
    скачиваются один раз при первом открытии карточки, поэтому сам рейтинг грузится так же быстро.
    Использует общие с top100.js TOP100_TABS, esc, escAttr, fmt, norm, top100Period */
@@ -900,6 +901,16 @@
     load()
       .then(() => open(idByNick[nick] || null))
       .catch(() => open(null));
+  });
+  /* ссылки с data-pc-open (составы на странице «Группировки» и т. п.): карточка открывается поверх текущей страницы,
+     после закрытия адрес возвращается к ней. Клик с Ctrl/Shift/колёсиком - как обычная ссылка, в новой вкладке */
+  document.addEventListener("click", e => {
+    const a = e.target.closest("[data-pc-open]");
+    if (!a || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    period = null;
+    metric = null;
+    open(a.dataset.pcOpen);
   });
   document.addEventListener("keydown", e => {
     if (e.key === "Escape" && root && !root.hidden) close();

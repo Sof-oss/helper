@@ -24,6 +24,10 @@ body:has(.result-title[data-sector="04"]) {
   --sec-acc: #b08cff;
   --sec-acc-rgb: 176, 140, 255;
 }
+body:has(.result-title[data-sector="05"]) {
+  --sec-acc: #e0574f;
+  --sec-acc-rgb: 224, 87, 79;
+}
 
 /* Заголовок страницы: плашка «СЕКТОР 03 // КАЛЬКУЛЯТОР» */
 html body .result-title[data-sector] {

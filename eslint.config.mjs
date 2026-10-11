@@ -43,6 +43,12 @@ export default [
     }
   },
   {
+    files: ["top100.js"],
+    languageOptions: {
+      globals: { TOP100_TABS: "readonly", esc: "readonly", escAttr: "readonly", norm: "readonly", fmt: "readonly" }
+    }
+  },
+  {
     files: ["player-card.js"],
     languageOptions: {
       globals: {

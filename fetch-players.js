@@ -11,10 +11,13 @@
  *  1. /api/users/search постранично (по 100) - список всех игроков: id, ник, уровень, репутация, последний вход, группировка;
  *  2. /api/users/<id>/profile - подробности (таланты, боссы, тайники и т. д.) только для тех, у кого есть прогресс
  *     (репутация > 0 или уровень > 1): у остальных все показатели нулевые, их профили не запрашиваем;
- *  3. CSV в том же формате, что раньше, - его читает build-top100.js.
+ *  3. CSV в том же формате, что раньше, - его читает build-top100.js;
+ *  4. /api/clans/search - список группировок (уровень, число бойцов, лидер) -> top100/clans.json для страницы «Группировки».
+ *     Если этот шаг не удался, выгрузка игроков всё равно считается успешной, а clans.json остаётся прежним.
  * Запросы идут понемногу (по 3 одновременно, с паузой) и повторяются при ошибках, чтобы не нагружать сервер игры.
  *
- * Параметры: --limit=N - взять только N профилей (для проверки), --out=путь - куда писать CSV */
+ * Параметры: --limit=N - взять только N профилей (для проверки), --out=путь - куда писать CSV,
+ *            --clans - только список группировок (шаг 4): быстрая проверка, показывает и сырой ответ сервера */
 const fs = require("fs");
 const path = require("path");
 const readline = require("readline");
@@ -99,6 +102,47 @@ const csvField = v => {
   return /[;"\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 };
 
+/* список группировок из игры: только то, что API отдаёт всем игрокам (название, уровень, число бойцов, лидер).
+   Если в ответе нет уровня или числа бойцов, остаётся прежнее значение из clans.json. Пустой ответ файл не затирает */
+const CLANS_OUT = path.join(__dirname, "top100", "clans.json");
+const CLANS_PAGE = 30;
+async function fetchClans(now) {
+  const items = [];
+  for (let offset = 0; offset < 3000; offset += CLANS_PAGE) {
+    const page = await get(`/clans/search?search=&limit=${CLANS_PAGE}&offset=${offset}`);
+    const part = Array.isArray(page) ? page : page.items || page.clans || [];
+    items.push(...part);
+    if (!part.length || (Array.isArray(page) ? part.length < CLANS_PAGE : page.has_more === false)) break;
+    await sleep(PAUSE_MS);
+  }
+  if (args.clans) console.log("Ответ сервера (первая группировка):\n" + JSON.stringify(items[0], null, 2));
+  if (!items.length) throw new Error("сервер вернул пустой список");
+  let old = {};
+  try {
+    old = Object.fromEntries(JSON.parse(fs.readFileSync(CLANS_OUT, "utf8")).clans.map(c => [c.name, c]));
+  } catch (e) {}
+  const num = v => (v == null || v === "" || isNaN(v) ? undefined : Number(v));
+  const clans = items
+    .filter(c => c && c.name)
+    .map(c => {
+      const prev = old[c.name] || {},
+        l = c.leader || c.owner;
+      return {
+        name: String(c.name).trim(),
+        level: num(c.level) ?? prev.level ?? 1,
+        members: num(c.members_count ?? c.members) ?? prev.members ?? 0,
+        leader:
+          l && (l.user_id ?? l.id) != null ? { id: Number(l.user_id ?? l.id), name: String(l.name || "").trim() } : null
+      };
+    });
+  const msk = new Date(now.getTime() + 3 * 3600e3).toISOString().slice(0, 19) + "+03:00";
+  fs.writeFileSync(
+    CLANS_OUT,
+    JSON.stringify({ updated: msk, source: "API игры: /clans/search", clans }, null, 2) + "\n"
+  );
+  console.log(`Группировки: ${clans.length} -> ${path.relative(process.cwd(), CLANS_OUT)}`);
+}
+
 (async () => {
   /* в GitHub Actions спросить токен некого: без ZONE_TOKEN сразу понятная ошибка, а не зависание */
   const given = tokenArg || process.env.ZONE_TOKEN;
@@ -117,6 +161,8 @@ const csvField = v => {
         exp.toLocaleString("ru-RU", { timeZone: "Europe/Moscow" }) +
         " (МСК) - скоро нужен новый"
     );
+
+  if (args.clans) return fetchClans(new Date());
 
   /* 1. список всех игроков */
   const list = [];
@@ -214,6 +260,14 @@ const csvField = v => {
     `Готово: ${rows.length} игроков с прогрессом (всего в игре ${list.length}) -> ${path.relative(process.cwd(), OUT) || OUT}` +
       (failed ? `, не удалось получить ${failed} профилей` : "")
   );
+
+  /* 4. группировки */
+  try {
+    await fetchClans(now);
+  } catch (e) {
+    if (/токен/.test(e.message)) throw e;
+    console.warn((process.env.GITHUB_ACTIONS ? "::warning::" : "") + "Группировки не обновлены: " + e.message);
+  }
 })().catch(e => {
   console.error("\nОшибка:", e.message);
   if (process.env.GITHUB_ACTIONS) console.log("::error title=Выгрузка Топ-100::" + e.message);

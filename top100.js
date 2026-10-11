@@ -1,46 +1,6 @@
 const $ = id => document.getElementById(id);
-const fmt = n => Math.round(n).toLocaleString("ru-RU");
 const TOP100_TAB_KEY = "gameHelperTop100Tab";
 const TOP100_PERIOD_KEY = "gameHelperTop100Period";
-const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-const escAttr = s => esc(s).replace(/"/g, "&quot;");
-
-/* разделы рейтинга: ключ, вкладка, подпись колонки, данные, цвет.
-   Порядок = порядок вкладок. sortLevel: клик по «Ур.» сортирует по уровню (повторный клик сбрасывает) */
-const TOP100_TABS = [
-  {
-    key: "reputation",
-    label: "Репутация",
-    metric: "Репутация",
-    data: () => window.TOP100_REPUTATION,
-    accent: "#f48fb1",
-    sortLevel: true
-  },
-  { key: "bosses", label: "Боссы", metric: "Боссы", data: () => window.TOP100_BOSSES, accent: "#ff8a65" },
-  { key: "stashes", label: "Тайники", metric: "Тайники", data: () => window.TOP100_STASHES, accent: "#26c6da" },
-  { key: "talents", label: "Таланты", metric: "Таланты", data: () => window.TOP100_TALENTS, accent: "#ffb74d" },
-  {
-    key: "collections",
-    label: "Коллекции",
-    metric: "Коллекции",
-    data: () => window.TOP100_COLLECTIONS,
-    accent: "#c9a6ff"
-  },
-  {
-    key: "expeditions",
-    label: "Экспедиции",
-    metric: "Экспедиции",
-    data: () => window.TOP100_EXPEDITIONS,
-    accent: "#9fdc9f"
-  },
-  {
-    key: "defense",
-    label: "Защита лагеря",
-    metric: "Защита лагеря",
-    data: () => window.TOP100_DEFENSE,
-    accent: "#54bfff"
-  }
-];
 
 /* группировки приходят из общей выгрузки (top100-data.js, собирает build-top100.js):
    TOP100_FACTIONS - группировки текущего рейтинга с цветами, TOP100_GROUPS - ник -> группировка.
@@ -52,7 +12,6 @@ const FACTIONS = (Array.isArray(window.TOP100_FACTIONS) ? window.TOP100_FACTIONS
 }));
 const FACTION_BY_KEY = new Map(FACTIONS.map(f => [f.key, f]));
 const GROUPS = window.TOP100_GROUPS || {};
-const norm = s => String(s).toLowerCase().replace(/ё/g, "е");
 const factionOf = nick => FACTION_BY_KEY.get(GROUPS[nick]) || null;
 const NO_FACTION = "-"; // «-» в выгрузке = без группировки, своей группировкой быть не может
 

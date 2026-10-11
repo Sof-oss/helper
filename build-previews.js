@@ -27,7 +27,7 @@ const fmt = n =>
     .replace(/\u202f|\u00a0/g, " ");
 
 /* названия, цвета показателей и эмблемы - из тех же файлов, что использует сайт */
-const tabsSrc = fs.readFileSync(path.join(ROOT, "top100.js"), "utf8");
+const tabsSrc = fs.readFileSync(path.join(ROOT, "top100-common.js"), "utf8");
 const TABS = [...tabsSrc.matchAll(/key:\s*"(\w+)",\s*label:\s*"([^"]+)"[^}]*?accent:\s*"(#[0-9a-fA-F]+)"/g)].map(m => ({
   key: m[1],
   label: m[2],
@@ -46,7 +46,7 @@ const FACTION_KEY = Object.fromEntries(
 );
 /* защита от тихой поломки: если формат исходников поменялся и разбор ничего не нашёл - сборка падает */
 if (!TABS.length || Object.keys(GLYPHS).length < 7 || Object.keys(FACTION_KEY).length < 7)
-  throw new Error("build-previews: не удалось прочитать вкладки (top100.js) или эмблемы группировок (ui.js)");
+  throw new Error("build-previews: не удалось прочитать вкладки (top100-common.js) или эмблемы группировок (ui.js)");
 /* звания - как в player-card.js */
 const TITLES = [
   [30, "Легенда"],
@@ -180,7 +180,7 @@ async function main() {
   for (const f of [
     "build-previews.js",
     "ui.js",
-    "top100.js",
+    "top100-common.js",
     "top100/factions.json",
     ...fs.readdirSync(path.join(ROOT, "previews")).map(f => "previews/" + f)
   ]) {

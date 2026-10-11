@@ -46,7 +46,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add top100-data.js top100-players.json top100/history top100/players top100/factions.json
+          git add top100-data.js top100-players.json top100/history top100/players top100/factions.json top100/clans.json
           if git diff --cached --quiet; then
             echo "Данные не изменились"
             echo "changed=false" >> "$GITHUB_OUTPUT"
