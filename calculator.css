@@ -92,14 +92,232 @@
 .tokens-body {
   padding: 18px 20px 22px;
 }
+/* вкладки окна «Расчёт по жетонам»: по жетонам / мой арсенал */
+.tok-tabs {
+  display: flex;
+  gap: 4px;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto 4px;
+  padding: 4px;
+  border: 1px solid #1d3a4f;
+  border-radius: 10px;
+  background: #061019;
+}
+.tok-tabs button {
+  padding: 8px 18px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #9fb3c4;
+  font-family: var(--f-display);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.tok-tabs button:hover {
+  color: #fff;
+}
+.tok-tabs button.on {
+  background: #123049;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px #2f6a93;
+}
+.tok-tabs button:focus-visible {
+  outline: 2px solid #54bfff;
+  outline-offset: 1px;
+}
+/* «Мой арсенал» */
+.ars {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 18px;
+  margin-top: 16px;
+}
+.ars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ars-item {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 14px;
+  border: 1px solid #1a3346;
+  border-left: 3px solid var(--c);
+  border-radius: 9px;
+  background: #0b1622;
+}
+.ars-name {
+  min-width: 0;
+}
+.ars-name b {
+  display: block;
+  color: #fff;
+  font-size: var(--fs-md, 15px);
+}
+.ars-name small {
+  display: block;
+  color: #7f97aa;
+  font-size: var(--fs-xs);
+}
+.ars-step {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #1d3a4f;
+  border-radius: 8px;
+  background: #061019;
+  overflow: hidden;
+}
+.ars-step button {
+  width: 32px;
+  height: 36px;
+  border: 0;
+  background: #0c2131;
+  color: #9fd4ff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.ars-step button:hover {
+  background: #123049;
+  color: #fff;
+}
+.ars-step input {
+  width: 7ch;
+  height: 36px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #fff;
+  text-align: center;
+  font-family: "ZoneMono", ui-monospace, monospace;
+  font-size: 15px;
+  font-weight: 600;
+}
+.ars-step input::placeholder {
+  color: #4d6475;
+}
+.ars-step input:focus {
+  outline: none;
+  background: #0a1c2a;
+  box-shadow: none;
+}
+.ars-sub {
+  grid-column: 2 / 4;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  color: #9fb3c4;
+  font-size: var(--fs-xs);
+}
+.ars-sub em {
+  font-style: normal;
+  font-family: "ZoneMono", ui-monospace, monospace;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--c);
+}
+.ars-sum {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #1d3a4f;
+  border-radius: 12px;
+  background: radial-gradient(circle at 50% 40%, #10293d, #08131d);
+}
+.ars-donut {
+  position: relative;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+}
+.ars-donut.empty {
+  background: #15283a;
+}
+.ars-donut::after {
+  content: "";
+  position: absolute;
+  inset: 22px;
+  border-radius: 50%;
+  background: #0a1824;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.65);
+}
+.ars-donut div {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.ars-donut small {
+  color: #9fb3c4;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.ars-donut strong {
+  max-width: 140px;
+  overflow-wrap: anywhere;
+  text-align: center;
+  font-family: "ZoneMono", ui-monospace, monospace;
+  font-size: 24px;
+  line-height: 1.15;
+  color: #fff;
+}
+.ars-leg {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 14px;
+  color: #9fb3c4;
+  font-size: var(--fs-xs);
+}
+.ars-leg i {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 6px;
+  border-radius: 2px;
+  background: var(--c);
+}
 @media (max-width: 900px) {
   .tok-cards {
     grid-template-columns: 1fr;
+  }
+  .ars {
+    grid-template-columns: 1fr;
+  }
+  .ars-sum {
+    order: -1;
   }
 }
 @media (max-width: 650px) {
   .tokens-body {
     padding: 14px 12px 18px;
+  }
+  .ars-item {
+    padding: 10px 12px;
+  }
+  .ars-donut {
+    width: 160px;
+    height: 160px;
+  }
+  .ars-donut strong {
+    max-width: 112px;
+    font-size: 20px;
   }
   .tok-inp-sep {
     width: auto;

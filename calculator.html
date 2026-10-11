@@ -126,6 +126,11 @@
         <div class="talent-game-actions"><button type="button" class="talent-icon-button" data-close-tokens aria-label="Закрыть">×</button></div>
       </header>
       <div class="gear-info-body tokens-body">
+        <div class="tok-tabs" role="tablist" aria-label="Вид расчёта">
+          <button type="button" role="tab" id="tokTabTokens" class="on" aria-selected="true" aria-controls="tokPaneTokens" data-tok-tab="tokens">По жетонам</button>
+          <button type="button" role="tab" id="tokTabArsenal" aria-selected="false" aria-controls="tokPaneArsenal" data-tok-tab="arsenal" tabindex="-1">Мой арсенал</button>
+        </div>
+        <div class="tok-pane" id="tokPaneTokens" role="tabpanel" aria-labelledby="tokTabTokens">
         <div class="tok-inputs">
           <label class="tok-inp"><span class="tok-inp-ic"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7.2V2.8"/><rect x="6.5" y="6.6" width="11" height="14.6" rx="2.6"/><circle cx="12" cy="9.8" r=".9"/><path d="M9.3 13.6h5.4M9.3 16.6h3.6"/></svg></span><span class="tok-inp-lbl">Жетоны</span><input id="tokenCount" type="text" inputmode="numeric" autocomplete="off" maxlength="11" data-group-digits value="7 200" aria-label="Количество жетонов"></label>
           <span class="tok-inp-sep" aria-hidden="true"></span>
@@ -134,6 +139,15 @@
         <p class="tok-hint">Жетоны считаются на целые удары: граната - 3, гранатомёт - 5, гаусс - 15. Во второе поле удобно вписать запас здоровья босса.</p>
         <div class="tok-cards" id="tokCards"></div>
         <p class="tok-note">Средний урон с критом = урон + шанс крита × бонус крита; в карточках указан именно он. Крит считается без учёта базового шанса критического удара и базовой прибавки критического урона.</p>
+        </div>
+        <div class="tok-pane" id="tokPaneArsenal" role="tabpanel" aria-labelledby="tokTabArsenal" hidden>
+          <p class="tok-hint">Впишите, сколько жетонного оружия у вас есть: гранат, гранатомётов и гауссов. Количество запоминается в браузере.</p>
+          <div class="ars">
+            <div class="ars-list" id="arsList"></div>
+            <div class="ars-sum" id="arsSum"></div>
+          </div>
+          <p class="tok-note">Урон считается средним с учётом крита: урон + шанс крита × бонус крита, по текущему уровню, снаряжению и талантам. Крит - без учёта базового шанса критического удара и базовой прибавки критического урона.</p>
+        </div>
       </div>
     </div>
   </section>

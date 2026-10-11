@@ -928,10 +928,118 @@ function renderTokens() {
     })
     .join("");
 }
+/* «Мой арсенал»: сколько у игрока гранат, гранатомётов и гауссов -> урон каждого и общий (средний с критом).
+   Количество и открытая вкладка запоминаются в браузере */
+const ARSENAL_KEY = "gameHelperArsenal",
+  ARSENAL_MAX = 999999,
+  ARSENAL_COLOR = { grenade: "#54bfff", gl: "#f2b544", gauss: "#3fdc8a" };
+let arsenal = { grenade: 0, gl: 0, gauss: 0 },
+  tokTab = "tokens";
+function saveArsenal() {
+  try {
+    localStorage.setItem(ARSENAL_KEY, JSON.stringify({ count: arsenal, tab: tokTab }));
+  } catch {}
+}
+function loadArsenal() {
+  try {
+    const d = JSON.parse(localStorage.getItem(ARSENAL_KEY) || "null");
+    if (!d) return;
+    if (d.count)
+      TOKEN_WEAPONS.forEach(([k]) => {
+        const n = Math.floor(Number(d.count[k]) || 0);
+        arsenal[k] = Math.max(0, Math.min(ARSENAL_MAX, n));
+      });
+    if (d.tab === "arsenal") tokTab = "arsenal";
+  } catch {}
+}
+function setTokTab(tab) {
+  tokTab = tab === "arsenal" ? "arsenal" : "tokens";
+  document.querySelectorAll("[data-tok-tab]").forEach(b => {
+    const on = b.dataset.tokTab === tokTab;
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-selected", on ? "true" : "false");
+    b.tabIndex = on ? 0 : -1;
+  });
+  $("tokPaneTokens").hidden = tokTab !== "tokens";
+  $("tokPaneArsenal").hidden = tokTab !== "arsenal";
+  if (tokTab === "arsenal") renderArsenal();
+  else renderTokens();
+}
+/* список оружия рисуется один раз (поля ввода не пересоздаются, фокус и курсор не прыгают), дальше обновляются только числа */
+function renderArsenal() {
+  const st = tokenWeaponStats();
+  if (!$("arsList").children.length)
+    $("arsList").innerHTML = st
+      .map(
+        w =>
+          '<div class="ars-item" style="--c:' +
+          ARSENAL_COLOR[w.key] +
+          '"><span class="tok-wicon weapon-' +
+          TOKEN_ICON_CLASS[w.key] +
+          '" aria-hidden="true"></span><div class="ars-name"><b>' +
+          w.name +
+          '</b><small id="arsPer-' +
+          w.key +
+          '"></small></div><div class="ars-step"><button type="button" data-ars-step="' +
+          w.key +
+          '" data-d="-1" aria-label="Меньше: ' +
+          w.name +
+          '">−</button><input id="ars-' +
+          w.key +
+          '" data-ars="' +
+          w.key +
+          '" type="text" inputmode="numeric" autocomplete="off" maxlength="7" data-group-digits aria-label="Сколько у вас: ' +
+          w.name +
+          '"><button type="button" data-ars-step="' +
+          w.key +
+          '" data-d="1" aria-label="Больше: ' +
+          w.name +
+          '">+</button></div><div class="ars-sub"><span id="arsShare-' +
+          w.key +
+          '"></span><em id="arsDmg-' +
+          w.key +
+          '"></em></div></div>'
+      )
+      .join("");
+  const rows = st.map(w => ({ w, dmg: arsenal[w.key] * w.avg }));
+  const total = rows.reduce((s, r) => s + r.dmg, 0);
+  let deg = 0;
+  const parts = [];
+  rows.forEach(({ w, dmg }) => {
+    const inp = $("ars-" + w.key),
+      val = arsenal[w.key] ? fmt(arsenal[w.key]) : "";
+    if (document.activeElement !== inp && inp.value !== val) inp.value = val;
+    $("arsPer-" + w.key).textContent =
+      fmt(w.avg) + " урона за удар" + (w.chance > 0 ? " · крит " + (w.chance * 100).toFixed(0) + "%" : "");
+    $("arsShare-" + w.key).textContent = total > 0 ? Math.round((dmg / total) * 100) + "% от общего" : "—";
+    $("arsDmg-" + w.key).textContent = fmt(dmg);
+    if (dmg > 0) {
+      const to = deg + (dmg / total) * 360;
+      parts.push(ARSENAL_COLOR[w.key] + " " + deg.toFixed(2) + "deg " + to.toFixed(2) + "deg");
+      deg = to;
+    }
+  });
+  $("arsSum").innerHTML =
+    '<div class="ars-donut' +
+    (total > 0 ? "" : " empty") +
+    '"' +
+    (parts.length ? ' style="background:conic-gradient(' + parts.join(",") + ')"' : "") +
+    "><div><small>Всего урона</small><strong>" +
+    fmt(total) +
+    "</strong></div></div>" +
+    '<div class="ars-leg">' +
+    st.map(w => '<span style="--c:' + ARSENAL_COLOR[w.key] + '"><i></i>' + w.name + "</span>").join("") +
+    "</div>";
+}
+function setArsenal(key, n) {
+  arsenal[key] = Math.max(0, Math.min(ARSENAL_MAX, Math.floor(n) || 0));
+  saveArsenal();
+  renderArsenal();
+}
 function openTokens() {
   $("tokensModal").classList.add("show");
   $("tokensModal").setAttribute("aria-hidden", "false");
-  renderTokens();
+  setTokTab(tokTab);
 }
 function closeTokens() {
   $("tokensModal").classList.remove("show");
@@ -1574,6 +1682,18 @@ document.addEventListener("click", e => {
     closeTokens();
     return;
   }
+  const tokTabBtn = e.target.closest("[data-tok-tab]");
+  if (tokTabBtn) {
+    setTokTab(tokTabBtn.dataset.tokTab);
+    saveArsenal();
+    return;
+  }
+  const arsStep = e.target.closest("[data-ars-step]");
+  if (arsStep) {
+    const k = arsStep.dataset.arsStep;
+    setArsenal(k, arsenal[k] + Number(arsStep.dataset.d));
+    return;
+  }
   if (e.target.closest("#shareBuild")) {
     shareBuild();
     return;
@@ -1685,10 +1805,23 @@ $("resetAll").onclick = () =>
     renderTokens();
   })
 );
+/* поле количества в «Моём арсенале»: число без пробелов-разрядов */
+document.addEventListener("input", e => {
+  const k = e.target.dataset && e.target.dataset.ars;
+  if (k) setArsenal(k, Number(String(e.target.value).replace(/\D/g, "")));
+});
+/* стрелки влево/вправо переключают вкладки окна, как в обычных вкладках */
+document.addEventListener("keydown", e => {
+  if (!e.target.dataset || !e.target.dataset.tokTab || (e.key !== "ArrowLeft" && e.key !== "ArrowRight")) return;
+  setTokTab(tokTab === "tokens" ? "arsenal" : "tokens");
+  saveArsenal();
+  document.querySelector('[data-tok-tab="' + tokTab + '"]').focus();
+});
 renderCards();
 initDock();
 loadState();
 loadTokens();
+loadArsenal();
 $("cmpInput").addEventListener("keydown", e => {
   if (e.key === "Enter") loadCmpFromInput();
 });
