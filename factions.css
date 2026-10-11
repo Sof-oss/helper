@@ -108,6 +108,10 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 14px;
+}
+/* карточки в ряду одной высоты, «Состав» - внизу карточки. Пока у кого-то открыт состав, ряды не тянутся,
+   иначе соседние карточки вытянулись бы пустыми на всю длину списка */
+.fx-list:has(.fx-roster[open]) {
   align-items: start;
 }
 .fx-card {
@@ -222,8 +226,14 @@
   border-radius: 6px;
   background: color-mix(in srgb, var(--fx) 9%, rgba(0, 0, 0, 0.25));
 }
+.fx-recruit-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
 .fx-recruit p {
-  margin: 6px 0 0;
+  margin: 8px 0 0;
   color: #c9d6e1;
   font-size: var(--fs-sm);
   line-height: 1.5;
@@ -240,7 +250,6 @@
   letter-spacing: 0.05em;
 }
 .fx-req {
-  margin-left: 8px;
   color: #e3ecf3;
   font-size: var(--fs-sm);
   font-weight: 700;
@@ -315,11 +324,19 @@
 }
 .fx-src {
   margin-left: auto;
-  color: #7f95a8;
+  color: #8fa3b3;
   font-size: var(--fs-xs);
+  white-space: nowrap;
+}
+.fx-src:hover {
+  color: #fff;
 }
 
 /* состав */
+.fx-roster,
+.fx-card > .fx-note:last-child {
+  margin-top: auto;
+}
 .fx-roster {
   border-top: 1px solid var(--panel-line);
   padding-top: 8px;
@@ -414,9 +431,6 @@
   .fx-stat {
     flex: 1 1 40%;
     min-width: 0;
-  }
-  .fx-src {
-    margin-left: 0;
   }
 }
 /* пальцем: строки состава, «Состав», лидер и ссылка на пост - не меньше 32-40 px по высоте, чтобы не промахиваться */

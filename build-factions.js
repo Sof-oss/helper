@@ -150,14 +150,20 @@ module.exports = function factionsMarkup(ROOT) {
         "</p>"
       : '<p class="fx-leader fx-muted"><span class="fx-label">Лидер</span>не назначен</p>';
     const motto = add.motto ? '<blockquote class="fx-motto">«' + esc(add.motto) + "»</blockquote>" : "";
+    const post = safeUrl(add.post);
+    const postHtml = post
+      ? '<a class="fx-src" href="' + esc(post) + '" target="_blank" rel="noopener">Пост о наборе ВК</a>'
+      : "";
+    /* пост о наборе - в шапке объявления справа, у всех карточек на одном месте */
     const recruit = add.recruit
-      ? '<div class="fx-recruit"><span class="fx-tag">Набор открыт</span>' +
+      ? '<div class="fx-recruit"><div class="fx-recruit-head"><span class="fx-tag">Набор открыт</span>' +
         (add.requirement ? '<span class="fx-req">Приём ' + esc(add.requirement) + "</span>" : "") +
-        "<p>" +
+        postHtml +
+        "</div><p>" +
         esc(add.recruit) +
         "</p></div>"
       : "";
-    /* группа ВК - отдельной заметной кнопкой, контакты и пост о наборе - своей строкой ниже */
+    /* группа ВК - отдельной заметной кнопкой, контакты - своей строкой ниже */
     const vk = add.vk && safeUrl(add.vk.url);
     const vkHtml = vk
       ? '<a class="fx-vk" href="' +
@@ -175,14 +181,11 @@ module.exports = function factionsMarkup(ROOT) {
       ])
       .filter(([u, n]) => u && n)
       .map(([u, n]) => '<a class="fx-btn" href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(n) + "</a>");
-    const post = safeUrl(add.post);
     const linksHtml =
-      contacts.length || post
+      contacts.length || (post && !add.recruit)
         ? '<div class="fx-links">' +
           (contacts.length ? '<span class="fx-label">Связь</span>' + contacts.join("") : "") +
-          (post
-            ? '<a class="fx-src" href="' + esc(post) + '" target="_blank" rel="noopener">Пост о наборе ВК</a>'
-            : "") +
+          (add.recruit ? "" : postHtml) +
           "</div>"
         : "";
     const known = people.length;
