@@ -4,9 +4,15 @@
    title - короткий заголовок (до ~60 символов)
    text  - пара слов о сути (до ~120 символов)
    url   - ссылка на пост ВК (кнопка «Читать в ВК»); можно не указывать - тогда кнопки нет
-   event - баннер ивента над новостью (пока есть "halloween"); можно не указывать
+   event - баннер над новостью: "halloween" (ивент) или "update" (слухи об обновлении); можно не указывать
    На главной видно 3 последние новости, остальные - по кнопке «Все новости». */
 window.ZONE_NEWS = [
+  {
+    date: "2026-10-11",
+    title: "Слухи: обновление выйдет уже сегодня?",
+    text: "Среди сталкеров ходят слухи, что сегодня в игру выйдет обновление. Официального анонса пока нет",
+    event: "update"
+  },
   {
     date: "2026-10-09",
     title: "Скоро Хэллоуин в Зоне",
@@ -46,7 +52,10 @@ window.ZONE_NEWS = [
   };
   const EVENTS = {
     halloween:
-      '<div class="zn-event" aria-hidden="true"><img src="assets/event-halloween-600.webp" srcset="assets/event-halloween-600.webp 600w, assets/event-halloween-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-eye zn-ev-l"></span><span class="zn-ev-eye zn-ev-r"></span><span class="zn-ev-izlom"><img src="assets/event-izlom-shadow.webp" width="366" height="320" alt="" loading="lazy" decoding="async"><i class="zn-ev-ie zn-ev-ie1"></i><i class="zn-ev-ie zn-ev-ie2"></i></span><span class="zn-ev-soon">Скоро</span></div>'
+      '<div class="zn-event" aria-hidden="true"><img src="assets/event-halloween-600.webp" srcset="assets/event-halloween-600.webp 600w, assets/event-halloween-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-eye zn-ev-l"></span><span class="zn-ev-eye zn-ev-r"></span><span class="zn-ev-izlom"><img src="assets/event-izlom-shadow.webp" width="366" height="320" alt="" loading="lazy" decoding="async"><i class="zn-ev-ie zn-ev-ie1"></i><i class="zn-ev-ie zn-ev-ie2"></i></span><span class="zn-ev-soon">Скоро</span></div>',
+    /* слухи об обновлении: картинка-баннер и метка «Слухи», мигающая точка как у рации */
+    update:
+      '<div class="zn-event zn-ev-update" aria-hidden="true"><img src="assets/event-update-600.webp" srcset="assets/event-update-600.webp 600w, assets/event-update-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>Слухи</span></div>'
   };
   const item = (n, i) =>
     '<li class="zn-item' +

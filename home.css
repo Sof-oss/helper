@@ -984,3 +984,27 @@ html.tour-seen .home-hero .tour-start {
     letter-spacing: 0.04em;
   }
 }
+
+/* баннер «Слухи об обновлении» (news.js, event: "update") */
+.zn-ev-update {
+  --ev: #7fd1c4;
+}
+/* картинка и так ночная - не затемняем, как хэллоуинскую, а чуть высветляем */
+.zn-ev-update img {
+  filter: brightness(1.15) contrast(1.05);
+}
+.zn-ev-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin: 0 7px 1px 0;
+  border-radius: 50%;
+  background: var(--ev);
+  box-shadow: 0 0 6px var(--ev);
+  vertical-align: middle;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .zn-ev-dot {
+    animation: hc-blink 1.6s ease-in-out infinite;
+  }
+}
