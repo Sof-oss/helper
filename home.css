@@ -990,6 +990,10 @@ html.tour-seen .home-hero .tour-start {
   --ev: #7fd1c4;
 }
 /* картинка и так ночная - не затемняем, как хэллоуинскую, а чуть высветляем */
+/* «Вышло» (event: "release") - тот же баннер, зелёная метка */
+.zn-ev-release {
+  --ev: #9be36a;
+}
 .zn-ev-update img {
   filter: brightness(1.15) contrast(1.05);
 }
