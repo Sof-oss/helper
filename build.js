@@ -658,6 +658,22 @@ function pwaTags(html, from) {
     if (!html.includes("</body>")) throw new Error("PWA: в " + from + " нет </body>");
     html = html.replace("</body>", '<script src="/sw-register.js" defer></script></body>');
   }
+  /* переходы между страницами (@view-transition в styles.css): при перезагрузке и «Назад» из кэша браузер сам
+     отменяет анимацию и пишет в консоль «Uncaught (in promise) InvalidStateError: Transition was aborted…»
+     (у новой страницы - pagereveal, у старой - pageswap: её ошибка всплывает, когда страницу достают из кэша по «Назад»).
+     Сайту это не мешает - просто подхватываем отказ. Скрипт встроенный и в <head>: событие pagereveal приходит
+     до первой отрисовки, раньше любых defer-скриптов (хэш для CSP считается сам, см. csp ниже) */
+  if (!html.includes("pagereveal")) {
+    const vt =
+      "<script>(function(){var n=function(){},h=function(e){var t=e.viewTransition;" +
+      "if(t){t.ready.catch(n);t.finished.catch(n);t.updateCallbackDone&&t.updateCallbackDone.catch(n)}};" +
+      'addEventListener("pagereveal",h);addEventListener("pageswap",h)})();</script>\n' +
+      /* согласие на переход - прямо в разметке: если styles.css к первой отрисовке ещё не разобран
+         (например, страница пришла из кэша по «Назад»), браузер считал, что переходов нет, и отменял анимацию */
+      "<style>@view-transition{navigation:auto}</style>\n";
+    if (!/<meta charset="UTF-8">\n?/.test(html)) throw new Error("view transitions: в " + from + " нет <meta charset>");
+    html = html.replace(/(<meta charset="UTF-8">\n?)/, "$1" + vt);
+  }
   /* сезонное оформление (season.js сам решает, включать ли его) - тоже на каждую страницу */
   if (!html.includes("season.js") && fs.existsSync(path.join(OUT, "season.js")))
     html = html.replace("</body>", '<script src="/season.js" defer></script></body>');
