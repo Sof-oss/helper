@@ -4,6 +4,7 @@
    title - короткий заголовок (до ~60 символов)
    text  - пара слов о сути (до ~120 символов)
    url   - ссылка на пост ВК (кнопка «Читать в ВК»); можно не указывать - тогда кнопки нет
+   promo, promoUrl - промокод из текста и ссылка на него: код в тексте станет кликабельным; можно не указывать
    event - баннер над новостью: "halloween" (ивент), "update" (слухи об обновлении) или "release" (обновление вышло); можно не указывать
    На главной видно 3 последние новости, остальные - по кнопке «Все новости». */
 window.ZONE_NEWS = [
@@ -12,6 +13,8 @@ window.ZONE_NEWS = [
     title: "Вышло обновление: Арена и характеристики сталкера",
     text: "Бои на Арене раз в час, прокачка характеристик за консервы, широкоформатный режим и промокод ARENA2026",
     url: "https://vk.ru/wall-239092289_274",
+    promo: "ARENA2026",
+    promoUrl: "https://vk.ru/app54612839#promo=ARENA2026",
     event: "release"
   },
   {
@@ -61,6 +64,21 @@ window.ZONE_NEWS = [
     release:
       '<div class="zn-event zn-ev-update zn-ev-release" aria-hidden="true"><img src="/assets/event-update-600.webp" srcset="/assets/event-update-600.webp 600w, /assets/event-update-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>Вышло</span></div>'
   };
+  /* промокод в тексте - ссылка, по которой он активируется в игре */
+  const promo = n => {
+    const t = esc(n.text);
+    if (!n.promo || !n.promoUrl) return t;
+    const code = esc(n.promo);
+    return t
+      .split(code)
+      .join(
+        '<a class="zn-promo" href="' +
+          esc(n.promoUrl) +
+          '" target="_blank" rel="noopener noreferrer" title="Активировать промокод в игре">' +
+          code +
+          "</a>"
+      );
+  };
   const item = (n, i) =>
     '<li class="zn-item' +
     (i >= SHOW ? " zn-more" : "") +
@@ -76,7 +94,7 @@ window.ZONE_NEWS = [
     '<b class="zn-title">' +
     esc(n.title) +
     "</b>" +
-    (n.text ? '<p class="zn-text">' + esc(n.text) + "</p>" : "") +
+    (n.text ? '<p class="zn-text">' + promo(n) + "</p>" : "") +
     (n.url
       ? '<a class="zn-link" href="' +
         esc(n.url) +

@@ -572,6 +572,27 @@ html.tour-seen .home-hero .tour-start {
   line-height: 1.45;
   color: #b4bec7;
 }
+/* промокод в тексте новости (news.js: promo/promoUrl) - моноширинная плашка-ссылка */
+.zn-promo {
+  padding: 1px 6px;
+  border: 1px dashed color-mix(in srgb, var(--zn) 70%, transparent);
+  border-radius: 3px;
+  font: 600 13px/1.3 var(--mono);
+  letter-spacing: 0.06em;
+  color: var(--zn);
+  background: color-mix(in srgb, var(--zn) 10%, transparent);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.zn-promo:hover,
+.zn-promo:focus-visible {
+  color: #fff;
+  background: color-mix(in srgb, var(--zn) 28%, transparent);
+  border-style: solid;
+}
 .zn-link {
   display: inline-flex;
   align-items: center;
