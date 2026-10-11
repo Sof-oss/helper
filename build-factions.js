@@ -76,15 +76,16 @@ module.exports = function factionsMarkup(ROOT) {
   const info = readJson(path.join(ROOT, "factions-info.json"), {});
   const uiSrc = fs.readFileSync(path.join(ROOT, "ui.js"), "utf8");
   const GLYPHS = Object.fromEntries(
-    [...uiSrc.matchAll(/^\s*(merc|dolg|svoboda|science|monolith|rassvet|loners):\s*'(.*)',?\s*$/gm)].map(m => [
-      m[1],
-      m[2]
-    ])
+    [
+      ...uiSrc.matchAll(
+        /^\s*(merc|dolg|svoboda|science|monolith|rassvet|loners|traders|renegades|clearsky):\s*'(.*)',?\s*$/gm
+      )
+    ].map(m => [m[1], m[2]])
   );
   const KEY = Object.fromEntries(
     [...uiSrc.matchAll(/\{\s*key:\s*"(\w+)",\s*label:\s*"([^"]+)"/g)].map(m => [m[2], m[1]])
   );
-  if (Object.keys(GLYPHS).length < 7 || Object.keys(KEY).length < 7)
+  if (Object.keys(GLYPHS).length < 10 || Object.keys(KEY).length < 10)
     throw new Error("build-factions: не удалось прочитать эмблемы группировок из ui.js");
 
   const REP = data.metrics.indexOf("reputation");

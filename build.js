@@ -725,7 +725,18 @@ const INTRO_FLAG = () =>
    Если страницу уже обслуживает service worker, preload не ставится: Chrome не отдаёт такой preload стилям
    («cross-world service worker resource mismatch») и качает фон второй раз, а из кэша SW фон и так приходит сразу */
 {
-  const THEMES = ["merc", "dolg", "svoboda", "science", "monolith", "rassvet", "loners"];
+  const THEMES = [
+    "merc",
+    "dolg",
+    "svoboda",
+    "science",
+    "monolith",
+    "rassvet",
+    "loners",
+    "traders",
+    "renegades",
+    "clearsky"
+  ];
   const map = {};
   for (const t of THEMES)
     map[t] = ["", "-1280", "-m"].map(s => "/" + version("assets/bg-" + t + s + ".webp", "фоны тем"));

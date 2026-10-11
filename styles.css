@@ -54,6 +54,15 @@ body {
 :root[data-theme="loners"] {
   --bg-img: url("assets/bg-loners.webp");
 }
+:root[data-theme="traders"] {
+  --bg-img: url("assets/bg-traders.webp");
+}
+:root[data-theme="renegades"] {
+  --bg-img: url("assets/bg-renegades.webp");
+}
+:root[data-theme="clearsky"] {
+  --bg-img: url("assets/bg-clearsky.webp");
+}
 @media (max-width: 1366px) {
   :root {
     --bg-img: url("assets/bg-merc-1280.webp");
@@ -78,6 +87,15 @@ body {
   }
   :root[data-theme="loners"] {
     --bg-img: url("assets/bg-loners-1280.webp");
+  }
+  :root[data-theme="traders"] {
+    --bg-img: url("assets/bg-traders-1280.webp");
+  }
+  :root[data-theme="renegades"] {
+    --bg-img: url("assets/bg-renegades-1280.webp");
+  }
+  :root[data-theme="clearsky"] {
+    --bg-img: url("assets/bg-clearsky-1280.webp");
   }
 }
 @media (max-width: 760px) {
@@ -105,6 +123,15 @@ body {
   :root[data-theme="loners"] {
     --bg-img: url("assets/bg-loners-m.webp");
   }
+  :root[data-theme="traders"] {
+    --bg-img: url("assets/bg-traders-m.webp");
+  }
+  :root[data-theme="renegades"] {
+    --bg-img: url("assets/bg-renegades-m.webp");
+  }
+  :root[data-theme="clearsky"] {
+    --bg-img: url("assets/bg-clearsky-m.webp");
+  }
 }
 /* размытая заглушка фона (32×18, ~150 байт в самом css): рисуется под фотографией сразу, пока та грузится
    и декодируется при переходе между страницами, - вместо чёрного экрана. Пересобрать: фон -1280 -> 32x18 webp */
@@ -128,6 +155,15 @@ body {
 }
 :root[data-theme="loners"] {
   --bg-lq: url("data:image/webp;base64,UklGRm4AAABXRUJQVlA4IGIAAADwAwCdASogABIAPtFWo0uoJKMhsAgBABoJZQDImCHXYyv3yOq6aDiAAP7NY/1GMXFS2jet5hVwqhUC9P5TJvRi8qgazyPeoqKsPICkuEKuoWzOMh/tS7kuZxl9aLAxBU4AAA==");
+}
+:root[data-theme="traders"] {
+  --bg-lq: url("data:image/webp;base64,UklGRogAAABXRUJQVlA4IHwAAADQBACdASogABIAPtFYo0uoJSMhsAgBABoJZQC4MCPqHJqJwF9NB1MGXuSeYtgGAAD+5AbqN5SPooHUJC9v2oPgYgXLeuwfq1x01qpCC5PLEgdcc37LwOtgmpvxgKL25CotX1lpHFqK5kOd6EX54ghftvSivuZPX46DAcgA");
+}
+:root[data-theme="renegades"] {
+  --bg-lq: url("data:image/webp;base64,UklGRoIAAABXRUJQVlA4IHYAAACQBACdASogABIAPtFYpEuoJSOhsAgBABoJZQDA3CHfzxjyypCpXMs9LzVgI1gA/vQgobAjFxZq5jgXwtZMgN6m6R6O52p8Hr96cIvSW0U4FRh32on7PXx2CmUWejASIEDgO4Pi8XrI3UU2up2TOzqMoDGgAAAA");
+}
+:root[data-theme="clearsky"] {
+  --bg-lq: url("data:image/webp;base64,UklGRpAAAABXRUJQVlA4IIQAAAAQBQCdASogABIAPtFWpEuoJKOhsAgBABoJZQCnFCHgeZSMJStjY73P/1JsWLyPe+wAAP7o45/pCYBYZhGxgpLXQjPa6VwisOLsyhAgOCdMd8+b7dr2cG2liH6CNEQhPUKffXq+w4nLXbiZt/d+FDIyJC1d7bRTs97YYdEq5vGxtbzh4AA=");
 }
 /* фон закреплён за окном, а не за страницей: слой фиксированной высоты в экран, поэтому картинка одинаковая на всех страницах
    и не растягивается, не едет при прокрутке и не прыгает при смене высоты контента (вкладки, поиск, фильтры).
@@ -4125,6 +4161,42 @@ svg.target-icon {
   --panel-line: #3a2f22;
   --bg-dim: 0.45;
 }
+:root[data-theme="traders"] {
+  --accent: #a3b04a;
+  --accent-2: #dfe3a8;
+  --accent-3: #e6dcc0;
+  --accent-ink: #12140a;
+  --glass-line: rgba(210, 215, 150, 0.18);
+  --wash: rgba(163, 176, 74, 0.13);
+  --panel: #11130c;
+  --panel-2: #0b0c08;
+  --panel-line: #33371f;
+  --bg-dim: 0.48;
+}
+:root[data-theme="renegades"] {
+  --accent: #2fa889;
+  --accent-2: #9fe0cc;
+  --accent-3: #d8c27a;
+  --accent-ink: #04140f;
+  --glass-line: rgba(140, 220, 195, 0.18);
+  --wash: rgba(47, 168, 137, 0.13);
+  --panel: #0a1411;
+  --panel-2: #070d0b;
+  --panel-line: #1d3a32;
+  --bg-dim: 0.45;
+}
+:root[data-theme="clearsky"] {
+  --accent: #ee8a3c;
+  --accent-2: #f7c08a;
+  --accent-3: #8fb4d8;
+  --accent-ink: #1a0d04;
+  --glass-line: rgba(170, 200, 230, 0.2);
+  --wash: rgba(238, 138, 60, 0.13);
+  --panel: #0b1420;
+  --panel-2: #080e17;
+  --panel-line: #22344a;
+  --bg-dim: 0.42;
+}
 
 /* ---------- 2. Второй цвет темы в интерфейсе ----------
    Раньше красный у учёных жил во вспышках аномалии; теперь он виден в
@@ -4546,6 +4618,15 @@ input[type="number"]:focus,
 .theme-item[data-theme-btn="loners"] .ti-thumb {
   background-image: url("assets/bg-loners-thumb.webp");
 }
+.theme-item[data-theme-btn="traders"] .ti-thumb {
+  background-image: url("assets/bg-traders-thumb.webp");
+}
+.theme-item[data-theme-btn="renegades"] .ti-thumb {
+  background-image: url("assets/bg-renegades-thumb.webp");
+}
+.theme-item[data-theme-btn="clearsky"] .ti-thumb {
+  background-image: url("assets/bg-clearsky-thumb.webp");
+}
 .theme-item:hover {
   transform: none;
   border-color: color-mix(in srgb, var(--t) 55%, transparent);
@@ -4606,6 +4687,12 @@ input[type="number"]:focus,
   .theme-list {
     width: min(330px, calc(100vw - 16px));
   }
+}
+/* групп уже десять: на низком экране список прокручивается, а не уходит под нижнее меню */
+.theme-list {
+  max-height: calc(100dvh - 90px - var(--tabbar-h));
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 .tp-badge,
 .ti-badge {
