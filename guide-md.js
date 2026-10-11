@@ -22,6 +22,12 @@
     return null;
   }
 
+  /* домен ссылки без www: «https://evil.ru/?heart-of-the-zone.ru» - чужой сайт, хотя имя сайта в адресе есть */
+  function hostOf(u) {
+    const m = /^https?:\/\/([^/?#:@]*@)?([^/?#:]+)/i.exec(u);
+    return m ? m[2].toLowerCase().replace(/^www\./, "") : "";
+  }
+
   /* строчная разметка; текст сначала экранируется, поэтому вставить свой HTML нельзя */
   function inline(text, opt) {
     const codes = [];
@@ -33,7 +39,7 @@
     s = s.replace(/\[([^\]\n]+)\]\(([^)\s]+)\)/g, (m, label, url) => {
       const u = safeUrl(url.replace(/&amp;/g, "&"));
       if (!u) return label;
-      const ext = /^https?:/i.test(u) && !(opt && opt.siteHost && u.toLowerCase().includes(opt.siteHost));
+      const ext = /^https?:/i.test(u) && !(opt && opt.siteHost && hostOf(u) === opt.siteHost);
       return (
         '<a href="' + esc(u) + '"' + (ext ? ' target="_blank" rel="noopener nofollow ugc"' : "") + ">" + label + "</a>"
       );

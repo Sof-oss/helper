@@ -602,10 +602,6 @@
     box-shadow 0.2s;
 }
 
-/* мини-сводка урона: только телефон, видна, пока карточки урона за краем экрана */
-.calc-dock {
-  display: none;
-}
 @media (max-width: 760px) {
   .page > .calc-title {
     margin: 8px 8px 0;
@@ -623,34 +619,6 @@
   }
   #freeCards:empty {
     min-height: 720px;
-  }
-  .calc-dock:not([hidden]) {
-    position: fixed;
-    left: 8px;
-    right: 8px;
-    bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 8px);
-    z-index: 40;
-    display: flex;
-    justify-content: space-around;
-    gap: 10px;
-    min-height: 44px;
-    padding: 8px 12px;
-    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
-    border-radius: 10px;
-    background: rgba(8, 12, 17, 0.96);
-    box-shadow: 0 8px 24px #000a;
-    color: #c9d6e2;
-    font: inherit;
-    font-size: var(--fs-sm);
-    cursor: pointer;
-  }
-  .calc-dock span {
-    white-space: nowrap;
-  }
-  .calc-dock b {
-    color: #fff;
-    font-size: 15px;
-    font-variant-numeric: tabular-nums;
   }
 }
 

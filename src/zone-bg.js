@@ -20,7 +20,7 @@ import {
   NoColorSpace,
   Vector2,
   Vector3
-} from "three";
+} from "./zone-gl.js";
 import { readTheme, isMobile, lowPower } from "./zone-theme.js";
 
 const FOV = 45,

@@ -204,11 +204,14 @@ function infoGroupsData(p) {
   ];
 }
 
-/* короткая запись для осей: 1,5М, 250к */
-function fmtShort(v) {
-  if (v >= 1e6) return (Math.round(v / 1e5) / 10).toLocaleString("ru-RU") + "М";
-  if (v >= 1e3) return Math.round(v / 1e3).toLocaleString("ru-RU") + "к";
-  return String(v);
+/* единица оси Y по максимуму графика: подписи - числа (5, 10, 14,5), единица («млн», «тыс.») - одна, над осью */
+function axisUnit(max) {
+  if (max >= 1e6) return { div: 1e6, name: "млн" };
+  if (max >= 1e4) return { div: 1e3, name: "тыс." };
+  return { div: 1, name: "" };
+}
+function fmtAxis(v, u) {
+  return (Math.round((v / u.div) * 10) / 10).toLocaleString("ru-RU");
 }
 /* «красивый» шаг сетки: 1, 2, 2,5 или 5 × 10^n, примерно 4-5 линий */
 function niceStep(max) {
@@ -253,11 +256,21 @@ function chartMarkup(g) {
   let grid = "",
     ylab = "",
     xlab = "";
+  const unit = axisUnit(max);
+  let lastV = 0;
   for (let v = 0; v <= max; v += st) {
     const y = 100 - (v / max) * 100;
     grid += '<line x1="0" x2="1000" y1="' + y * 10 + '" y2="' + y * 10 + '"/>';
-    ylab += '<span style="top:' + y + '%">' + fmtShort(v) + "</span>";
+    /* ноль не подписываем, если есть единица: на его месте, в углу под осью, стоит «млн» / «тыс.» */
+    if (v || !unit.name) ylab += '<span style="top:' + y + '%">' + fmtAxis(v, unit) + "</span>";
+    lastV = v;
   }
+  /* верх кривой выше последней линии сетки - подписываем и его, иначе непонятно, до скольких растёт график */
+  if ((max - lastV) / max > 0.12) {
+    grid += '<line class="ich-grid-top" x1="0" x2="1000" y1="0" y2="0"/>';
+    ylab += '<span class="ich-y-top" style="top:0%">' + fmtAxis(max, unit) + "</span>";
+  }
+  if (unit.name) ylab += '<span class="ich-unit">' + unit.name + "</span>";
   const xs = n > 60 ? 20 : 10;
   for (let l = xs; l <= n; l += xs) xlab += '<span style="left:' + ((l - 1) / (n - 1)) * 100 + '%">' + l + "</span>";
   const done = g.reached ? rows.slice(0, g.reached) : [];

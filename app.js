@@ -1162,7 +1162,6 @@ function calc() {
   }
   announceResults(r);
   prevResults = r;
-  updateDock(r);
 }
 /* уровень вне 1–100 исправляется, но не молча: подсказка под полем и короткая подсветка */
 function levelHint(raw) {
@@ -1181,43 +1180,6 @@ function levelHint(raw) {
     hint.textContent = "";
     $("level").classList.remove("is-fixed");
   }, 3000);
-}
-/* мини-сводка урона на телефоне: настройки стоят над результатами, и без неё не видно, что изменилось */
-const DOCK = [
-  ["grenade", "Граната"],
-  ["gauss", "Гаусс"],
-  ["knife", "Нож"]
-];
-function updateDock(r) {
-  const dock = $("calcDock");
-  if (!dock) return;
-  dock.innerHTML = DOCK.map(([k, l]) => "<span>" + l + " <b>" + fmt(r[k]) + "</b></span>").join("");
-}
-function initDock() {
-  const dock = $("calcDock");
-  if (!dock || !("IntersectionObserver" in window)) return;
-  const narrow = matchMedia("(max-width: 760px)");
-  const seen = new Set();
-  const sync = () => {
-    dock.hidden = !narrow.matches || seen.size > 0;
-  };
-  /* карточки считаются видными, когда поднялись выше нижней трети экрана, а не выглянули краем */
-  const io = new IntersectionObserver(
-    entries => {
-      entries.forEach(e => (e.isIntersecting ? seen.add(e.target) : seen.delete(e.target)));
-      sync();
-    },
-    { rootMargin: "0px 0px -35% 0px" }
-  );
-  ["paidCards", "freeCards"].forEach(id => io.observe($(id)));
-  narrow.addEventListener("change", sync);
-  dock.addEventListener("click", () => {
-    const top = $("paidCards").closest(".result-panel");
-    top.scrollIntoView({
-      behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-      block: "start"
-    });
-  });
 }
 function render() {
   $("sets").innerHTML = optionMarkup(SETS, state.sets, "set");
@@ -1486,7 +1448,7 @@ function shareBuild() {
    Фокус идёт в окно и возвращается на кнопку, которой его открыли. Следим за классом .show, поэтому функции открытия и закрытия окон не трогаем */
 const openedModals = new Map();
 function setPageInert(on) {
-  document.querySelectorAll(".site-header,.page,.calc-dock,.site-footer").forEach(el => {
+  document.querySelectorAll(".site-header,.page,.site-footer").forEach(el => {
     el.inert = on;
   });
 }
@@ -1818,7 +1780,6 @@ document.addEventListener("keydown", e => {
   document.querySelector('[data-tok-tab="' + tokTab + '"]').focus();
 });
 renderCards();
-initDock();
 loadState();
 loadTokens();
 loadArsenal();

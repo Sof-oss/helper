@@ -266,7 +266,7 @@ window.__roll = function (el, text) {
   }
 
   /* --- нижнее меню на телефоне: повторяет верхнее --- */
-  var SHORT = { "Калькулятор урона": "Калькулятор", Информация: "Инфо" };
+  var SHORT = { "Калькулятор урона": "Урон", Информация: "Инфо" };
   var nav = d.querySelector(".main-nav");
   if (nav && !d.querySelector(".tabbar")) {
     var bar = d.createElement("nav");
@@ -284,6 +284,8 @@ window.__roll = function (el, text) {
       var label = a.textContent.trim();
       var span = d.createElement("span");
       span.textContent = SHORT[label] || label;
+      /* подпись сокращена - полное название остаётся для экранных дикторов */
+      if (SHORT[label]) link.setAttribute("aria-label", label);
       link.appendChild(span);
       bar.appendChild(link);
     });

@@ -419,3 +419,21 @@
     margin-left: 0;
   }
 }
+/* пальцем: строки состава, «Состав», лидер и ссылка на пост - не меньше 32-40 px по высоте, чтобы не промахиваться */
+@media (max-width: 760px), (pointer: coarse) {
+  .fx-roster summary {
+    padding: 8px 0;
+  }
+  .fx-roster li {
+    align-items: center;
+    padding: 0 4px;
+  }
+  .fx-roster li a {
+    padding: 10px 0;
+  }
+  .fx-leader a,
+  .fx-src {
+    display: inline-block;
+    padding: 7px 0;
+  }
+}

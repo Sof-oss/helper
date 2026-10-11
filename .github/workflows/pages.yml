@@ -39,7 +39,7 @@ jobs:
         run: npm ci # esbuild для сжатия css и js, playwright-core для картинок-превью (Chrome в GitHub Actions уже есть)
 
       - name: Tests and lint
-        run: npm test && npm run lint
+        run: npm test && npm run lint && npm run format:check
 
       - name: Build
         run: node build-changelog.js && node build-guide-images.js && node build.js && node build-previews.js # build-changelog.js импортирует новости в site-news.json и готовит блок «Новости сайта», build-guide-images.js - копии картинок гайдов для телефонов

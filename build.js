@@ -3,12 +3,11 @@
 /* Сборка для деплоя: исходники из корня -> ./dist
  * 0. Общие куски (partials/header.html, partials/footer.html) подставляются вместо <!-- @include имя -->,
  *    в шапке помечается активный пункт меню: так меню правится в одном месте, а не в каждой странице.
- * 0б. Модули собираются esbuild (см. MODULES): 3D главной (src/home-3d.js + three.js) - маленький home-3d.js
+ * 0б. Модули собираются esbuild (см. MODULES): 3D главной (src/home-3d.js + src/zone-gl.js) - маленький home-3d.js
  *     и догружаемые части в dist/3d/; калькулятор (src/calculator.js -> app.js, polish.js, talents.js) - один calculator.js.
  * 1. Таблицы «Информации» и «Топ-100» дописываются прямо в HTML: их видят поисковики и те, у кого выключен JS.
  *    Разметку рисуют те же info.js / info-tasks.js / top100.js, что работают в браузере, поэтому она совпадает.
- * 2. Общие стили (styles.css - бывшие styles.css, polish.css и visual.css) остаются отдельными файлами и кэшируются один раз на весь сайт,
- *    подряд идущие стили одной страницы склеиваются (bundle-*.css); css и js сжимаются esbuild.
+ * 2. Все стили страницы склеиваются в один bundle-*.css без правил, которые на ней не нужны; css и js сжимаются esbuild.
  * 3. Ссылки на css, js и картинки получают ?v=<хэш содержимого>, после деплоя старый кэш не подтянется.
  * 3б. Гайды из guides/<адрес>/index.md (Markdown, см. guide-md.js) становятся страницами /guide/<адрес>,
  *     список гайдов дописывается в guides.html, картинки гайдов копируются в dist/guide-img/<адрес>/.
@@ -254,9 +253,9 @@ const GUIDE_INVITE =
   '<span class="guide-card-meta">Открыть форму →</span></span></a>';
 
 /* ---------- 3D главной ----------
-   src/home-3d.js - маленький загрузчик; живой фон (zone-bg.js) и общий кусок three.js
-   собираются в отдельные файлы dist/3d/*-<хэш>.js и скачиваются только когда нужны. Хэш в имени - защита от старого кэша.
-   Из three.js попадает только используемое */
+   src/home-3d.js - маленький загрузчик; живой фон (zone-bg.js вместе с src/zone-gl.js - крошечной обёрткой WebGL
+   вместо three.js) собирается в отдельный файл dist/3d/*-<хэш>.js и скачивается только когда нужен.
+   Хэш в имени - защита от старого кэша */
 {
   const r = esbuild.buildSync({
     entryPoints: [path.join(ROOT, "src", "home-3d.js")],
@@ -277,7 +276,7 @@ const GUIDE_INVITE =
       path
         .basename(f)
         .replace(/-[A-Z0-9]{8}\.js$/, ".js")
-        .replace(/^chunk\.js$/, "three.js (общий)") +
+        .replace(/^chunk\.js$/, "общий кусок") +
       " " +
       (o.bytes / 1024).toFixed(0) +
       " КБ"
@@ -498,55 +497,138 @@ const PRERENDER = {
 };
 
 /* ---------- стили ----------
-   Порядок подключения не меняется: от него зависит, какое правило побеждает (visual.css, например, перекрашивает polish.css).
-   - Общие файлы (подключены на двух и больше страницах, например styles.css) идут отдельными файлами:
-     они одинаковые на всём сайте, браузер скачивает каждый один раз и на других страницах берёт из кэша.
-   - Файлы только одной страницы, если стоят подряд, склеиваются в один bundle-<хэш>.css в корне dist
-     (поэтому относительные url() внутри стилей остаются верными).
-   Исходные css, вошедшие в склейку, в dist после этого не нужны и удаляются */
+   У каждой страницы - один файл стилей bundle-<хэш>.css в корне dist (поэтому относительные url() внутри остаются верными):
+   все её css по порядку подключения, склеенные в один. Один запрос вместо пяти-семи - браузер раньше рисует страницу.
+   Порядок файлов и правил внутри не меняется: от него зависит, какое правило побеждает.
+   Из склейки убираются правила, которые на этой странице сработать не могут: в селекторе есть класс или id, которого
+   нет ни в html страницы, ни в её скриптах (включая те, что они догружают), - например, стили Топ-100 на странице калькулятора.
+   Проверка осторожная: класс считается «есть», если такое слово встречается где угодно в коде страницы
+   (даже в комментарии), или он собирается из начала вида "pc-" + …; классы внутри :not(), :is(), :has() и т. п. не проверяются.
+   Исходные css, вошедшие в склейки, из dist удаляются. intro.css и halloween.css подключаются отдельно (см. ниже и season.js) */
+let postcss = null,
+  selParser = null;
+try {
+  postcss = require("postcss");
+  selParser = require("postcss-selector-parser");
+} catch (e) {
+  console.warn("Предупреждение: postcss не установлен (npm install) - стили соберутся без очистки");
+}
 const LOCAL_CSS = /<link rel="stylesheet" href="(\/?)([^":]+\.css)">\n?/g;
-const bundledCss = new Set();
-const cssPages = fs
-  .readdirSync(OUT)
-  .filter(f => f.endsWith(".html"))
-  .map(name => ({ name, list: [...fs.readFileSync(path.join(OUT, name), "utf8").matchAll(LOCAL_CSS)].map(m => m[2]) }))
-  .filter(p => p.list.length);
-const cssUse = {};
-cssPages.forEach(p =>
-  new Set(p.list).forEach(f => {
-    cssUse[f] = (cssUse[f] || 0) + 1;
-  })
-);
-const sharedCss = Object.keys(cssUse).filter(f => cssUse[f] > 1);
-if (sharedCss.length) console.log("Общие стили (кэшируются на весь сайт): " + sharedCss.join(", "));
-for (const { name, list } of cssPages) {
-  /* группы по порядку: общий файл - сам по себе, подряд идущие файлы страницы - вместе */
-  const groups = [];
-  for (const f of list) {
-    const last = groups[groups.length - 1];
-    if (cssUse[f] > 1 || !last || last.shared) groups.push({ shared: cssUse[f] > 1, files: [f] });
-    else last.files.push(f);
+/* скрипты, которые догружают другие скрипты, и файлы, которые build.js добавит на страницы позже */
+const LAZY_JS = {
+  "my-place.js": ["top100-data.js"],
+  "season.js": ["halloween.js"],
+  "home-3d.js": ["src/zone-bg.js", "src/zone-theme.js"]
+};
+const EVERY_PAGE_JS = ["season.js", "intro.js", "sw-register.js"];
+function pageWords(name, html) {
+  const srcs = [html],
+    seen = new Set();
+  const add = f => {
+    f = f.replace(/^\//, "");
+    if (seen.has(f)) return;
+    seen.add(f);
+    const file = [path.join(OUT, f), path.join(ROOT, f)].find(x => fs.existsSync(x));
+    if (file) srcs.push(fs.readFileSync(file, "utf8"));
+    (LAZY_JS[f] || []).forEach(add);
+  };
+  for (const m of html.matchAll(/<script\b[^>]*\ssrc="([^"?#]+)/g)) add(m[1]);
+  EVERY_PAGE_JS.forEach(add);
+  /* данные, из которых скрипты берут имена (группировки, новости) */
+  fs.readdirSync(ROOT)
+    .filter(f => f.endsWith(".json") && !/^(package|top100-players)/.test(f))
+    .forEach(add);
+  /* разметку, которую дорисовывает сборка (пререндер ниже, страницы гайдов по шаблону guides.html), пишет build.js,
+     карточки «Группировок» - build-factions.js */
+  add("build.js");
+  if (name === "factions.html") add("build-factions.js");
+  const text = srcs.join("\n");
+  const words = new Set(text.match(/[A-Za-z_][\w-]*/g));
+  const glued = [...new Set([...text.matchAll(/["'`\s]([A-Za-z_][\w-]*)(?:["']\s*\+|\$\{)/g)].map(m => m[1]))];
+  /* "x-" + имя - любой класс на x-; " m" + номер - только m и цифры (m1, m2), иначе короткие куски строк
+     сохранили бы слишком много лишнего */
+  const prefixes = glued.filter(p => p.endsWith("-"));
+  const numbered = new Set(glued.filter(p => !p.endsWith("-")));
+  return cls =>
+    words.has(cls) ||
+    prefixes.some(p => cls.startsWith(p)) ||
+    (/\d$/.test(cls) && numbered.has(cls.replace(/\d+$/, "")));
+}
+function mayMatch(selector, known) {
+  let ok = true;
+  try {
+    selParser(root =>
+      root.walk(n => {
+        if (!ok || (n.type !== "class" && n.type !== "id")) return;
+        for (let p = n.parent; p; p = p.parent) if (p.type === "pseudo") return;
+        if (!known(n.value)) ok = false;
+      })
+    ).processSync(selector);
+  } catch (e) {
+    return true;
   }
-  const hrefs = groups.map(g => {
-    if (g.shared || g.files.length === 1) return g.files[0];
-    const bundle = "bundle-" + crypto.createHash("sha1").update(g.files.join("|")).digest("hex").slice(0, 8) + ".css";
-    fs.writeFileSync(
-      path.join(OUT, bundle),
-      g.files.map(f => "/* " + f + " */\n" + fs.readFileSync(path.join(OUT, f), "utf8")).join("\n")
-    );
-    g.files.forEach(f => bundledCss.add(f));
-    return bundle;
+  return ok;
+}
+function purgeCss(css, known) {
+  if (!postcss) return css;
+  const root = postcss.parse(css);
+  root.walkRules(rule => {
+    if (rule.parent && rule.parent.type === "atrule" && /keyframes$/i.test(rule.parent.name)) return;
+    const keep = rule.selectors.filter(s => mayMatch(s, known));
+    if (!keep.length) rule.remove();
+    else if (keep.length < rule.selectors.length) rule.selectors = keep;
   });
-  let first = true;
+  /* опустевшие @media / @supports / @layer тоже убираем */
+  for (let again = true; again;) {
+    again = false;
+    root.walkAtRules(a => {
+      if (a.nodes && !a.nodes.length) {
+        a.remove();
+        again = true;
+      }
+    });
+  }
+  return root.toString();
+}
+const bundledCss = new Set();
+let cssBefore = 0,
+  cssAfter = 0;
+for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
   const file = path.join(OUT, name);
-  const html = fs.readFileSync(file, "utf8").replace(LOCAL_CSS, (m, slash) => {
-    if (!first) return "";
-    first = false;
-    return hrefs.map(h => '<link rel="stylesheet" href="' + slash + h + '">\n').join("");
+  const html = fs.readFileSync(file, "utf8");
+  const found = [...html.matchAll(LOCAL_CSS)];
+  if (!found.length) continue;
+  const known = pageWords(name, html);
+  const parts = found.map(m => {
+    const src = fs.readFileSync(path.join(OUT, m[2]), "utf8");
+    const out = purgeCss(src, known);
+    cssBefore += src.length;
+    cssAfter += out.length;
+    bundledCss.add(m[2]);
+    return "/* " + m[2] + " */\n" + out;
   });
-  fs.writeFileSync(file, html);
+  const css = parts.join("\n");
+  const bundle = "bundle-" + crypto.createHash("sha1").update(css).digest("hex").slice(0, 8) + ".css";
+  fs.writeFileSync(path.join(OUT, bundle), css);
+  let first = true;
+  fs.writeFileSync(
+    file,
+    html.replace(LOCAL_CSS, (m, slash) => {
+      if (!first) return "";
+      first = false;
+      return '<link rel="stylesheet" href="' + slash + bundle + '">\n';
+    })
+  );
 }
 bundledCss.forEach(f => fs.rmSync(path.join(OUT, f)));
+if (postcss)
+  console.log(
+    "Стили: один файл на страницу, лишние для страницы правила убраны: " +
+      (cssBefore / 1024).toFixed(0) +
+      " -> " +
+      (cssAfter / 1024).toFixed(0) +
+      " КБ (сумма по страницам, до сжатия)"
+  );
 
 /* ---------- сжатие ----------
    js - обычные скрипты (не модули) с общими глобальными именами: esbuild без format не переименовывает
@@ -605,25 +687,43 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".css"))) {
   fs.writeFileSync(file, css);
 }
 
+/* картинки, адрес которых целиком записан в скрипте ("/assets/event-update-600.webp"), тоже получают ?v=:
+   их можно надолго кэшировать, а после замены файла браузер скачает новую версию. Адреса, которые скрипт
+   собирает по частям ("/assets/bosses/" + id + ".webp"), не трогаются */
+for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".js") && !MODULES[f])) {
+  const file = path.join(OUT, name);
+  const js = fs.readFileSync(file, "utf8");
+  const out = js.replace(
+    /(["'\s,])(\/assets\/[\w/.-]+\.(?:webp|png|jpe?g|svg|gif))(?=["'\s,])/g,
+    (m, pre, u) => pre + (fs.existsSync(path.join(OUT, u.slice(1))) ? version(u, name) : u)
+  );
+  if (out !== js) fs.writeFileSync(file, out);
+}
+
 /* ---------- интро для новичков (intro.js / intro.css) ----------
    Встроенный скрипт в <head> до стилей решает, показывать ли ПДА: при первом визите (нет zonePdaSeen;
    zoneIntroSeen - метка бывшей 3D-заставки главной: кто видел её, тот не новичок), не ботам и не превью соцсетей/мессенджеров, не во фрейме; ?intro в адресе - показать принудительно.
-   Тогда <html class="intro">, и intro.css прячет сайт ещё до первой отрисовки. Страховка: если intro.js
+   Тогда <html class="intro">, и тот же скрипт подключает intro.css (document.write - стиль из разметки, браузер ждёт его
+   до первой отрисовки, как обычный <link>), который прячет сайт. Остальным посетителям intro.css не нужен и не скачивается. Страховка: если intro.js
    не появился за 6 с (не загрузился), класс снимается и сайт виден как обычно. Нет на 404 и offline */
 function introPage(name) {
   return name !== "404.html" && name !== "offline.html" && fs.existsSync(path.join(OUT, "intro.js"));
 }
-const INTRO_FLAG =
+const INTRO_FLAG = () =>
   "<script>/* интро ПДА (build.js) */(function(){try{var h=document.documentElement,n=navigator,f=/[?&]intro(=|&|$)/.test(location.search);" +
   'if(!f){if(localStorage.getItem("zonePdaSeen")||localStorage.getItem("zoneIntroSeen")||n.webdriver||window.top!==window.self)return;' +
   'if(/bot|crawl|spider|slurp|google(-|other|web)|mediapartners|yandex|bing|baidu|duckduck|facebookexternalhit|vkshare|whatsapp|telegram|discord|skype|slack|lighthouse|headless|phantom|prerender|preview|pinterest|twitter|embed/i.test(n.userAgent||""))return}' +
-  'h.classList.add("intro");setTimeout(function(){if(!document.querySelector(".pda-intro")){h.classList.remove("intro");window.dispatchEvent(new Event("zone-intro-done"))}},6000)}catch(e){}})();</script>\n';
+  'h.classList.add("intro");document.write(\'<link rel="stylesheet" href="/intro.css?v=' +
+  fileHash("intro.css") +
+  '">\');setTimeout(function(){if(!document.querySelector(".pda-intro")){h.classList.remove("intro");window.dispatchEvent(new Event("zone-intro-done"))}},6000)}catch(e){}})();</script>\n';
 
 /* ---------- фон темы - с первых миллисекунд ----------
    Фото темы задано в css (body::before), и браузер узнаёт о нём только после разбора стилей - при переходе
    между страницами это давало чёрный экран. Встроенный скрипт сразу после скрипта темы ставит preload той же
    картинки (тема из localStorage, размер - по тем же границам, что в начале styles.css: 760 и 1366 px).
-   Адреса с ?v= - те же, что в styles.css, поэтому браузер скачивает картинку один раз */
+   Адреса с ?v= - те же, что в styles.css, поэтому браузер скачивает картинку один раз.
+   Если страницу уже обслуживает service worker, preload не ставится: Chrome не отдаёт такой preload стилям
+   («cross-world service worker resource mismatch») и качает фон второй раз, а из кэша SW фон и так приходит сразу */
 {
   const THEMES = ["merc", "dolg", "svoboda", "science", "monolith", "rassvet", "loners"];
   const map = {};
@@ -632,7 +732,7 @@ const INTRO_FLAG =
   const tag =
     "<script>/* preload фона темы (build.js) */(function(){try{var M=" +
     JSON.stringify(map) +
-    ',t=document.documentElement.dataset.theme,m=M[t]||M.merc,w=window.innerWidth,l=document.createElement("link");' +
+    ',s=navigator.serviceWorker;if(s&&s.controller)return;var t=document.documentElement.dataset.theme,m=M[t]||M.merc,w=window.innerWidth,l=document.createElement("link");' +
     'l.rel="preload";l.as="image";l.href=w<=760?m[2]:w<=1366?m[1]:m[0];l.setAttribute("fetchpriority","high");' +
     "document.head.appendChild(l)}catch(e){}})();</script>\n";
   for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
@@ -641,7 +741,7 @@ const INTRO_FLAG =
     if (html.includes("preload фона темы")) continue;
     const at = html.search(/<link rel="stylesheet"/);
     if (at < 0) continue;
-    fs.writeFileSync(file, html.slice(0, at) + tag + (introPage(name) ? INTRO_FLAG : "") + html.slice(at));
+    fs.writeFileSync(file, html.slice(0, at) + tag + (introPage(name) ? INTRO_FLAG() : "") + html.slice(at));
   }
 }
 
@@ -677,11 +777,9 @@ function pwaTags(html, from) {
   /* сезонное оформление (season.js сам решает, включать ли его) - тоже на каждую страницу */
   if (!html.includes("season.js") && fs.existsSync(path.join(OUT, "season.js")))
     html = html.replace("</body>", '<script src="/season.js" defer></script></body>');
-  /* интро для новичков: стили - в <head> (прячут сайт до первой отрисовки), скрипт - в конце */
-  if (introPage(from) && !html.includes("intro.js")) {
-    html = html.replace("</head>", '<link rel="stylesheet" href="/intro.css">\n</head>');
+  /* интро для новичков: стили подключает встроенный скрипт в <head> (INTRO_FLAG), скрипт - в конце */
+  if (introPage(from) && !html.includes("intro.js"))
     html = html.replace("</body>", '<script src="/intro.js" defer></script></body>');
-  }
   return html;
 }
 
@@ -717,6 +815,14 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
     .replace(/(<link\b[^>]*?\shref=")([^"]+)(")/g, (m, a, u, b) => a + version(u, name) + b)
     .replace(/(<script\b[^>]*?\ssrc=")([^"]+)(")/g, (m, a, u, b) => a + version(u, name) + b)
     .replace(/(<img\b[^>]*?\ssrc=")(\/(?:assets|guide-img)\/[^"]+)(")/g, (m, a, u, b) => a + version(u, name) + b)
+    /* картинка превью для соцсетей: ?v=<хэш файла> вместо ручного ?v=3 - после замены картинки превью обновится само */
+    .replace(
+      /(<meta (?:property="og:image(?::secure_url)?|name="twitter:image|name="vk:image)" content="|<link rel="image_src" href=")([^"?]+)(?:\?[^"]*)?"/g,
+      (m, a, u) => {
+        const rel = u.startsWith(SITE + "/") ? u.slice(SITE.length + 1) : null;
+        return a + (rel && fs.existsSync(path.join(OUT, rel)) ? SITE + "/" + rel + "?v=" + fileHash(rel) : u) + '"';
+      }
+    )
     .replace(/(<img\b[^>]*?\ssrcset=")([^"]+)(")/g, (m, a, list, b) => {
       const out = list.split(/,\s*/).map(c => {
         const [u, w] = c.trim().split(/\s+/);

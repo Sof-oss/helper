@@ -79,3 +79,10 @@ test("шапка гайда, описание и обложка", () => {
   assert.equal(excerpt(body), "Первый абзац.");
   assert.equal(firstImage(body), "img-1.webp");
 });
+
+test("ссылка с именем сайта в параметрах остаётся внешней", () => {
+  const html = render("[x](https://evil.example/?heart-of-the-zone.ru)", { siteHost: "heart-of-the-zone.ru" });
+  assert.match(html, /rel="noopener nofollow ugc"/);
+  const own = render("[x](https://www.heart-of-the-zone.ru/top100)", { siteHost: "heart-of-the-zone.ru" });
+  assert.doesNotMatch(own, /nofollow/);
+});

@@ -5844,7 +5844,7 @@ th.top100-sort {
 }
 .site-footer > span {
   font-size: var(--fs-md);
-  opacity: 0.38;
+  opacity: 0.62;
   color: #9aa6b0;
 }
 @media (max-width: 1000px) {
@@ -7452,6 +7452,20 @@ main.content.page-narrow {
 }
 .ich-y span {
   top: 0;
+}
+/* единица оси («млн», «тыс.») - в углу под осью вместо нуля, на одной строке с подписями уровней; верхняя подпись - конец кривой */
+.ich-y .ich-unit {
+  top: auto;
+  bottom: -20px;
+  transform: none;
+  margin-top: 0;
+  color: #8fa3b3;
+}
+.ich-y .ich-y-top {
+  color: #8fa3b3;
+}
+.ich-grid .ich-grid-top {
+  stroke-dasharray: 6 8;
 }
 .ich-x {
   position: absolute;
