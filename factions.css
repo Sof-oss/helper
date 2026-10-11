@@ -305,7 +305,10 @@
     border-color 0.15s,
     background 0.15s;
 }
-.fx-btn:hover {
+.fx-btn-plain {
+  cursor: default;
+}
+.fx-btn:not(.fx-btn-plain):hover {
   border-color: var(--fx);
   background: color-mix(in srgb, var(--fx) 12%, transparent);
 }

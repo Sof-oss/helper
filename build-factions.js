@@ -188,8 +188,13 @@ module.exports = function factionsMarkup(ROOT) {
           .replace(/^@+/, "")
           .trim()
       ])
-      .filter(([u, n]) => u && n)
-      .map(([u, n]) => '<a class="fx-btn" href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(n) + "</a>");
+      .filter(([, n]) => n)
+      /* контакт без ссылки (url не указан) - просто имя, без перехода */
+      .map(([u, n]) =>
+        u
+          ? '<a class="fx-btn" href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(n) + "</a>"
+          : '<span class="fx-btn fx-btn-plain">' + esc(n) + "</span>"
+      );
     const linksHtml =
       contacts.length || (post && !add.recruit)
         ? '<div class="fx-links">' +
