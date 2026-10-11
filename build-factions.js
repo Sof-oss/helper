@@ -70,6 +70,14 @@ function shield(name, color) {
 }
 
 module.exports = function factionsMarkup(ROOT) {
+  /* фото базы для карточки - assets/bg-<тема>-card.webp (720×260, кадр из фона темы), с ?v=<хэш>, как у остальных картинок.
+     У группировок без темы фото нет - вместо него подсветка цветом группировки (.fx-bg-tint) */
+  const cardBg = key => {
+    const f = path.join(ROOT, "assets", "bg-" + key + "-card.webp");
+    if (!fs.existsSync(f)) return "";
+    const v = require("crypto").createHash("md5").update(fs.readFileSync(f)).digest("hex").slice(0, 8);
+    return "/assets/bg-" + key + "-card.webp?v=" + v;
+  };
   const clansFile = readJson(path.join(ROOT, "top100", "clans.json"), { clans: [] });
   const data = readJson(path.join(ROOT, "top100-players.json"));
   const colors = readJson(path.join(ROOT, "top100", "factions.json"), {});
@@ -234,11 +242,9 @@ module.exports = function factionsMarkup(ROOT) {
       '" style="--fx:' +
       esc(color) +
       '">' +
-      (key
-        ? '<span class="fx-bg" style="background-image:url(/assets/bg-' +
-          key +
-          '-thumb.webp)" aria-hidden="true"></span>'
-        : "") +
+      (key && cardBg(key)
+        ? '<span class="fx-bg" style="background-image:url(' + cardBg(key) + ')" aria-hidden="true"></span>'
+        : '<span class="fx-bg fx-bg-tint" aria-hidden="true"></span>') +
       '<header class="fx-head"><span class="fx-emblem">' +
       emblem +
       '</span><div><h2><a href="#' +

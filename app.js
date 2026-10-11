@@ -1011,7 +1011,7 @@ function renderArsenal() {
     if (document.activeElement !== inp && inp.value !== val) inp.value = val;
     $("arsPer-" + w.key).textContent =
       fmt(w.avg) + " урона за удар" + (w.chance > 0 ? " · крит " + (w.chance * 100).toFixed(0) + "%" : "");
-    $("arsShare-" + w.key).textContent = total > 0 ? Math.round((dmg / total) * 100) + "% от общего" : "—";
+    $("arsShare-" + w.key).textContent = total > 0 ? Math.round((dmg / total) * 100) + "% от общего" : "-";
     $("arsDmg-" + w.key).textContent = fmt(dmg);
     if (dmg > 0) {
       const to = deg + (dmg / total) * 360;

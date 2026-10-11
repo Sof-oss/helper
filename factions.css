@@ -135,16 +135,45 @@
     0 0 0 2px var(--fx),
     0 0 24px color-mix(in srgb, var(--fx) 30%, transparent);
 }
-/* фото базы группировки (как фон темы) - тихо в верхней части карточки */
+/* фото базы группировки (кадр из фона темы) в верхней части карточки: заметное за шапкой с шевроном и названием,
+   к девизу и лидеру плавно уходит в тёмное. Слева - затемнение под текст, чтобы название читалось и на светлом
+   закате. Без фото (группировка без темы) - мягкая подсветка цветом группировки */
 .fx-bg {
   position: absolute;
   inset: 0 0 auto;
-  height: 120px;
+  height: 180px;
   background: center/cover no-repeat;
-  opacity: 0.22;
-  -webkit-mask-image: linear-gradient(180deg, #000, transparent);
-  mask-image: linear-gradient(180deg, #000, transparent);
+  opacity: 0.6;
+  -webkit-mask-image: linear-gradient(180deg, #000 35%, transparent);
+  mask-image: linear-gradient(180deg, #000 35%, transparent);
   pointer-events: none;
+  transition:
+    opacity 0.3s,
+    transform 0.5s ease;
+}
+.fx-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(5, 8, 11, 0.7), rgba(5, 8, 11, 0.25) 60%, rgba(5, 8, 11, 0.05));
+}
+.fx-bg-tint {
+  height: 140px;
+  opacity: 1;
+  background: radial-gradient(120% 100% at 15% 0%, color-mix(in srgb, var(--fx) 26%, transparent), transparent 70%);
+}
+.fx-bg-tint::after {
+  content: none;
+}
+.fx-head h2,
+.fx-meta {
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .fx-card:hover .fx-bg:not(.fx-bg-tint) {
+    opacity: 0.75;
+    transform: scale(1.04);
+  }
 }
 .fx-card > :not(.fx-bg) {
   position: relative;

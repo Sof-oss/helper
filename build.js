@@ -1102,6 +1102,25 @@ if (fs.existsSync(smSrc)) {
         .join("");
   fs.writeFileSync(path.join(OUT, "sitemap.xml"), sm.replace("</urlset>", extra + "</urlset>"));
 }
+/* ---------- тире ----------
+   На сайте везде обычный дефис «-», а не длинное тире «—»: всё, что попало в dist (страницы, скрипты, данные,
+   новости, гайды, тексты группировок), проходит через замену - и «—», и &mdash;. Стоит до CSP: хэши встроенных
+   скриптов считаются уже по исправленному тексту */
+{
+  const fix = s => s.replace(/\u2014|&mdash;|&#8212;|&#x2014;/gi, "-");
+  const walk = dir => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const f = path.join(dir, e.name);
+      if (e.isDirectory()) walk(f);
+      else if (/\.(html|js|mjs|json|css|xml|webmanifest|txt|md)$/i.test(e.name)) {
+        const src = fs.readFileSync(f, "utf8");
+        const out = fix(src);
+        if (out !== src) fs.writeFileSync(f, out);
+      }
+    }
+  };
+  walk(OUT);
+}
 /* ---------- Content-Security-Policy ----------
    GitHub Pages не умеет свои заголовки, поэтому политика - <meta http-equiv> в каждой странице. Встроенные
    <script> разрешены по sha256 их текста (хэши считаются здесь, после всех правок HTML), чужие скрипты запрещены.
