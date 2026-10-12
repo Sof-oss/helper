@@ -1,14 +1,14 @@
 {
-  "updated": "2026-10-11T12:05:36+03:00",
+  "updated": "2026-10-12T12:12:42+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
       "name": "Бандиты",
       "level": 1,
-      "members": 1,
+      "members": 2,
       "leader": {
         "id": 3178,
-        "name": "Шулер"
+        "name": "«Братва» Изверг"
       }
     },
     {
@@ -23,10 +23,10 @@
     {
       "name": "Ренегаты",
       "level": 1,
-      "members": 6,
+      "members": 1,
       "leader": {
         "id": 3085,
-        "name": "«Ренегаты» Шпала"
+        "name": "Шпала"
       }
     },
     {
@@ -94,7 +94,7 @@
     },
     {
       "name": "Учёные",
-      "level": 1,
+      "level": 2,
       "members": 19,
       "leader": {
         "id": 1223,
@@ -112,8 +112,8 @@
     },
     {
       "name": "Долг",
-      "level": 1,
-      "members": 20,
+      "level": 2,
+      "members": 21,
       "leader": {
         "id": 1253,
         "name": "🛡Д.О.Л.Г🛡 Акер"
@@ -121,8 +121,8 @@
     },
     {
       "name": "Вольные сталкеры",
-      "level": 1,
-      "members": 20,
+      "level": 2,
+      "members": 25,
       "leader": {
         "id": 1141,
         "name": "[Вольный сталкер] Фунт"
