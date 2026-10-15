@@ -1,11 +1,11 @@
 {
-  "updated": "2026-10-14T12:51:34+03:00",
+  "updated": "2026-10-15T12:26:31+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
       "name": "Бандиты",
       "level": 1,
-      "members": 4,
+      "members": 6,
       "leader": {
         "id": 3178,
         "name": "«Братва» Изверг"
@@ -41,7 +41,7 @@
     {
       "name": "Торговцы",
       "level": 1,
-      "members": 16,
+      "members": 17,
       "leader": {
         "id": 1789,
         "name": "Клык"
@@ -50,7 +50,7 @@
     {
       "name": "Ассасины",
       "level": 1,
-      "members": 3,
+      "members": 4,
       "leader": {
         "id": 269,
         "name": "Ассасин Дмитрий Василенков"
@@ -104,7 +104,7 @@
     {
       "name": "Долг",
       "level": 2,
-      "members": 22,
+      "members": 23,
       "leader": {
         "id": 1253,
         "name": "🛡Д.О.Л.Г🛡 Акер"
@@ -122,7 +122,7 @@
     {
       "name": "Свобода",
       "level": 1,
-      "members": 19,
+      "members": 20,
       "leader": {
         "id": 388,
         "name": "«Cвобода» Чехов"
