@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-15T12:26:31+03:00",
+  "updated": "2026-10-16T13:37:05+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
@@ -41,7 +41,7 @@
     {
       "name": "Торговцы",
       "level": 1,
-      "members": 17,
+      "members": 18,
       "leader": {
         "id": 1789,
         "name": "Клык"
@@ -86,7 +86,7 @@
     {
       "name": "Учёные",
       "level": 2,
-      "members": 20,
+      "members": 22,
       "leader": {
         "id": 1223,
         "name": "\"Учёные\"  СаХаРоК"
@@ -122,7 +122,7 @@
     {
       "name": "Свобода",
       "level": 1,
-      "members": 20,
+      "members": 19,
       "leader": {
         "id": 388,
         "name": "«Cвобода» Чехов"
