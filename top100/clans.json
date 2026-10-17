@@ -1,11 +1,11 @@
 {
-  "updated": "2026-10-16T13:37:05+03:00",
+  "updated": "2026-10-17T12:02:47+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
       "name": "Бандиты",
       "level": 1,
-      "members": 6,
+      "members": 7,
       "leader": {
         "id": 3178,
         "name": "«Братва» Изверг"
@@ -41,7 +41,7 @@
     {
       "name": "Торговцы",
       "level": 1,
-      "members": 18,
+      "members": 19,
       "leader": {
         "id": 1789,
         "name": "Клык"
@@ -86,7 +86,7 @@
     {
       "name": "Учёные",
       "level": 2,
-      "members": 22,
+      "members": 23,
       "leader": {
         "id": 1223,
         "name": "\"Учёные\"  СаХаРоК"
@@ -104,7 +104,7 @@
     {
       "name": "Долг",
       "level": 2,
-      "members": 23,
+      "members": 24,
       "leader": {
         "id": 1253,
         "name": "🛡Д.О.Л.Г🛡 Акер"
