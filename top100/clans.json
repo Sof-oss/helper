@@ -1,11 +1,20 @@
 {
-  "updated": "2026-10-19T12:08:02+03:00",
+  "updated": "2026-10-20T12:01:58+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
+      "name": "1709",
+      "level": 1,
+      "members": 2,
+      "leader": {
+        "id": 3942,
+        "name": "|1709| РуSSкиЙ"
+      }
+    },
+    {
       "name": "Бандиты",
       "level": 1,
-      "members": 8,
+      "members": 10,
       "leader": {
         "id": 3178,
         "name": "«Братва» Изверг"
@@ -122,7 +131,7 @@
     {
       "name": "Свобода",
       "level": 2,
-      "members": 21,
+      "members": 22,
       "leader": {
         "id": 388,
         "name": "«Cвобода» Чехов"
