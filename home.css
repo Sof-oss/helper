@@ -551,6 +551,8 @@ html.tour-seen .home-hero .tour-start {
   bottom: 12px;
 }
 .zone-news:not(.open) .zn-compact .zn-text,
+.zone-news:not(.open) .zn-compact .zn-points,
+.zone-news:not(.open) .zn-compact .zn-shots,
 .zone-news:not(.open) .zn-compact .zn-event {
   display: none;
 }
@@ -608,6 +610,175 @@ html.tour-seen .home-hero .tour-start {
   font-size: 14px;
   line-height: 1.45;
   color: #b4bec7;
+}
+/* подробности новости (news.js: points) - короткий список с жёлтыми маркерами */
+.zn-points {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: #b4bec7;
+}
+.zn-points li {
+  position: relative;
+  padding-left: 14px;
+}
+.zn-points li + li {
+  margin-top: 4px;
+}
+.zn-points li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 0.6em;
+  width: 5px;
+  height: 5px;
+  background: var(--zn);
+  opacity: 0.8;
+}
+/* скриншоты новости (news.js: shots) - превью в ряд, по клику открываются крупно */
+.zn-shots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+.zn-shot {
+  position: relative;
+  display: block;
+  padding: 0;
+  border: 1px solid rgba(140, 170, 220, 0.22);
+  border-radius: 3px;
+  overflow: hidden;
+  background: #0b0e12;
+  aspect-ratio: 16 / 10;
+  cursor: zoom-in;
+}
+.zn-shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition:
+    transform 0.25s,
+    filter 0.25s;
+}
+.zn-shot-zoom {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.65);
+  color: var(--zn);
+}
+.zn-shot-zoom svg,
+.zn-lb-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.zn-shot:hover,
+.zn-shot:focus-visible {
+  border-color: color-mix(in srgb, var(--zn) 70%, transparent);
+}
+.zn-shot:hover img,
+.zn-shot:focus-visible img {
+  transform: scale(1.04);
+  filter: brightness(1.1);
+}
+/* окно просмотра скриншота */
+.zn-lightbox {
+  max-width: none;
+  max-height: none;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.zn-lightbox::backdrop {
+  background: rgba(3, 5, 8, 0.88);
+}
+.zn-lightbox figure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 100%;
+  margin: 0;
+  padding: 56px 64px 24px;
+  box-sizing: border-box;
+}
+.zn-lightbox img {
+  max-width: 100%;
+  max-height: calc(100% - 40px);
+  border: 1px solid rgba(140, 170, 220, 0.25);
+  border-radius: 3px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+.zn-lb-cap {
+  font: 600 12px/1.4 var(--mono);
+  letter-spacing: 0.08em;
+  color: #b4bec7;
+  text-align: center;
+}
+.zn-lb-btn {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(140, 170, 220, 0.3);
+  border-radius: 3px;
+  background: rgba(10, 13, 17, 0.85);
+  color: #eef2f5;
+  cursor: pointer;
+}
+.zn-lb-btn:hover,
+.zn-lb-btn:focus-visible {
+  border-color: #d9a441;
+  color: #d9a441;
+}
+.zn-lb-close {
+  top: 12px;
+  right: 12px;
+}
+.zn-lb-prev,
+.zn-lb-next {
+  top: 50%;
+  transform: translateY(-50%);
+}
+.zn-lb-prev {
+  left: 12px;
+}
+.zn-lb-next {
+  right: 12px;
+}
+.zn-lb-single .zn-lb-prev,
+.zn-lb-single .zn-lb-next {
+  display: none;
+}
+@media (max-width: 760px) {
+  .zn-lightbox figure {
+    padding: 56px 8px 72px;
+  }
+  .zn-lb-prev,
+  .zn-lb-next {
+    top: auto;
+    bottom: 14px;
+    transform: none;
+  }
 }
 /* промокод в тексте новости (news.js: promo/promoUrl) - моноширинная плашка-ссылка */
 .zn-promo {
