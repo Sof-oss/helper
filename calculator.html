@@ -7,7 +7,7 @@
 <script>/* тема до первой отрисовки, чтобы не мигало */(function(){try{var t=localStorage.getItem("zoneTheme");if(t)document.documentElement.dataset.theme=t}catch(e){}})();</script>
 <script>/* адрес без .html: /calculator.html -> /calculator, /index.html -> / (на GitHub Pages нет серверных переадресаций, канонический адрес указан в rel=canonical) */(function(){var p=location.pathname;if(/\.html$/.test(p))history.replaceState(null,"",p.replace(/(^|\/)index\.html$/,"$1").replace(/\.html$/,"")+location.search+location.hash)})();</script>
 <title>Сердце Зоны - Калькулятор урона</title>
-<meta name="description" content="Калькулятор урона для игры «Сердце Зоны»: оружие, снаряжение и таланты.">
+<meta name="description" content="Калькулятор урона для игры «Сердце Зоны»: урон каждого оружия с учётом уровня, снаряжения и талантов, древо талантов, расчёт по жетонам и ссылка на билд.">
 <link rel="canonical" href="https://heart-of-the-zone.ru/calculator">
 <!-- превью ссылки на сам калькулятор. Ссылки на билд ведут на /build (та же страница, её делает build.js) - там ироничное превью «Смотри мой билд» -->
 <meta property="og:type" content="website">
@@ -36,6 +36,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <!-- свои шрифты (assets/fonts, @font-face в styles.css); Oswald нужен сразу - заголовки и меню -->
 <link rel="preload" href="assets/fonts/oswald-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/graffiti-logo.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="calculator.css">

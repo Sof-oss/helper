@@ -155,7 +155,7 @@ window.__roll = function (el, text) {
   }
 
   /* --- переключатель тем в шапке: свёрнутый значок группировки, по клику - список тем --- */
-  var header = d.querySelector(".header-inner");
+  var header = d.querySelector(".header-tools") || d.querySelector(".header-inner");
   if (header && !d.getElementById("themeSwitch")) {
     var box = d.createElement("div");
     box.className = "theme-pick";

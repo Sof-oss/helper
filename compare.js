@@ -154,7 +154,7 @@
     });
     const me = ZP.getMe();
     const P = { a: ids.a && data.players[ids.a], b: ids.b && data.players[ids.b] };
-    document.title = P.a && P.b ? P.a.n + " vs " + P.b.n + " - Сердце Зоны" : "Сравнение игроков - Сердце Зоны";
+    document.title = P.a && P.b ? P.a.n + " vs " + P.b.n + " - Сердце Зоны" : "Сердце Зоны - Сравнение игроков";
     const meta = rowsMeta();
     const score = { a: 0, b: 0 };
     const rows = { a: [], b: [] };

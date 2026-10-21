@@ -749,23 +749,28 @@ const INTRO_FLAG = () =>
   for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
     const file = path.join(OUT, name);
     const html = fs.readFileSync(file, "utf8");
-    if (html.includes("preload фона темы")) continue;
+    if (html.includes("<script>/* preload фона темы")) continue;
     const at = html.search(/<link rel="stylesheet"/);
     if (at < 0) continue;
     fs.writeFileSync(file, html.slice(0, at) + tag + (introPage(name) ? INTRO_FLAG() : "") + html.slice(at));
   }
 }
 
+/* подключён ли уже файл: ищем сам тег <script src="…/имя">, а не любое упоминание имени - иначе слово
+   «season.js» в комментарии или тексте страницы тихо выключало подключение скрипта на всём сайте */
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const hasScript = (html, file) => new RegExp("<script\\b[^>]*\\bsrc=[\"']?[^\"'>\\s]*\\b" + escRe(file)).test(html);
+
 /* ---------- PWA: manifest и service worker ----------
    На каждую страницу - ссылка на manifest.webmanifest и sw-register.js (регистрирует sw.js). В исходных html их нет,
    чтобы не повторять в каждом файле; версии ?v= они получают ниже вместе со всеми. Сам sw.js собирается в конце */
 function pwaTags(html, from) {
-  if (!html.includes('rel="manifest"')) {
+  if (!/<link\b[^>]*\brel=["']?manifest\b/.test(html)) {
     const tag = '<link rel="manifest" href="/manifest.webmanifest">\n';
     const icon = /(<link rel="apple-touch-icon"[^>]*>\n?)/;
     html = icon.test(html) ? html.replace(icon, "$1" + tag) : html.replace("</head>", tag + "</head>");
   }
-  if (!html.includes("sw-register.js")) {
+  if (!hasScript(html, "sw-register.js")) {
     if (!html.includes("</body>")) throw new Error("PWA: в " + from + " нет </body>");
     html = html.replace("</body>", '<script src="/sw-register.js" defer></script></body>');
   }
@@ -774,7 +779,7 @@ function pwaTags(html, from) {
      (у новой страницы - pagereveal, у старой - pageswap: её ошибка всплывает, когда страницу достают из кэша по «Назад»).
      Сайту это не мешает - просто подхватываем отказ. Скрипт встроенный и в <head>: событие pagereveal приходит
      до первой отрисовки, раньше любых defer-скриптов (хэш для CSP считается сам, см. csp ниже) */
-  if (!html.includes("pagereveal")) {
+  if (!/<script>[^<]*addEventListener\("pagereveal"/.test(html)) {
     const vt =
       "<script>(function(){var n=function(){},h=function(e){var t=e.viewTransition;" +
       "if(t){t.ready.catch(n);t.finished.catch(n);t.updateCallbackDone&&t.updateCallbackDone.catch(n)}};" +
@@ -786,10 +791,10 @@ function pwaTags(html, from) {
     html = html.replace(/(<meta charset="UTF-8">\n?)/, "$1" + vt);
   }
   /* сезонное оформление (season.js сам решает, включать ли его) - тоже на каждую страницу */
-  if (!html.includes("season.js") && fs.existsSync(path.join(OUT, "season.js")))
+  if (!hasScript(html, "season.js") && fs.existsSync(path.join(OUT, "season.js")))
     html = html.replace("</body>", '<script src="/season.js" defer></script></body>');
   /* интро для новичков: стили подключает встроенный скрипт в <head> (INTRO_FLAG), скрипт - в конце */
-  if (introPage(from) && !html.includes("intro.js"))
+  if (introPage(from) && !hasScript(html, "intro.js"))
     html = html.replace("</body>", '<script src="/intro.js" defer></script></body>');
   return html;
 }

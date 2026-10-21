@@ -84,7 +84,7 @@
   }
 
   function button() {
-    var header = d.querySelector(".header-inner");
+    var header = d.querySelector(".header-tools") || d.querySelector(".header-inner");
     if (!header || d.getElementById("hwToggle")) return;
     var box = d.createElement("div");
     box.className = "hw-switch";

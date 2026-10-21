@@ -16,6 +16,8 @@ body {
 /* якоря (#…) не прячутся под прилипшей шапкой */
 html {
   scroll-padding-top: 84px;
+  /* место под полосу прокрутки есть всегда: на коротких страницах (Гайды, Сравнение) шапка не съезжает на 8 px */
+  scrollbar-gutter: stable;
 }
 @supports (overflow-x: clip) {
   html,
@@ -278,7 +280,9 @@ body::before {
   src: url("assets/fonts/graffiti-logo.woff2") format("woff2");
   font-weight: normal;
   font-style: normal;
-  font-display: swap;
+  /* block, а не swap: файл 4 КБ и стоит в preload, а подмена запасного шрифта меняла ширину логотипа
+     и на планшетах и телефонах сдвигала соседние элементы шапки */
+  font-display: block;
 }
 .logo-title {
   font-family: "Graffiti1C", "Segoe UI", Arial, sans-serif;
@@ -5115,6 +5119,23 @@ input[type="number"]:focus,
 ::view-transition-new(root) {
   animation: none;
 }
+/* переключатели в шапке (тема, Хэллоуин) добавляют defer-скрипты, а снимок новой страницы браузер делает раньше -
+   на нём кнопок ещё нет, и при каждом переходе они пропадали и появлялись заново. Поэтому у блока кнопок свой
+   снимок: до конца перехода виден старый (кнопки на том же месте), новый пустой скрыт */
+.header-tools {
+  view-transition-name: header-tools;
+}
+::view-transition-group(header-tools) {
+  animation: none;
+  z-index: 101;
+}
+::view-transition-old(header-tools) {
+  animation: none;
+}
+::view-transition-new(header-tools) {
+  animation: none;
+  opacity: 0;
+}
 #top100TableWrap {
   view-transition-name: leaderboard;
 }
@@ -7809,6 +7830,58 @@ main.content.page-narrow {
 }
 .hw-switch + .theme-pick {
   margin-left: 8px;
+}
+/* контейнер переключателей есть в разметке с первого кадра и не сжимается: кнопки, которые скрипты добавляют
+   позже, не отнимают ширину у логотипа и не сдвигают меню. Ширина - тыква 40 + 8 + тема 38 */
+.header-tools {
+  margin-left: auto;
+  flex: 0 0 auto;
+  min-width: 86px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.header-tools > .hw-switch {
+  margin-left: 0;
+}
+.header-tools:empty {
+  min-height: 38px;
+}
+@media (max-width: 760px) {
+  .header-tools {
+    min-width: 84px;
+  }
+}
+/* 1101–1366 px: логотип шириной 315 px с меню и переключателями не помещается, и флекс сжимал его так,
+   что «Сердце Зоны» переносилось в две строки. Здесь логотип по ширине содержимого и в одну строку */
+@media (min-width: 1101px) and (max-width: 1366px) {
+  .header-inner {
+    gap: 22px;
+  }
+  .logo {
+    width: auto;
+    flex-shrink: 0;
+  }
+  .logo-title {
+    white-space: nowrap;
+  }
+}
+/* 1101–1260 px: логотип - как на планшете, отступы меньше, чтобы всё влезло в одну строку */
+@media (min-width: 1101px) and (max-width: 1260px) {
+  .header-inner {
+    gap: 10px;
+  }
+  .logo {
+    gap: 9px;
+  }
+  .rad-logo,
+  .rad-logo img {
+    width: 44px;
+    height: 44px;
+  }
+  .logo-title {
+    font-size: 22px;
+  }
 }
 .hw-toggle {
   position: relative;
