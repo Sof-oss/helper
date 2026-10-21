@@ -5084,21 +5084,27 @@ input[type="number"]:focus,
 }
 
 /* ---------- 9. Переходы между страницами и вкладками ----------
-   Кросс-документные View Transitions: шапка и нижнее меню получают свои имена
-   и «переезжают» на новую страницу без мигания, остальное меняется моментально
-   (анимация корня отключена - именно она раньше мигала панелями). */
+   Кросс-документные View Transitions: новая страница сменяет старую моментально (анимация корня отключена -
+   именно она раньше мигала панелями). Шапка при переходе между страницами - часть обычного снимка страницы:
+   отдельный снимок шапки растворялся (старый и новый полупрозрачные снимки - мигала вся шапка, тыква на миг
+   становилась серой) и терял размытие стекла под собой. Имя app-header шапка получает только на время
+   перехода внутри страницы (класс vt-same на <html> ставит window.__vt в ui.js) - чтобы снимки анимированных
+   таблиц не перекрыли её; и тогда она меняется мгновенно, без растворения. */
 @view-transition {
   navigation: auto;
 }
-.site-header {
+html.vt-same .site-header {
   view-transition-name: app-header;
 }
 .tabbar {
   view-transition-name: app-tabbar;
 }
-::view-transition-old(app-header),
+::view-transition-group(app-header),
 ::view-transition-new(app-header) {
-  animation-duration: 0.18s;
+  animation: none;
+}
+::view-transition-old(app-header) {
+  display: none;
 }
 /* нижнее меню не растворяется (полупрозрачные снимки старой и новой панели давали мигание
    на телефонах): старый снимок скрыт, новая панель сразу на месте */
@@ -5119,10 +5125,12 @@ input[type="number"]:focus,
 ::view-transition-new(root) {
   animation: none;
 }
-#top100TableWrap {
+/* таблицы анимируются только при смене вкладки внутри страницы: при переходе на другую страницу их снимок
+   растворялся поверх новой страницы */
+html.vt-same #top100TableWrap {
   view-transition-name: leaderboard;
 }
-#infoGroups {
+html.vt-same #infoGroups {
   view-transition-name: infogroups;
 }
 ::view-transition-old(leaderboard),
@@ -5289,14 +5297,52 @@ body::after {
     radial-gradient(1100px 520px at 50% -10%, var(--wash), transparent 70%);
 }
 
-/* ---------- R3. Шапка ---------- */
+/* ---------- R3. Шапка: жидкое стекло, как в iOS ----------
+   Лёгкая тёмная вуаль (оттенок - background-color, его и меняет .scrolled плавно) + сильное размытие
+   с насыщенностью: фон темы проступает сквозь шапку мягким цветным пятном. Объём стеклу дают блик по
+   верхней кромке, отблеск сверху вниз (background-image), светлая волосяная граница и пятна света (::before).
+   Читаемость держат тени текста меню и логотипа */
 .site-header {
   height: 76px;
-  border-bottom: 1px solid var(--line);
-  background: linear-gradient(180deg, rgba(5, 7, 9, 0.86), rgba(6, 9, 12, 0.62));
-  -webkit-backdrop-filter: blur(10px) saturate(1.1);
-  backdrop-filter: blur(10px) saturate(1.1);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(10, 14, 20, 0.2);
+  background-image: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.1) 0,
+    rgba(255, 255, 255, 0.025) 48%,
+    rgba(255, 255, 255, 0.045) 100%
+  );
+  -webkit-backdrop-filter: blur(22px) saturate(1.8) brightness(1.05);
+  backdrop-filter: blur(22px) saturate(1.8) brightness(1.05);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04),
+    0 8px 26px rgba(0, 0, 0, 0.2);
+}
+/* пятна света на стекле: блик слева сверху и отражение справа снизу; под содержимым шапки (z-index -1) */
+.site-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 160% at 14% -60%, rgba(255, 255, 255, 0.13), transparent 60%),
+    radial-gradient(45% 140% at 88% 160%, rgba(255, 255, 255, 0.07), transparent 62%);
+}
+.logo-title {
+  text-shadow:
+    0 1px 8px rgba(0, 0, 0, 0.7),
+    0 0 2px rgba(0, 0, 0, 0.5);
+}
+/* браузер без backdrop-filter: стекла не будет, поэтому вуаль плотнее - иначе текст теряется на фоне */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .site-header {
+    background-color: rgba(8, 11, 15, 0.86);
+  }
+  .site-header.scrolled {
+    background-color: rgba(8, 11, 15, 0.93);
+  }
 }
 .site-header::after {
   content: "";
@@ -5316,8 +5362,13 @@ body::after {
   );
   opacity: 0.55;
 }
+/* прокручено: под шапкой текст и таблицы - вуаль чуть плотнее, стекло остаётся прозрачным */
 .site-header.scrolled {
-  background: linear-gradient(180deg, rgba(5, 7, 9, 0.94), rgba(6, 9, 12, 0.86));
+  background-color: rgba(10, 14, 20, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+    0 10px 30px rgba(0, 0, 0, 0.32);
 }
 .header-inner {
   gap: 36px;

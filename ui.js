@@ -12,13 +12,24 @@ window.__vt = function (fn) {
   var d = document;
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (!d.startViewTransition || reduce) return fn();
-  var done = false;
+  var done = false,
+    h = d.documentElement;
+  /* vt-same - переход внутри страницы (вкладки Топ-100, «Информации»): только на это время у шапки и таблиц есть
+     view-transition-name (styles.css, раздел 9). При переходе между страницами шапка - часть обычного снимка
+     страницы и меняется мгновенно, не растворяясь */
+  var end = function () {
+    h.classList.remove("vt-same");
+  };
+  h.classList.add("vt-same");
   try {
-    d.startViewTransition(function () {
+    var t = d.startViewTransition(function () {
       done = true;
       fn();
     });
+    if (t && t.finished) t.finished.then(end, end);
+    else end();
   } catch (e) {
+    end();
     if (!done) fn();
   }
 };
