@@ -1,0 +1,36 @@
+From 89aaff86bda5a114860afddbce97385cdf92d8d8 Mon Sep 17 00:00:00 2001
+From: agent <a@a>
+Date: Wed, 21 Oct 2026 08:16:00 +0000
+Subject: [PATCH] =?UTF-8?q?=D0=9D=D0=BE=D0=B2=D0=BE=D1=81=D1=82=D0=B8=20?=
+ =?UTF-8?q?=D0=97=D0=BE=D0=BD=D1=8B:=203=20000=20=D1=83=D1=87=D0=B0=D1=81?=
+ =?UTF-8?q?=D1=82=D0=BD=D0=B8=D0=BA=D0=BE=D0=B2=20=D0=B8=20=D1=80=D0=BE?=
+ =?UTF-8?q?=D0=B7=D1=8B=D0=B3=D1=80=D1=8B=D1=88=20=D0=B6=D0=B5=D1=82=D0=BE?=
+ =?UTF-8?q?=D0=BD=D0=BE=D0=B2?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+---
+ news.js | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/news.js b/news.js
+index 0cdfcbd..f73d195 100644
+--- a/news.js
++++ b/news.js
+@@ -8,6 +8,12 @@
+    event - баннер над новостью: "halloween" (ивент), "update" (слухи об обновлении) или "release" (обновление вышло); можно не указывать
+    На главной видно 3 последние новости, остальные - по кнопке «Все новости». */
+ window.ZONE_NEWS = [
++  {
++    date: "2026-10-14",
++    title: "Нас уже 3 000! Розыгрыш жетонов",
++    text: "7 случайных сталкеров получат по 400 жетонов: лайк и репост поста. Итоги - 14 ноября",
++    url: "https://vk.ru/wall-239092289_278"
++  },
+   {
+     date: "2026-10-11",
+     title: "Вышло обновление: Арена и характеристики сталкера",
+-- 
+2.49.0
+
