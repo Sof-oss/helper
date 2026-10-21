@@ -5,14 +5,17 @@
    text  - пара слов о сути (до ~120 символов)
    url   - ссылка на пост ВК (кнопка «Читать в ВК»); можно не указывать - тогда кнопки нет
    promo, promoUrl - промокод из текста и ссылка на него: код в тексте станет кликабельным; можно не указывать
-   event - баннер над новостью: "halloween" (ивент), "update" (слухи об обновлении) или "release" (обновление вышло); можно не указывать
-   На главной видно 3 последние новости, остальные - по кнопке «Все новости». */
+   event - баннер над новостью: "halloween" (ивент), "update" (слухи об обновлении), "release" (обновление вышло)
+           или "giveaway" (розыгрыш); можно не указывать
+   На главной видно 3 последние новости: первая целиком, следующие две - строкой (дата и заголовок),
+   остальные - по кнопке «Все новости». */
 window.ZONE_NEWS = [
   {
     date: "2026-10-14",
     title: "Нас уже 3 000! Розыгрыш жетонов",
     text: "7 случайных сталкеров получат по 400 жетонов: лайк и репост поста. Итоги - 14 ноября",
-    url: "https://vk.ru/wall-239092289_278"
+    url: "https://vk.ru/wall-239092289_278",
+    event: "giveaway"
   },
   {
     date: "2026-10-11",
@@ -47,7 +50,8 @@ window.ZONE_NEWS = [
   const root = document.getElementById("zoneNews");
   const list = Array.isArray(window.ZONE_NEWS) ? window.ZONE_NEWS.filter(n => n && n.title) : [];
   if (!root || !list.length) return;
-  const SHOW = 1,
+  const FULL = 1,
+    SHOW = 3,
     FRESH_DAYS = 3;
   const MONTHS = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -68,7 +72,10 @@ window.ZONE_NEWS = [
       '<div class="zn-event zn-ev-update" aria-hidden="true"><img src="/assets/event-update-600.webp" srcset="/assets/event-update-600.webp 600w, /assets/event-update-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>Слухи</span></div>',
     /* обновление вышло: та же картинка, метка «Вышло» зелёного цвета */
     release:
-      '<div class="zn-event zn-ev-update zn-ev-release" aria-hidden="true"><img src="/assets/event-update-600.webp" srcset="/assets/event-update-600.webp 600w, /assets/event-update-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>Вышло</span></div>'
+      '<div class="zn-event zn-ev-update zn-ev-release" aria-hidden="true"><img src="/assets/event-update-600.webp" srcset="/assets/event-update-600.webp 600w, /assets/event-update-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>Вышло</span></div>',
+    /* розыгрыш: сталкеры у костра и кейс с жетонами, золотая метка «Розыгрыш» */
+    giveaway:
+      '<div class="zn-event zn-ev-giveaway" aria-hidden="true"><img src="/assets/event-giveaway-600.webp" srcset="/assets/event-giveaway-600.webp 600w, /assets/event-giveaway-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>Розыгрыш</span></div>'
   };
   /* промокод в тексте - ссылка, по которой он активируется в игре */
   const promo = n => {
@@ -87,7 +94,7 @@ window.ZONE_NEWS = [
   };
   const item = (n, i) =>
     '<li class="zn-item' +
-    (i >= SHOW ? " zn-more" : "") +
+    (i >= SHOW ? " zn-more" : i >= FULL ? " zn-compact" : "") +
     '">' +
     (EVENTS[n.event] || "") +
     '<div class="zn-meta"><time datetime="' +

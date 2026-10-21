@@ -539,6 +539,43 @@ html.tour-seen .home-hero .tour-start {
 .zone-news:not(.open) .zn-more {
   display: none;
 }
+/* вторая и третья новости в свёрнутом списке - одной строкой: дата, заголовок и стрелка на пост ВК */
+.zone-news:not(.open) .zn-compact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0 10px 14px;
+}
+.zone-news:not(.open) .zn-compact::before {
+  top: 12px;
+  bottom: 12px;
+}
+.zone-news:not(.open) .zn-compact .zn-text,
+.zone-news:not(.open) .zn-compact .zn-event {
+  display: none;
+}
+.zone-news:not(.open) .zn-compact .zn-meta {
+  flex: none;
+  min-width: 52px;
+  margin: 0;
+}
+.zone-news:not(.open) .zn-compact .zn-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.zone-news:not(.open) .zn-compact .zn-link {
+  flex: none;
+  margin: 0;
+  font-size: 0;
+  letter-spacing: 0;
+}
+.zone-news:not(.open) .zn-compact .zn-link::before {
+  display: none;
+}
 .zn-meta {
   display: flex;
   align-items: center;
@@ -1015,7 +1052,11 @@ html.tour-seen .home-hero .tour-start {
 .zn-ev-release {
   --ev: #9be36a;
 }
-.zn-ev-update img {
+.zn-ev-giveaway {
+  --ev: #f0c25a;
+}
+.zn-ev-update img,
+.zn-ev-giveaway img {
   filter: brightness(1.15) contrast(1.05);
 }
 .zn-ev-dot {
