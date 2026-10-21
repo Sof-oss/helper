@@ -151,11 +151,17 @@ window.ZONE_NEWS = [
       "</div>"
     );
   };
+  /* баннер новости: по клику (или Enter) открывается крупно в том же окне просмотра, что и скриншоты */
+  const banner = n =>
+    (EVENTS[n.event] || "").replace(
+      ' aria-hidden="true">',
+      ' role="button" tabindex="0" data-alt="' + esc(n.title) + '" aria-label="Открыть баннер: ' + esc(n.title) + '">'
+    );
   const item = (n, i) =>
     '<li class="zn-item' +
     (i >= SHOW ? " zn-more" : i >= FULL ? " zn-compact" : "") +
     '">' +
-    (EVENTS[n.event] || "") +
+    banner(n) +
     '<div class="zn-meta"><time datetime="' +
     esc(n.date) +
     '">' +
@@ -196,7 +202,8 @@ window.ZONE_NEWS = [
       btn.querySelector("span").textContent = open ? "Свернуть" : "Все новости";
     });
 
-  /* окно просмотра скриншота: Esc или клик мимо картинки - закрыть, стрелки - соседний скриншот этой новости */
+  /* окно просмотра баннера и скриншотов: Esc или клик мимо картинки - закрыть,
+     стрелки - соседняя картинка этой же новости (баннер, затем скриншоты) */
   if (!root.addEventListener || !document.createElement) return;
   let box = null,
     group = [],
@@ -205,10 +212,10 @@ window.ZONE_NEWS = [
     at = (k + group.length) % group.length;
     const b = group[at];
     const img = box.querySelector("img");
-    img.src = b.dataset.src;
-    img.alt = b.dataset.alt;
+    img.src = b.src;
+    img.alt = b.alt;
     box.querySelector(".zn-lb-cap").textContent =
-      b.dataset.alt + (group.length > 1 ? "  ·  " + (at + 1) + " / " + group.length : "");
+      b.alt + (group.length > 1 ? "  ·  " + (at + 1) + " / " + group.length : "");
     box.classList.toggle("zn-lb-single", group.length < 2);
   };
   const make = () => {
@@ -231,13 +238,30 @@ window.ZONE_NEWS = [
       if (e.key === "ArrowRight") show(at + 1);
     });
   };
-  root.addEventListener("click", e => {
-    const b = e.target.closest && e.target.closest(".zn-shot");
-    if (!b) return;
+  /* у баннера берём самую крупную картинку из srcset */
+  const big = img => (img.srcset ? img.srcset.split(",").pop().trim().split(" ")[0] : img.src);
+  const open = el => {
+    const news = el.closest(".zn-item");
+    const items = [...news.querySelectorAll(".zn-event[role=button], .zn-shot")];
+    group = items.map(x =>
+      x.classList.contains("zn-shot")
+        ? { src: x.dataset.src, alt: x.dataset.alt }
+        : { src: big(x.querySelector("img")), alt: x.dataset.alt }
+    );
     if (!box) make();
-    group = [...b.parentNode.querySelectorAll(".zn-shot")];
-    show(+b.dataset.k);
+    show(items.indexOf(el));
     if (box.showModal) box.showModal();
     else box.setAttribute("open", "");
+  };
+  const target = e => e.target.closest && e.target.closest(".zn-shot, .zn-event[role=button]");
+  root.addEventListener("click", e => {
+    const el = target(e);
+    if (el) open(el);
+  });
+  root.addEventListener("keydown", e => {
+    const el = (e.key === "Enter" || e.key === " ") && target(e);
+    if (!el || el.classList.contains("zn-shot")) return;
+    e.preventDefault();
+    open(el);
   });
 })();
