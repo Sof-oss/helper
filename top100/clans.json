@@ -1,11 +1,11 @@
 {
-  "updated": "2026-10-20T12:01:58+03:00",
+  "updated": "2026-10-21T12:02:07+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
       "name": "1709",
       "level": 1,
-      "members": 2,
+      "members": 4,
       "leader": {
         "id": 3942,
         "name": "|1709| РуSSкиЙ"
@@ -14,7 +14,7 @@
     {
       "name": "Бандиты",
       "level": 1,
-      "members": 10,
+      "members": 7,
       "leader": {
         "id": 3178,
         "name": "«Братва» Изверг"
@@ -95,7 +95,7 @@
     {
       "name": "Учёные",
       "level": 2,
-      "members": 25,
+      "members": 24,
       "leader": {
         "id": 1223,
         "name": "\"Учёные\"  СаХаРоК"
