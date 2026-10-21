@@ -146,6 +146,13 @@ window.__roll = function (el, text) {
       if (nm) nm.textContent = t.label;
       tgl.setAttribute("title", "Тема: " + t.label);
       tgl.setAttribute("aria-label", "Тема интерфейса: " + t.label + ". Нажмите, чтобы выбрать другую");
+      /* встроенный скрипт шапки (partials/header.html) на следующей странице рисует значок отсюда ещё до отрисовки */
+      try {
+        localStorage.setItem(
+          "zoneThemeBadge",
+          JSON.stringify({ k: t.key, c: t.color, c2: t.color2 || t.color, l: t.label, s: emblem(t.key) })
+        );
+      } catch (e) {}
     }
     Array.prototype.forEach.call(box.querySelectorAll("[data-theme-btn]"), function (b) {
       var on = b.dataset.themeBtn === t.key;
@@ -154,25 +161,33 @@ window.__roll = function (el, text) {
     });
   }
 
-  /* --- переключатель тем в шапке: свёрнутый значок группировки, по клику - список тем --- */
+  /* --- переключатель тем в шапке: свёрнутый значок группировки, по клику - список тем ---
+     сама кнопка уже в разметке (partials/header.html), чтобы шапка не менялась после отрисовки; здесь - список и
+     обработчики. Если кнопки в разметке нет (старая страница из кэша), она создаётся как раньше */
   var header = d.querySelector(".header-tools") || d.querySelector(".header-inner");
-  if (header && !d.getElementById("themeSwitch")) {
-    var box = d.createElement("div");
-    box.className = "theme-pick";
-    box.id = "themeSwitch";
-
-    var toggle = d.createElement("button");
-    toggle.type = "button";
-    toggle.className = "theme-pick-toggle";
-    toggle.id = "themeToggle";
-    toggle.setAttribute("aria-expanded", "false");
-    toggle.setAttribute("aria-controls", "themeList");
-    toggle.setAttribute("aria-label", "Выбрать тему интерфейса");
-    toggle.innerHTML =
-      '<span class="tp-badge"><svg viewBox="0 0 64 72" aria-hidden="true"></svg></span>' +
-      '<span class="tp-text"><small>Группировка</small><b class="tp-name"></b></span>' +
-      '<svg class="tp-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
-    box.appendChild(toggle);
+  var box = d.getElementById("themeSwitch");
+  if (header && !(box && box.querySelector(".theme-list"))) {
+    var fresh = !box;
+    if (fresh) {
+      box = d.createElement("div");
+      box.className = "theme-pick";
+      box.id = "themeSwitch";
+    }
+    var toggle = d.getElementById("themeToggle");
+    if (!toggle) {
+      toggle = d.createElement("button");
+      toggle.type = "button";
+      toggle.className = "theme-pick-toggle";
+      toggle.id = "themeToggle";
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.setAttribute("aria-controls", "themeList");
+      toggle.setAttribute("aria-label", "Выбрать тему интерфейса");
+      toggle.innerHTML =
+        '<span class="tp-badge"><svg viewBox="0 0 64 72" aria-hidden="true"></svg></span>' +
+        '<span class="tp-text"><small>Группировка</small><b class="tp-name"></b></span>' +
+        '<svg class="tp-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+      box.appendChild(toggle);
+    }
 
     var list = d.createElement("div");
     list.className = "theme-list";
@@ -238,7 +253,7 @@ window.__roll = function (el, text) {
     try {
       hintSeen = localStorage.getItem(HINT_KEY) === "1";
     } catch (e) {}
-    if (!hintSeen) box.classList.add("hint");
+    box.classList.toggle("hint", !hintSeen);
     toggle.addEventListener("click", function () {
       setOpen(!box.classList.contains("open"));
       if (box.classList.contains("hint")) {
@@ -265,7 +280,7 @@ window.__roll = function (el, text) {
     d.addEventListener("keydown", function (e) {
       if (e.key === "Escape") setOpen(false, true);
     });
-    header.appendChild(box);
+    if (fresh) header.appendChild(box);
   }
   applyTheme(current);
 

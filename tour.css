@@ -54,43 +54,7 @@
   }
 }
 
-/* значок «?» в шапке - после прохождения */
-.tour-help {
-  margin-left: auto;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  flex: 0 0 34px;
-  padding: 0;
-  border-radius: 50%;
-  cursor: pointer;
-  border: 1px solid color-mix(in srgb, var(--accent) 55%, #1d3a4f);
-  background: color-mix(in srgb, var(--accent) 14%, rgba(7, 13, 24, 0.6));
-  color: #fff;
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s,
-    transform 0.15s;
-}
-.tour-help svg {
-  width: 19px;
-  height: 19px;
-}
-.tour-help:hover {
-  transform: translateY(-1px);
-  border-color: var(--accent);
-  box-shadow:
-    0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent),
-    0 0 14px color-mix(in srgb, var(--accent) 40%, transparent);
-}
-.tour-help:focus-visible {
-  outline: 2px solid var(--accent-2, #fff);
-  outline-offset: 2px;
-}
-.tour-help + .theme-pick {
-  margin-left: 12px;
-}
+/* значок «?» в шапке - после прохождения (сама кнопка и её вид - partials/header.html и styles.css) */
 .tour-help.pending {
   opacity: 0;
   transform: scale(0.6);
@@ -114,17 +78,6 @@
     transform: scale(1);
   }
 }
-@media (max-width: 760px) {
-  .tour-help {
-    width: 32px;
-    height: 32px;
-    flex-basis: 32px;
-  }
-  .tour-help + .theme-pick {
-    margin-left: 8px;
-  }
-}
-
 /* пока идёт тур, сайт под ним не кликается (tour.js): прозрачный слой ниже подсветки и окна */
 .tour-block {
   position: fixed;

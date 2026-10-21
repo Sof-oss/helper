@@ -5119,23 +5119,6 @@ input[type="number"]:focus,
 ::view-transition-new(root) {
   animation: none;
 }
-/* переключатели в шапке (тема, Хэллоуин) добавляют defer-скрипты, а снимок новой страницы браузер делает раньше -
-   на нём кнопок ещё нет, и при каждом переходе они пропадали и появлялись заново. Поэтому у блока кнопок свой
-   снимок: до конца перехода виден старый (кнопки на том же месте), новый пустой скрыт */
-.header-tools {
-  view-transition-name: header-tools;
-}
-::view-transition-group(header-tools) {
-  animation: none;
-  z-index: 101;
-}
-::view-transition-old(header-tools) {
-  animation: none;
-}
-::view-transition-new(header-tools) {
-  animation: none;
-  opacity: 0;
-}
 #top100TableWrap {
   view-transition-name: leaderboard;
 }
@@ -7822,7 +7805,7 @@ main.content.page-narrow {
   }
 }
 
-/* ---------- переключатель сезонного оформления «Хэллоуин в Зоне» (кнопку рисует season.js) ----------
+/* ---------- переключатель сезонного оформления «Хэллоуин в Зоне» (кнопка - в partials/header.html, оживляет season.js) ----------
    тыква-фонарь: выключено - потухшая серая, включено - оранжевая с дрожащим свечным огнём внутри; меню - с паутиной */
 .hw-switch {
   position: relative;
@@ -7831,25 +7814,73 @@ main.content.page-narrow {
 .hw-switch + .theme-pick {
   margin-left: 8px;
 }
-/* контейнер переключателей есть в разметке с первого кадра и не сжимается: кнопки, которые скрипты добавляют
-   позже, не отнимают ширину у логотипа и не сдвигают меню. Ширина - тыква 40 + 8 + тема 38 */
+/* кнопки шапки (тыква, тема, «?» тура) - в разметке partials/header.html с первого кадра, скрипты (season.js, ui.js,
+   tour.js) их только оживляют. Какие видны, решает встроенный скрипт шапки до отрисовки классами на <html>:
+   hw-season - идёт сезон, tour-seen - тур уже пройден. Поэтому на всех страницах шапка одинаковая с первого кадра:
+   ничего не появляется позже, логотип и меню не сдвигаются. На страницах без тура (data-no-tour) место под «?»
+   остаётся пустым - кнопки стоят там же, где на остальных */
 .header-tools {
   margin-left: auto;
   flex: 0 0 auto;
-  min-width: 86px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  min-height: 38px;
 }
 .header-tools > .hw-switch {
   margin-left: 0;
 }
-.header-tools:empty {
-  min-height: 38px;
+.hw-switch {
+  display: none;
+}
+html.hw-season .hw-switch {
+  display: block;
+}
+.tour-help {
+  display: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  margin-left: 10px;
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, #1d3a4f);
+  background: color-mix(in srgb, var(--accent) 14%, rgba(7, 13, 24, 0.6));
+  color: #fff;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    transform 0.15s;
+}
+html.tour-seen .tour-help {
+  display: grid;
+}
+.tour-help[data-no-tour] {
+  visibility: hidden;
+}
+.tour-help svg {
+  width: 19px;
+  height: 19px;
+}
+.tour-help:hover {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent),
+    0 0 14px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.tour-help:focus-visible {
+  outline: 2px solid var(--accent-2, #fff);
+  outline-offset: 2px;
 }
 @media (max-width: 760px) {
-  .header-tools {
-    min-width: 84px;
+  .tour-help {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+    margin-left: 8px;
   }
 }
 /* 1101–1366 px: логотип шириной 315 px с меню и переключателями не помещается, и флекс сжимал его так,

@@ -83,8 +83,25 @@
         >Гайды</a
       >
     </nav>
-    <!-- место под переключатели темы и сезонного оформления: занято с первого кадра, чтобы меню не сдвигалось -->
-    <div class="header-tools"></div>
+    <!-- кнопки шапки (тыква сезонного оформления, тема, «?» тура) - в разметке с первого кадра, скрипты их только
+         оживляют. Какие из них видны, решает встроенный скрипт ниже ещё до отрисовки, поэтому при переходах между
+         страницами ничего не появляется позже и не сдвигается -->
+    <div class="header-tools">
+      <div class="hw-switch">
+        <!-- prettier-ignore -->
+        <button type="button" id="hwToggle" class="hw-toggle" aria-haspopup="true" aria-expanded="false" aria-label="Оформление «Хэллоуин в Зоне»"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="hw-t-stem" d="M12 6.2c0-1.6.6-2.8 2-3.6"/><path class="hw-t-body" d="M12 6.4c-1.4-.9-3.6-1-5.3 0C4.3 7.8 3 10.4 3 13.4 3 17.6 5.8 21 9.4 21c1 0 1.9-.3 2.6-.7.7.4 1.6.7 2.6.7 3.6 0 6.4-3.4 6.4-7.6 0-3-1.3-5.6-3.7-7-1.7-1-3.9-.9-5.3 0Z"/><path class="hw-t-face" d="M7.6 11.6 9.6 13l-2 .6zM16.4 11.6 14.4 13l2 .6zM7.8 16.2l1.5.9 1.3-.9 1.4.9 1.4-.9 1.3.9 1.5-.9"/></svg></button>
+      </div>
+      <div class="theme-pick" id="themeSwitch">
+        <!-- prettier-ignore -->
+        <button type="button" class="theme-pick-toggle" id="themeToggle" aria-expanded="false" aria-controls="themeList" aria-label="Выбрать тему интерфейса"><span class="tp-badge"><svg viewBox="0 0 64 72" aria-hidden="true"></svg></span><span class="tp-text"><small>Группировка</small><b class="tp-name"></b></span><svg class="tp-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      </div>
+      <!-- prettier-ignore -->
+      <button type="button" class="tour-help" aria-label="Подсказки по этой странице" title="Подсказки по этой странице"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9.2 9.3a2.9 2.9 0 1 1 4.3 2.5c-.9.5-1.5 1.1-1.5 2.1v.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.6" r="1.2" fill="currentColor"/></svg></button>
+    </div>
+    <!-- до первой отрисовки: тыква - только в сезон (окно сезона build.js берёт из season.js), «?» - тому, кто уже
+         прошёл тур, значок темы - из запомненного ui.js (zoneThemeBadge), активный пункт меню - по центру на узком экране -->
+    <!-- prettier-ignore -->
+    <script>(function(){var d=document,h=d.documentElement,ls=function(k){try{return localStorage.getItem(k)}catch(e){return null}};try{var S=__HW_SEASON__,n=new Date(),md=("0"+(n.getMonth()+1)).slice(-2)+"-"+("0"+n.getDate()).slice(-2);if(S.mode==="on"||(S.mode==="auto"&&(S.from<=S.to?md>=S.from&&md<=S.to:md>=S.from||md<=S.to)))h.classList.add("hw-season");if(ls("zoneTourSeen")==="1")h.classList.add("tour-seen");var box=d.getElementById("themeSwitch"),tg=d.getElementById("themeToggle");if(ls("zoneThemeHintSeen")!=="1")box.classList.add("hint");var c=JSON.parse(ls("zoneThemeBadge")||"null");if(c&&c.k===(ls("zoneTheme")||"merc")&&typeof c.s==="string"){tg.style.setProperty("--t",c.c);tg.style.setProperty("--t2",c.c2);tg.querySelector(".tp-badge svg").innerHTML=c.s;tg.querySelector(".tp-name").textContent=c.l;tg.title="Тема: "+c.l}var nav=d.querySelector(".main-nav"),a=nav&&nav.querySelector("a.active");if(a)nav.scrollLeft=a.offsetLeft-(nav.clientWidth-a.offsetWidth)/2}catch(e){}})();</script>
   </div>
 </header>
 

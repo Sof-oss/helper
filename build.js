@@ -313,9 +313,22 @@ const partial = name => {
   if (!fs.existsSync(file)) throw new Error("Нет файла partials/" + name + ".html");
   return fs.readFileSync(file, "utf8");
 };
+/* окно сезонного оформления для встроенного скрипта шапки (тыква видна с первого кадра) - из season.js,
+   чтобы оно задавалось в одном месте */
+const HW_SEASON = (() => {
+  const m = /var SEASON = (\{[^}]*\});/.exec(fs.readFileSync(path.join(ROOT, "season.js"), "utf8"));
+  if (!m) throw new Error("season.js: не найдена строка var SEASON = { … } (нужна шапке, см. partials/header.html)");
+  return m[1];
+})();
 function applyIncludes(html, from) {
+  /* «?» тура в шапке есть на каждой странице, чтобы кнопки стояли одинаково; там, где тура нет, место под ним пустое */
+  const tour = /<script\b[^>]*\bsrc=["']?[^"'>\s]*\btour\.js/.test(html);
   return html.replace(INCLUDE, (m, name, active) => {
-    let part = partial(name);
+    let part = partial(name).split("__HW_SEASON__").join(HW_SEASON);
+    if (!tour)
+      part = part
+        .split('<button type="button" class="tour-help"')
+        .join('<button type="button" class="tour-help" data-no-tour');
     if (active !== undefined) {
       const link = '<a href="' + active + '"';
       if (!part.includes(link)) throw new Error(from + ": в partials/" + name + ".html нет пункта меню " + active);

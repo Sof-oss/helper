@@ -3,6 +3,7 @@
      mode: "auto" - включается само с from по to (ММ-ДД, по часам посетителя);
      mode: "on"   - включено всегда (например, чтобы проверить);
      mode: "off"  - выключено полностью, кнопки 🎃 в шапке нет, файлы оформления не грузятся.
+   (build.js копирует эту строку во встроенный скрипт шапки - partials/header.html, - чтобы тыква была видна с первого кадра)
    Пока сезон идёт, в шапке есть кнопка 🎃 - посетитель выбирает сам: «Выкл», «Тихо» (только тыквы и
    вороны, по умолчанию), «Сезон» (всё) или «Выброс» (всё чаще + фонарик вместо курсора). Выбор запоминается в браузере.
    Само оформление - halloween.css + halloween.js, они подгружаются только когда оно включено.
@@ -85,20 +86,30 @@
 
   function button() {
     var header = d.querySelector(".header-tools") || d.querySelector(".header-inner");
-    if (!header || d.getElementById("hwToggle")) return;
-    var box = d.createElement("div");
-    box.className = "hw-switch";
-    var b = d.createElement("button");
-    b.type = "button";
-    b.id = "hwToggle";
-    b.className = "hw-toggle";
-    b.setAttribute("aria-haspopup", "true");
-    b.setAttribute("aria-expanded", "false");
-    b.setAttribute("aria-label", "Оформление «Хэллоуин в Зоне»");
-    b.innerHTML =
-      '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="hw-t-stem" d="M12 6.2c0-1.6.6-2.8 2-3.6"/>' +
-      '<path class="hw-t-body" d="M12 6.4c-1.4-.9-3.6-1-5.3 0C4.3 7.8 3 10.4 3 13.4 3 17.6 5.8 21 9.4 21c1 0 1.9-.3 2.6-.7.7.4 1.6.7 2.6.7 3.6 0 6.4-3.4 6.4-7.6 0-3-1.3-5.6-3.7-7-1.7-1-3.9-.9-5.3 0Z"/>' +
-      '<path class="hw-t-face" d="M7.6 11.6 9.6 13l-2 .6zM16.4 11.6 14.4 13l2 .6zM7.8 16.2l1.5.9 1.3-.9 1.4.9 1.4-.9 1.3.9 1.5-.9"/></svg>';
+    if (!header) return;
+    /* кнопка уже в разметке (partials/header.html), видна в сезон с первого кадра (класс hw-season на <html>
+       ставит встроенный скрипт шапки); здесь - меню и обработчики. Без кнопки в разметке - создаём, как раньше */
+    var b = d.getElementById("hwToggle"),
+      box = b && b.parentNode;
+    if (b && b.dataset.ready) return;
+    d.documentElement.classList.add("hw-season");
+    var fresh = !b;
+    if (fresh) {
+      box = d.createElement("div");
+      box.className = "hw-switch";
+      b = d.createElement("button");
+      b.type = "button";
+      b.id = "hwToggle";
+      b.className = "hw-toggle";
+      b.setAttribute("aria-haspopup", "true");
+      b.setAttribute("aria-expanded", "false");
+      b.setAttribute("aria-label", "Оформление «Хэллоуин в Зоне»");
+      b.innerHTML =
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="hw-t-stem" d="M12 6.2c0-1.6.6-2.8 2-3.6"/>' +
+        '<path class="hw-t-body" d="M12 6.4c-1.4-.9-3.6-1-5.3 0C4.3 7.8 3 10.4 3 13.4 3 17.6 5.8 21 9.4 21c1 0 1.9-.3 2.6-.7.7.4 1.6.7 2.6.7 3.6 0 6.4-3.4 6.4-7.6 0-3-1.3-5.6-3.7-7-1.7-1-3.9-.9-5.3 0Z"/>' +
+        '<path class="hw-t-face" d="M7.6 11.6 9.6 13l-2 .6zM16.4 11.6 14.4 13l2 .6zM7.8 16.2l1.5.9 1.3-.9 1.4.9 1.4-.9 1.3.9 1.5-.9"/></svg>';
+    }
+    b.dataset.ready = "1";
     var menu = d.createElement("div");
     menu.className = "hw-menu";
     menu.setAttribute("role", "menu");
@@ -144,6 +155,10 @@
         b.focus();
       }
     });
+    if (!fresh) {
+      box.appendChild(menu);
+      return;
+    }
     box.appendChild(b);
     box.appendChild(menu);
     var theme = d.getElementById("themeSwitch");

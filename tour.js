@@ -1,4 +1,4 @@
-/* Тур по сайту для новичков. Подключён на всех страницах.
+/* Тур по сайту для новичков. Подключён на всех основных страницах (у каждой есть свои шаги в STEPS).
    - Каждый шаг привязан к странице (page) и к элементам на ней (sel - селектор или список селекторов):
      тур сам переходит на нужную страницу, прокручивает к элементу и подсвечивает его, остальное затемняется.
      Если элемента нет (другая вёрстка, скрыт на телефоне), шаг просто показывается без подсветки.
@@ -17,6 +17,7 @@
     home: { name: "Знакомство", color: "#e0b83a" },
     calc: { name: "Калькулятор урона", color: "#54bfff" },
     top: { name: "Топ-100", color: "#9fdc9f" },
+    fx: { name: "Группировки", color: "#e0574f" },
     info: { name: "Информация", color: "#ffb74d" },
     guides: { name: "Гайды", color: "#c9a6ff" },
     end: { name: "Напоследок", color: "#e0b83a" }
@@ -136,6 +137,21 @@
       sel: ".t100-vs-link",
       title: "Сравнение игроков",
       text: "Два «Личных дела» рядом: кто впереди в каждом из семи рейтингов и на сколько. Сравнить можно и из карточки игрока - кнопкой «Сравнить». Ссылкой на сравнение легко поделиться."
+    },
+
+    {
+      g: "fx",
+      page: "/factions",
+      sel: ".fx-tools",
+      title: "Поиск по группировкам",
+      text: "Ищите по названию группировки или по нику бойца - у найденного бойца раскроется состав. «Только с набором» оставит группировки, которые зовут к себе."
+    },
+    {
+      g: "fx",
+      page: "/factions",
+      sel: "#factionsList > .fx-card:not([hidden])",
+      title: "Карточка группировки",
+      text: "Лидер, численность, девиз и условия набора. В «Составе» - все бойцы: нажмите на ник, и откроется карточка игрока."
     },
 
     /* «Информация»: шаги сами открывают нужный раздел (и на телефоне - вкладку внутри раздела),
@@ -263,19 +279,24 @@
   var help = null;
   function makeHelp() {
     if (help) return help;
-    var inner = d.querySelector(".header-inner");
-    if (!inner) return null;
-    help = d.createElement("button");
-    help.type = "button";
-    help.className = "tour-help";
+    /* кнопка уже в шапке (partials/header.html) и видна с первого кадра, если тур пройден (класс tour-seen на <html>
+       ставит встроенный скрипт шапки), - здесь её только показываем и оживляем. Нет в разметке - создаём, как раньше */
+    help = d.querySelector(".header-tools .tour-help");
+    if (!help) {
+      var inner = d.querySelector(".header-tools") || d.querySelector(".header-inner");
+      if (!inner) return null;
+      help = d.createElement("button");
+      help.type = "button";
+      help.className = "tour-help";
+      help.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9.2 9.3a2.9 2.9 0 1 1 4.3 2.5c-.9.5-1.5 1.1-1.5 2.1v.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.6" r="1.2" fill="currentColor"/></svg>';
+      inner.appendChild(help);
+    }
+    help.removeAttribute("data-no-tour");
+    d.documentElement.classList.add("tour-seen");
     var helpLabel = here() === "/" ? "Тур по сайту" : "Подсказки по этой странице";
     help.setAttribute("aria-label", helpLabel);
     help.title = helpLabel;
-    help.innerHTML =
-      '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9.2 9.3a2.9 2.9 0 1 1 4.3 2.5c-.9.5-1.5 1.1-1.5 2.1v.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17.6" r="1.2" fill="currentColor"/></svg>';
-    var theme = d.getElementById("themeSwitch");
-    if (theme && theme.parentNode === inner) inner.insertBefore(help, theme);
-    else inner.appendChild(help);
     /* на главной - полный тур, на остальных страницах - короткий тур только по этой странице */
     help.addEventListener("click", function () {
       if (here() === "/") start();
