@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-23T12:03:01+03:00",
+  "updated": "2026-10-24T12:02:55+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
@@ -77,7 +77,7 @@
     {
       "name": "Чистое небо",
       "level": 1,
-      "members": 10,
+      "members": 11,
       "leader": {
         "id": 1220,
         "name": "Петя кок"
@@ -113,7 +113,7 @@
     {
       "name": "Долг",
       "level": 3,
-      "members": 23,
+      "members": 24,
       "leader": {
         "id": 1253,
         "name": "🛡Д.О.Л.Г🛡 Акер"
