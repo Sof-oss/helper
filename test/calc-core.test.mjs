@@ -5,7 +5,10 @@ import { TALENTS } from "../talents.js";
 import {
   SETS,
   ITEMS,
+  ALL_ITEMS,
   clampLevel,
+  clampArena,
+  arenaBonus,
   baseDamageByLevel,
   freeBase,
   toBits,
@@ -52,14 +55,15 @@ test("урон растёт с уровнем и не убывает", () => {
 });
 
 test("ссылка на билд: туда и обратно", () => {
-  const b = { level: 42, sets: [0, 3, SETS.length - 1], items: [1, ITEMS.length - 1], talents: {} };
+  const gear = ["HEAD_001", "JACKET_001", "PANTS_001", "JACKET_003", "JACKET_016"];
+  const b = { level: 42, gear, arena: 250, talents: {} };
   b.talents[TALENTS[0][0]] = 5;
   const child = TALENTS.find(t => t[9].length === 1 && t[9][0] === TALENTS[0][0]);
   b.talents[child[0]] = 3;
   const back = parseBuild("https://heart-of-the-zone.ru/calculator#" + buildHashOf(b));
   assert.equal(back.level, 42);
-  assert.deepEqual(back.sets, b.sets);
-  assert.deepEqual(back.items, b.items);
+  assert.deepEqual(back.gear.sort(), gear.sort());
+  assert.equal(back.arena, 250);
   assert.deepEqual(back.talents, b.talents);
 });
 
@@ -69,8 +73,40 @@ test("ссылка на билд: мусор и края", () => {
   assert.equal(parseBuild("#l=12.5").level, 12);
   assert.equal(parseBuild("#l=-3").level, 1);
   assert.equal(parseBuild("#l=500").level, 100);
-  assert.equal(parseBuild("l=7&s=abc").sets.length, 0);
+  assert.equal(parseBuild("l=7&s=abc").gear.length, 0);
   assert.deepEqual(parseBuild("#t=9999").talents[TALENTS[0][0]], 5, "ранг выше 5 обрезается");
+  assert.equal(parseBuild("#a=999").arena, 500);
+  assert.equal(parseBuild("#a=-10").arena, 0);
+});
+
+test("старые ссылки с s/i читаются как вещи и новые бонусы", () => {
+  const b = parseBuild("#l=25&s=1&i=1&t=0");
+  assert.deepEqual(b.gear.sort(), ["HEAD_001", "JACKET_001", "JACKET_003", "PANTS_001"].sort());
+  assert.equal(b.arena, 0);
+  assert.equal(parseBuild("#l=25&s=1023").gear.length, 26, "все вещи первых 10 комплектов");
+});
+
+test("арена: таблица бонусов к урону", () => {
+  assert.deepEqual(arenaBonus(0), { knife: 0, pistol: 0, auto: 0, grenade: 0, gl: 0, gauss: 0 });
+  assert.deepEqual(arenaBonus(250), { knife: 5, pistol: 6, auto: 6, grenade: 6, gl: 14, gauss: 45 });
+  assert.deepEqual(arenaBonus(500), { knife: 11, pistol: 12, auto: 13, grenade: 13, gl: 28, gauss: 90 });
+  assert.equal(clampArena(900), 500);
+  assert.equal(clampArena(-1), 0);
+  assert.equal(clampArena(12.5), 13);
+  assert.equal(clampArena("12.4"), 12);
+  assert.equal(clampArena(""), 0);
+  assert.equal(clampArena("abc"), 0);
+});
+
+test("новый ивентовый комплект и разбивка по вещам", () => {
+  const set = SETS.find(s => s.code === "SET_012");
+  assert.ok(set && set.isNew);
+  assert.deepEqual(
+    set.items.map(i => i.name),
+    ["Хоккейная маска", "Потёртая куртка", "Старые джинсы"]
+  );
+  assert.equal(ALL_ITEMS.length, 36);
+  assert.ok(ITEMS.every(i => !set.items.some(x => x.code === i.code)));
 });
 
 test("таланты без выполненных требований отбрасываются", () => {

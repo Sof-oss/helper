@@ -1,10 +1,12 @@
 /* Service worker: сайт открывается без сети и ставится на телефон как приложение (manifest.webmanifest).
    Регистрирует его sw-register.js (build.js подключает его и manifest на каждую страницу).
-   build.js при сборке подставляет в dist/sw.js версию сборки и список «оболочки» - страниц и их css/js/картинок
-   с ?v=<хэш>. Новая сборка = новая версия = новый файл sw.js: браузер ставит его сам, старый кэш оболочки удаляется.
+   build.js при сборке подставляет в dist/sw.js версию и список статической оболочки - offline.html и css/js/
+   шрифтов/иконок/картинок страниц. Сами страницы и данные Топ-100 в версию и precache не входят: они меняются
+   каждый день, а оболочка должна обновляться только при правке статики. Новая версия = новый sw.js: браузер
+   ставит его сам, старый кэш оболочки удаляется.
    Стратегии:
    - страницы: сначала сеть (если сеть молчит дольше 4 с - сохранённая копия), без сети - сохранённая копия
-     или страница offline;
+     (кэшируется при первом открытии) или страница offline;
    - данные Топ-100 (top100-data.js, top100-players.json): всегда сначала сеть, кэш - только без сети;
    - файлы с ?v=, шрифты и куски 3D (/3d/*-хэш.js): из кэша, их содержимое по этому адресу не меняется;
    - остальное своё (картинки гайдов, фоны): из кэша сразу, в фоне обновляем.
@@ -19,23 +21,30 @@ const RUNTIME = "zone-runtime";
 const RUNTIME_MAX = 160;
 const NET_TIMEOUT = 4000;
 
+/* адреса с ?v= - по содержимому: их можно брать из HTTP-кэша. У остальных (offline, постеры без ?v) содержимое
+   по адресу может измениться, поэтому на установке запрашиваем свежую копию */
+const precacheRequest = u => new Request(u, { cache: /\?v=/.test(u) ? "default" : "reload" });
+
 self.addEventListener("install", e => {
   e.waitUntil(
     caches
       .open(SHELL)
-      .then(c => c.addAll(PRECACHE.map(u => new Request(u, { cache: "reload" }))))
+      .then(c => c.addAll(PRECACHE.map(precacheRequest)))
       .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener("activate", e => {
   e.waitUntil(
-    caches
-      .keys()
-      .then(keys =>
-        Promise.all(keys.filter(k => k.startsWith("zone-shell-") && k !== SHELL).map(k => caches.delete(k)))
-      )
-      .then(() => self.clients.claim())
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter(k => k.startsWith("zone-shell-") && k !== SHELL).map(k => caches.delete(k)));
+      await self.clients.claim();
+      /* страница, которая уже открыта в момент установки, не проходила через fetch SW - сохраняем её и ассеты,
+         чтобы после первого же визита раздел открывался без сети */
+      const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      await Promise.all(clients.map(c => cachePage(c.url)));
+    })()
   );
 });
 
@@ -99,6 +108,30 @@ async function cacheFirst(req) {
     trim(RUNTIME, RUNTIME_MAX);
   }
   return res;
+}
+/* сохранить страницу и её файлы с ?v= (например, картинки гайда) в кэш: для вкладок, открытых до установки SW */
+const PAGE_ASSET = /<(?:link|script|img)\b[^>]*?\s(?:href|src)="([^"]+\?v=[^"]+)"/g;
+async function cachePage(url) {
+  try {
+    const res = await fetch(url, { cache: "reload" });
+    if (!res.ok) return;
+    await put(PAGES, pageKey(new URL(url)), res.clone());
+    const html = await res.text();
+    const assets = [...html.matchAll(PAGE_ASSET)]
+      .map(m => new URL(m[1], url))
+      .filter(u => u.origin === self.location.origin);
+    /* данные Топ-100 - в DATA (их потом читает networkFirst), остальные файлы - в общий кэш */
+    const data = assets.filter(u => /^\/top100-data\.js$/.test(u.pathname));
+    const rest = assets.filter(u => !data.includes(u));
+    await Promise.all([
+      ...data.map(u =>
+        fetch(u.href)
+          .then(r => (r.ok ? put(DATA, new Request(u.href), r) : null))
+          .catch(() => {})
+      ),
+      ...rest.map(u => cacheFirst(new Request(u.href)).catch(() => {}))
+    ]);
+  } catch {}
 }
 async function staleWhileRevalidate(req, e) {
   const hit = await caches.match(req);

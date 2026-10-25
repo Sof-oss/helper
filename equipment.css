@@ -1,0 +1,543 @@
+/* Снаряжение калькулятора: кнопка и поле арены в боковой панели, окно «карта комплектов» */
+
+/* ---------- боковая панель: кнопка и характеристики арены ---------- */
+.equipment-open {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 13px;
+  border: 1px solid var(--line-strong, #2b3e50);
+  border-radius: var(--r-sm, 4px);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 16%, #0d1115), #080a0d);
+  color: #fff;
+  font:
+    600 12px/1.2 Oswald,
+    "Segoe UI",
+    sans-serif;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.equipment-open b {
+  font:
+    700 10px/1 "ZoneMono",
+    "JetBrains Mono",
+    monospace;
+  color: var(--accent, #5f8ac9);
+  white-space: nowrap;
+}
+.equipment-open:hover,
+.equipment-open:focus-visible {
+  border-color: var(--accent, #5f8ac9);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 25%, transparent);
+  outline: none;
+}
+/* ---------- характеристики арены: заметный блок ---------- */
+.arena-field {
+  --arena-ac: var(--accent, #5f8ac9);
+  --arena-ac-2: var(--accent-2, #aec8ec);
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--arena-ac) 32%, transparent);
+  border-radius: var(--r-sm, 4px);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--arena-ac) 9%, transparent), transparent 70%), rgba(4, 10, 16, 0.55);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--arena-ac-2) 12%, transparent);
+}
+.arena-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.arena-head label {
+  color: #c9d6e1;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.arena-range {
+  flex: 0 0 auto;
+  padding: 2px 4px;
+  border: 1px solid color-mix(in srgb, var(--arena-ac) 20%, rgba(255, 255, 255, 0.08));
+  border-radius: 2px;
+  color: color-mix(in srgb, var(--arena-ac-2) 55%, #77899a);
+  font:
+    700 8px/1 "ZoneMono",
+    "JetBrains Mono",
+    monospace;
+  letter-spacing: 0.06em;
+}
+.arena-control {
+  display: grid;
+  grid-template-columns: 32px 1fr 32px;
+  gap: 4px;
+  margin: 7px 0 10px;
+}
+.arena-control input {
+  width: 100%;
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid color-mix(in srgb, var(--arena-ac) 28%, #2b3e50);
+  border-radius: var(--r-sm, 4px);
+  background: #061019;
+  color: var(--arena-ac-2);
+  font:
+    700 15px "ZoneMono",
+    "JetBrains Mono",
+    monospace;
+  text-align: center;
+}
+.arena-control input:focus,
+.arena-control input:focus-visible {
+  border-color: var(--arena-ac);
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--arena-ac) 25%, transparent);
+}
+.arena-step {
+  height: 34px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--arena-ac) 28%, #2b3e50);
+  border-radius: var(--r-sm, 4px);
+  background: color-mix(in srgb, var(--arena-ac) 7%, #0a141e);
+  color: #dfe7ee;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+}
+.arena-step:hover,
+.arena-step:focus-visible {
+  border-color: var(--arena-ac);
+  background: color-mix(in srgb, var(--arena-ac) 14%, #0a141e);
+  color: var(--arena-ac-2);
+  outline: none;
+}
+.arena-step:focus-visible {
+  outline: 2px solid var(--arena-ac);
+  outline-offset: 2px;
+}
+.arena-bonus-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 6px;
+  color: var(--arena-ac-2);
+  font:
+    700 8.5px "ZoneMono",
+    "JetBrains Mono",
+    monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.arena-bonus-title::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--arena-ac);
+  box-shadow: 0 0 7px color-mix(in srgb, var(--arena-ac) 70%, transparent);
+}
+.arena-bonus {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+}
+.arena-stat {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 5px;
+  border: 1px solid color-mix(in srgb, var(--arena-ac) 16%, rgba(255, 255, 255, 0.07));
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--arena-ac) 5%, rgba(0, 0, 0, 0.2));
+}
+.arena-stat .weapon-icon {
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.55));
+}
+.arena-stat > span {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.arena-stat small {
+  overflow: hidden;
+  color: #91a5b5;
+  font-size: 8.5px;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.arena-stat b {
+  color: var(--arena-ac-2);
+  font:
+    700 12px/1 "ZoneMono",
+    "JetBrains Mono",
+    monospace;
+}
+.arena-stat.is-zero {
+  opacity: 0.38;
+}
+.arena-stat.is-zero b {
+  color: #8fa3b4;
+}
+
+/* ---------- карточки урона: отдельная колонка арены ---------- */
+.damage-card .breakdown {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 5px;
+}
+.damage-card .breakdown .bd-cell small {
+  font-family: Oswald, "Segoe UI", sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.damage-card .breakdown .bd-cell em {
+  font-size: 16px;
+}
+.damage-card .breakdown .bd-arena {
+  border-top-color: var(--accent, #5f8ac9);
+}
+.damage-card .breakdown .bd-arena em {
+  color: var(--accent-2, #aec8ec);
+}
+
+/* ---------- окно «Снаряжение и бонусы» ---------- */
+#gearInfoModal .equipment-window {
+  width: min(1320px, 96vw);
+  height: min(860px, 92vh);
+}
+#gearInfoModal .equipment-body {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.eq-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex: 0 0 auto;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #aebfce;
+  font-size: 12px;
+}
+.eq-toolbar b {
+  color: #e7eef5;
+  font-family: "ZoneMono", "JetBrains Mono", monospace;
+}
+.eq-toolbar-btns {
+  display: flex;
+  gap: 5px;
+}
+.eq-toolbar-btns button,
+.eq-set-toggle {
+  padding: 5px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.035);
+  color: #b9c9d6;
+  font:
+    700 9px "ZoneMono",
+    "JetBrains Mono",
+    monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.eq-toolbar-btns button:hover,
+.eq-toolbar-btns button:focus-visible,
+.eq-set-toggle:hover,
+.eq-set-toggle:focus-visible {
+  border-color: var(--accent, #5f8ac9);
+  color: #fff;
+  outline: none;
+}
+.eq-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px 16px;
+  scrollbar-width: thin;
+}
+.eq-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.eq-card {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(120, 160, 190, 0.22);
+  background: rgba(5, 12, 18, 0.72);
+}
+.eq-card.is-new {
+  border-color: rgba(217, 164, 65, 0.7);
+  box-shadow:
+    0 0 0 1px rgba(217, 164, 65, 0.1),
+    inset 2px 0 0 #d9a441;
+}
+.eq-card.is-new .eq-ring {
+  background: conic-gradient(#d9a441 calc(var(--p) * 1%), rgba(255, 255, 255, 0.08) 0);
+}
+.eq-card > header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.eq-card h3 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  color: #e7eef5;
+  font:
+    600 12.5px/1.2 Oswald,
+    "Segoe UI",
+    sans-serif;
+  letter-spacing: 0.02em;
+}
+.eq-ring {
+  --p: 0;
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent, #5f8ac9) calc(var(--p) * 1%), rgba(255, 255, 255, 0.08) 0);
+}
+.eq-ring::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: #09131c;
+}
+.eq-ring b {
+  position: relative;
+  color: #dfe7ee;
+  font:
+    700 10px "ZoneMono",
+    "JetBrains Mono",
+    monospace;
+}
+.eq-new {
+  flex: 0 0 auto;
+  padding: 2px 5px;
+  border-radius: 2px;
+  background: #d9a441;
+  color: #111;
+  font:
+    700 8px/1 "ZoneMono",
+    monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.eq-set-toggle {
+  flex: 0 0 auto;
+  padding: 5px 7px;
+  font-size: 8.5px;
+}
+.eq-set-toggle[aria-pressed="true"] {
+  border-color: rgba(95, 138, 201, 0.55);
+  color: var(--accent, #5f8ac9);
+}
+.eq-slots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+.eq-slot {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 2px;
+  background: rgba(0, 0, 0, 0.18);
+  color: #dfe7ee;
+  text-align: center;
+  cursor: pointer;
+}
+.eq-slot:hover {
+  border-color: rgba(95, 138, 201, 0.5);
+}
+.eq-slot:focus-visible {
+  outline: 2px solid var(--accent, #5f8ac9);
+  outline-offset: 1px;
+}
+.eq-slot.on {
+  border-color: rgba(95, 138, 201, 0.6);
+  background: rgba(95, 138, 201, 0.12);
+}
+.eq-slot:not(.on) {
+  opacity: 0.48;
+}
+.eq-slot img {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+.eq-slot b {
+  min-height: 26px;
+  color: #eef4f8;
+  font:
+    600 11px/1.2 Oswald,
+    "Segoe UI",
+    sans-serif;
+}
+.eq-slot .eq-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+.eq-chip {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  padding: 2px 5px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  color: #b3c5d4;
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.eq-chip b {
+  color: #dfe7ee;
+  font-weight: 700;
+}
+.eq-chip.is-crit b {
+  color: #e6b95c;
+}
+.eq-chip-muted {
+  color: #7f93a4;
+  border-style: dashed;
+}
+.eq-slot .eq-chip {
+  font-size: 11px;
+  padding: 3px 6px;
+  line-height: 1.35;
+}
+.eq-empty {
+  visibility: hidden;
+}
+.eq-card[data-eq-card="standalone"] {
+  grid-column: 1 / -1;
+}
+.eq-card[data-eq-card="standalone"] .eq-slots {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.eq-total-title {
+  margin-bottom: 4px;
+  color: #d9a441;
+  font:
+    700 9px "ZoneMono",
+    "JetBrains Mono",
+    monospace;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+.eq-totals {
+  flex: 0 0 auto;
+  max-height: 31%;
+  overflow: auto;
+  padding: 10px 16px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(3, 8, 12, 0.6);
+}
+.eq-total-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 4px 0;
+}
+.eq-total-row + .eq-total-row {
+  border-top: 1px dashed rgba(255, 255, 255, 0.07);
+}
+.eq-total-row > small {
+  flex: 0 0 150px;
+  color: #8fa3b4;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.4;
+}
+.eq-total-row .eq-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+.eq-total-row .eq-chip {
+  padding: 3px 6px;
+  font-size: 11px;
+}
+
+@media (max-width: 1050px) {
+  #gearInfoModal .equipment-window {
+    width: 96vw;
+  }
+  .eq-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .eq-card[data-eq-card="standalone"] .eq-slots {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  #gearInfoModal .equipment-window {
+    width: 100vw;
+    height: 100dvh;
+    border: 0;
+  }
+  .eq-grid {
+    grid-template-columns: 1fr;
+  }
+  .eq-card[data-eq-card="standalone"] .eq-slots {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .eq-toolbar {
+    padding: 8px 10px;
+    font-size: 10px;
+    flex-wrap: wrap;
+  }
+  .eq-scroll {
+    padding: 8px 10px;
+  }
+  .eq-totals {
+    max-height: 34%;
+    padding: 8px 10px 10px;
+  }
+  .eq-total-row {
+    flex-direction: column;
+    gap: 3px;
+  }
+  .eq-total-row > small {
+    flex-basis: auto;
+  }
+  .damage-card .breakdown {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 701px) and (max-width: 900px) {
+  .damage-card .breakdown {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

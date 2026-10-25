@@ -552,6 +552,8 @@
     root.hidden = true;
     if (openBtn) openBtn.setAttribute("aria-expanded", "false");
     if (location.hash === "#send") history.replaceState(null, "", location.pathname + location.search);
+    /* кнопка закрытия исчезла вместе с формой - возвращаем фокус туда, откуда форму открыли */
+    if (openBtn) openBtn.focus();
   }
   if (openBtn)
     openBtn.addEventListener("click", ev => {

@@ -1,0 +1,14 @@
+# Единые переносы строк: в репозитории и рабочей копии - LF (иначе Prettier на Windows
+# ругается на CRLF, хотя Linux CI проходит). Windows-батники требуют CRLF.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.mp4 binary
+*.webm binary

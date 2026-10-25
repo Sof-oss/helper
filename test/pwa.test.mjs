@@ -23,9 +23,12 @@ test("manifest: обязательные поля и иконки нужных �
   assert.ok(m.icons.some(i => i.sizes === "512x512"));
 });
 
-test("sw.js: метки версии и списка оболочки на месте, данные Топ-100 - сначала из сети", () => {
+test("sw.js: метки версии и статической оболочки, страницы/данные - сначала из сети", () => {
   const sw = read("sw.js").toString();
   assert.ok(sw.includes('"__SW_VERSION__"'));
   assert.ok(sw.includes('"__SW_PRECACHE__"'));
+  assert.match(sw, /precacheRequest/);
+  assert.match(sw, /cachePage/);
+  assert.match(sw, /includeUncontrolled/);
   assert.match(sw, /top100-\(\?:data\\\.js\|players\\\.json\)/);
 });

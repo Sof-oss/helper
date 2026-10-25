@@ -290,7 +290,13 @@ function centerActiveTab(smooth) {
   updateTabsFade();
 }
 function renderTop100Table() {
+  const entries = top100Entries(currentTab());
   $("top100TableWrap").innerHTML = top100TableMarkup(currentTab());
+  /* поиск и фильтр меняют таблицу без перезагрузки - сообщаем результат экранному диктору */
+  const status = $("top100Results");
+  if (status)
+    status.textContent =
+      top100Query.trim() || top100Faction ? (entries.length ? "Найдено: " + entries.length : "Никого не нашли") : "";
 }
 
 /* кнопки периодов и подпись, за какие именно даты показаны изменения.
@@ -361,7 +367,7 @@ function shortStamp(s) {
 /* поиск, период и фильтр по отрядам стоят в top100.html (место под них занято сразу, таблица не прыгает);
    если разметки нет (старая страница), вставляются между вкладками и таблицей */
 const SHELL_HTML =
-  '<div class="t100-tools"><div class="t100-period" id="top100Period" role="group" aria-label="За какой период показывать изменения" hidden><span class="t100-period-title">Изменения</span><div class="t100-period-btns" id="top100PeriodBtns"></div><p class="t100-period-range" id="top100PeriodRange" aria-live="polite"></p></div>' +
+  '<div class="t100-tools"><div class="t100-period" id="top100Period" role="group" aria-label="За какой период показывать изменения" hidden><span class="t100-period-title">Изменения</span><div class="t100-period-btns" id="top100PeriodBtns"></div><p class="t100-period-range" id="top100PeriodRange" role="status" aria-live="polite"></p></div>' +
   '<label class="t100-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="top100Search" type="search" placeholder="Найти ник" autocomplete="off" aria-label="Поиск по нику"></label>' +
   '<button type="button" class="t100-factions-toggle" id="top100FactionsToggle" aria-expanded="false" aria-controls="top100Factions">Отряды: <b id="top100FactionSummary">Все</b><svg class="t100-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
   '<div class="t100-factions" id="top100Factions"></div></div>';
@@ -370,6 +376,15 @@ function ensureShell() {
   if (shellReady) return;
   shellReady = true;
   if (!$("top100Search")) $("top100Tabs").insertAdjacentHTML("afterend", SHELL_HTML);
+  /* на старой странице без статуса поиска добавляем его после таблицы */
+  if (!$("top100Results")) {
+    const wrap = $("top100TableWrap");
+    if (wrap)
+      wrap.insertAdjacentHTML(
+        "afterend",
+        '<p class="sr-only" id="top100Results" role="status" aria-live="polite"></p>'
+      );
+  }
   $("top100Search").addEventListener("input", e => {
     top100Query = e.target.value;
     renderTop100Table();

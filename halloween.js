@@ -600,6 +600,8 @@
     if (!eggPage()) return;
     egg = el("button", "hw-egg", '<img alt="" src="' + img(pick(PUMPKINS)) + '"><span class="hw-bubble"></span>');
     egg.type = "button";
+    /* весь слой декоративный и aria-hidden; из Tab-порядка кнопку тоже убираем - мышью и пальцем она работает */
+    egg.tabIndex = -1;
     egg.setAttribute("aria-label", "Тыква");
     egg.addEventListener("click", function () {
       var page = eggPage();

@@ -65,6 +65,9 @@ body {
 :root[data-theme="clearsky"] {
   --bg-img: url("assets/bg-clearsky.webp");
 }
+:root[data-theme="bandits"] {
+  --bg-img: url("assets/bg-bandits.webp");
+}
 @media (max-width: 1366px) {
   :root {
     --bg-img: url("assets/bg-merc-1280.webp");
@@ -98,6 +101,9 @@ body {
   }
   :root[data-theme="clearsky"] {
     --bg-img: url("assets/bg-clearsky-1280.webp");
+  }
+  :root[data-theme="bandits"] {
+    --bg-img: url("assets/bg-bandits-1280.webp");
   }
 }
 @media (max-width: 760px) {
@@ -133,6 +139,9 @@ body {
   }
   :root[data-theme="clearsky"] {
     --bg-img: url("assets/bg-clearsky-m.webp");
+  }
+  :root[data-theme="bandits"] {
+    --bg-img: url("assets/bg-bandits-m.webp");
   }
 }
 /* размытая заглушка фона (32×18, ~150 байт в самом css): рисуется под фотографией сразу, пока та грузится
@@ -692,7 +701,9 @@ svg.target-icon {
 .bd-cell {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 2px;
+  text-align: center;
 }
 .bd-cell small {
   font-size: var(--fs-xs);
@@ -2784,6 +2795,9 @@ svg.target-icon {
 .dmg-bar .s3 {
   background: #27db88;
 }
+.dmg-bar .s-arena {
+  background: var(--accent, #5f8ac9);
+}
 .bd-cell {
   padding-top: 5px;
   border-top: 2px solid #a9bed0;
@@ -4201,6 +4215,20 @@ svg.target-icon {
   --panel-line: #22344a;
   --bg-dim: 0.42;
 }
+/* Бандиты: холодный бирюзовый кант с игры, сталь и кость с шеврона */
+:root[data-theme="bandits"] {
+  --accent: #62dada;
+  --accent-2: #d8cdb8;
+  --accent-3: #7f8f8c;
+  --accent-ink: #041414;
+  --glass-line: rgba(150, 225, 220, 0.2);
+  --wash: rgba(98, 218, 218, 0.13);
+  --panel: #0a1515;
+  --panel-2: #060e0e;
+  --panel-line: #1b3333;
+  --bg-dim: 0.34;
+  --bg-lq: linear-gradient(160deg, #0a1515, #060e0e);
+}
 
 /* ---------- 2. Второй цвет темы в интерфейсе ----------
    Раньше красный у учёных жил во вспышках аномалии; теперь он виден в
@@ -4631,6 +4659,9 @@ input[type="number"]:focus,
 .theme-item[data-theme-btn="clearsky"] .ti-thumb {
   background-image: url("assets/bg-clearsky-thumb.webp");
 }
+.theme-item[data-theme-btn="bandits"] .ti-thumb {
+  background-image: url("assets/bg-bandits-thumb.webp");
+}
 .theme-item:hover {
   transform: none;
   border-color: color-mix(in srgb, var(--t) 55%, transparent);
@@ -4692,7 +4723,7 @@ input[type="number"]:focus,
     width: min(330px, calc(100vw - 16px));
   }
 }
-/* групп уже десять: на низком экране список прокручивается, а не уходит под нижнее меню */
+/* групп уже больше десяти: на низком экране список прокручивается, а не уходит под нижнее меню */
 .theme-list {
   max-height: calc(100dvh - 90px - var(--tabbar-h));
   overflow-y: auto;
@@ -5986,7 +6017,7 @@ th.top100-sort {
 }
 .site-footer > span {
   font-size: var(--fs-md);
-  opacity: 0.62;
+  opacity: 0.9;
   color: #9aa6b0;
 }
 @media (max-width: 1000px) {

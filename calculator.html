@@ -7,13 +7,13 @@
 <script>/* тема до первой отрисовки, чтобы не мигало */(function(){try{var t=localStorage.getItem("zoneTheme");if(t)document.documentElement.dataset.theme=t}catch(e){}})();</script>
 <script>/* адрес без .html: /calculator.html -> /calculator, /index.html -> / (на GitHub Pages нет серверных переадресаций, канонический адрес указан в rel=canonical) */(function(){var p=location.pathname;if(/\.html$/.test(p))history.replaceState(null,"",p.replace(/(^|\/)index\.html$/,"$1").replace(/\.html$/,"")+location.search+location.hash)})();</script>
 <title>Сердце Зоны - Калькулятор урона</title>
-<meta name="description" content="Калькулятор урона для игры «Сердце Зоны»: урон каждого оружия с учётом уровня, снаряжения и талантов, древо талантов, расчёт по жетонам и ссылка на билд.">
+<meta name="description" content="Калькулятор урона для игры «Сердце Зоны»: урон каждого оружия с учётом уровня, снаряжения, арены и талантов, древо талантов, расчёт по жетонам и ссылка на билд.">
 <link rel="canonical" href="https://heart-of-the-zone.ru/calculator">
 <!-- превью ссылки на сам калькулятор. Ссылки на билд ведут на /build (та же страница, её делает build.js) - там ироничное превью «Смотри мой билд» -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Сердце Зоны">
 <meta property="og:title" content="Калькулятор урона «Сердце Зоны»">
-<meta property="og:description" content="Урон оружия за жетоны и бесплатных ударов с учётом уровня, снаряжения и талантов: древо талантов, расчёт по жетонам, ссылка на билд и сравнение.">
+<meta property="og:description" content="Урон оружия за жетоны и бесплатных ударов с учётом уровня, снаряжения, арены и талантов: древо талантов, расчёт по жетонам, ссылка на билд и сравнение.">
 <meta property="og:url" content="https://heart-of-the-zone.ru/calculator">
 <meta property="og:image" content="https://heart-of-the-zone.ru/assets/preview-calculator.jpg?v=1">
 <meta property="og:image:secure_url" content="https://heart-of-the-zone.ru/assets/preview-calculator.jpg?v=1">
@@ -24,13 +24,13 @@
 <meta property="og:locale" content="ru_RU">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Калькулятор урона «Сердце Зоны»">
-<meta name="twitter:description" content="Урон оружия за жетоны и бесплатных ударов с учётом уровня, снаряжения и талантов: древо талантов, расчёт по жетонам, ссылка на билд и сравнение.">
+<meta name="twitter:description" content="Урон оружия за жетоны и бесплатных ударов с учётом уровня, снаряжения, арены и талантов: древо талантов, расчёт по жетонам, ссылка на билд и сравнение.">
 <meta name="twitter:image" content="https://heart-of-the-zone.ru/assets/preview-calculator.jpg?v=1">
 <meta name="twitter:image:alt" content="Калькулятор урона «Сердце Зоны»">
 <meta name="vk:image" content="https://heart-of-the-zone.ru/assets/preview-calculator.jpg?v=1">
 <link rel="image_src" href="https://heart-of-the-zone.ru/assets/preview-calculator.jpg?v=1">
 <!-- структурированные данные для поисковиков: хлебные крошки и само приложение-калькулятор -->
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://heart-of-the-zone.ru/"}, {"@type": "ListItem", "position": 2, "name": "Калькулятор урона", "item": "https://heart-of-the-zone.ru/calculator"}]}, {"@type": "WebApplication", "name": "Калькулятор урона - Сердце Зоны", "url": "https://heart-of-the-zone.ru/calculator", "description": "Урон оружия за жетоны и бесплатных ударов в игре «Сердце Зоны» с учётом уровня, снаряжения и талантов: дерево талантов, расчёт жетонов на нужный урон, сравнение билдов по ссылке.", "applicationCategory": "GameApplication", "operatingSystem": "Any", "browserRequirements": "Requires JavaScript", "inLanguage": "ru-RU", "isAccessibleForFree": true, "image": "https://heart-of-the-zone.ru/assets/preview.jpg", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "RUB"}, "isPartOf": {"@type": "WebSite", "name": "Сердце Зоны", "url": "https://heart-of-the-zone.ru/"}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://heart-of-the-zone.ru/"}, {"@type": "ListItem", "position": 2, "name": "Калькулятор урона", "item": "https://heart-of-the-zone.ru/calculator"}]}, {"@type": "WebApplication", "name": "Калькулятор урона - Сердце Зоны", "url": "https://heart-of-the-zone.ru/calculator", "description": "Урон оружия за жетоны и бесплатных ударов в игре «Сердце Зоны» с учётом уровня, снаряжения, арены и талантов: дерево талантов, расчёт жетонов на нужный урон, сравнение билдов по ссылке.", "applicationCategory": "GameApplication", "operatingSystem": "Any", "browserRequirements": "Requires JavaScript", "inLanguage": "ru-RU", "isAccessibleForFree": true, "image": "https://heart-of-the-zone.ru/assets/preview.jpg", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "RUB"}, "isPartOf": {"@type": "WebSite", "name": "Сердце Зоны", "url": "https://heart-of-the-zone.ru/"}}]}</script>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -40,6 +40,7 @@
 <link rel="preload" href="assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="calculator.css">
+<link rel="stylesheet" href="equipment.css">
 
 
   <link rel="stylesheet" href="tour.css">
@@ -73,17 +74,16 @@
 <!-- «Мои билды»: содержимое рисует src/calc-slots.js, место занято заранее (calc-slots.css) -->
 <section class="side-section slots-section" id="calcSlots" aria-label="Мои билды"></section>
 <section class="side-section level-section"><div class="side-title"><svg class="person-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2.6c-3.3 0-5.6 2.7-5.6 6.2v2.3c0 1.2.6 2.3 1.6 3l-2.1 1.3C4.1 16.3 3.4 18.2 3.4 21.4h17.2c0-3.2-.7-5.1-2.5-6l-2.1-1.3c1-.7 1.6-1.8 1.6-3V8.8c0-3.5-2.3-6.2-5.6-6.2zM9.3 10.6c.5-1.7 1.5-2.6 2.7-2.6s2.2.9 2.7 2.6v.6c0 1.5-1.2 2.7-2.7 2.7s-2.7-1.2-2.7-2.7z"/></svg><b>Уровень персонажа</b></div><div class="level-row"><button type="button" data-step="level" data-dir="-1">−</button><input id="level" type="number" inputmode="numeric" aria-label="Уровень персонажа" min="1" max="100" step="1" value="1"><button type="button" data-step="level" data-dir="1">+</button></div><p class="level-hint" id="levelHint" aria-live="polite"></p></section>
+<section class="side-section equipment-section"><div class="side-title"><span class="clothes-icon" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-mask"/></svg></span><b>Снаряжение</b></div><button type="button" id="openEquipment" class="equipment-open" aria-haspopup="dialog" aria-controls="gearInfoModal">Открыть карту комплектов <b id="equipmentCount">0 / 36</b></button><div class="arena-field"><div class="arena-head"><label for="arenaPoints">Характеристики. Вложено очков:</label><span class="arena-range">0-500</span></div><div class="arena-control"><button type="button" class="arena-step" data-step="arenaPoints" data-dir="-1" aria-label="Уменьшить характеристики">−</button><input id="arenaPoints" type="number" inputmode="numeric" min="0" max="500" step="1" value="0" aria-describedby="arenaHint"><button type="button" class="arena-step" data-step="arenaPoints" data-dir="1" aria-label="Увеличить характеристики">+</button></div><div class="arena-bonus-title">Бонус к урону</div><div class="arena-bonus" id="arenaHint" aria-live="polite"></div></div></section>
 <section class="side-section talent-launcher"><div class="side-title"><span><svg class="ic" aria-hidden="true"><use href="#i-tree"/></svg></span><b>Таланты</b></div><button type="button" id="openTalents" class="talent-open"><span><svg class="ic" aria-hidden="true"><use href="#i-rank"/></svg></span><span>Открыть древо талантов</span><b id="talentPointsBadge">0 / 135</b></button><div class="talent-summary" id="talentSummary">Очки не распределены</div></section>
-<section class="side-section equipment-section"><div class="side-title"><span class="clothes-icon" aria-hidden="true"><svg class="ic" aria-hidden="true"><use href="#i-mask"/></svg></span><b>Комплекты</b><button type="button" id="openGearInfo" class="gear-info-btn" aria-label="Бонусы снаряжения" title="Бонусы снаряжения"><svg class="ic" aria-hidden="true"><use href="#i-info"/></svg><span>Бонусы</span></button></div><button type="button" id="gearToggle" class="gear-toggle" aria-expanded="false" aria-controls="sets items">Снаряжение</button><div id="sets" class="options"></div><div class="items-divider"><span>•</span><b>Одиночные вещи</b></div><div id="items" class="options"></div></section>
 <div class="side-actions">
-<label class="select-all"><input id="selectAllEquipment" type="checkbox"> <span>Выбрать всё снаряжение</span></label>
 <button type="button" class="side-btn" id="shareBuild"><svg class="ic" aria-hidden="true"><use href="#i-link"/></svg>Ссылка на билд</button>
 <button type="button" class="side-btn" id="openCompare"><svg class="ic" aria-hidden="true"><use href="#i-compare"/></svg>Сравнить</button>
 <button type="button" class="side-btn ghost" id="resetAll"><svg class="ic" aria-hidden="true"><use href="#i-reset"/></svg>Сбросить всё</button>
 </div>
 </aside>
 <div class="content">
-<noscript><section class="result-panel placeholder-panel"><p>Калькулятор считает урон оружия за жетоны и бесплатных ударов с учётом уровня, снаряжения и талантов. Для работы нужен включённый JavaScript.</p></section></noscript>
+<noscript><section class="result-panel placeholder-panel"><p>Калькулятор считает урон оружия за жетоны и бесплатных ударов с учётом уровня, снаряжения, арены и талантов. Для работы нужен включённый JavaScript.</p></section></noscript>
 <section class="result-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-ammo"/></svg></span><h2><b>Урон (оружие за жетоны)</b></h2><button type="button" id="openTokens" class="tokens-btn">Расчёт по жетонам</button></div><div class="damage-grid" id="paidCards"></div><p class="damage-footnote">* Без учёта базового шанса критического удара и базовой прибавки критического урона. Число в углу карточки - на сколько изменился урон после последней правки</p></section>
 <section class="result-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-knife"/></svg></span><h2><b>Урон (бесплатные удары)</b></h2></div><div class="damage-grid" id="freeCards"></div><p class="damage-footnote">В скобках <span class="first-hit">зелёным</span> - урон первого бесплатного удара с бонусом от таланта «Засада»</p></section>
 <section class="result-panel extra-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-gauge"/></svg></span><h2><b>Дополнительные характеристики</b></h2></div><div class="extra-grid"><div><i class="delta" id="deltaNoCooldown"></i><span><svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg></span><small>Шанс удара без отката*</small><strong id="noCooldown">0%</strong></div><div><i class="delta" id="deltaCooldown"></i><span><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg></span><small>Сокращение отката</small><strong id="cooldown">0%</strong></div><div><i class="delta" id="deltaFirstFreeHit"></i><span><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg></span><small>Урон первого бесплатного удара</small><strong id="firstFreeHit">+0%</strong></div></div><p class="damage-footnote">* Без учёта базового шанса удара без отката</p></section>
@@ -104,15 +104,15 @@
     </div>
   </section>
 </div>
-<div id="gearInfoModal" class="talent-modal gear-info-modal" aria-hidden="true">
+<div id="gearInfoModal" class="talent-modal gear-info-modal equipment-modal" aria-hidden="true">
   <div class="talent-backdrop" data-close-gear-info></div>
   <section class="talent-dialog gear-info-dialog" role="dialog" aria-modal="true" aria-labelledby="gearInfoModalTitle">
-    <div class="talent-game-window gear-info-window">
+    <div class="talent-game-window gear-info-window equipment-window">
       <header class="talent-game-header">
-        <div><h2 id="gearInfoModalTitle">Бонусы снаряжения</h2><p>Полный список бонусов всех комплектов и одиночных вещей</p></div>
+        <div><h2 id="gearInfoModalTitle">Снаряжение и бонусы</h2><p>Отметьте полученные вещи: каждая даёт свой бонус. Общие бонусы - внизу окна</p></div>
         <div class="talent-game-actions"><button type="button" class="talent-icon-button" data-close-gear-info aria-label="Закрыть">×</button></div>
       </header>
-      <div class="gear-info-body" id="gearInfoBody"></div>
+      <div class="gear-info-body equipment-body" id="gearInfoBody"></div>
     </div>
   </section>
 </div>
@@ -121,7 +121,7 @@
   <section class="talent-dialog gear-info-dialog" role="dialog" aria-modal="true" aria-labelledby="tokensModalTitle">
     <div class="talent-game-window gear-info-window tokens-window">
       <header class="talent-game-header">
-        <div><h2 id="tokensModalTitle">Расчёт по жетонам</h2><p>По текущему уровню, снаряжению и талантам из калькулятора</p></div>
+        <div><h2 id="tokensModalTitle">Расчёт по жетонам</h2><p>По текущему уровню, снаряжению, характеристикам арены и талантам из калькулятора</p></div>
         <div class="talent-game-actions"><button type="button" class="talent-icon-button" data-close-tokens aria-label="Закрыть">×</button></div>
       </header>
       <div class="gear-info-body tokens-body">
@@ -145,7 +145,7 @@
             <div class="ars-list" id="arsList"></div>
             <div class="ars-sum" id="arsSum"></div>
           </div>
-          <p class="tok-note">Урон считается средним с учётом крита: урон + шанс крита × бонус крита, по текущему уровню, снаряжению и талантам. Крит - без учёта базового шанса критического удара и базовой прибавки критического урона.</p>
+          <p class="tok-note">Урон считается средним с учётом крита: урон + шанс крита × бонус крита, по текущему уровню, снаряжению, характеристикам арены и талантам. Крит - без учёта базового шанса критического удара и базовой прибавки критического урона.</p>
         </div>
       </div>
     </div>

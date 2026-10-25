@@ -9,7 +9,6 @@ import {
   GEAR_BONUS_LABELS,
   GEAR_BONUS_PCT,
   GEAR_EXTRA,
-  gearBonusTags,
   gearTotalItem,
   setGearInfoRenderer
 } from "./app.js";
@@ -32,8 +31,8 @@ import {
     '<path d="M8.6 3.4 6 5v4.4L4.5 11v9.6h15V11L18 9.4V5l-2.6-1.6C14.9 5.5 13.6 7 12 7s-2.9-1.5-3.4-3.6z"/><path d="M12 7v13.6M7 13.6h3M14 13.6h3M7 16.8h3M14 16.8h3"/>'
   );
 
-  /* --- полоса: база / уровень / снаряжение / таланты --- */
-  const PARTS = ["base", "level", "gear", "talentOut"];
+  /* --- полоса: база / уровень / снаряжение / арена / таланты --- */
+  const PARTS = ["base", "level", "gear", "arena", "talentOut"];
   const num = id => {
     const e = $(id);
     return e ? parseInt(e.textContent.replace(/\D/g, ""), 10) || 0 : 0;
@@ -46,7 +45,7 @@ import {
       "beforebegin",
       '<div class="dmg-bar" data-k="' +
         s.id.slice(6) +
-        '" aria-hidden="true"><i class="s0"></i><i class="s1"></i><i class="s2"></i><i class="s3"></i></div>'
+        '" aria-hidden="true"><i class="s0"></i><i class="s1"></i><i class="s2"></i><i class="s-arena"></i><i class="s3"></i></div>'
     );
   });
   function updateBars() {
@@ -64,77 +63,6 @@ import {
     characterData: true
   });
   updateBars();
-
-  /* --- плитки снаряжения (render() в app.js пересоздаёт список, поэтому следим за ним) --- */
-  function chip(label) {
-    const inp = label.querySelector("input");
-    if (!inp || label.dataset.chip) return;
-    const x = (inp.dataset.type === "set" ? SETS : ITEMS)[inp.dataset.index];
-    if (!x) return;
-    const b = x.bonuses || {},
-      free = b.knife != null,
-      arr = free ? [b.knife, b.pistol, b.auto] : [b.grenade, b.gl, b.gauss],
-      ex = [];
-    if (
-      x.critChance ||
-      x.critDamage ||
-      x.critGaussChance ||
-      x.critGrenadeChance ||
-      x.critGaussDamage ||
-      x.critGrenadeDamage
-    )
-      ex.push("крит");
-    if (x.cooldown || x.freeNoCooldown) ex.push("откат");
-    /* у каждого числа - мини-значок оружия, иначе непонятно, что значит «+41 / +85 / +270» */
-    const W = free
-      ? [
-          ["knife", "Нож"],
-          ["pistol", "Пистолет"],
-          ["rifle", "Автомат"]
-        ]
-      : [
-          ["grenade", "Граната"],
-          ["ubgl", "Гранатомёт"],
-          ["gauss", "Гаусс"]
-        ];
-    label.querySelector("span").innerHTML =
-      "<b>" +
-      x.name +
-      '</b><small class="opt-stats">' +
-      arr
-        .map(
-          (v, i) =>
-            '<span class="gs" title="' +
-            W[i][1] +
-            '"><i class="weapon-icon weapon-' +
-            W[i][0] +
-            '" aria-hidden="true"></i><span class="sr-only">' +
-            W[i][1] +
-            " </span>+" +
-            v +
-            "</span>"
-        )
-        .join("") +
-      (ex.length ? '<span class="gs-ex">' + ex.join(", ") + "</span>" : "") +
-      "</small>";
-    /* значок как в окне бонусов: противогаз у комплектов, разгрузка у одиночных вещей;
-    цвет значка по-прежнему показывает, к какому оружию бонусы */
-    label.insertAdjacentHTML(
-      "afterbegin",
-      (inp.dataset.type === "set" ? ICON_SET : ICON_ITEM).replace('class="ic"', 'class="ic opt-ic"')
-    );
-    label.classList.add(free ? "opt-free" : "opt-paid");
-    label.dataset.chip = "1";
-    label.title = gearBonusTags(x)
-      .map(t => t.label + " " + t.value)
-      .join(", ");
-  }
-  ["sets", "items"].forEach(id => {
-    const el = $(id),
-      run = () => el.querySelectorAll(".option").forEach(chip);
-    run();
-    new MutationObserver(run).observe(el, { childList: true });
-  });
 
   /* --- кнопки в боковой панели талантов (их рисует app.js) --- */
   const ts = $("talentSidebar");

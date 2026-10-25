@@ -69,7 +69,7 @@ function shield(name, color) {
   );
 }
 
-module.exports = function factionsMarkup(ROOT) {
+function factionsMarkup(ROOT) {
   /* фото базы для карточки - assets/bg-<тема>-card.webp (720×260, кадр из фона темы), с ?v=<хэш>, как у остальных картинок.
      У группировок без темы фото нет - вместо него подсветка цветом группировки (.fx-bg-tint) */
   const cardBg = key => {
@@ -86,14 +86,14 @@ module.exports = function factionsMarkup(ROOT) {
   const GLYPHS = Object.fromEntries(
     [
       ...uiSrc.matchAll(
-        /^\s*(merc|dolg|svoboda|science|monolith|rassvet|loners|traders|renegades|clearsky):\s*'(.*)',?\s*$/gm
+        /^\s*(merc|dolg|svoboda|science|monolith|rassvet|loners|traders|renegades|clearsky|bandits):\s*'(.*)',?\s*$/gm
       )
     ].map(m => [m[1], m[2]])
   );
   const KEY = Object.fromEntries(
     [...uiSrc.matchAll(/\{\s*key:\s*"(\w+)",\s*label:\s*"([^"]+)"/g)].map(m => [m[2], m[1]])
   );
-  if (Object.keys(GLYPHS).length < 10 || Object.keys(KEY).length < 10)
+  if (Object.keys(GLYPHS).length < 11 || Object.keys(KEY).length < 11)
     throw new Error("build-factions: не удалось прочитать эмблемы группировок из ui.js");
 
   const REP = data.metrics.indexOf("reputation");
@@ -280,4 +280,10 @@ module.exports = function factionsMarkup(ROOT) {
     count: list.length,
     hiring: list.filter(f => (info[f.c.name] || {}).recruit).length
   };
-};
+}
+
+module.exports = factionsMarkup;
+/* чистые помощники - для тестов: экранирование, проверка ссылок и якорь карточки */
+module.exports.esc = esc;
+module.exports.safeUrl = safeUrl;
+module.exports.anchor = anchor;

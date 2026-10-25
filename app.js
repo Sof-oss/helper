@@ -3,16 +3,30 @@ import { TALENTS } from "./talents.js";
 import {
   SETS,
   ITEMS,
+  ALL_ITEMS,
+  ITEM_BY_CODE,
   clampLevel,
+  clampArena,
+  arenaBonus,
   MIN_LEVEL,
   MAX_LEVEL,
+  MAX_ARENA,
   baseDamageByLevel,
   buildHashOf as buildHashOfCore,
   parseBuild as parseBuildCore,
   sanitizeTalents
 } from "./src/calc-core.js";
-const state = { sets: new Set(), items: new Set(), talents: {} };
+const state = { items: new Set(), talents: {}, arena: 0 };
 const keys = ["knife", "pistol", "auto", "grenade", "gl", "gauss"];
+const ARENA_ICON = { knife: "knife", pistol: "pistol", auto: "rifle", grenade: "grenade", gl: "ubgl", gauss: "gauss" };
+const ARENA_LABEL = {
+  knife: "Нож",
+  pistol: "Пистолет",
+  auto: "Автомат",
+  grenade: "Граната",
+  gl: "Подствольник",
+  gauss: "Гаусс"
+};
 const TALENT_ASSETS = {
   TALENT_0001: "TALENT_0001-sfcxbYqa.webp",
   TALENT_0002: "TALENT_0002-DJDfGX4a.webp",
@@ -56,8 +70,8 @@ function saveState() {
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({
-        sets: [...state.sets],
-        items: [...state.items],
+        gear: [...state.items],
+        arena: state.arena,
         level: clampLevel($("level").value),
         talents: state.talents
       })
@@ -68,15 +82,22 @@ function loadState() {
   try {
     const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
     if (!data) return;
-    state.sets.clear();
     state.items.clear();
     state.talents = {};
-    (Array.isArray(data.sets) ? data.sets : [])
-      .filter(i => Number.isInteger(i) && i >= 0 && i < SETS.length)
-      .forEach(i => state.sets.add(i));
-    (Array.isArray(data.items) ? data.items : [])
-      .filter(i => Number.isInteger(i) && i >= 0 && i < ITEMS.length)
-      .forEach(i => state.items.add(i));
+    /* новый формат: gear - коды вещей; старый: sets/items - индексы комплектов и одиночных вещей */
+    const add = code => {
+      if (ITEM_BY_CODE[code]) state.items.add(code);
+    };
+    (Array.isArray(data.gear) ? data.gear : []).forEach(add);
+    if (!Array.isArray(data.gear)) {
+      (Array.isArray(data.sets) ? data.sets : []).forEach(i => {
+        if (Number.isInteger(i) && SETS[i]) SETS[i].items.forEach(x => add(x.code));
+      });
+      (Array.isArray(data.items) ? data.items : []).forEach(i => {
+        if (Number.isInteger(i) && ITEMS[i]) add(ITEMS[i].code);
+      });
+    }
+    state.arena = clampArena(data.arena);
     if (data.level !== undefined) $("level").value = clampLevel(data.level);
     if (data.talents && typeof data.talents === "object") state.talents = sanitizeTalents(data.talents);
   } catch {}
@@ -356,6 +377,7 @@ function hideTalentTip() {
 /* суммарные бонусы, урон и крит */
 function totals() {
   const total = Object.fromEntries(keys.map(k => [k, 0]));
+  const gearTotal = Object.fromEntries(keys.map(k => [k, 0]));
   let critChance = 0,
     critDamage = 0,
     critGaussChance = 0,
@@ -365,22 +387,33 @@ function totals() {
     noCooldown = 0,
     cooldown = 0;
   const addBonuses = x => {
-    keys.forEach(k => (total[k] += x.bonuses[k] || 0));
-    critChance += x.critChance || 0;
-    critDamage += x.critDamage || 0;
-    critGaussChance += x.critGaussChance || 0;
-    critGrenadeChance += x.critGrenadeChance || 0;
-    critGaussDamage += x.critGaussDamage || 0;
-    critGrenadeDamage += x.critGrenadeDamage || 0;
-    noCooldown += x.freeNoCooldown || 0;
-    cooldown += x.cooldown || 0;
+    const ex = x.extras || x;
+    keys.forEach(k => {
+      const v = x.bonuses[k] || 0;
+      gearTotal[k] += v;
+      total[k] += v;
+    });
+    critChance += ex.critChance || 0;
+    critDamage += ex.critDamage || 0;
+    critGaussChance += ex.critGaussChance || 0;
+    critGrenadeChance += ex.critGrenadeChance || 0;
+    critGaussDamage += ex.critGaussDamage || 0;
+    critGrenadeDamage += ex.critGrenadeDamage || 0;
+    noCooldown += ex.freeNoCooldown || 0;
+    cooldown += ex.cooldown || 0;
   };
-  state.sets.forEach(i => addBonuses(SETS[i]));
-  state.items.forEach(i => addBonuses(ITEMS[i]));
+  state.items.forEach(code => {
+    const x = ITEM_BY_CODE[code];
+    if (x) addBonuses(x);
+  });
+  const arena = arenaBonus(state.arena);
+  keys.forEach(k => (total[k] += arena[k]));
   const t = talentTotals();
   keys.forEach(k => (total[k] += t.total[k]));
   return {
     total,
+    gearTotal,
+    arena,
     critChance: critChance + t.critChance,
     critDamage,
     critGaussChance,
@@ -746,6 +779,18 @@ const GEAR_BONUS_LABELS = {
   cooldown: "Сокращение отката"
 };
 const GEAR_BONUS_PCT = new Set(["critChance", "critGaussChance", "critGrenadeChance", "freeNoCooldown", "cooldown"]);
+/* короткие подписи для карточек снаряжения: окно узкое, длинные названия не помещаются */
+const EQ_BONUS_LABELS = {
+  ...GEAR_BONUS_LABELS,
+  critChance: "Крит",
+  critDamage: "Крит. урон",
+  critGaussChance: "Крит гаусса",
+  critGrenadeChance: "Крит гранаты",
+  critGaussDamage: "Крит. урон гаусса",
+  critGrenadeDamage: "Крит. урон гранаты",
+  freeNoCooldown: "Без отката",
+  cooldown: "Откат"
+};
 const GEAR_EXTRA = [
   "critChance",
   "critDamage",
@@ -804,6 +849,8 @@ let renderGearInfo = defaultRenderGearInfo;
 function setGearInfoRenderer(fn) {
   renderGearInfo = fn;
 }
+/* старый рендерер оставлен для polish.js; новое окно рисует renderEquipment() */
+void renderGearInfo;
 function defaultRenderGearInfo() {
   $("gearInfoBody").innerHTML =
     '<div class="gear-info-group-title">Комплекты</div>' +
@@ -817,11 +864,14 @@ function defaultRenderGearInfo() {
 function openGearInfo() {
   $("gearInfoModal").classList.add("show");
   $("gearInfoModal").setAttribute("aria-hidden", "false");
-  renderGearInfo();
+  renderEquipment();
+  const close = $("gearInfoModal").querySelector("button[data-close-gear-info]");
+  if (close) requestAnimationFrame(() => close.focus({ preventScroll: true }));
 }
 function closeGearInfo() {
   $("gearInfoModal").classList.remove("show");
   $("gearInfoModal").setAttribute("aria-hidden", "true");
+  if ($("openEquipment")) $("openEquipment").focus({ preventScroll: true });
 }
 
 /* расчёт по жетонам */
@@ -1077,7 +1127,8 @@ function cardMarkup([k, name, icon], withCrit) {
     '"></i><div class="breakdown">' +
     cellHtml("", "База", "base") +
     cellHtml("bd-level", "Уровень", "level") +
-    cellHtml("bd-gear", "Экипировка", "gear") +
+    cellHtml("bd-gear", "Снаряжение", "gear") +
+    cellHtml("bd-arena", "Арена", "arena") +
     cellHtml("bd-talent", "Таланты", "talentOut") +
     "</div>" +
     (withCrit
@@ -1095,21 +1146,232 @@ function renderCards() {
   $("freeCards").innerHTML = CARDS.free.map(c => cardMarkup(c, false)).join("");
 }
 
-function optionMarkup(arr, set, type) {
-  return arr
-    .map(
-      (x, i) =>
-        '<label class="option"><input type="checkbox" data-type="' +
-        type +
-        '" data-index="' +
-        i +
-        '" ' +
-        (set.has(i) ? "checked" : "") +
-        "><span>" +
-        x.name +
-        "</span></label>"
-    )
+/* ---------- снаряжение: карта комплектов в окне ---------- */
+const escEq = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const ITEM_SET = new Map();
+SETS.forEach(s => s.items.forEach(i => ITEM_SET.set(i.code, s.code)));
+ITEMS.forEach(i => ITEM_SET.set(i.code, "standalone"));
+const gearSets = () => [SETS.find(s => s.isNew), ...SETS.filter(s => !s.isNew)].filter(Boolean);
+const gearLabel = (k, v) => EQ_BONUS_LABELS[k] + " +" + (GEAR_BONUS_PCT.has(k) ? Math.round(v * 100) + "%" : fmt(v));
+function equipmentChips(item) {
+  const out = [];
+  keys.forEach(k => {
+    if (item.bonuses[k]) out.push(gearLabel(k, item.bonuses[k]));
+  });
+  GEAR_EXTRA.forEach(k => {
+    if (item.extras[k]) out.push(gearLabel(k, item.extras[k]));
+  });
+  return out;
+}
+function gearExtras() {
+  const ex = {
+    critChance: 0,
+    critDamage: 0,
+    critGaussChance: 0,
+    critGrenadeChance: 0,
+    critGaussDamage: 0,
+    critGrenadeDamage: 0,
+    freeNoCooldown: 0,
+    cooldown: 0
+  };
+  state.items.forEach(code => {
+    const x = ITEM_BY_CODE[code];
+    if (!x) return;
+    Object.keys(ex).forEach(k => (ex[k] += x.extras[k] || 0));
+  });
+  return ex;
+}
+function chipsMarkup(list) {
+  return list.map(t => '<span class="eq-chip">' + t + "</span>").join("");
+}
+function equipmentSummaryHTML() {
+  const T = totals(),
+    ex = gearExtras();
+  const chip = k => '<span class="eq-chip">' + GEAR_BONUS_LABELS[k] + " <b>+" + fmt(T.gearTotal[k]) + "</b></span>";
+  const extra = GEAR_EXTRA.filter(k => ex[k])
+    .map(k => '<span class="eq-chip is-crit">' + gearLabel(k, ex[k]) + "</span>")
     .join("");
+  return (
+    '<div class="eq-total-title">Общие бонусы снаряжения</div>' +
+    '<div class="eq-total-row"><small>Урон</small><div class="eq-chips">' +
+    (keys.some(k => T.gearTotal[k])
+      ? keys
+          .filter(k => T.gearTotal[k])
+          .map(chip)
+          .join("")
+      : '<span class="eq-chip eq-chip-muted">ничего не выбрано</span>') +
+    "</div></div>" +
+    (extra
+      ? '<div class="eq-total-row"><small>Крит и откат</small><div class="eq-chips">' + extra + "</div></div>"
+      : "")
+  );
+}
+function equipmentSlot(item) {
+  const on = state.items.has(item.code);
+  return (
+    '<button type="button" class="eq-slot' +
+    (on ? " on" : "") +
+    '" data-eq-item="' +
+    escEq(item.code) +
+    '" aria-pressed="' +
+    on +
+    '" title="' +
+    escEq(item.name) +
+    '">' +
+    '<img src="' +
+    item.icon +
+    '" alt="" width="64" height="64" loading="lazy" decoding="async"><b>' +
+    escEq(item.name) +
+    '</b><span class="eq-chips">' +
+    chipsMarkup(equipmentChips(item)) +
+    "</span></button>"
+  );
+}
+function equipmentCard(key, name, items, isNew) {
+  const selected = items.filter(i => state.items.has(i.code)).length;
+  const pct = Math.round((selected / items.length) * 100);
+  const all = selected === items.length;
+  const standalone = key === "standalone";
+  return (
+    '<article class="eq-card' +
+    (isNew ? " is-new" : "") +
+    '" data-eq-card="' +
+    escEq(key) +
+    '"><header><span class="eq-ring" data-eq-ring="' +
+    escEq(key) +
+    '" style="--p:' +
+    pct +
+    '"><b>' +
+    selected +
+    "/" +
+    items.length +
+    "</b></span><h3>" +
+    escEq(name) +
+    "</h3>" +
+    (isNew ? '<span class="eq-new">новый</span>' : "") +
+    '<button type="button" class="eq-set-toggle" data-eq-set="' +
+    escEq(key) +
+    '" aria-pressed="' +
+    all +
+    '">' +
+    (standalone ? (all ? "снять всё" : "все вещи") : all ? "снять комплект" : "весь комплект") +
+    '</button></header><div class="eq-slots">' +
+    items.map(equipmentSlot).join("") +
+    (items.length < 3 ? '<span class="eq-slot eq-empty" aria-hidden="true"></span>'.repeat(3 - items.length) : "") +
+    "</div></article>"
+  );
+}
+function renderEquipment() {
+  const body = $("gearInfoBody");
+  if (!body) return;
+  body.innerHTML =
+    '<div class="eq-toolbar"><span role="status" aria-live="polite">Выбрано <b id="eqCount">' +
+    state.items.size +
+    "</b> из " +
+    ALL_ITEMS.length +
+    '</span><span class="eq-toolbar-btns"><button type="button" id="eqSelectAll">Выбрать всё</button><button type="button" id="eqClear">Снять всё</button></span></div>' +
+    '<div class="eq-scroll"><div class="eq-grid">' +
+    gearSets()
+      .map(s => equipmentCard(s.code, s.name, s.items, s.isNew))
+      .join("") +
+    equipmentCard("standalone", "Без комплекта", ITEMS, false) +
+    '</div></div><div class="eq-totals" id="eqTotals">' +
+    equipmentSummaryHTML() +
+    "</div>";
+}
+function updateEquipmentSummary() {
+  const count = $("equipmentCount");
+  if (count) count.textContent = state.items.size + " / " + ALL_ITEMS.length;
+  const arena = $("arenaPoints");
+  if (arena && document.activeElement !== arena) arena.value = state.arena;
+  const hint = $("arenaHint");
+  if (hint) {
+    const a = arenaBonus(state.arena);
+    hint.innerHTML = keys
+      .map(
+        k =>
+          '<span class="arena-stat' +
+          (a[k] ? "" : " is-zero") +
+          '"><i class="weapon-icon weapon-' +
+          ARENA_ICON[k] +
+          '" aria-hidden="true"></i><span><small>' +
+          ARENA_LABEL[k] +
+          "</small><b>" +
+          (a[k] ? "+" + fmt(a[k]) : "0") +
+          "</b></span></span>"
+      )
+      .join("");
+  }
+  const eqCount = $("eqCount");
+  if (eqCount) eqCount.textContent = state.items.size;
+  const totalsBox = $("eqTotals");
+  if (totalsBox) totalsBox.innerHTML = equipmentSummaryHTML();
+}
+function updateEquipmentCard(key) {
+  const card = document.querySelector('[data-eq-card="' + key + '"]');
+  if (!card) return;
+  const items = key === "standalone" ? ITEMS : (SETS.find(s => s.code === key) || { items: [] }).items;
+  const selected = items.filter(i => state.items.has(i.code)).length;
+  const ring = card.querySelector("[data-eq-ring]");
+  if (ring) {
+    ring.style.setProperty("--p", Math.round((selected / items.length) * 100));
+    const b = ring.querySelector("b");
+    if (b) b.textContent = selected + "/" + items.length;
+  }
+  const setBtn = card.querySelector("[data-eq-set]");
+  if (setBtn) {
+    setBtn.setAttribute("aria-pressed", selected === items.length);
+    const standalone = key === "standalone";
+    setBtn.textContent = standalone
+      ? selected === items.length
+        ? "снять всё"
+        : "все вещи"
+      : selected === items.length
+        ? "снять комплект"
+        : "весь комплект";
+  }
+  items.forEach(i => {
+    const b = card.querySelector('[data-eq-item="' + i.code + '"]');
+    if (!b) return;
+    const on = state.items.has(i.code);
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-pressed", on);
+  });
+}
+function toggleEquipmentItem(code) {
+  if (!ITEM_BY_CODE[code]) return;
+  if (state.items.has(code)) state.items.delete(code);
+  else state.items.add(code);
+  saveState();
+  updateEquipmentCard(ITEM_SET.get(code) || "standalone");
+  updateEquipmentSummary();
+  calc();
+}
+function toggleEquipmentSet(key) {
+  const items = key === "standalone" ? ITEMS : (SETS.find(s => s.code === key) || { items: [] }).items;
+  const all = items.every(i => state.items.has(i.code));
+  items.forEach(i => (all ? state.items.delete(i.code) : state.items.add(i.code)));
+  saveState();
+  updateEquipmentCard(key);
+  updateEquipmentSummary();
+  calc();
+}
+function selectAllEquipment(on) {
+  ALL_ITEMS.forEach(i => (on ? state.items.add(i.code) : state.items.delete(i.code)));
+  saveState();
+  renderEquipment();
+  updateEquipmentSummary();
+  calc();
+}
+function setArena(raw) {
+  const input = $("arenaPoints"),
+    active = document.activeElement === input;
+  state.arena = clampArena(raw);
+  /* как у уровня: дробное и выход за 0–500 исправляются сразу, пустое поле не трогаем, пока печатают */
+  if (!active || (raw !== "" && String(state.arena) !== raw)) input.value = state.arena;
+  saveState();
+  updateEquipmentSummary();
+  calc();
 }
 function set(id, v, roll) {
   const el = $(id);
@@ -1138,7 +1400,8 @@ function calc() {
     const K = cap(k);
     set("base" + K, fmt(baseFlat[k]));
     set("level" + K, fmt(base[k] - baseFlat[k]));
-    set("gear" + K, fmt(T.total[k] - tal[k]));
+    set("gear" + K, fmt(T.gearTotal[k]));
+    set("arena" + K, fmt(T.arena[k]));
     set("talentOut" + K, fmt(tal[k]));
     set("result" + K, fmt(r[k]), true);
   });
@@ -1182,12 +1445,8 @@ function levelHint(raw) {
   }, 3000);
 }
 function render() {
-  $("sets").innerHTML = optionMarkup(SETS, state.sets, "set");
-  $("items").innerHTML = optionMarkup(ITEMS, state.items, "item");
-  $("selectAllEquipment").checked = state.sets.size === SETS.length && state.items.size === ITEMS.length;
+  updateEquipmentSummary();
   renderTalents();
-  $("gearToggle").textContent =
-    "Снаряжение: выбрано " + (state.sets.size + state.items.size) + " из " + (SETS.length + ITEMS.length);
   calc();
 }
 function showToast(text, kind) {
@@ -1200,11 +1459,11 @@ function showToast(text, kind) {
   window.__toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
 }
 
-/* билд в ссылке: уровень, снаряжение и таланты после # */
+/* билд в ссылке: уровень, вещи, характеристики арены и таланты после # */
 const currentBuild = () => ({
   level: clampLevel($("level").value),
-  sets: [...state.sets],
-  items: [...state.items],
+  gear: [...state.items],
+  arena: state.arena,
   talents: { ...state.talents }
 });
 const buildHashOf = b => buildHashOfCore(b);
@@ -1215,9 +1474,9 @@ function buildHash() {
 const parseBuild = raw => parseBuildCore(raw);
 /* расчёт чужого билда: на время подменяем состояние и возвращаем как было */
 function resultsFor(b) {
-  const keep = { sets: state.sets, items: state.items, talents: state.talents };
-  state.sets = new Set(b.sets);
-  state.items = new Set(b.items);
+  const keep = { items: state.items, arena: state.arena, talents: state.talents };
+  state.items = new Set(b.gear);
+  state.arena = b.arena;
   state.talents = b.talents;
   try {
     return results(b.level);
@@ -1313,8 +1572,8 @@ function cmpRow(label, x, y, pct) {
 const cmpTags = (arr, cls) => arr.map(t => '<span class="gear-info-tag cmp-tag ' + cls + '">' + t + "</span>").join("");
 /* сводка сверху: уровень, очки талантов и сколько собрано снаряжения */
 function cmpHead(a, b) {
-  const gear = x => x.sets.length + x.items.length,
-    total = SETS.length + ITEMS.length;
+  const gear = x => x.gear.length,
+    total = ALL_ITEMS.length;
   const card = (cls, title, x) =>
     '<div class="cmp-card ' +
     cls +
@@ -1332,7 +1591,9 @@ function cmpHead(a, b) {
     gear(x) +
     " из " +
     total +
-    "</span></div>";
+    "</span><span>арена " +
+    x.arena +
+    " очков</span></div>";
   return (
     '<div class="cmp-head">' +
     card("a", "Ваш билд", a) +
@@ -1356,8 +1617,8 @@ function renderCompare() {
     '<tr class="cmp-group"><td colspan="3">★ Общее</td></tr>' +
     cmpRow("Уровень", a.level, b.level) +
     cmpRow("Очки талантов", sumRanks(a.talents), sumRanks(b.talents)) +
-    cmpRow("Комплекты", a.sets.length, b.sets.length) +
-    cmpRow("Одиночные вещи", a.items.length, b.items.length);
+    cmpRow("Снаряжение", a.gear.length, b.gear.length) +
+    cmpRow("Арена", a.arena, b.arena);
   CMP_GROUPS.forEach(([title, list]) => {
     rows +=
       '<tr class="cmp-group"><td colspan="3">' +
@@ -1365,9 +1626,13 @@ function renderCompare() {
       "</td></tr>" +
       list.map(([k, l, p]) => cmpRow(l, ra[k], rb[k], p)).join("");
   });
-  const only = (x, y, list) => x.filter(i => !y.includes(i)).map(i => list[i].name);
-  const mine = [...only(a.sets, b.sets, SETS), ...only(a.items, b.items, ITEMS)],
-    theirs = [...only(b.sets, a.sets, SETS), ...only(b.items, a.items, ITEMS)];
+  const only = (x, y) =>
+    x
+      .filter(code => !y.includes(code))
+      .map(code => ITEM_BY_CODE[code] && ITEM_BY_CODE[code].name)
+      .filter(Boolean);
+  const mine = only(a.gear, b.gear),
+    theirs = only(b.gear, a.gear);
   const tal = TALENTS.filter(t => (a.talents[t[0]] || 0) !== (b.talents[t[0]] || 0)).map(t => {
     const x = a.talents[t[0]] || 0,
       y = b.talents[t[0]] || 0;
@@ -1576,10 +1841,26 @@ function announceResults(r) {
 }
 
 document.addEventListener("click", e => {
-  const gt = e.target.closest("#gearToggle");
-  if (gt) {
-    const open = gt.closest(".equipment-section").classList.toggle("gear-open");
-    gt.setAttribute("aria-expanded", open);
+  if (e.target.closest("#openEquipment")) {
+    openGearInfo();
+    return;
+  }
+  const eqItem = e.target.closest("[data-eq-item]");
+  if (eqItem) {
+    toggleEquipmentItem(eqItem.dataset.eqItem);
+    return;
+  }
+  const eqSet = e.target.closest("[data-eq-set]");
+  if (eqSet) {
+    toggleEquipmentSet(eqSet.dataset.eqSet);
+    return;
+  }
+  if (e.target.closest("#eqSelectAll")) {
+    selectAllEquipment(true);
+    return;
+  }
+  if (e.target.closest("#eqClear")) {
+    selectAllEquipment(false);
     return;
   }
   /* зум дерева талантов кнопками и вписать в окно */
@@ -1704,15 +1985,15 @@ document.addEventListener("mouseover", e => {
 document.addEventListener("mouseout", e => {
   if (e.target.closest && e.target.closest(".talent-node-game")) hideTalentTip();
 });
-document.addEventListener("change", e => {
-  const i = e.target;
-  if (!i.matches("[data-type]")) return;
-  const s = i.dataset.type === "set" ? state.sets : state.items,
-    n = Number(i.dataset.index);
-  i.checked ? s.add(n) : s.delete(n);
-  saveState();
-  render();
-});
+const arenaInput = $("arenaPoints");
+if (arenaInput) {
+  arenaInput.max = String(MAX_ARENA);
+  arenaInput.addEventListener("input", () => setArena(arenaInput.value));
+  arenaInput.addEventListener("change", () => {
+    arenaInput.value = clampArena(arenaInput.value);
+    setArena(arenaInput.value);
+  });
+}
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-step]");
   if (!b) return;
@@ -1721,18 +2002,12 @@ document.addEventListener("click", e => {
     min = Number(input.min) || 0,
     max = Number(input.max) || 999;
   input.value = Math.min(max, Math.max(min, (Number(input.value) || 0) + dir));
-  saveState();
-  calc();
-});
-$("selectAllEquipment").addEventListener("change", e => {
-  state.sets.clear();
-  state.items.clear();
-  if (e.target.checked) {
-    SETS.forEach((_, i) => state.sets.add(i));
-    ITEMS.forEach((_, i) => state.items.add(i));
+  if (input.id === "arenaPoints") {
+    setArena(input.value);
+    return;
   }
   saveState();
-  render();
+  calc();
 });
 $("level").addEventListener("change", () => {
   const raw = $("level").value;
@@ -1748,15 +2023,17 @@ $("level").addEventListener("input", () => {
 $("resetAll").onclick = () =>
   askConfirm({
     title: "Сбросить всё?",
-    text: "Уровень, снаряжение и все очки талантов вернутся к началу. Отменить это действие нельзя.",
+    text: "Уровень, снаряжение, характеристики арены и все очки талантов вернутся к началу. Отменить это действие нельзя.",
     ok: "Сбросить всё"
   }).then(yes => {
     if (!yes) return;
-    state.sets.clear();
     state.items.clear();
+    state.arena = 0;
     state.talents = {};
     lastTalentChange = null;
     $("level").value = 1;
+    if ($("arenaPoints")) $("arenaPoints").value = 0;
+    if ($("gearInfoModal") && $("gearInfoModal").classList.contains("show")) renderEquipment();
     saveState();
     render();
   });
@@ -1800,11 +2077,13 @@ if (linked) openCompare();
 function applyBuild(raw) {
   const b = parseBuild(raw);
   if (!b) return false;
-  state.sets = new Set(b.sets);
-  state.items = new Set(b.items);
+  state.items = new Set(b.gear);
+  state.arena = b.arena;
   state.talents = b.talents;
   $("level").value = b.level;
+  if ($("arenaPoints")) $("arenaPoints").value = b.arena;
   lastTalentChange = null;
+  if ($("gearInfoModal") && $("gearInfoModal").classList.contains("show")) renderEquipment();
   saveState();
   render();
   return true;

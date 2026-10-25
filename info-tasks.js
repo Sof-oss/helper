@@ -15,9 +15,9 @@
     energy: { full: "Затраты энергии", short: "Энергия", cls: "en" },
     tokens: { full: "Жетоны", short: "Жетоны", cls: "tok" }
   };
-  /* иконки: три игровые картинки, для опыта - нарисованный значок «XP» */
+  /* иконки ресурсов из игры */
   const ICON = {
-    exp: '<svg class="res-xp" viewBox="0 0 24 24" aria-hidden="true"><rect x="2.2" y="5.2" width="19.6" height="13.6" rx="3.2"/><text x="12" y="16.1" text-anchor="middle">XP</text></svg>',
+    exp: '<img src="assets/xp.webp" alt="" width="256" height="296" loading="lazy" decoding="async">',
     bullets:
       '<img src="assets/common_currency-BGqetmZE.webp" alt="" width="83" height="96" loading="lazy" decoding="async">',
     rep: '<img src="assets/reputation-DqOMMtrl.webp" alt="" width="96" height="92" loading="lazy" decoding="async">',

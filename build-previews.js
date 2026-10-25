@@ -38,7 +38,7 @@ const GLYPHS = Object.fromEntries(
   /* картинки эмблем (/assets/…) в превью открываются из previews/dossier.html - путь от неё */
   [
     ...uiSrc.matchAll(
-      /^\s*(merc|dolg|svoboda|science|monolith|rassvet|loners|traders|renegades|clearsky):\s*'(.*)',?\s*$/gm
+      /^\s*(merc|dolg|svoboda|science|monolith|rassvet|loners|traders|renegades|clearsky|bandits):\s*'(.*)',?\s*$/gm
     )
   ].map(m => [m[1], m[2].replace(/href="\/assets\//g, 'href="../assets/')])
 );
@@ -46,7 +46,7 @@ const FACTION_KEY = Object.fromEntries(
   [...uiSrc.matchAll(/\{\s*key:\s*"(\w+)",\s*label:\s*"([^"]+)"/g)].map(m => [m[2], m[1]])
 );
 /* защита от тихой поломки: если формат исходников поменялся и разбор ничего не нашёл - сборка падает */
-if (!TABS.length || Object.keys(GLYPHS).length < 10 || Object.keys(FACTION_KEY).length < 10)
+if (!TABS.length || Object.keys(GLYPHS).length < 11 || Object.keys(FACTION_KEY).length < 11)
   throw new Error("build-previews: не удалось прочитать вкладки (top100-common.js) или эмблемы группировок (ui.js)");
 /* звания - как в player-card.js */
 const TITLES = [

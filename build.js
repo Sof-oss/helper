@@ -29,13 +29,23 @@ try {
 }
 
 const ROOT = __dirname;
-const OUT = path.join(ROOT, "dist");
+/* BUILD_OUT - только для тестов: собрать во временную папку, не трогая рабочий dist */
+const OUT = process.env.BUILD_OUT ? path.resolve(process.env.BUILD_OUT) : path.join(ROOT, "dist");
 
 /* модули: файл в dist -> точка входа и все исходники (по ним же считается дата страницы в sitemap).
    Исходники модулей в dist не копируются - на сайт попадает только собранный файл */
 const MODULES = {
   "home-3d.js": ["src/home-3d.js", "src/zone-bg.js", "src/zone-theme.js"],
-  "calculator.js": ["src/calculator.js", "src/calc-core.js", "src/calc-slots.js", "app.js", "polish.js", "talents.js"]
+  "calculator.js": [
+    "src/calculator.js",
+    "src/calc-core.js",
+    "src/calc-slots.js",
+    "src/gear-data.js",
+    "src/arena-data.js",
+    "app.js",
+    "polish.js",
+    "talents.js"
+  ]
 };
 
 /* в dist не попадает служебное и исходники сборки (выгрузка игроков и CSV рейтинга нужны только для build-top100.js) */
@@ -748,7 +758,8 @@ const INTRO_FLAG = () =>
     "loners",
     "traders",
     "renegades",
-    "clearsky"
+    "clearsky",
+    "bandits"
   ];
   const map = {};
   for (const t of THEMES)
@@ -1181,10 +1192,14 @@ function addCsp(file) {
 })(OUT);
 
 /* ---------- service worker ----------
-   dist/sw.js = sw.js из корня + версия сборки и список «оболочки»: основные страницы, страница offline и всё,
-   что они подключают с ?v= (css, js, шрифты, картинки). Версия - хэш этих адресов и самих страниц, поэтому любая
-   правка сайта даёт новый sw.js: браузер ставит его и удаляет старый кэш оболочки. Картинки боссов входят в оболочку;
-   фоны тем, картинки гайдов и 3D главной - нет (тяжёлые), они кэшируются при первом показе.
+   dist/sw.js = sw.js из корня + версия и список статической оболочки: offline.html и статические файлы,
+   которые подключают основные страницы (css, js, шрифты, иконки, картинки). Сами страницы и данные Топ-100 в
+   оболочку не входят: они обновляются каждый день, а версия оболочки должна меняться только при правке статики.
+   Иначе ежедневный деплой рейтинга менял бы версию и заставлял PWA заново скачивать всю оболочку.
+   Страницы и данные - network-first и кэшируются при открытии (PAGES/DATA), поэтому офлайн работают разделы,
+   которые уже открывали. Версия - хэш списка статических адресов, содержимого offline.html и картинок без ?v;
+   поэтому правка css/js/картинки даёт новый sw.js, а обновление рейтинга - нет. Картинки боссов входят в оболочку;
+   фоны тем, остальные картинки гайдов и 3D главной - нет (тяжёлые), они кэшируются при первом показе.
    Видео боссов service worker не трогает: браузер грузит их кусками (Range), такие ответы в кэш не кладутся */
 {
   const SHELL_PAGES = [
@@ -1206,10 +1221,19 @@ function addCsp(file) {
     const file = path.join(OUT, name);
     if (!fs.existsSync(file)) throw new Error("service worker: нет страницы " + name);
     const html = fs.readFileSync(file, "utf8");
-    h.update(html);
-    urls.add(name === "index.html" ? "/" : "/" + name.replace(/\.html$/, ""));
-    for (const m of html.matchAll(/<(?:link|script|img)\b[^>]*?\s(?:href|src)="([^"]+\?v=[^"]+)"/g))
-      if (!/^([a-z]+:)?\/\//i.test(m[1])) urls.add(m[1].startsWith("/") ? m[1] : "/" + m[1]);
+    /* Сами страницы в оболочку не кладём: они network-first и кэшируются при открытии. Исключение - offline.html:
+       её SW отдаёт, когда сети нет, и её содержимое входит в версию, чтобы правка страницы обновляла офлайн-заглушку */
+    if (name === "offline.html") {
+      h.update(html);
+      urls.add("/offline");
+    }
+    for (const m of html.matchAll(/<(?:link|script|img)\b[^>]*?\s(?:href|src)="([^"]+\?v=[^"]+)"/g)) {
+      if (/^([a-z]+:)?\/\//i.test(m[1])) continue;
+      const u = m[1].startsWith("/") ? m[1] : "/" + m[1];
+      /* данные Топ-100 меняются каждый день - их место в DATA-кэше (network-first), а не в версии оболочки */
+      if (/^\/top100-(?:data\.js|players\.json)(?:\?|$)/.test(u)) continue;
+      urls.add(u);
+    }
   }
   /* картинки и шрифты из стилей оболочки (иконки оружия, woff2), кроме фонов тем и запасных ttf/woff */
   for (const u of [...urls].filter(x => /\.css\?/.test(x))) {
@@ -1239,6 +1263,8 @@ function addCsp(file) {
   const src = fs.readFileSync(path.join(ROOT, "sw.js"), "utf8");
   if (!src.includes('"__SW_VERSION__"') || !src.includes('"__SW_PRECACHE__"'))
     throw new Error("service worker: в sw.js нет меток __SW_VERSION__ / __SW_PRECACHE__");
+  /* код самого SW тоже входит в версию: поменялась логика - нужен новый кэш оболочки */
+  h.update(src);
   const code = src
     .replace('"__SW_VERSION__"', JSON.stringify(h.digest("hex").slice(0, 10)))
     .replace('"__SW_PRECACHE__"', JSON.stringify(list));
@@ -1257,7 +1283,13 @@ function addCsp(file) {
     const real = fs.existsSync(f) ? f : f + ".html";
     return a + (fs.existsSync(real) ? fs.statSync(real).size : 0);
   }, 0);
-  console.log("Service worker: оболочка " + list.length + " файлов, " + (kb / 1024).toFixed(0) + " КБ");
+  console.log(
+    "Service worker: статическая оболочка " +
+      list.length +
+      " файлов, " +
+      (kb / 1024).toFixed(0) +
+      " КБ (страницы и данные - отдельно)"
+  );
 }
 
 console.log("Готово: " + pages + " стр. в " + path.relative(process.cwd(), OUT));
