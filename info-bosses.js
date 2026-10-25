@@ -66,7 +66,7 @@
   const EVENT = {
     key: "experiment",
     name: "Эксперимент №31",
-    hp: 1000000,
+    hp: 500000,
     set: {
       name: "Пятничный вечер",
       img: "friday",
@@ -74,11 +74,11 @@
     },
     dates: "с 23 октября по 6 ноября",
     rewards: [
-      { place: "1", exp: 1500, tokens: 20, pda: 10, key: "orange", keyCount: 6, set: 100 },
-      { place: "2", exp: 1200, tokens: 15, pda: 7, key: "orange", keyCount: 3, set: 75 },
-      { place: "3", exp: 900, tokens: 10, pda: 5, key: "purple", keyCount: 6, set: 50 },
-      { place: "4–10", exp: 600, tokens: 7, key: "blue", keyCount: 6, extra: "gauss", extraCount: 1, set: 30 },
-      { place: "11+", exp: 300, tokens: 5, key: "green", keyCount: 6, extra: "ubgl", extraCount: 2, set: 30 }
+      { place: "1", exp: 750, tokens: 10, pda: 5, key: "orange", keyCount: 3, extra: "gauss", extraCount: 5, set: 100 },
+      { place: "2", exp: 600, tokens: 8, pda: 4, key: "orange", keyCount: 1, extra: "gauss", extraCount: 4, set: 75 },
+      { place: "3", exp: 450, tokens: 5, pda: 3, key: "purple", keyCount: 3, extra: "gauss", extraCount: 3, set: 50 },
+      { place: "4–10", exp: 300, tokens: 4, key: "blue", keyCount: 3, extra: "ubgl", extraCount: 8, set: 30 },
+      { place: "11+", exp: 150, tokens: 3, key: "green", keyCount: 3, extra: "grenade", extraCount: 15, set: 30 }
     ]
   };
   /* ресурсы награды: подписи и иконки те же, что во вкладке «Задания» */
@@ -115,6 +115,10 @@
     ubgl: {
       name: "Выстрел гранатомёта",
       icon: '<img src="assets/bosses/ubgl.webp" alt="" width="18" height="18" loading="lazy" decoding="async">'
+    },
+    grenade: {
+      name: "Граната",
+      icon: '<img src="assets/bosses/grenade.webp" alt="" width="18" height="18" loading="lazy" decoding="async">'
     }
   };
   const VEST_ICO =
@@ -270,7 +274,7 @@
             "</tr>"
         )
         .join("") +
-      '</tbody></table></div><p class="boss-reward-note">Ключ - карточка босса указанного цвета, Доп. - выстрел Гаусса или гранатомёта. Сет - шанс получить вещь комплекта «Пятничный вечер».</p></div>'
+      '</tbody></table></div><p class="boss-reward-note">Ключ - карточка босса указанного цвета, Доп. - граната, выстрел Гаусса или гранатомёта. Сет - шанс получить вещь комплекта «Пятничный вечер».</p></div>'
     );
   }
   function eventCard() {
