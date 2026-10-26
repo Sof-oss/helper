@@ -471,7 +471,7 @@ const PRERENDER = {
   "factions.html": html => {
     const f = require("./build-factions.js")(ROOT);
     html = html.replace('id="main" data-history=""', 'id="main" data-history="' + f.history + '"');
-    return fill(fill(html, "factionsStats", f.stats), "factionsList", f.list);
+    return fill(fill(fill(html, "factionsStats", f.stats), "factionsRank", f.rank), "factionsList", f.list);
   },
   /* «Новости сайта» и «Новости Зоны» на главной уходят в HTML готовыми, чтобы были видны сразу и поисковикам;
      пустой список новостей Зоны допустим - тогда блок просто скрыт */

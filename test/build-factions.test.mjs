@@ -63,6 +63,9 @@ test("рендер: ники, девизы и ссылки из данных н�
     assert.equal(res.count, 1);
     assert.equal(res.hiring, 1);
     assert.match(res.stats, /fx-stat/);
+    assert.match(res.rank, /data-fx-rank/);
+    assert.match(res.rank, /data-reputation="100"/);
+    assert.ok(!/<script/i.test(res.rank), "в рейтинге не должно быть исполняемого script");
     assert.match(res.list, /class="fx-card/);
     assert.ok(!/<script/i.test(res.list), "в разметке не должно быть исполняемого script");
     assert.ok(!/javascript:/i.test(res.list), "javascript:-ссылки не должны попадать в HTML");

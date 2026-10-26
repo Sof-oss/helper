@@ -290,13 +290,64 @@
       e.name +
       '</h2></div><div class="boss-event-body"><div class="boss-event-main"><div class="boss-hp"><span>Здоровье</span><b>' +
       n0(e.hp) +
-      ' <small>HP</small></b></div><div class="boss-block boss-event-when"><h3>Когда появляется</h3><div class="boss-event-schedule"><div class="boss-event-schedule-row"><span>Появление</span><b>2 раза в день</b></div><div class="boss-event-schedule-row"><span>Время</span><b class="boss-event-time">05:00 · 18:00 МСК</b></div><div class="boss-event-schedule-row"><span>Доступен</span><b class="boss-event-date">' +
+      ' <small>HP</small></b></div><div class="boss-block boss-event-when"><h3>Когда появляется</h3><div class="boss-event-count" data-event-countdown aria-hidden="true"><span class="boss-event-count-label">До появления</span><b data-event-countdown-val>--:--:--</b></div><div class="boss-event-schedule"><div class="boss-event-schedule-row"><span>Появление</span><b>2 раза в день</b></div><div class="boss-event-schedule-row"><span>Время</span><b class="boss-event-time">05:00 · 18:00 МСК</b></div><div class="boss-event-schedule-row"><span>Доступен</span><b class="boss-event-date">' +
       e.dates +
       '</b></div></div></div><div class="boss-block"><h3>Как проходит бой</h3><ul class="boss-event-rules"><li>Здоровье общее: урон всех игроков идёт в один счётчик</li><li>Место - по личному урону</li><li>Награда - после победы; побег лишает награды</li></ul></div><div class="boss-block"><h3>Требования</h3><div class="boss-req boss-req-none">Бой доступен во время события</div></div></div>' +
       rewardTable(e.rewards) +
       setBlock(e.set, "boss-event-set") +
       "</div></article>"
     );
+  }
+
+  /* обратный отсчёт до появления ивентового босса: 05:00 и 18:00 МСК, событие с 23 октября по 6 ноября 2026 */
+  function startEventCountdown() {
+    const box = root.querySelector("[data-event-countdown]");
+    if (!box) return;
+    const label = box.querySelector(".boss-event-count-label"),
+      val = box.querySelector("[data-event-countdown-val]");
+    /* время МСК = UTC+3: 05:00 -> 02:00Z, 18:00 -> 15:00Z */
+    const times = [];
+    for (let day = 0; day < 15; day++) {
+      const base = Date.UTC(2026, 9, 23 + day, 2, 0, 0);
+      times.push(base, base + 13 * 3600 * 1000);
+    }
+    const last = Date.UTC(2026, 10, 6, 15, 0, 0),
+      end = Date.UTC(2026, 10, 6, 21, 0, 0);
+    const spawns = times.filter(t => t <= last);
+    const pad = n => String(n).padStart(2, "0");
+    function tick() {
+      const now = Date.now();
+      if (now > end) {
+        label.textContent = "Событие завершилось";
+        val.textContent = "—";
+        if (box.classList && box.classList.remove) box.classList.remove("is-now");
+        return;
+      }
+      const recent = spawns.filter(t => t <= now).pop();
+      if (recent && now - recent < 60000) {
+        label.textContent = "Босс появился";
+        val.textContent = "сейчас";
+        if (box.classList && box.classList.add) box.classList.add("is-now");
+        return;
+      }
+      const next = spawns.find(t => t > now);
+      if (!next) {
+        label.textContent = "Событие завершается";
+        val.textContent = "—";
+        if (box.classList && box.classList.remove) box.classList.remove("is-now");
+        return;
+      }
+      const diff = next - now,
+        h = Math.floor(diff / 3600000),
+        m = Math.floor(diff / 60000) % 60,
+        s = Math.floor(diff / 1000) % 60,
+        days = Math.floor(h / 24);
+      label.textContent = "До появления";
+      val.textContent = days ? days + "д " + pad(h % 24) + ":" + pad(m) : pad(h) + ":" + pad(m) + ":" + pad(s);
+      if (box.classList && box.classList.remove) box.classList.remove("is-now");
+    }
+    tick();
+    if (typeof setInterval === "function") setInterval(tick, 1000);
   }
 
   const root = document.getElementById("bossesRoot");
@@ -306,6 +357,7 @@
       eventCard() +
       BOSSES.map(bossCard).join("") +
       '</div><p class="damage-footnote">Боссы идут по цепочке: с каждого падает ключ, а три таких ключа открывают бой со следующим. Ивентовый босс не входит в цепочку - он появляется по расписанию Хэллоуинского события. Значок бронежилета в награде в игре - вещи комплекта, которые могут выпасть с босса.</p>';
+  if (root) startEventCountdown();
   /* анимация из игры играет, только пока карточка на экране; при «уменьшить движение» остаётся кадр-заставка */
   const still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (root && !still && typeof IntersectionObserver === "function") {

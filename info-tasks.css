@@ -1254,6 +1254,44 @@
   padding: 12px 15px;
   min-width: 0;
 }
+.boss-event-count {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border: 1px solid #ff9a2e59;
+  border-radius: 6px;
+  background: linear-gradient(180deg, #ff9a2e14, #0000001f);
+  box-shadow: inset 0 1px 0 #ffcf8a1f;
+}
+.boss-event-count-label {
+  color: #ffcf8a;
+  font:
+    700 10px/1 "ZoneMono",
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.boss-event-count b {
+  color: #fff;
+  font:
+    700 24px/1 "ZoneMono",
+    ui-monospace,
+    monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 12px #ff9a2e59;
+}
+.boss-event-count.is-now {
+  border-color: #ffcf8a99;
+  background: linear-gradient(180deg, #ffcf8a24, #0000001f);
+}
+.boss-event-count.is-now b {
+  color: #ffcf8a;
+}
 .boss-event-schedule {
   display: grid;
   gap: 0;
