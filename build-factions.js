@@ -214,7 +214,10 @@ function factionsMarkup(ROOT) {
     })
     .join("");
   const updated = String(data.updated || "").split(" ")[0];
-  /* история по датам: суммы показателей каждой группировки - для периодов и своего диапазона */
+  /* история по датам: накопительный прирост показателей, начисленный той группировке, в которой боец состоял.
+     gh - журнал смены группировок [индекс даты, название]: прирост между соседними выгрузками засчитывается,
+     только если группировка не менялась, поэтому вступление, выход и переход не приносят чужой прогресс.
+     Массивы накопительные: прирост за период = значение в конце минус значение в начале. */
   const histRaw = Array.isArray(data.dates) ? data.dates : [];
   const histDates = histRaw.map(ts => new Date(ts + 3 * 3600000).toISOString().slice(0, 10));
   const valueAt = (p, mi, di) => {
@@ -226,15 +229,49 @@ function factionsMarkup(ROOT) {
     }
     return v;
   };
+  const groupAt = (p, di) => {
+    const gh = p.gh;
+    if (!Array.isArray(gh) || !gh.length) return p.g || "";
+    let g = "";
+    for (const h of gh) {
+      if (h[0] > di) break;
+      g = h[1] || "";
+    }
+    return g;
+  };
   const rankHistory = { dates: histDates, metrics: activeMetrics.map(m => m.key), factions: {} };
   list.forEach(f => {
     const series = {};
     activeMetrics.forEach(m => {
-      const mi = metricIdx[m.key];
-      series[m.key] = histRaw.map((_, di) => f.people.reduce((s, p) => s + valueAt(p, mi, di), 0));
+      series[m.key] = histRaw.map(() => 0);
     });
     rankHistory.factions[anchor(f.c.name)] = series;
   });
+  if (histRaw.length > 1) {
+    for (const p of Object.values(data.players)) {
+      const s = p.s || [];
+      if (!s.length) continue;
+      /* первый снимок бойца - точка отсчёта, а не прирост */
+      for (let di = Math.max(1, s[0][0] + 1); di < histRaw.length; di++) {
+        const group = groupAt(p, di);
+        if (!group || group !== groupAt(p, di - 1)) continue;
+        const target = rankHistory.factions[anchor(group)];
+        if (!target) continue;
+        activeMetrics.forEach(m => {
+          const mi = metricIdx[m.key],
+            cur = valueAt(p, mi, di),
+            prev = valueAt(p, mi, di - 1);
+          if (cur > prev) target[m.key][di] += cur - prev;
+        });
+      }
+    }
+    /* массивы накопительные: клиент вычитает значение начала периода из значения конца */
+    for (const series of Object.values(rankHistory.factions))
+      for (const key of rankHistory.metrics) {
+        const arr = series[key];
+        for (let i = 1; i < arr.length; i++) arr[i] += arr[i - 1];
+      }
+  }
   const historyJson = JSON.stringify(rankHistory).replace(/</g, "\\u003c");
   const firstDate = histDates[0] || "",
     lastDate = histDates[histDates.length - 1] || "",
@@ -367,7 +404,7 @@ function factionsMarkup(ROOT) {
     esc(rankTabs[0].hint) +
     '</p><div class="fx-rank-dialog-body"><ol class="fx-rank-list" data-fx-rank-list>' +
     rankRows +
-    '</ol><p class="fx-rank-note">Суммы считаются по бойцам с прогрессом, которые попали в ежедневную выгрузку Топ-100. Активность - среднее по семи показателям, лучший результат по каждому принят за 100.</p></div></section></div>';
+    '</ol><p class="fx-rank-note">Всё время - текущие суммы по составу, за период - прирост, который боец сделал, пока числился в группировке. Активность - среднее по семи показателям, лучший результат по каждому принят за 100.</p></div></section></div>';
   const rank =
     '<div class="fx-rank-wrap" data-fx-rank style="--m:var(--accent)"><script type="application/json" id="fxRankHistory">' +
     historyJson +

@@ -81,3 +81,85 @@ test("рендер: ники, девизы и ссылки из данных н�
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 });
+
+test("история периодов: прирост засчитывается только за время в группировке", () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "hotz-factions-gh-"));
+  const write = (file, data) => {
+    fs.mkdirSync(path.dirname(path.join(tmp, file)), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmp, file),
+      typeof data === "string" || Buffer.isBuffer(data) ? data : JSON.stringify(data)
+    );
+  };
+  try {
+    write("ui.js", fs.readFileSync(path.join(ROOT, "ui.js")));
+    write("top100/factions.json", { Evil: "#ff0000" });
+    write("top100/clans.json", { clans: [{ name: "Evil", level: 1, members: 2 }] });
+    write("factions-info.json", {});
+    write("top100-data.js", 'window.TOP100_HISTORY={"id":"2026-10-24"};');
+    write("top100-players.json", {
+      updated: "2026-10-24 12:00",
+      dates: [0, 1, 2, 3].map(d => Date.UTC(2026, 9, 20 + d)),
+      metrics: ["reputation"],
+      players: {
+        /* всё время в Evil: +50 на первой и +50 на последней дате */
+        1: {
+          n: "Постоянный",
+          g: "Evil",
+          l: 1,
+          v: [200],
+          s: [
+            [0, 1, 100],
+            [1, 1, 150],
+            [2, 1, 150],
+            [3, 1, 200]
+          ]
+        },
+        /* пришёл в Evil на дату 2: прирост до вступления новой группировке не идёт */
+        2: {
+          n: "Новичок",
+          g: "Evil",
+          l: 1,
+          v: [1300],
+          gh: [
+            [0, "Good"],
+            [2, "Evil"]
+          ],
+          s: [
+            [0, 1, 1000],
+            [1, 1, 1100],
+            [2, 1, 1200],
+            [3, 1, 1300]
+          ]
+        },
+        /* вышел из Evil на дату 2: прирост за время в группировке остаётся у неё */
+        3: {
+          n: "Ушедший",
+          g: "Good",
+          l: 1,
+          v: [800],
+          gh: [
+            [0, "Evil"],
+            [2, "Good"]
+          ],
+          s: [
+            [0, 1, 500],
+            [1, 1, 600],
+            [2, 1, 700],
+            [3, 1, 800]
+          ]
+        }
+      }
+    });
+
+    const res = factions(tmp);
+    const m = res.rank.match(/<script type="application\/json" id="fxRankHistory">([\s\S]*?)<\/script>/);
+    assert.ok(m, "история должна попасть в разметку");
+    const hist = JSON.parse(m[1]);
+    /* дата 1: +50 у постоянного и +100 у будущего ушедшего; дата 2 - день переходов, не считается;
+       дата 3: +50 у постоянного и +100 у новичка */
+    assert.deepEqual(hist.factions["f-evil"].reputation, [0, 150, 150, 300]);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
