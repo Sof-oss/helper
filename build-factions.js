@@ -183,7 +183,7 @@ function factionsMarkup(ROOT) {
       key: m.key,
       label: m.label,
       color: m.color,
-      hint: m.label + ": суммарно по бойцам группировки из Топ-100"
+      hint: m.label + ": суммарно по всем бойцам группировки с прогрессом"
     }))
   ];
   const rankRows = ranked
@@ -392,7 +392,7 @@ function factionsMarkup(ROOT) {
     list.length +
     ' группировок <span aria-hidden="true">→</span></button></section>';
   const modal =
-    '<div class="fx-rank-modal" id="fxRankModal" aria-hidden="true"><div class="fx-rank-modal-backdrop" data-close-rank></div><section class="fx-rank fx-rank-dialog" role="dialog" aria-modal="true" aria-labelledby="fxRankModalTitle"><header class="fx-rank-head"><div><h2 id="fxRankModalTitle">Рейтинг активности</h2><p>Показатели группировок за выбранный период по данным Топ-100</p></div><div class="fx-rank-modal-tools">' +
+    '<div class="fx-rank-modal" id="fxRankModal" aria-hidden="true"><div class="fx-rank-modal-backdrop" data-close-rank></div><section class="fx-rank fx-rank-dialog" role="dialog" aria-modal="true" aria-labelledby="fxRankModalTitle"><header class="fx-rank-head"><div><h2 id="fxRankModalTitle">Рейтинг активности</h2><p>Показатели группировок за выбранный период по ежедневной выгрузке игроков</p></div><div class="fx-rank-modal-tools">' +
     updatedBadge +
     '<button type="button" class="fx-rank-close" data-close-rank aria-label="Закрыть рейтинг">×</button></div></header>' +
     periodsHtml +
@@ -507,7 +507,7 @@ function factionsMarkup(ROOT) {
         rows +
         "</ol>" +
         (known < members
-          ? '<p class="fx-note">Остальные пока без прогресса и в выгрузку Топ-100 не попадают</p>'
+          ? '<p class="fx-note">Остальные пока без прогресса и в ежедневную выгрузку не попадают</p>'
           : "") +
         "</details>"
       : '<p class="fx-note">' + (members ? "Бойцов с прогрессом пока нет" : "В группировке пока никого нет") + "</p>";

@@ -298,8 +298,8 @@
         else
           setHints(
             info
-              ? metricLabel(metric) + ": прирост " + periodLabel + " · по бойцам из Топ-100"
-              : metricLabel(metric) + ": суммарно за всё время по текущему составу из Топ-100"
+              ? metricLabel(metric) + ": прирост " + periodLabel + " · по всем бойцам с прогрессом"
+              : metricLabel(metric) + ": суммарно за всё время по текущему составу"
           );
       },
       clearForCard = function (e) {
