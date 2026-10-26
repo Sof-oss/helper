@@ -101,6 +101,106 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
+.fx-rank-periods {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+}
+.fx-rank-period-label {
+  margin-right: 2px;
+  color: #7f95a8;
+  font:
+    700 9px/1 "ZoneMono",
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.fx-rank-period {
+  padding: 6px 11px;
+  border: 1px solid var(--panel-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #aebfce;
+  font:
+    600 11.5px/1 Oswald,
+    "Segoe UI",
+    sans-serif;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+.fx-rank-period:hover {
+  border-color: color-mix(in srgb, var(--m, var(--accent)) 50%, var(--panel-line));
+  color: #fff;
+}
+.fx-rank-period.on {
+  border-color: var(--m, var(--accent));
+  background: color-mix(in srgb, var(--m, var(--accent)) 14%, #0a0f14);
+  color: #fff;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--m, var(--accent)) 30%, transparent);
+}
+.fx-rank-custom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 9px;
+  padding: 8px 10px;
+  border: 1px dashed color-mix(in srgb, var(--m, var(--accent)) 35%, var(--panel-line));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--m, var(--accent)) 4%, transparent);
+}
+.fx-rank-custom[hidden] {
+  display: none;
+}
+.fx-rank-custom label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #9fb1c1;
+  font-size: 11px;
+}
+.fx-rank-custom input {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid #2b3e50;
+  border-radius: 4px;
+  background: #061019;
+  color: #e6eef5;
+  font:
+    600 11px/1 "ZoneMono",
+    ui-monospace,
+    monospace;
+  color-scheme: dark;
+}
+.fx-rank-custom input:focus {
+  border-color: var(--m, var(--accent));
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--m, var(--accent)) 22%, transparent);
+}
+.fx-rank-apply {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--m, var(--accent)) 55%, var(--panel-line));
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--m, var(--accent)) 10%, #0a0f14);
+  color: var(--m, var(--accent));
+  font:
+    600 10px/1 Oswald,
+    "Segoe UI",
+    sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.fx-rank-apply:hover,
+.fx-rank-apply:focus-visible {
+  border-color: var(--m, var(--accent));
+  color: #fff;
+  outline: none;
+}
 .fx-rank-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -496,6 +596,15 @@ body.fx-rank-lock {
     height: 100dvh;
     max-height: 100dvh;
     border-radius: 0;
+  }
+  .fx-rank-periods {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+  .fx-rank-period {
+    flex: 0 0 auto;
   }
   .fx-rank-tabs {
     flex-wrap: nowrap;

@@ -104,7 +104,9 @@ function factionsMarkup(ROOT) {
   for (const [id, p] of Object.entries(data.players)) {
     if (!p.g || p.g === "-") continue;
     if (!roster.has(p.g)) roster.set(p.g, []);
-    roster.get(p.g).push({ id, n: p.n, l: p.l || 1, rep: (p.v && p.v[REP]) || 0, v: p.v || [], off: !!p.off });
+    roster
+      .get(p.g)
+      .push({ id, n: p.n, l: p.l || 1, rep: (p.v && p.v[REP]) || 0, v: p.v || [], s: p.s || [], off: !!p.off });
   }
 
   /* группировки из игры + те, что встречаются только у игроков (если список из игры устарел) */
@@ -212,6 +214,69 @@ function factionsMarkup(ROOT) {
     })
     .join("");
   const updated = String(data.updated || "").split(" ")[0];
+  /* история по датам: суммы показателей каждой группировки - для периодов и своего диапазона */
+  const histRaw = Array.isArray(data.dates) ? data.dates : [];
+  const histDates = histRaw.map(ts => new Date(ts + 3 * 3600000).toISOString().slice(0, 10));
+  const valueAt = (p, mi, di) => {
+    let v = 0;
+    for (const pt of p.s || []) {
+      if (pt[0] > di) break;
+      const x = pt[2 + mi];
+      if (x !== null && x !== undefined) v = x;
+    }
+    return v;
+  };
+  const rankHistory = { dates: histDates, metrics: activeMetrics.map(m => m.key), factions: {} };
+  list.forEach(f => {
+    const series = {};
+    activeMetrics.forEach(m => {
+      const mi = metricIdx[m.key];
+      series[m.key] = histRaw.map((_, di) => f.people.reduce((s, p) => s + valueAt(p, mi, di), 0));
+    });
+    rankHistory.factions[anchor(f.c.name)] = series;
+  });
+  const historyJson = JSON.stringify(rankHistory).replace(/</g, "\\u003c");
+  const firstDate = histDates[0] || "",
+    lastDate = histDates[histDates.length - 1] || "",
+    defaultFrom = histDates.length ? histDates[Math.max(0, histDates.length - 8)] : "";
+  const periods = [
+    { key: "all", label: "Всё время" },
+    { key: "d1", label: "Сутки" },
+    { key: "d7", label: "Неделя" },
+    { key: "d30", label: "Месяц" },
+    { key: "custom", label: "Свой период" }
+  ];
+  const periodsHtml =
+    '<div class="fx-rank-periods" role="group" aria-label="Период рейтинга"><span class="fx-rank-period-label">Период</span>' +
+    periods
+      .map(
+        (p, i) =>
+          '<button type="button" class="fx-rank-period' +
+          (i === 0 ? " on" : "") +
+          '" data-rank-period="' +
+          p.key +
+          '" aria-pressed="' +
+          (i === 0) +
+          '">' +
+          p.label +
+          "</button>"
+      )
+      .join("") +
+    "</div>";
+  const customHtml =
+    '<div class="fx-rank-custom" data-rank-custom hidden><label>От <input type="date" data-rank-from min="' +
+    esc(firstDate) +
+    '" max="' +
+    esc(lastDate) +
+    '" value="' +
+    esc(defaultFrom) +
+    '" aria-label="Начало периода"></label><label>До <input type="date" data-rank-to min="' +
+    esc(firstDate) +
+    '" max="' +
+    esc(lastDate) +
+    '" value="' +
+    esc(lastDate) +
+    '" aria-label="Конец периода"></label><button type="button" class="fx-rank-apply" data-rank-apply>Показать</button></div>';
   const tabsHtml = rankTabs
     .map(
       (t, i) =>
@@ -274,11 +339,15 @@ function factionsMarkup(ROOT) {
   const updatedBadge = updated ? '<span class="fx-rank-updated">Обновлено ' + esc(updated) + "</span>" : "";
   const compact =
     '<section class="fx-rank fx-rank-compact" aria-labelledby="fxRankTitle">' +
-    '<header class="fx-rank-head"><div><h2 id="fxRankTitle">Рейтинг активности</h2><p>Топ-5 по показателю · полный рейтинг - по кнопке</p></div>' +
+    '<header class="fx-rank-head"><div><h2 id="fxRankTitle">Рейтинг активности</h2><p>Топ-5 за выбранный период · полный рейтинг - по кнопке</p></div>' +
     updatedBadge +
-    '</header><div class="fx-rank-tabs" role="group" aria-label="Показатель рейтинга">' +
+    "</header>" +
+    periodsHtml +
+    '<div class="fx-rank-tabs" role="group" aria-label="Показатель рейтинга">' +
     tabsHtml +
-    '</div><p class="fx-rank-hint" data-fx-rank-hint role="status" aria-live="polite">' +
+    "</div>" +
+    customHtml +
+    '<p class="fx-rank-hint" data-fx-rank-hint role="status" aria-live="polite">' +
     esc(rankTabs[0].hint) +
     '</p><div class="fx-rank-cards" data-fx-rank-cards>' +
     compactCards +
@@ -286,16 +355,26 @@ function factionsMarkup(ROOT) {
     list.length +
     ' группировок <span aria-hidden="true">→</span></button></section>';
   const modal =
-    '<div class="fx-rank-modal" id="fxRankModal" aria-hidden="true"><div class="fx-rank-modal-backdrop" data-close-rank></div><section class="fx-rank fx-rank-dialog" role="dialog" aria-modal="true" aria-labelledby="fxRankModalTitle"><header class="fx-rank-head"><div><h2 id="fxRankModalTitle">Рейтинг активности</h2><p>Суммарные показатели группировок по данным Топ-100</p></div><div class="fx-rank-modal-tools">' +
+    '<div class="fx-rank-modal" id="fxRankModal" aria-hidden="true"><div class="fx-rank-modal-backdrop" data-close-rank></div><section class="fx-rank fx-rank-dialog" role="dialog" aria-modal="true" aria-labelledby="fxRankModalTitle"><header class="fx-rank-head"><div><h2 id="fxRankModalTitle">Рейтинг активности</h2><p>Показатели группировок за выбранный период по данным Топ-100</p></div><div class="fx-rank-modal-tools">' +
     updatedBadge +
-    '<button type="button" class="fx-rank-close" data-close-rank aria-label="Закрыть рейтинг">×</button></div></header><div class="fx-rank-tabs" role="group" aria-label="Показатель рейтинга">' +
+    '<button type="button" class="fx-rank-close" data-close-rank aria-label="Закрыть рейтинг">×</button></div></header>' +
+    periodsHtml +
+    '<div class="fx-rank-tabs" role="group" aria-label="Показатель рейтинга">' +
     tabsHtml +
-    '</div><p class="fx-rank-hint" data-fx-rank-hint role="status" aria-live="polite">' +
+    "</div>" +
+    customHtml +
+    '<p class="fx-rank-hint" data-fx-rank-hint role="status" aria-live="polite">' +
     esc(rankTabs[0].hint) +
     '</p><div class="fx-rank-dialog-body"><ol class="fx-rank-list" data-fx-rank-list>' +
     rankRows +
     '</ol><p class="fx-rank-note">Суммы считаются по бойцам с прогрессом, которые попали в ежедневную выгрузку Топ-100. Активность - среднее по семи показателям, лучший результат по каждому принят за 100.</p></div></section></div>';
-  const rank = '<div class="fx-rank-wrap" data-fx-rank style="--m:var(--accent)">' + compact + modal + "</div>";
+  const rank =
+    '<div class="fx-rank-wrap" data-fx-rank style="--m:var(--accent)"><script type="application/json" id="fxRankHistory">' +
+    historyJson +
+    "</script>" +
+    compact +
+    modal +
+    "</div>";
 
   const cards = list.map(({ c, people, leaderId, members }) => {
     const name = c.name,
