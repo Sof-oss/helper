@@ -1,11 +1,11 @@
 {
-  "updated": "2026-10-25T12:13:56+03:00",
+  "updated": "2026-10-26T12:06:23+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
       "name": "1709",
       "level": 1,
-      "members": 6,
+      "members": 9,
       "leader": {
         "id": 3942,
         "name": "|1709| РуSSкиЙ"
@@ -77,7 +77,7 @@
     {
       "name": "Чистое небо",
       "level": 1,
-      "members": 11,
+      "members": 12,
       "leader": {
         "id": 1220,
         "name": "Петя кок"
@@ -113,7 +113,7 @@
     {
       "name": "Долг",
       "level": 3,
-      "members": 24,
+      "members": 25,
       "leader": {
         "id": 1253,
         "name": "🛡Д.О.Л.Г🛡 Акер"
@@ -121,7 +121,7 @@
     },
     {
       "name": "Вольные сталкеры",
-      "level": 2,
+      "level": 3,
       "members": 25,
       "leader": {
         "id": 1141,
@@ -148,7 +148,7 @@
     },
     {
       "name": "Наёмники",
-      "level": 3,
+      "level": 4,
       "members": 25,
       "leader": {
         "id": 133,
