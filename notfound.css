@@ -1,4 +1,11 @@
 /* страница 404: код, текст и кнопки разделов */
+.nf-page > .result-title {
+  padding: 12px 18px;
+  margin-bottom: 12px;
+  border: 1px solid color-mix(in srgb, var(--accent, #54bfff) 30%, transparent);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(6, 10, 14, 0.88), rgba(6, 10, 14, 0.72));
+}
 .nf-panel {
   padding: 36px 16px 40px;
   text-align: center;

@@ -263,7 +263,11 @@
     det.innerHTML = openLoc === null ? "" : locDetail(openLoc);
     if (openLoc === null) det.removeAttribute("aria-label");
     else det.setAttribute("aria-label", L[openLoc]);
-    if (scroll && openLoc !== null) det.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (scroll && openLoc !== null)
+      det.scrollIntoView({
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "nearest"
+      });
   }
   /* ---------- калькулятор энергии ----------
    Сколько ресурсов даст N энергии на выбранной локации и сколько жетонов уйдёт на энергетики.

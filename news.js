@@ -274,10 +274,10 @@ window.ZONE_NEWS = [
     box.className = "zn-lightbox";
     box.setAttribute("aria-label", "Скриншот");
     box.innerHTML =
-      '<figure><img alt=""><figcaption class="zn-lb-cap"></figcaption></figure>' +
+      '<div class="zn-lb-shell"><figure><img alt=""><figcaption class="zn-lb-cap"></figcaption></figure>' +
       '<button type="button" class="zn-lb-btn zn-lb-close" aria-label="Закрыть"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>' +
       '<button type="button" class="zn-lb-btn zn-lb-prev" aria-label="Предыдущий скриншот"><svg viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></button>' +
-      '<button type="button" class="zn-lb-btn zn-lb-next" aria-label="Следующий скриншот"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>';
+      '<button type="button" class="zn-lb-btn zn-lb-next" aria-label="Следующий скриншот"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button></div>';
     document.body.appendChild(box);
     box.addEventListener("click", e => {
       if (e.target.closest(".zn-lb-prev")) show(at - 1);

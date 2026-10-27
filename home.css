@@ -744,39 +744,70 @@ html.tour-seen .home-hero .tour-start {
   width: 100%;
   height: 100%;
   margin: 0;
-  padding: 0;
+  padding: 24px 60px;
   border: 0;
+  box-sizing: border-box;
   background: transparent;
+  overscroll-behavior: contain;
+}
+.zn-lightbox[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.zn-lightbox:not([open]) {
+  display: none;
 }
 .zn-lightbox::backdrop {
-  background: rgba(3, 5, 8, 0.88);
+  background: rgba(3, 5, 8, 0.9);
+}
+.zn-lb-shell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  max-height: 100%;
 }
 .zn-lightbox figure {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  gap: 10px;
-  height: 100%;
+  gap: 0;
+  max-width: min(1400px, 86vw);
+  max-height: 86dvh;
   margin: 0;
-  padding: 56px 64px 24px;
-  box-sizing: border-box;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(140, 170, 220, 0.25);
+  border-radius: 4px;
+  background: #080d12;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
 }
 .zn-lightbox img {
+  display: block;
   max-width: 100%;
-  max-height: calc(100% - 40px);
-  border: 1px solid rgba(140, 170, 220, 0.25);
-  border-radius: 3px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  max-height: calc(86dvh - 46px);
+  margin: 0 auto;
+  border: 0;
+  border-radius: 0;
+  background: #05080b;
+  object-fit: contain;
 }
 .zn-lb-cap {
-  font: 600 12px/1.4 var(--mono);
-  letter-spacing: 0.08em;
-  color: #b4bec7;
-  text-align: center;
+  width: 100%;
+  padding: 10px 14px;
+  border-top: 1px solid rgba(140, 170, 220, 0.18);
+  background: #0a0f14;
+  font: 600 13px/1.4 var(--mono);
+  letter-spacing: 0.06em;
+  color: #c6d2db;
+  text-align: left;
 }
 .zn-lb-btn {
   position: absolute;
+  z-index: 2;
   display: grid;
   place-items: center;
   width: 40px;
@@ -793,8 +824,8 @@ html.tour-seen .home-hero .tour-start {
   color: #d9a441;
 }
 .zn-lb-close {
-  top: 12px;
-  right: 12px;
+  top: 8px;
+  right: 8px;
 }
 .zn-lb-prev,
 .zn-lb-next {
@@ -802,24 +833,35 @@ html.tour-seen .home-hero .tour-start {
   transform: translateY(-50%);
 }
 .zn-lb-prev {
-  left: 12px;
+  left: 8px;
 }
 .zn-lb-next {
-  right: 12px;
+  right: 8px;
 }
 .zn-lb-single .zn-lb-prev,
 .zn-lb-single .zn-lb-next {
   display: none;
 }
 @media (max-width: 760px) {
-  .zn-lightbox figure {
-    padding: 56px 8px 72px;
+  .zn-lightbox {
+    padding: 12px;
   }
-  .zn-lb-prev,
+  .zn-lightbox figure {
+    max-width: 100%;
+    max-height: calc(100dvh - 24px);
+  }
+  .zn-lightbox img {
+    max-height: calc(100dvh - 68px);
+  }
+  .zn-lb-close {
+    top: 4px;
+    right: 4px;
+  }
+  .zn-lb-prev {
+    left: 4px;
+  }
   .zn-lb-next {
-    top: auto;
-    bottom: 14px;
-    transform: none;
+    right: 4px;
   }
 }
 /* промокод в тексте новости (news.js: promo/promoUrl) - моноширинная плашка-ссылка */

@@ -46,6 +46,11 @@
   border-color: var(--accent);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
 }
+.vs-pick input:not(:placeholder-shown) {
+  color: #fff;
+  font-weight: 600;
+  border-color: color-mix(in srgb, var(--accent) 55%, #1f3d54);
+}
 .vs-swap {
   margin-bottom: 2px;
   border-color: color-mix(in srgb, var(--accent) 30%, transparent);
@@ -279,6 +284,21 @@
   font-weight: 700;
   color: var(--c);
 }
+.vs-win {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: rgba(127, 224, 160, 0.14);
+  color: #9ff0bb;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.vs-win i {
+  font-style: normal;
+}
 .vs-delta.up {
   color: #7fe0a0;
 }
@@ -304,7 +324,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  min-height: 220px;
+  min-height: 170px;
   height: 100%;
   padding: 20px;
   border: 1px dashed color-mix(in srgb, var(--accent) 35%, rgba(255, 255, 255, 0.08));
@@ -324,6 +344,34 @@
   margin: 0;
   font-size: 13px;
   color: #8ea3b5;
+}
+.vs-quick {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.vs-quick span {
+  font-size: 12px;
+  color: #8ea3b5;
+}
+.vs-quick button {
+  padding: 6px 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, #1f3d54);
+  border-radius: 999px;
+  background: rgba(10, 20, 30, 0.7);
+  color: #dbe6ef;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.vs-quick button:hover,
+.vs-quick button:focus-visible {
+  border-color: var(--accent);
+  color: #fff;
 }
 .vs-note {
   margin: 12px 0 0;
@@ -366,8 +414,8 @@
     gap: 0 8px;
   }
   .vs-card .pc-head-strip {
-    padding: 5px 8px;
-    font-size: 9px;
+    padding: 6px 8px;
+    font-size: 11px;
     letter-spacing: 0.06em;
   }
   .vs-card .pc-signal {

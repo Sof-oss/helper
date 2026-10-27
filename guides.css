@@ -84,10 +84,18 @@
   transform: translateY(-2px);
 }
 .guide-card-img {
+  position: relative;
   display: block;
   aspect-ratio: 16/9;
   background: #081420;
   overflow: hidden;
+}
+.guide-card-img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(5, 9, 13, 0.06) 35%, rgba(5, 9, 13, 0.55));
 }
 .guide-card-img img {
   display: block;

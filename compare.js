@@ -34,7 +34,9 @@
         (i + 1) +
         '</label><div class="vs-pick-in"><input id="vsInput' +
         s +
-        '" type="search" placeholder="Ник игрока" spellcheck="false"></div></div>' +
+        '" type="search" name="vsPlayer' +
+        s +
+        '" placeholder="Ник игрока…" autocomplete="off" spellcheck="false"></div></div>' +
         (i === 0
           ? '<button type="button" class="mp-ic vs-swap" id="vsSwap" title="Поменять местами" aria-label="Поменять игроков местами">' +
             ICON.swap +
@@ -49,8 +51,10 @@
     ZP.picker(inp, m => {
       if (!m.id) return;
       ids[s] = m.id;
-      inp.value = "";
       update();
+    });
+    inp.addEventListener("focus", () => {
+      if (inp.value) inp.select();
     });
   });
   document.getElementById("vsSwap").addEventListener("click", () => {
@@ -64,8 +68,18 @@
     const qs = q.toString();
     history.replaceState(null, "", location.pathname + (qs ? "?" + qs : "") + location.hash);
   }
+  /* в поле видно выбранного игрока: по ссылке, после выбора и после обмена местами */
+  function syncInputs() {
+    if (!data) return;
+    SIDES.forEach(s => {
+      const inp = document.getElementById("vsInput" + s),
+        p = ids[s] && data.players[ids[s]];
+      if (inp) inp.value = p ? p.n : "";
+    });
+  }
   function update() {
     syncUrl();
+    syncInputs();
     draw();
   }
 
@@ -129,15 +143,41 @@
       "</dl></div></div></header>"
     );
   }
+  function topPicks(n) {
+    if (!data) return [];
+    const mi = data.metrics.indexOf("reputation");
+    return Object.entries(data.players)
+      .filter(([, p]) => p && p.v)
+      .sort((a, b) => (b[1].v[mi] || 0) - (a[1].v[mi] || 0))
+      .slice(0, n)
+      .map(([id, p]) => ({ id: id, n: p.n }));
+  }
   function emptyCard(side) {
     const me = ZP.getMe(),
-      other = ids[side === "a" ? "b" : "a"];
+      other = ids[side === "a" ? "b" : "a"],
+      picks = topPicks(3).filter(x => x.id !== other && x.id !== ids[side]);
     return (
       '<article class="vs-card vs-card-' +
       side +
       ' vs-card-empty"><div class="vs-placeholder"><b>Игрок ' +
       (side === "a" ? 1 : 2) +
-      "</b><p>Найдите игрока по нику в поле выше</p>" +
+      "</b><p>Выберите игрока в поле выше или возьмите из топа</p>" +
+      (picks.length
+        ? '<div class="vs-quick"><span>Быстрый выбор</span>' +
+          picks
+            .map(
+              x =>
+                '<button type="button" data-vs-pick="' +
+                side +
+                '" data-vs-id="' +
+                esc(x.id) +
+                '">' +
+                esc(x.n) +
+                "</button>"
+            )
+            .join("") +
+          "</div>"
+        : "") +
       (me && me.id && me.id !== other
         ? '<button type="button" class="mp-btn ghost" data-vs-me="' + side + '">' + ICON.me + "Подставить меня</button>"
         : "") +
@@ -193,6 +233,9 @@
             fmt(v[s]) +
             "</b>" +
             '<span class="vs-sub">' +
+            (win === s
+              ? '<span class="vs-win" title="Лучший результат"><i aria-hidden="true">✓</i> лучше</span>'
+              : "") +
             (win === s ? '<span class="vs-diff">+' + fmt(diff) + "</span>" : "") +
             (d
               ? '<span class="vs-delta ' +
@@ -259,6 +302,12 @@
 
   /* ---------- кнопки ---------- */
   root.addEventListener("click", e => {
+    const qp = e.target.closest("[data-vs-pick]");
+    if (qp) {
+      ids[qp.dataset.vsPick] = qp.dataset.vsId;
+      update();
+      return;
+    }
     const m = e.target.closest("[data-vs-me]");
     if (m) {
       const me = ZP.getMe();
@@ -300,8 +349,7 @@
       /* пустое сравнение - сразу подставляем себя первым */
       const me = ZP.getMe();
       if (!ids.a && !ids.b && me && me.id && d.players[me.id]) ids.a = me.id;
-      syncUrl();
-      draw();
+      update();
     })
     .catch(() => {
       document.getElementById("vsBody").innerHTML =

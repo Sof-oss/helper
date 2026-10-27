@@ -1095,6 +1095,10 @@ html.pc-lock body {
     padding: 12px 12px 12px;
     flex-wrap: wrap;
   }
+  .pc-head-text {
+    flex: 1 1 calc(100% - 70px);
+    min-width: 0;
+  }
   .pc-patch {
     flex-basis: 54px;
     width: 54px;
@@ -1104,18 +1108,22 @@ html.pc-lock body {
     margin-bottom: 8px;
   }
   .pc-dossier {
-    gap: 6px 16px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 16px;
   }
   .pc-dossier dd {
     font-size: var(--fs-sm);
   }
   .pc-stamp {
-    position: absolute;
-    right: 10px;
-    top: 8px;
-    margin: 0;
-    padding: 4px 8px 3px;
-    font-size: var(--fs-sm);
+    position: static;
+    order: 3;
+    flex: 0 0 auto;
+    width: max-content;
+    margin: 6px 0 0 66px;
+    padding: 4px 9px 3px;
+    font-size: 13px;
+    transform: rotate(-3deg);
   }
   .pc-stamp small {
     font-size: var(--fs-xs);
@@ -1124,7 +1132,7 @@ html.pc-lock body {
     padding-right: 0;
   }
   .pc-head-main:has(.pc-stamp) h2 {
-    padding-right: 78px;
+    padding-right: 0;
   }
   .pc-patches {
     padding: 0 12px 12px;

@@ -112,7 +112,7 @@
   margin-right: 2px;
   color: #7f95a8;
   font:
-    700 9px/1 "ZoneMono",
+    700 10px/1 "ZoneMono",
     ui-monospace,
     monospace;
   letter-spacing: 0.08em;
@@ -125,7 +125,7 @@
   background: rgba(255, 255, 255, 0.03);
   color: #aebfce;
   font:
-    600 11.5px/1 Oswald,
+    600 12px/1 Oswald,
     "Segoe UI",
     sans-serif;
   letter-spacing: 0.04em;
@@ -160,7 +160,7 @@
   align-items: center;
   gap: 6px;
   color: #9fb1c1;
-  font-size: 11px;
+  font-size: 12px;
 }
 .fx-rank-custom input {
   height: 32px;
@@ -534,6 +534,7 @@
 .fx-rank-dialog-body {
   min-height: 0;
   overflow: auto;
+  overscroll-behavior: contain;
   padding-right: 4px;
   scrollbar-width: thin;
 }
@@ -598,22 +599,28 @@ body.fx-rank-lock {
     border-radius: 0;
   }
   .fx-rank-periods {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    scrollbar-width: thin;
+    flex-wrap: wrap;
+    overflow: visible;
+    padding-bottom: 0;
   }
   .fx-rank-period {
+    min-height: 34px;
+    padding: 8px 12px;
     flex: 0 0 auto;
   }
   .fx-rank-tabs {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    scrollbar-width: thin;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(86px, 1fr));
+    gap: 4px;
+    overflow: visible;
+    padding-bottom: 0;
   }
   .fx-rank-tab {
-    flex: 0 0 auto;
+    padding: 8px 4px;
+    font-size: 11px;
+    line-height: 1.15;
+    text-align: center;
+    white-space: normal;
   }
   .fx-rank-row {
     grid-template-columns: 30px minmax(0, 1fr) auto;

@@ -94,7 +94,7 @@
       '</div><div class="gf-tabs" role="tablist"><button type="button" role="tab" class="active" aria-selected="true" data-tab="edit">Текст</button><button type="button" role="tab" aria-selected="false" data-tab="preview">Предпросмотр</button></div></div>' +
       '<textarea id="gfText" maxlength="' +
       LIM.text +
-      '" rows="16" placeholder="Текст гайда. Пустая строка - новый абзац, «## » в начале строки - подзаголовок, «- » в начале строки - пункт списка, **жирный**, *курсив*. Картинки - кнопкой на панели." required></textarea>' +
+      '" rows="16" aria-label="Текст гайда" placeholder="Текст гайда. Пустая строка - новый абзац, «## » в начале строки - подзаголовок, «- » в начале строки - пункт списка, **жирный**, *курсив*. Картинки - кнопкой на панели." required></textarea>' +
       '<div class="gf-preview guide-body" id="gfPreview" hidden></div>' +
       '<div class="gf-foot"><span id="gfCount"></span><span>Оформление: <b>## Подзаголовок</b>, <b>**жирный**</b>, <b>- список</b>, <b>[текст](ссылка)</b></span></div></div>' +
       '<div class="gf-images"><div class="gf-images-list" id="gfImages"></div>' +
@@ -546,7 +546,11 @@
     root.hidden = false;
     if (openBtn) openBtn.setAttribute("aria-expanded", "true");
     captcha();
-    if (scroll) root.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (scroll)
+      root.scrollIntoView({
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "start"
+      });
   }
   function close() {
     root.hidden = true;

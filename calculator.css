@@ -203,10 +203,11 @@
 .ars-step input::placeholder {
   color: #4d6475;
 }
-.ars-step input:focus {
-  outline: none;
+.ars-step input:focus-visible {
+  outline: 2px solid var(--c, #54bfff);
+  outline-offset: 1px;
   background: #0a1c2a;
-  box-shadow: none;
+  border-radius: 3px;
 }
 .ars-sub {
   grid-column: 2 / 4;
@@ -263,8 +264,8 @@
   gap: 2px;
 }
 .ars-donut small {
-  color: #9fb3c4;
-  font-size: 11px;
+  color: #a9bccc;
+  font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }

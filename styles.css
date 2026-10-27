@@ -193,9 +193,15 @@ body::before {
   pointer-events: none;
   background-repeat: no-repeat;
 }
+:where(button, input, a, select, summary) {
+  touch-action: manipulation;
+}
 :where(button, input, a):focus-visible {
   outline: 2px solid #54bfff;
   outline-offset: 2px;
+}
+:where(h1, h2, h3) {
+  text-wrap: balance;
 }
 
 /* ===== Шапка ===== */
@@ -596,6 +602,7 @@ body::before {
 }
 .result-title h1 {
   margin: 0;
+  text-wrap: balance;
 }
 .target-icon {
   font-size: 39px;
@@ -1289,6 +1296,7 @@ svg.target-icon {
   inset: 0;
   display: none;
   z-index: 2000;
+  overscroll-behavior: contain;
 }
 .talent-modal.show {
   display: block;
@@ -6732,6 +6740,14 @@ th.top100-sort {
     box-shadow: 0 0 0 9px color-mix(in srgb, var(--t, #5f8ac9) 0%, transparent);
   }
 }
+@media (max-width: 760px) {
+  .theme-pick-toggle::after {
+    right: 1px;
+    bottom: 1px;
+    width: 13px;
+    height: 13px;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .theme-pick-toggle::after {
     transition: none;
@@ -7000,7 +7016,8 @@ th.top100-sort {
   color: color-mix(in srgb, var(--accent) 55%, #fff);
 }
 .news-head b {
-  font-size: 14.5px;
+  font-size: 15.5px;
+  line-height: 1.25;
   color: #f1f6fa;
 }
 .news-items {
@@ -7014,9 +7031,10 @@ th.top100-sort {
   display: flex;
   align-items: baseline;
   gap: 9px;
-  font-size: var(--fs-sm);
+  font-size: 13.5px;
   line-height: 1.45;
-  color: #c4ced6;
+  color: #cbd5dd;
+  text-wrap: pretty;
 }
 .news-items a {
   color: var(--accent-2);
@@ -7819,9 +7837,10 @@ main.content.page-narrow {
     ui-monospace,
     monospace;
 }
-.ich-plan input:focus {
-  outline: none;
+.ich-plan input:focus-visible {
   border-color: var(--ich);
+  outline: 2px solid color-mix(in srgb, var(--ich) 60%, transparent);
+  outline-offset: 1px;
 }
 .ich-plan-res {
   margin-left: auto;

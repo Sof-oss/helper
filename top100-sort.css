@@ -107,13 +107,13 @@
   gap: 6px;
 }
 .t100-chip {
-  height: 30px;
-  padding: 0 11px;
+  height: 32px;
+  padding: 0 12px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  border: 1px solid #1f3d54;
-  background: #0a1a27;
+  border: 1px solid rgba(120, 160, 190, 0.16);
+  background: transparent;
   color: #a9bbc9;
   font: inherit;
   font-weight: 600;
@@ -136,11 +136,15 @@
   color: #8aa0b2;
 }
 .t100-chip:hover {
-  background: #0e2334;
+  background: rgba(14, 35, 52, 0.75);
+  border-color: rgba(120, 160, 190, 0.35);
   color: #d5e1ea;
 }
 .t100-chip.active {
   color: #eef4fa;
+  border-color: color-mix(in srgb, var(--f) 55%, #1f3d54);
+  background: color-mix(in srgb, var(--f) 16%, #0a1a27);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--f) 18%, transparent);
 }
 .t100-dot {
   display: inline-block;
@@ -573,12 +577,17 @@
   }
   .top100-panel .top100-tab {
     grid-column: span 3;
-    height: 36px;
+    height: auto;
+    min-height: 38px;
     min-width: 0;
-    padding: 0 4px;
-    letter-spacing: 0.03em;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    padding: 6px 4px;
+    font-size: 11px;
+    line-height: 1.15;
+    letter-spacing: 0.01em;
+    text-align: center;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
   }
   .top100-panel .top100-tab:nth-child(n + 5) {
     grid-column: span 4;
@@ -635,7 +644,7 @@
     order: 3;
   }
   .top100-panel .t100-chip {
-    height: 34px;
+    height: 38px;
   }
 }
 
