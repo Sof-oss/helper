@@ -1,7 +1,16 @@
 {
-  "updated": "2026-10-26T12:06:23+03:00",
+  "updated": "2026-10-27T12:02:14+03:00",
   "source": "API игры: /clans/search",
   "clans": [
+    {
+      "name": "Военные",
+      "level": 1,
+      "members": 2,
+      "leader": {
+        "id": 4438,
+        "name": "\"Военные\" Дымка"
+      }
+    },
     {
       "name": "1709",
       "level": 1,
@@ -95,7 +104,7 @@
     {
       "name": "Учёные",
       "level": 2,
-      "members": 25,
+      "members": 24,
       "leader": {
         "id": 1223,
         "name": "\"Учёные\"  СаХаРоК"
@@ -131,7 +140,7 @@
     {
       "name": "Свобода",
       "level": 2,
-      "members": 25,
+      "members": 24,
       "leader": {
         "id": 388,
         "name": "«Cвобода» Чехов"
