@@ -10,7 +10,6 @@ import {
   arenaBonus,
   MIN_LEVEL,
   MAX_LEVEL,
-  MAX_ARENA,
   baseDamageByLevel,
   buildHashOf as buildHashOfCore,
   parseBuild as parseBuildCore,
@@ -1367,7 +1366,7 @@ function setArena(raw) {
   const input = $("arenaPoints"),
     active = document.activeElement === input;
   state.arena = clampArena(raw);
-  /* как у уровня: дробное и выход за 0–500 исправляются сразу, пустое поле не трогаем, пока печатают */
+  /* как у уровня: дробное и отрицательные значения исправляются сразу, пустое поле не трогаем, пока печатают */
   if (!active || (raw !== "" && String(state.arena) !== raw)) input.value = state.arena;
   saveState();
   updateEquipmentSummary();
@@ -1987,7 +1986,6 @@ document.addEventListener("mouseout", e => {
 });
 const arenaInput = $("arenaPoints");
 if (arenaInput) {
-  arenaInput.max = String(MAX_ARENA);
   arenaInput.addEventListener("input", () => setArena(arenaInput.value));
   arenaInput.addEventListener("change", () => {
     arenaInput.value = clampArena(arenaInput.value);

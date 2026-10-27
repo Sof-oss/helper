@@ -75,7 +75,7 @@ test("ссылка на билд: мусор и края", () => {
   assert.equal(parseBuild("#l=500").level, 100);
   assert.equal(parseBuild("l=7&s=abc").gear.length, 0);
   assert.deepEqual(parseBuild("#t=9999").talents[TALENTS[0][0]], 5, "ранг выше 5 обрезается");
-  assert.equal(parseBuild("#a=999").arena, 500);
+  assert.equal(parseBuild("#a=999").arena, 999);
   assert.equal(parseBuild("#a=-10").arena, 0);
 });
 
@@ -86,11 +86,12 @@ test("старые ссылки с s/i читаются как вещи и но�
   assert.equal(parseBuild("#l=25&s=1023").gear.length, 26, "все вещи первых 10 комплектов");
 });
 
-test("арена: таблица бонусов к урону", () => {
+test("арена: бонусы по формуле", () => {
   assert.deepEqual(arenaBonus(0), { knife: 0, pistol: 0, auto: 0, grenade: 0, gl: 0, gauss: 0 });
   assert.deepEqual(arenaBonus(250), { knife: 5, pistol: 6, auto: 6, grenade: 6, gl: 14, gauss: 45 });
   assert.deepEqual(arenaBonus(500), { knife: 11, pistol: 12, auto: 13, grenade: 13, gl: 28, gauss: 90 });
-  assert.equal(clampArena(900), 500);
+  assert.deepEqual(arenaBonus(1000), { knife: 23, pistol: 24, auto: 26, grenade: 27, gl: 56, gauss: 180 });
+  assert.equal(clampArena(900), 900);
   assert.equal(clampArena(-1), 0);
   assert.equal(clampArena(12.5), 13);
   assert.equal(clampArena("12.4"), 12);

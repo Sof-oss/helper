@@ -2,7 +2,7 @@
    Импортируется app.js (собирается в calculator.js) и тестами (test/calc-core.test.mjs) */
 import { TALENTS } from "../talents.js";
 import { SETS, ITEMS } from "./gear-data.js";
-import { ARENA_BONUS, ARENA_MAX } from "./arena-data.js";
+import { ARENA_BASE, ARENA_COEF_PERCENT } from "./arena-data.js";
 
 export { SETS, ITEMS };
 /* все вещи одним списком: комплекты идут в порядке данных, затем одиночные;
@@ -14,8 +14,7 @@ const LEGACY_STANDALONE = ["JACKET_003", "JACKET_008", "JACKET_009", "JACKET_011
 
 export const MIN_LEVEL = 1,
   MAX_LEVEL = 100,
-  MAX_RANK = 5,
-  MAX_ARENA = ARENA_MAX;
+  MAX_RANK = 5;
 
 /* уровень персонажа: целое 1–100; дробное округляется, мусор и пустое - 1 */
 export function clampLevel(v) {
@@ -23,16 +22,24 @@ export function clampLevel(v) {
   if (!Number.isFinite(n)) return MIN_LEVEL;
   return Math.max(MIN_LEVEL, Math.min(MAX_LEVEL, n));
 }
-/* сумма характеристик арены: целое 0–500 */
+/* сумма характеристик арены: целое неотрицательное число, без верхнего предела */
 export function clampArena(v) {
   const n = Math.round(Number(v));
   if (!Number.isFinite(n)) return 0;
-  return Math.max(0, Math.min(MAX_ARENA, n));
+  return Math.max(0, n);
 }
-/* бонусы к урону от суммы характеристик: столбцы таблицы игры [нож, пистолет, автомат, граната, подствольник, гаусс] */
+/* бонусы к урону: floor(базовый урон × очки × 0.04907 / 100) для каждого оружия */
 export function arenaBonus(points) {
-  const a = ARENA_BONUS[clampArena(points)] || [0, 0, 0, 0, 0, 0];
-  return { knife: a[0], pistol: a[1], auto: a[2], grenade: a[3], gl: a[4], gauss: a[5] };
+  const p = clampArena(points),
+    share = (p * ARENA_COEF_PERCENT) / 100;
+  return {
+    knife: Math.floor(ARENA_BASE.knife * share),
+    pistol: Math.floor(ARENA_BASE.pistol * share),
+    auto: Math.floor(ARENA_BASE.auto * share),
+    grenade: Math.floor(ARENA_BASE.grenade * share),
+    gl: Math.floor(ARENA_BASE.gl * share),
+    gauss: Math.floor(ARENA_BASE.gauss * share)
+  };
 }
 
 /* бесплатные удары считаются так же, как оружие за жетоны: «нулевое» значение × 1,02^уровень, округление в конце.
