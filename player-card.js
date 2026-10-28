@@ -268,6 +268,8 @@
     }
   }
   let basePath = /^\/p\//.test(location.pathname) ? "/top100" : location.pathname;
+  /* параметры рейтинга запоминаем до перехода на /p/<id>: в адресе карточки они не нужны */
+  let baseSearch = /^\/p\//.test(location.pathname) ? "" : location.search;
   function close() {
     if (!root || root.hidden) return;
     root.hidden = true;
@@ -275,7 +277,7 @@
     cur = null;
     /* адрес страницы рейтинга возвращаем на место (см. open) */
     if (/^\/p\//.test(location.pathname) || /^#p=/.test(location.hash))
-      history.replaceState(null, "", basePath + location.search);
+      history.replaceState(null, "", basePath + baseSearch);
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
   function share() {
@@ -326,8 +328,11 @@
         }
         renderCard();
 
-        if (!/^\/p\//.test(location.pathname)) basePath = location.pathname;
-        history.replaceState(null, "", "/p/" + encodeURIComponent(id) + location.search);
+        if (!/^\/p\//.test(location.pathname)) {
+          basePath = location.pathname;
+          baseSearch = location.search;
+        }
+        history.replaceState(null, "", "/p/" + encodeURIComponent(id));
         root.querySelector(".pc-dialog").focus({ preventScroll: true });
         root.querySelector(".pc-dialog").scrollTop = 0;
       })
