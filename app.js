@@ -707,7 +707,6 @@ function renderTalents() {
   $("modalSpentPoints").textContent = spent;
   $("modalMaxPoints").textContent = MAX_TALENT_POINTS;
   $("talentPointsBadge").textContent = spent + " / " + MAX_TALENT_POINTS;
-  $("talentSummary").textContent = spent ? "Распределено " + spent + " очков" : "Очки не распределены";
   applyTreeTransform();
 
   if ($("talentModal").classList.contains("show")) {
