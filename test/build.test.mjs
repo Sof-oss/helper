@@ -1,5 +1,3 @@
-/* Smoke-тест сборки: build.js должен собрать сайт без ошибок, с CSP, версиями файлов,
-   sitemap и статической оболочкой service worker (без страниц и ежедневных данных Топ-100). */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";

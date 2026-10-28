@@ -1,4 +1,4 @@
-/* Калькулятор урона. ES-модуль: собирается build.js из src/calculator.js вместе с talents.js и polish.js в один calculator.js */
+/* Калькулятор урона: состояние билда, расчёт и окна. */
 import { TALENTS } from "./talents.js";
 import {
   SETS,
@@ -261,9 +261,7 @@ function talentAncestors(code) {
   return seen;
 }
 
-/* Дерево статичное: пользователь его не двигает и не масштабирует.
-   Масштаб считается один раз - так, чтобы дерево целиком помещалось в окно,
-   и пересчитывается при изменении размеров окна */
+/* Дерево статичное: пользователь его не двигает и не масштабирует. */
 const treeT = { s: 1, x: 0, y: 0 };
 function clampTreeScale(s) {
   return Math.min(2.5, Math.max(0.2, s));
@@ -272,9 +270,7 @@ function applyTreeTransform() {
   const c = document.querySelector(".talent-flow-canvas");
   if (c) c.style.transform = "translate(" + treeT.x + "px," + treeT.y + "px) scale(" + treeT.s + ")";
 }
-/* вписать дерево в окно и отцентровать (offsetLeft/Top не учитывают transform).
-   Считаем по фактическим границам узлов, а не по холсту: у холста есть поля,
-   из-за которых дерево выглядело мелким на широком экране */
+/* вписать дерево в окно и отцентровать (offsetLeft/Top не учитывают transform). */
 function talentNodeBox() {
   const nodes = [...document.querySelectorAll(".talent-flow-canvas .talent-node-game")];
   if (!nodes.length) return null;
@@ -713,7 +709,7 @@ function renderTalents() {
   $("talentPointsBadge").textContent = spent + " / " + MAX_TALENT_POINTS;
   $("talentSummary").textContent = spent ? "Распределено " + spent + " очков" : "Очки не распределены";
   applyTreeTransform();
-  /* фокус: при открытии подробностей уходит в них, при закрытии возвращается на талант, при перерисовке остаётся на своей кнопке */
+
   if ($("talentModal").classList.contains("show")) {
     const box = detailOverlay.querySelector(".talent-detail-modal");
     setDetailInert(detailOn);
@@ -911,8 +907,7 @@ function tokenWeaponStats() {
     return { key: k, name, price: TOKEN_PRICES[k], dmg, chance, bonus, avg: dmg + chance * bonus };
   });
 }
-/* карточки оружия: урон за жетон, полоска выгоды и три строки расчёта.
-   Самое выгодное оружие выделено рамкой и зелёной полоской - этого достаточно. */
+/* карточки оружия: урон за жетон, полоска выгоды и три строки расчёта. */
 const TOKEN_ICON_CLASS = { grenade: "grenade", gl: "ubgl", gauss: "gauss" };
 function renderTokens() {
   const tokens = tokenInt("tokenCount"),
@@ -977,8 +972,7 @@ function renderTokens() {
     })
     .join("");
 }
-/* «Мой арсенал»: сколько у игрока гранат, гранатомётов и гауссов -> урон каждого и общий (средний с критом).
-   Количество и открытая вкладка запоминаются в браузере */
+/* «Мой арсенал»: сколько у игрока гранат, гранатомётов и гауссов -> урон каждого и общий (средний с критом). */
 const ARSENAL_KEY = "gameHelperArsenal",
   ARSENAL_MAX = 999999,
   ARSENAL_COLOR = { grenade: "#54bfff", gl: "#f2b544", gauss: "#3fdc8a" };
@@ -1014,7 +1008,7 @@ function setTokTab(tab) {
   if (tokTab === "arsenal") renderArsenal();
   else renderTokens();
 }
-/* список оружия рисуется один раз (поля ввода не пересоздаются, фокус и курсор не прыгают), дальше обновляются только числа */
+
 function renderArsenal() {
   const st = tokenWeaponStats();
   if (!$("arsList").children.length)
@@ -1145,7 +1139,7 @@ function renderCards() {
   $("freeCards").innerHTML = CARDS.free.map(c => cardMarkup(c, false)).join("");
 }
 
-/* ---------- снаряжение: карта комплектов в окне ---------- */
+/* снаряжение: карта комплектов в окне */
 const escEq = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const ITEM_SET = new Map();
 SETS.forEach(s => s.items.forEach(i => ITEM_SET.set(i.code, s.code)));
@@ -1532,8 +1526,7 @@ const CMP_GROUPS = [
   ]
 ];
 const sumRanks = t => Object.values(t).reduce((a, b) => a + b, 0);
-/* у большего значения зелёная стрелка вверх, у меньшего красная вниз, рядом на сколько; поровну - без отметок.
-   Под числом - полоска: насколько значение больше/меньше второго билда */
+/* у большего значения зелёная стрелка вверх, у меньшего красная вниз, рядом на сколько; поровну - без отметок. */
 function cmpRow(label, x, y, pct) {
   const d = Math.abs(y - x),
     eq = d < (pct ? 0.005 : 0.5),
@@ -1707,9 +1700,7 @@ function shareBuild() {
   );
 }
 
-/* ===== Окна и озвучка =====
-   Пока окно открыто, страница под ним inert: Tab не уходит за диалог, скринридер не читает фон.
-   Фокус идёт в окно и возвращается на кнопку, которой его открыли. Следим за классом .show, поэтому функции открытия и закрытия окон не трогаем */
+/* Окна и озвучка */
 const openedModals = new Map();
 function setPageInert(on) {
   document.querySelectorAll(".site-header,.page,.site-footer").forEach(el => {
@@ -1743,9 +1734,7 @@ function modalHidden(m) {
   });
 });
 
-/* подтверждение в стиле сайта вместо confirm(): askConfirm({title,text,ok}) -> Promise<boolean>.
-   Окно встаёт поверх открытых окон (например, древа талантов), всё под ним становится недоступным,
-   фокус сразу на «Отмена», после закрытия возвращается на кнопку, с которой спросили */
+/* подтверждение в стиле сайта вместо confirm(): askConfirm({title,text,ok}) -> Promise<boolean>. */
 let confirmResolve = null,
   confirmOpener = null,
   confirmInerted = [];

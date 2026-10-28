@@ -1,10 +1,4 @@
-/* Форма «Отправить свой гайд» на странице гайдов.
-   Открывается кнопкой или по адресу /guides#send. Текст пишется в простом Markdown (guide-md.js),
-   предпросмотр рисуется тем же кодом, что и страница гайда на сайте. Картинки сжимаются прямо в браузере.
-   Отправка - в функцию Yandex Cloud (yandex/index.js), она создаёт pull request в репозитории сайта;
-   гайд публикуется, когда его принимают. Адрес и ключ защиты от ботов - в guides-config.js:
-   Yandex SmartCaptcha (smartcaptchaSiteKey) или, если его нет, Cloudflare Turnstile (turnstileSiteKey).
-   Черновик (заголовок, ник, текст) хранится в localStorage, картинки - только до перезагрузки страницы */
+/* Форма «Отправить свой гайд» на странице гайдов. */
 (function () {
   "use strict";
   const root = document.getElementById("guideForm");
@@ -31,8 +25,7 @@
   let built = false,
     widget = null,
     sending = false;
-  /* номер черновика: повторная отправка того же гайда (двойной клик, повтор после ошибки сети)
-     не создаст второй pull request - Worker узнает его по этому номеру */
+
   const newSid = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
   let sid = newSid();
 
@@ -120,8 +113,6 @@
       text = $("gfText"),
       preview = $("gfPreview");
 
-    /* что ещё нужно для отправки: список под кнопкой обновляется на ходу, после неудачной попытки
-       незаполненные поля подсвечиваются (aria-invalid) */
     let tried = false;
     const checks = () => {
       const n = text.value.trim().length;
@@ -492,7 +483,7 @@
       r.readAsDataURL(blob);
     });
 
-  /* капча подгружается, только когда форму открыли. Yandex SmartCaptcha или Cloudflare Turnstile */
+  /* капча подгружается, только когда форму открыли. */
   const captchaApi = () => (CAPTCHA === "yandex" ? window.smartCaptcha : window.turnstile);
   function captchaToken() {
     const api = captchaApi();

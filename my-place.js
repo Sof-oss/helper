@@ -1,12 +1,4 @@
-/* «Моё место»: посетитель отмечает себя (ник из Топ-100 или любой игрок из карточек), дальше
-   - Топ-100 (top100.html): его строка подсвечена во всех рейтингах, панель «Моё место» над таблицей,
-     кнопка «К моему месту» прокручивает к строке (сбрасывает поиск и фильтр, предлагает рейтинги, где он есть);
-     в карточке игрока - кнопки «Это я» и «Сравнить»;
-   - главная (index.html): блок с местами во всех семи рейтингах и изменением с прошлого обновления.
-   Места и изменения - из top100-data.js (TOP100_* и TOP100_CHANGES, те же стрелки, что в таблице), места вне сотни -
-   из карточек игроков top100-players.json. На главной top100-data.js догружается, только если посетитель себя отметил.
-   Нужен zone-players.js (window.ZonePlayers). top100.js, player-card.js и разметку страниц не трогает:
-   панель и кнопки вставляются сами, за перерисовкой таблицы и карточки следит MutationObserver */
+/* «Моё место»: сохранение ника и подсветка игрока в рейтингах. */
 (function () {
   "use strict";
   const ZP = window.ZonePlayers;
@@ -16,9 +8,8 @@
   const $ = id => document.getElementById(id);
   const reduce = () => window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* ---------- данные рейтинга ---------- */
-  /* период «с прошлого обновления»: в top100-data.js он совпадает с периодом, который начинается с прошлой выгрузки
-     (TOP100_HISTORY.from), обычно это «За сутки». Нет такого - берём первый период, как таблица по умолчанию */
+  /* данные рейтинга */
+
   function lastPeriod() {
     const list = Array.isArray(window.TOP100_PERIODS) ? window.TOP100_PERIODS : [],
       h = window.TOP100_HISTORY;
@@ -92,7 +83,7 @@
   const compareHref = (a, b) =>
     "/compare?a=" + encodeURIComponent(a) + (b && b !== a ? "&b=" + encodeURIComponent(b) : "");
 
-  /* ======================= Топ-100 ======================= */
+  /* Топ-100 */
   function initTop100() {
     const wrap = $("top100TableWrap"),
       tools = document.querySelector(".top100-panel .t100-tools");
@@ -327,9 +318,6 @@
     initCard();
   }
 
-  /* ---------- награда «Хэллоуина в Зоне»: все тыквы-пасхалки найдены (halloween.js, localStorage.hotzHwFound) ----------
-     Звание видно только в своей карточке («Это я») и только в этом браузере - находки хранятся у посетителя.
-     Остаётся и после сезона. HW_EGG_PAGES - столько же, сколько EGG_PAGES в halloween.js */
   const HW_FOUND_KEY = "hotzHwFound";
   const HW_EGG_PAGES = 6;
   function pumpkinHunter() {
@@ -347,7 +335,7 @@
     '<path class="hw-rank-face" d="M7.6 11.6 9.6 13l-2 .6zM16.4 11.6 14.4 13l2 .6zM7.8 16.2l1.5.9 1.3-.9 1.4.9 1.4-.9 1.3.9 1.5-.9"/></svg>' +
     "<span><small>Особое звание · Хэллоуин</small><b>Тыквенный сталкер</b></span></div>";
 
-  /* ---------- карточка игрока (player-card.js): «Это я» и «Сравнить» под шапкой «Личного дела» ---------- */
+  /* карточка игрока (player-card.js): «Это я» и «Сравнить» под шапкой «Личного дела» */
   function initCard() {
     const curId = () => {
       const m = location.pathname.match(/^\/p\/([^/]+)/) || location.hash.match(/^#p=(.+)$/);
@@ -414,7 +402,7 @@
     }
   }
 
-  /* ======================= Главная ======================= */
+  /* Главная */
   function initHome() {
     const box = $("homeMe");
     if (!box) return;

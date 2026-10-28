@@ -1,19 +1,6 @@
 #!/usr/bin/env node
 "use strict";
-/* Сборка для деплоя: исходники из корня -> ./dist
- * 0. Общие куски (partials/header.html, partials/footer.html) подставляются вместо <!-- @include имя -->,
- *    в шапке помечается активный пункт меню: так меню правится в одном месте, а не в каждой странице.
- * 0б. Модули собираются esbuild (см. MODULES): 3D главной (src/home-3d.js + src/zone-gl.js) - маленький home-3d.js
- *     и догружаемые части в dist/3d/; калькулятор (src/calculator.js -> app.js, polish.js, talents.js) - один calculator.js.
- * 1. Таблицы «Информации» и «Топ-100» дописываются прямо в HTML: их видят поисковики и те, у кого выключен JS.
- *    Разметку рисуют те же info.js / info-tasks.js / top100.js, что работают в браузере, поэтому она совпадает.
- * 2. Все стили страницы склеиваются в один bundle-*.css без правил, которые на ней не нужны; css и js сжимаются esbuild.
- * 3. Ссылки на css, js и картинки получают ?v=<хэш содержимого>, после деплоя старый кэш не подтянется.
- * 3б. Гайды из guides/<адрес>/index.md (Markdown, см. guide-md.js) становятся страницами /guide/<адрес>,
- *     список гайдов дописывается в guides.html, картинки гайдов копируются в dist/guide-img/<адрес>/.
- * 4. В sitemap.xml дописывается lastmod: дата последнего коммита страницы и её css/js, у Топ-100 - время выгрузки рейтинга.
- * 5. После сборки build-previews.js делает ссылки на карточки игроков /p/<id> с картинкой «Личное дело» (npm run build - оба шага).
- * Запуск: npm install (один раз, ставит esbuild), затем node build.js. Без esbuild сборка не идёт: калькулятор собирается им */
+/* Сборка: исходники из корня -> ./dist */
 const fs = require("fs");
 const path = require("path");
 const vm = require("vm");
@@ -32,8 +19,7 @@ const ROOT = __dirname;
 /* BUILD_OUT - только для тестов: собрать во временную папку, не трогая рабочий dist */
 const OUT = process.env.BUILD_OUT ? path.resolve(process.env.BUILD_OUT) : path.join(ROOT, "dist");
 
-/* модули: файл в dist -> точка входа и все исходники (по ним же считается дата страницы в sitemap).
-   Исходники модулей в dist не копируются - на сайт попадает только собранный файл */
+/* модули: файл в dist -> точка входа и все исходники (по ним же считается дата страницы в sitemap). */
 const MODULES = {
   "home-3d.js": ["src/home-3d.js", "src/zone-bg.js", "src/zone-theme.js"],
   "calculator.js": [
@@ -90,7 +76,7 @@ const SKIP = new Set([
     .filter(f => !f.startsWith("src/"))
 ]);
 
-/* ---------- копирование ---------- */
+/* копирование */
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT);
 for (const name of fs.readdirSync(ROOT)) {
@@ -98,11 +84,7 @@ for (const name of fs.readdirSync(ROOT)) {
   fs.cpSync(path.join(ROOT, name), path.join(OUT, name), { recursive: true });
 }
 
-/* ---------- гайды ----------
-   guides/<адрес>/index.md + картинки рядом. Гайд попадает в репозиторий через pull request из формы
-   «Отправить свой гайд» (функция Yandex Cloud, yandex/index.js) и публикуется, когда его принимают (Merge).
-   Адрес папки = адрес страницы: guides/kak-nachat/index.md -> /guide/kak-nachat.
-   Картинки лежат отдельно от страницы (dist/guide-img/<адрес>/), чтобы папка не мешала адресу /guide/<адрес> */
+/* гайды guides/<адрес>/index.md + картинки рядом. */
 const GuideMD = require("./guide-md.js");
 const SITE = "https://heart-of-the-zone.ru";
 const GUIDES_DIR = path.join(ROOT, "guides");
@@ -262,10 +244,6 @@ const GUIDE_INVITE =
   "«Билд для новичка», «Как лучше копить жетоны»</small>" +
   '<span class="guide-card-meta">Открыть форму →</span></span></a>';
 
-/* ---------- 3D главной ----------
-   src/home-3d.js - маленький загрузчик; живой фон (zone-bg.js вместе с src/zone-gl.js - крошечной обёрткой WebGL
-   вместо three.js) собирается в отдельный файл dist/3d/*-<хэш>.js и скачивается только когда нужен.
-   Хэш в имени - защита от старого кэша */
 {
   const r = esbuild.buildSync({
     entryPoints: [path.join(ROOT, "src", "home-3d.js")],
@@ -294,10 +272,7 @@ const GUIDE_INVITE =
   console.log("3D главной: " + parts.join(", "));
 }
 
-/* ---------- калькулятор ----------
-   app.js, polish.js и talents.js - ES-модули с явными import/export (без общих глобальных имён).
-   Точка входа src/calculator.js задаёт порядок; на сайт уходит один файл calculator.js.
-   format "iife": всё внутри одной функции, наружу ничего не торчит */
+/* калькулятор app.js, polish.js и talents.js - ES-модули с явными import/export (без общих глобальных имён). */
 {
   const r = esbuild.buildSync({
     entryPoints: [path.join(ROOT, "src", "calculator.js")],
@@ -313,18 +288,13 @@ const GUIDE_INVITE =
   console.log("Калькулятор: calculator.js " + (Object.values(r.metafile.outputs)[0].bytes / 1024).toFixed(0) + " КБ");
 }
 
-/* ---------- общие куски страниц ----------
-   <!-- @include header active="/calculator" --> -> partials/header.html; ссылки с href="/calculator" получают
-   class="active" и aria-current="page". Без active (страница 404) ничего не подсвечивается.
-   Неизвестный кусок или active без пункта меню роняют сборку, чтобы не выпустить страницу без шапки */
 const INCLUDE = /<!--\s*@include\s+([\w-]+)(?:\s+active="([^"]*)")?\s*-->\n?/g;
 const partial = name => {
   const file = path.join(ROOT, "partials", name + ".html");
   if (!fs.existsSync(file)) throw new Error("Нет файла partials/" + name + ".html");
   return fs.readFileSync(file, "utf8");
 };
-/* окно сезонного оформления для встроенного скрипта шапки (тыква видна с первого кадра) - из season.js,
-   чтобы оно задавалось в одном месте */
+
 const HW_SEASON = (() => {
   const m = /var SEASON = (\{[^}]*\});/.exec(fs.readFileSync(path.join(ROOT, "season.js"), "utf8"));
   if (!m) throw new Error("season.js: не найдена строка var SEASON = { … } (нужна шапке, см. partials/header.html)");
@@ -352,7 +322,7 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
   fs.writeFileSync(file, applyIncludes(fs.readFileSync(file, "utf8"), name));
 }
 
-/* ---------- пререндер ---------- */
+/* пререндер */
 /* заглушка DOM: скрипты страницы пишут в innerHTML по id, мы забираем то, что они туда положили */
 function fakeDom() {
   const els = {};
@@ -403,8 +373,7 @@ function runScripts(files) {
   return els;
 }
 
-/* «живые» строки на плашках разделов главной: считаются из данных сайта при каждой сборке.
-   Калькулятор и «сегодня/вчера» у Топ-100 дописывает в браузере home-live.js */
+/* «живые» строки на плашках разделов главной: считаются из данных сайта при каждой сборке. */
 function plural(n, one, few, many) {
   const m10 = n % 10,
     m100 = n % 100;
@@ -473,8 +442,7 @@ const PRERENDER = {
     html = html.replace('id="main" data-history=""', 'id="main" data-history="' + f.history + '"');
     return fill(fill(fill(html, "factionsStats", f.stats), "factionsRank", f.rank), "factionsList", f.list);
   },
-  /* «Новости сайта» и «Новости Зоны» на главной уходят в HTML готовыми, чтобы были видны сразу и поисковикам;
-     пустой список новостей Зоны допустим - тогда блок просто скрыт */
+
   "index.html": html => {
     const els = runScripts(["changelog.js", "news.js"]);
     html = fill(html, "homeNews", els.homeNews.innerHTML);
@@ -482,8 +450,7 @@ const PRERENDER = {
     return els.zoneNews && els.zoneNews.innerHTML ? fill(html, "zoneNews", els.zoneNews.innerHTML) : html;
   },
   "info.html": (html, els) => {
-    /* содержимое разделов в метках <!--sec:…-->: на странице каждого раздела в HTML остаётся только его раздел
-       (см. INFO_SECTIONS ниже), остальные дорисовывает скрипт при переключении */
+    /* каждый раздел «Информации» размечен метками sec */
     const mark = (k, inner) => "<!--sec:" + k + "-->" + inner + "<!--/sec:" + k + "-->";
     html = fill(
       html,
@@ -519,15 +486,6 @@ const PRERENDER = {
   }
 };
 
-/* ---------- стили ----------
-   У каждой страницы - один файл стилей bundle-<хэш>.css в корне dist (поэтому относительные url() внутри остаются верными):
-   все её css по порядку подключения, склеенные в один. Один запрос вместо пяти-семи - браузер раньше рисует страницу.
-   Порядок файлов и правил внутри не меняется: от него зависит, какое правило побеждает.
-   Из склейки убираются правила, которые на этой странице сработать не могут: в селекторе есть класс или id, которого
-   нет ни в html страницы, ни в её скриптах (включая те, что они догружают), - например, стили Топ-100 на странице калькулятора.
-   Проверка осторожная: класс считается «есть», если такое слово встречается где угодно в коде страницы
-   (даже в комментарии), или он собирается из начала вида "pc-" + …; классы внутри :not(), :is(), :has() и т. п. не проверяются.
-   Исходные css, вошедшие в склейки, из dist удаляются. intro.css и halloween.css подключаются отдельно (см. ниже и season.js) */
 let postcss = null,
   selParser = null;
 try {
@@ -561,15 +519,13 @@ function pageWords(name, html) {
   fs.readdirSync(ROOT)
     .filter(f => f.endsWith(".json") && !/^(package|top100-players)/.test(f))
     .forEach(add);
-  /* разметку, которую дорисовывает сборка (пререндер ниже, страницы гайдов по шаблону guides.html), пишет build.js,
-     карточки «Группировок» - build-factions.js */
+
   add("build.js");
   if (name === "factions.html") add("build-factions.js");
   const text = srcs.join("\n");
   const words = new Set(text.match(/[A-Za-z_][\w-]*/g));
   const glued = [...new Set([...text.matchAll(/["'`\s]([A-Za-z_][\w-]*)(?:["']\s*\+|\$\{)/g)].map(m => m[1]))];
-  /* "x-" + имя - любой класс на x-; " m" + номер - только m и цифры (m1, m2), иначе короткие куски строк
-     сохранили бы слишком много лишнего */
+
   const prefixes = glued.filter(p => p.endsWith("-"));
   const numbered = new Set(glued.filter(p => !p.endsWith("-")));
   return cls =>
@@ -653,9 +609,6 @@ if (postcss)
       " КБ (сумма по страницам, до сжатия)"
   );
 
-/* ---------- сжатие ----------
-   js - обычные скрипты (не модули) с общими глобальными именами: esbuild без format не переименовывает
-   имена верхнего уровня, поэтому app.js / polish.js / talents.js продолжают видеть друг друга */
 if (esbuild) {
   let saved = 0;
   for (const name of fs.readdirSync(OUT).filter(f => /\.(css|js)$/.test(f) && !MODULES[f])) {
@@ -674,7 +627,7 @@ if (esbuild) {
   console.log("Сжатие css и js: −" + (saved / 1024).toFixed(1) + " КБ");
 }
 
-/* ---------- версии файлов ---------- */
+/* версии файлов */
 const hashCache = new Map();
 function fileHash(rel) {
   if (!hashCache.has(rel)) {
@@ -690,7 +643,7 @@ function fileHash(rel) {
   return hashCache.get(rel);
 }
 
-/* "assets/x.webp" или "/styles.css" -> с ?v=. Внешние, data: и якоря не трогаем */
+/* "assets/x.webp" или "/styles.css" -> с ?v=. */
 function version(url, from) {
   if (/^([a-z]+:)?\/\//i.test(url) || /^(data:|#)/.test(url) || url.includes("?")) return url;
   const rel = url.startsWith("/") ? url.slice(1) : url;
@@ -710,9 +663,6 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".css"))) {
   fs.writeFileSync(file, css);
 }
 
-/* картинки, адрес которых целиком записан в скрипте ("/assets/event-update-600.webp"), тоже получают ?v=:
-   их можно надолго кэшировать, а после замены файла браузер скачает новую версию. Адреса, которые скрипт
-   собирает по частям ("/assets/bosses/" + id + ".webp"), не трогаются */
 for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".js") && !MODULES[f])) {
   const file = path.join(OUT, name);
   const js = fs.readFileSync(file, "utf8");
@@ -723,12 +673,6 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".js") && !MODULES
   if (out !== js) fs.writeFileSync(file, out);
 }
 
-/* ---------- интро для новичков (intro.js / intro.css) ----------
-   Встроенный скрипт в <head> до стилей решает, показывать ли ПДА: при первом визите (нет zonePdaSeen;
-   zoneIntroSeen - метка бывшей 3D-заставки главной: кто видел её, тот не новичок), не ботам и не превью соцсетей/мессенджеров, не во фрейме; ?intro в адресе - показать принудительно.
-   Тогда <html class="intro">, и тот же скрипт подключает intro.css (document.write - стиль из разметки, браузер ждёт его
-   до первой отрисовки, как обычный <link>), который прячет сайт. Остальным посетителям intro.css не нужен и не скачивается. Страховка: если intro.js
-   не появился за 6 с (не загрузился), класс снимается и сайт виден как обычно. Нет на 404 и offline */
 function introPage(name) {
   return name !== "404.html" && name !== "offline.html" && fs.existsSync(path.join(OUT, "intro.js"));
 }
@@ -740,13 +684,6 @@ const INTRO_FLAG = () =>
   fileHash("intro.css") +
   '">\');setTimeout(function(){if(!document.querySelector(".pda-intro")){h.classList.remove("intro");window.dispatchEvent(new Event("zone-intro-done"))}},6000)}catch(e){}})();</script>\n';
 
-/* ---------- фон темы - с первых миллисекунд ----------
-   Фото темы задано в css (body::before), и браузер узнаёт о нём только после разбора стилей - при переходе
-   между страницами это давало чёрный экран. Встроенный скрипт сразу после скрипта темы ставит preload той же
-   картинки (тема из localStorage, размер - по тем же границам, что в начале styles.css: 760 и 1366 px).
-   Адреса с ?v= - те же, что в styles.css, поэтому браузер скачивает картинку один раз.
-   Если страницу уже обслуживает service worker, preload не ставится: Chrome не отдаёт такой preload стилям
-   («cross-world service worker resource mismatch») и качает фон второй раз, а из кэша SW фон и так приходит сразу */
 {
   const THEMES = [
     "merc",
@@ -780,14 +717,9 @@ const INTRO_FLAG = () =>
   }
 }
 
-/* подключён ли уже файл: ищем сам тег <script src="…/имя">, а не любое упоминание имени - иначе слово
-   «season.js» в комментарии или тексте страницы тихо выключало подключение скрипта на всём сайте */
 const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const hasScript = (html, file) => new RegExp("<script\\b[^>]*\\bsrc=[\"']?[^\"'>\\s]*\\b" + escRe(file)).test(html);
 
-/* ---------- PWA: manifest и service worker ----------
-   На каждую страницу - ссылка на manifest.webmanifest и sw-register.js (регистрирует sw.js). В исходных html их нет,
-   чтобы не повторять в каждом файле; версии ?v= они получают ниже вместе со всеми. Сам sw.js собирается в конце */
 function pwaTags(html, from) {
   if (!/<link\b[^>]*\brel=["']?manifest\b/.test(html)) {
     const tag = '<link rel="manifest" href="/manifest.webmanifest">\n';
@@ -798,18 +730,12 @@ function pwaTags(html, from) {
     if (!html.includes("</body>")) throw new Error("PWA: в " + from + " нет </body>");
     html = html.replace("</body>", '<script src="/sw-register.js" defer></script></body>');
   }
-  /* переходы между страницами (@view-transition в styles.css): при перезагрузке и «Назад» из кэша браузер сам
-     отменяет анимацию и пишет в консоль «Uncaught (in promise) InvalidStateError: Transition was aborted…»
-     (у новой страницы - pagereveal, у старой - pageswap: её ошибка всплывает, когда страницу достают из кэша по «Назад»).
-     Сайту это не мешает - просто подхватываем отказ. Скрипт встроенный и в <head>: событие pagereveal приходит
-     до первой отрисовки, раньше любых defer-скриптов (хэш для CSP считается сам, см. csp ниже) */
+
   if (!/<script>[^<]*addEventListener\("pagereveal"/.test(html)) {
     const vt =
       "<script>(function(){var n=function(){},h=function(e){var t=e.viewTransition;" +
       "if(t){t.ready.catch(n);t.finished.catch(n);t.updateCallbackDone&&t.updateCallbackDone.catch(n)}};" +
       'addEventListener("pagereveal",h);addEventListener("pageswap",h)})();</script>\n' +
-      /* согласие на переход - прямо в разметке: если styles.css к первой отрисовке ещё не разобран
-         (например, страница пришла из кэша по «Назад»), браузер считал, что переходов нет, и отменял анимацию */
       "<style>@view-transition{navigation:auto}</style>\n";
     if (!/<meta charset="UTF-8">\n?/.test(html)) throw new Error("view transitions: в " + from + " нет <meta charset>");
     html = html.replace(/(<meta charset="UTF-8">\n?)/, "$1" + vt);
@@ -823,8 +749,6 @@ function pwaTags(html, from) {
   return html;
 }
 
-/* версия сезонного оформления: halloween.css/js и картинки assets/halloween подключает season.js сам,
-   поэтому его метка __HW_V__ заменяется хэшем их содержимого (до того, как сам season.js получит ?v=) */
 if (fs.existsSync(path.join(OUT, "season.js"))) {
   const hh = crypto.createHash("sha256");
   const hwDir = path.join(OUT, "assets", "halloween");
@@ -843,7 +767,7 @@ if (fs.existsSync(path.join(OUT, "season.js"))) {
   fs.writeFileSync(seasonFile, fs.readFileSync(seasonFile, "utf8").replace("__HW_V__", hh.digest("hex").slice(0, 10)));
 }
 
-/* ---------- html ---------- */
+/* html */
 let pages = 0;
 for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
   let html = fs.readFileSync(path.join(OUT, name), "utf8");
@@ -875,11 +799,7 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
   console.log(name.padEnd(16), (before / 1024).toFixed(1) + " КБ -> " + (html.length / 1024).toFixed(1) + " КБ");
 }
 
-/* ---------- разделы «Информации» на своих адресах ----------
-   /info - «Прогресс по уровням», /info-tasks - «Задания», /info-bosses - «Боссы». Это одна и та же страница
-   (переключение разделов - без перезагрузки, адрес меняет info-tasks.js), но у каждого раздела свой файл
-   со своими заголовком, описанием и canonical, и в нём сразу открыт нужный раздел - для ссылок и поисковиков.
-   Адреса через дефис, а не /info/tasks: файл info.html рядом с папкой info/ на GitHub Pages - лишний риск */
+/* разделы «Информации» на своих адресах /info - «Прогресс по уровням», /info-tasks - «Задания», /info-bosses - «Боссы». */
 const INFO_SECTIONS = {
   tasks: {
     file: "info-tasks.html",
@@ -944,10 +864,6 @@ const onlySection = (html, key) =>
   }
 }
 
-/* ---------- /build: ссылка на билд ----------
-   Билд передаётся после # (его соцсети не видят), поэтому у ссылок на билд свой адрес /build с ироничным превью
-   «Смотри мой билд», а у самого калькулятора - обычное. Страница - копия калькулятора, закрыта от индексации
-   (canonical - /calculator); app.js после загрузки билда меняет адрес на /calculator */
 {
   const BUILD_OG = {
     title: "Смотри мой билд - Калькулятор урона «Сердце Зоны»",
@@ -973,10 +889,6 @@ const onlySection = (html, key) =>
   pages++;
 }
 
-/* ---------- страницы гайдов ----------
-   Шаблон - уже собранная guides.html (шапка, подвал, стили, версии файлов): меняются заголовок, описание,
-   адрес, картинка для соцсетей и содержимое <main>. Страница лежит глубже (/guide/…), поэтому
-   относительные ссылки шаблона делаются от корня сайта */
 if (guides.length) {
   const tpl = fs
     .readFileSync(path.join(OUT, "guides.html"), "utf8")
@@ -1053,9 +965,6 @@ if (guides.length) {
   console.log("Гайды: " + guides.length + " стр. в dist/guide");
 }
 
-/* ---------- sitemap.xml: lastmod ----------
-   Дата страницы - последний коммит её html и подключённых css/js (в GitHub Actions нужен checkout с fetch-depth: 0).
-   У Топ-100 - время выгрузки рейтинга из top100-data.js (по Москве): страница меняется вместе с данными */
 function gitDate(files) {
   try {
     const out = execFileSync("git", ["log", "-1", "--format=%cI", "--", ...files], {
@@ -1093,7 +1002,7 @@ if (fs.existsSync(smSrc)) {
       /* адреса в sitemap без .html (/calculator), файл страницы - calculator.html */
       const slug = new URL(loc).pathname.replace(/^\//, "");
       let page = !slug ? "index.html" : slug.endsWith(".html") ? slug : slug + ".html";
-      /* разделы «Информации» собираются из info.html (см. INFO_SECTIONS) */
+      /* разделы «Информации» собираются из info.html */
       if (Object.values(INFO_SECTIONS).some(sec => sec.file === page)) page = "info.html";
       if (!fs.existsSync(path.join(ROOT, page))) return m;
       /* у списка гайдов дата - ещё и последний коммит папок гайдов */
@@ -1131,10 +1040,7 @@ if (fs.existsSync(smSrc)) {
         .join("");
   fs.writeFileSync(path.join(OUT, "sitemap.xml"), sm.replace("</urlset>", extra + "</urlset>"));
 }
-/* ---------- тире ----------
-   На сайте везде обычный дефис «-», а не длинное тире «—»: всё, что попало в dist (страницы, скрипты, данные,
-   новости, гайды, тексты группировок), проходит через замену - и «—», и &mdash;. Стоит до CSP: хэши встроенных
-   скриптов считаются уже по исправленному тексту */
+
 {
   const fix = s => s.replace(/\u2014|&mdash;|&#8212;|&#x2014;/gi, "-");
   const walk = dir => {
@@ -1150,11 +1056,7 @@ if (fs.existsSync(smSrc)) {
   };
   walk(OUT);
 }
-/* ---------- Content-Security-Policy ----------
-   GitHub Pages не умеет свои заголовки, поэтому политика - <meta http-equiv> в каждой странице. Встроенные
-   <script> разрешены по sha256 их текста (хэши считаются здесь, после всех правок HTML), чужие скрипты запрещены.
-   style-src 'unsafe-inline' - из-за style="…" в разметке, которую рисуют скрипты. Капча и функция приёма гайдов
-   разрешены только там, где есть форма отправки. frame-ancestors в <meta> не работает - его задаёт Cloudflare */
+/* Content-Security-Policy GitHub Pages не умеет свои заголовки, поэтому политика - <meta http-equiv> в каждой странице. */
 const CAPTCHA_ORIGINS = ["https://smartcaptcha.yandexcloud.net", "https://challenges.cloudflare.com"];
 function cspFor(html) {
   const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(
@@ -1191,16 +1093,6 @@ function addCsp(file) {
   }
 })(OUT);
 
-/* ---------- service worker ----------
-   dist/sw.js = sw.js из корня + версия и список статической оболочки: offline.html и статические файлы,
-   которые подключают основные страницы (css, js, шрифты, иконки, картинки). Сами страницы и данные Топ-100 в
-   оболочку не входят: они обновляются каждый день, а версия оболочки должна меняться только при правке статики.
-   Иначе ежедневный деплой рейтинга менял бы версию и заставлял PWA заново скачивать всю оболочку.
-   Страницы и данные - network-first и кэшируются при открытии (PAGES/DATA), поэтому офлайн работают разделы,
-   которые уже открывали. Версия - хэш списка статических адресов, содержимого offline.html и картинок без ?v;
-   поэтому правка css/js/картинки даёт новый sw.js, а обновление рейтинга - нет. Картинки боссов входят в оболочку;
-   фоны тем, остальные картинки гайдов и 3D главной - нет (тяжёлые), они кэшируются при первом показе.
-   Видео боссов service worker не трогает: браузер грузит их кусками (Range), такие ответы в кэш не кладутся */
 {
   const SHELL_PAGES = [
     "index.html",
@@ -1221,8 +1113,7 @@ function addCsp(file) {
     const file = path.join(OUT, name);
     if (!fs.existsSync(file)) throw new Error("service worker: нет страницы " + name);
     const html = fs.readFileSync(file, "utf8");
-    /* Сами страницы в оболочку не кладём: они network-first и кэшируются при открытии. Исключение - offline.html:
-       её SW отдаёт, когда сети нет, и её содержимое входит в версию, чтобы правка страницы обновляла офлайн-заглушку */
+    /* Сами страницы в оболочку не кладём: они network-first и кэшируются при открытии. */
     if (name === "offline.html") {
       h.update(html);
       urls.add("/offline");
@@ -1242,8 +1133,7 @@ function addCsp(file) {
       if (!/^([a-z]+:)?\/\//i.test(m[2]) && !/(^|\/)assets\/bg-|\.(ttf|woff)\?/.test(m[2]))
         urls.add(m[2].startsWith("/") ? m[2] : "/" + m[2]);
   }
-  /* картинки, которые страницы оболочки подключают без ?v (иконки наград, постеры и вещи боссов, ~0,2 МБ),
-     и все картинки раздела «Боссы»; видео боссов в оболочку не входят */
+
   for (const name of SHELL_PAGES)
     for (const m of fs
       .readFileSync(path.join(OUT, name), "utf8")

@@ -1,3 +1,4 @@
+/* Информация: прогресс по уровням, ПДА и персонажу. */
 const $ = id => document.getElementById(id);
 const fmt = n => Math.round(n).toLocaleString("ru-RU");
 
@@ -49,8 +50,6 @@ function infoTableMarkup(rows, headers, reached) {
   );
 }
 
-/* прогресс игрока из калькулятора (app.js хранит его в localStorage gameHelperState):
-   level - уровень персонажа, talents - сколько очков талантов вложено (= сколько уровней талантов получено) */
 const CALC_STATE_KEY = "gameHelperState";
 function readCalcProgress() {
   try {
@@ -125,7 +124,7 @@ function infoGroupMarkup(title, ledColor, body, notes, modClass) {
   );
 }
 
-/* вкладки для мобильной версии (#infoTabs, styles.css), на десктопе скрыты. Классы те же, что у вкладок «Топ-100» */
+/* вкладки для мобильной версии (#infoTabs, styles.css), на десктопе скрыты. */
 const INFO_TAB_KEY = "gameHelperInfoTab";
 const INFO_TABS = [
   { key: "talents", label: "Таланты", accent: "#ffb74d" },
@@ -364,8 +363,7 @@ function chartCardsMarkup(g) {
     "</div>"
   );
 }
-/* расчёт «с уровня - до уровня»: сколько нужно, чтобы с уровня a (уже есть) подняться до уровня b.
-   Строка уровня хранит, сколько нужно, чтобы его получить, поэтому сам уровень a в сумму не входит */
+/* расчёт «с уровня - до уровня»: сколько нужно, чтобы с уровня a (уже есть) подняться до уровня b. */
 function planSum(g, a, b) {
   return g.rows[b - 1][2] - g.rows[a - 1][2];
 }
@@ -511,8 +509,7 @@ document.addEventListener("pointerdown", e => {
   if (area.setPointerCapture) area.setPointerCapture(e.pointerId);
   chartSelect(area.closest(".ich"), chartLevelAt(area, e.clientX));
 });
-/* наведение показывает подсказку для уровня под курсором; нажатие или перетаскивание с зажатой кнопкой (пальцем)
-   переставляет выбранный уровень вместе с ползунком. Курсор ушёл с графика - подсказка возвращается к ползунку */
+
 document.addEventListener("pointermove", e => {
   if (chartDrag) {
     chartSelect(chartDrag.closest(".ich"), chartLevelAt(chartDrag, e.clientX));
@@ -598,8 +595,7 @@ document.addEventListener("click", e => {
 });
 
 renderInfo();
-/* открыли по ссылке с меткой (/info#pda), а вкладки блоков скрыты (вид «Таблицы» на ПК) -
-   все блоки на экране, поэтому просто прокручиваем к нужному */
+
 if (INFO_TABS.some(t => t.key === INFO_HASH)) {
   requestAnimationFrame(() => {
     const tabs = $("infoTabs");

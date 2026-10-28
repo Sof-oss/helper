@@ -1,11 +1,6 @@
 #!/usr/bin/env node
 "use strict";
-/* Логотип и иконки сайта из previews/logo.html (знак радиации из src/zone-sign.js + 3D-сердце из src/zone-heart.js).
- * node build-logo.js - перерисовать assets/heart-logo.webp, assets/heart-core.webp, знак в partials/header.html,
- * favicon.svg, favicon.ico, favicon-32.png, apple-touch-icon.png, иконки приложения icon-192.png, icon-512.png,
- * icon-maskable-512.png (manifest.webmanifest), общее превью assets/preview.jpg и превью разделов
- * assets/preview-<раздел>.jpg (previews/site.html).
- * Нужны playwright-core и Chrome/Edge (или CHROME=путь). Результат коммитят в репозиторий, при деплое не запускается */
+/* Логотип и иконки сайта */
 const fs = require("fs");
 const path = require("path");
 const http = require("http");

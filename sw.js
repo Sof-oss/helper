@@ -1,16 +1,4 @@
-/* Service worker: сайт открывается без сети и ставится на телефон как приложение (manifest.webmanifest).
-   Регистрирует его sw-register.js (build.js подключает его и manifest на каждую страницу).
-   build.js при сборке подставляет в dist/sw.js версию и список статической оболочки - offline.html и css/js/
-   шрифтов/иконок/картинок страниц. Сами страницы и данные Топ-100 в версию и precache не входят: они меняются
-   каждый день, а оболочка должна обновляться только при правке статики. Новая версия = новый sw.js: браузер
-   ставит его сам, старый кэш оболочки удаляется.
-   Стратегии:
-   - страницы: сначала сеть (если сеть молчит дольше 4 с - сохранённая копия), без сети - сохранённая копия
-     (кэшируется при первом открытии) или страница offline;
-   - данные Топ-100 (top100-data.js, top100-players.json): всегда сначала сеть, кэш - только без сети;
-   - файлы с ?v=, шрифты и куски 3D (/3d/*-хэш.js): из кэша, их содержимое по этому адресу не меняется;
-   - остальное своё (картинки гайдов, фоны): из кэша сразу, в фоне обновляем.
-   Чужие адреса (капча, приём гайдов), не-GET запросы, видео и запросы с Range не трогаем */
+/* Service worker: сайт открывается без сети и ставится на телефон как приложение (manifest.webmanifest). */
 "use strict";
 const VERSION = "__SW_VERSION__";
 const PRECACHE = "__SW_PRECACHE__";
@@ -21,8 +9,7 @@ const RUNTIME = "zone-runtime";
 const RUNTIME_MAX = 160;
 const NET_TIMEOUT = 4000;
 
-/* адреса с ?v= - по содержимому: их можно брать из HTTP-кэша. У остальных (offline, постеры без ?v) содержимое
-   по адресу может измениться, поэтому на установке запрашиваем свежую копию */
+/* адреса с ?v= - по содержимому: их можно брать из HTTP-кэша. */
 const precacheRequest = u => new Request(u, { cache: /\?v=/.test(u) ? "default" : "reload" });
 
 self.addEventListener("install", e => {
@@ -40,8 +27,7 @@ self.addEventListener("activate", e => {
       const keys = await caches.keys();
       await Promise.all(keys.filter(k => k.startsWith("zone-shell-") && k !== SHELL).map(k => caches.delete(k)));
       await self.clients.claim();
-      /* страница, которая уже открыта в момент установки, не проходила через fetch SW - сохраняем её и ассеты,
-         чтобы после первого же визита раздел открывался без сети */
+
       const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
       await Promise.all(clients.map(c => cachePage(c.url)));
     })()

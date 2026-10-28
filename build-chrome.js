@@ -1,7 +1,5 @@
 "use strict";
-/* Поиск установленного Chrome/Edge и запуск через playwright-core - для сборочных скриптов, которые рисуют картинки
- * (build-previews.js - превью «Личное дело», build-guide-images.js - уменьшенные копии и обложки гайдов).
- * Путь можно указать явно в переменной CHROME_PATH. В GitHub Actions Chrome уже установлен */
+/* Поиск Chrome/Edge для сборочных скриптов */
 const fs = require("fs");
 const { execFileSync } = require("child_process");
 

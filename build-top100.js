@@ -1,28 +1,6 @@
 #!/usr/bin/env node
 "use strict";
-/* Общая выгрузка рейтинга (один CSV) -> top100-data.js
- * Запуск: node build-top100.js [папка_с_csv] [путь_к_top100-data.js]
- * По умолчанию CSV берётся из ./top100/heart-of-the-zone-top100-all.csv, результат пишется в ./top100-data.js
- * CSV в репозиторий не попадает (.gitignore): это сырая выгрузка всех игроков, нужна только здесь, на вашем компьютере.
- * На сайт уходят только собранные top100-data.js и top100-players.json - в них лишь то, что показывают рейтинг и карточки.
- *
- * В CSV одна строка на игрока и все показатели сразу (разделитель «;» или «,», определяется сам).
- * Каждый раздел рейтинга получается сортировкой этих игроков по своей колонке.
- * Группировка берётся из колонки «Группировка» (а не из ника), «-» = без группировки.
- * Цвета группировок хранятся в top100/factions.json: новая группировка получает свой цвет автоматически
- * и сохраняет его между обновлениями. На сайт уходят только группировки, которые есть в текущем рейтинге,
- * поэтому плашка пропавшей группировки исчезает сама.
- *
- * Кроме самих данных скрипт считает изменения за несколько периодов (TOP100_PERIODS / TOP100_CHANGES):
- *  1. delta - прирост метрики;
- *  2. rank  - изменение места.
- * Периоды: с прошлого обновления, за 24 часа, за неделю, за месяц.
- * Считается по снимкам прошлых запусков top100/history/<дата_время>.json,
- * которые скрипт складывает сам (ник -> [место, значение]).
- * Для периода берётся самый свежий снимок, которому уже не меньше нужного срока.
- * Если истории не хватает, берём самый ранний снимок и помечаем период как неполный.
- * Если CSV не изменился с прошлого запуска, новый снимок не создаётся.
- * Оба объекта: ник -> число (+ вверх, − вниз), null - новый в списке, нет ключа - данных нет. */
+/* Сборка рейтинга из CSV в top100-data.js */
 const fs = require("fs");
 const path = require("path");
 
@@ -62,8 +40,7 @@ function parseCsv(text, sep) {
   return rows.filter(r => !(r.length === 1 && r[0] === ""));
 }
 
-/* число из выгрузки: «1 839», «217 843» (обычные и неразрывные пробелы).
-   Прочерк и пустое поле дают NaN */
+/* число из выгрузки: «1 839», «217 843» (обычные и неразрывные пробелы). */
 const toNumber = v => Number(String(v).replace(/[\s\u00A0\u202F]/g, ""));
 
 const CSV_FILE = "heart-of-the-zone-top100-all.csv";
@@ -132,8 +109,7 @@ function readPlayers(filePath) {
     });
 }
 
-/* раздел: игроки по убыванию значения, при равенстве - в порядке общей выгрузки (по репутации).
-   Строка: [ник, уровень, значение, давно не заходил (0/1)] */
+/* раздел: игроки по убыванию значения, при равенстве - в порядке общей выгрузки (по репутации). */
 /* в разделе только первые TOP_N: в CSV теперь все игроки (fetch-players.js), на сайт идёт топ по каждому показателю */
 const TOP_N = Number(process.env.TOP_N) || 100;
 function sectionRows(players, column) {
@@ -144,9 +120,7 @@ function sectionRows(players, column) {
     .map(pl => [pl.nick, pl.level, pl.values[column], pl.inactive]);
 }
 
-/* ---------- цвета группировок ----------
-   top100/factions.json: {"Группировка": "#rrggbb"}. Цвета можно править руками, скрипт их не трогает.
-   Новой группировке подбирается оттенок, максимально далёкий от уже занятых */
+/* цвета группировок top100/factions.json: {"Группировка": "#rrggbb"}. */
 const hexToHue = hex => {
   const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
   if (!m) return null;
@@ -203,7 +177,7 @@ const outputFile = process.argv[3] || path.join(process.cwd(), "top100-data.js")
 const historyDir = path.join(inputDir, "history");
 const factionsFile = path.join(inputDir, "factions.json");
 
-/* ---------- дата сборки по Москве ---------- */
+/* дата сборки по Москве */
 const MSK = 3 * 3600 * 1000; // Москва без перехода на летнее время
 const DAY = 864e5;
 const nowMs = Date.now();
@@ -231,9 +205,7 @@ const snapId = `${p.year}-${p.month}-${p.day}_${p.hour}-${p.minute}-${p.second}`
 const KEEP_SNAPSHOTS = 50; // последние столько храним всегда
 const KEEP_DAYS = 40; // и всё, что моложе: этого хватает на период «месяц» (в git старое остаётся)
 
-/* ---------- снимки запусков ----------
-   Новые: 2026-10-04_12-30-17.json (время по Москве).
-   Старые недельные (2026-W40.json) тоже читаем, они считаются самыми давними */
+/* снимки запусков: 2026-10-04_12-30-17.json */
 function readSnapshots() {
   if (!fs.existsSync(historyDir)) return [];
   const files = fs
@@ -246,8 +218,7 @@ function readSnapshots() {
     data: JSON.parse(fs.readFileSync(path.join(historyDir, f), "utf8"))
   });
   const timedSnaps = timed.map(load);
-  /* недельный снимок, у которого есть копия с точным временем (переименованный файл забыли удалить), пропускаем:
-     иначе он попадает в историю дважды и под неверной датой (понедельник недели) */
+
   const weeklySnaps = weekly.map(load).filter(w => {
     const dup = timedSnaps.some(t => sameData(t.data, w.data));
     if (dup)
@@ -295,7 +266,7 @@ function sameData(old, now) {
   });
 }
 
-/* ---------- данные ---------- */
+/* данные */
 const csvPath = path.join(inputDir, CSV_FILE);
 if (!fs.existsSync(csvPath)) throw new Error("Не найден файл: " + csvPath);
 const players = readPlayers(csvPath);
@@ -316,8 +287,7 @@ for (const { column, varName, key } of SOURCES) {
   blocks.push(`window.${varName}=[\n${rows.map(r => JSON.stringify(r)).join(",\n")}\n];`);
 }
 
-/* группировки: цвет из factions.json, новым - новый цвет (файл дописывается).
-   В данные сайта идут только группировки текущего рейтинга, по числу игроков */
+/* группировки: цвет из factions.json, новым - новый цвет (файл дописывается). */
 let factionColors = {};
 if (fs.existsSync(factionsFile)) factionColors = JSON.parse(fs.readFileSync(factionsFile, "utf8"));
 else factionColors = { ...DEFAULT_FACTION_COLORS };
@@ -357,16 +327,13 @@ players.forEach(pl => {
 const snaps = readSnapshots();
 const latest = snaps[snaps.length - 1] || null;
 const unchanged = !!latest && sameData(latest.data, snapshot);
-/* момент, к которому относятся данные: если CSV не менялись, это время последнего снимка, а не время запуска.
-   Иначе повторный запуск сдвигал бы «Обновлено» и периоды, хотя рейтинг тот же */
+/* момент, к которому относятся данные: если CSV не менялись, это время последнего снимка, а не время запуска. */
 const dataMs = unchanged ? snapTime(latest.id) : nowMs;
 const stamp = fmtStamp(dataMs);
 const previous = unchanged ? snaps[snaps.length - 2] || null : latest;
 const older = (unchanged ? snaps.slice(0, -1) : snaps).slice().sort((a, b) => snapTime(a.id) - snapTime(b.id));
 
-/* смена ника: снимки рейтинга хранят игроков по нику, а ник меняется (например, приписка группировки).
-   ID игрока -> все его ники по снимкам игроков (top100/players, их пишет build-players.js).
-   Без этого сменивший ник получал бы «new», а его прирост терялся */
+/* смена ника: снимки рейтинга хранят игроков по нику, а ник меняется (например, приписка группировки). */
 const idOfNick = {};
 players.forEach(pl => {
   if (pl.id) idOfNick[pl.nick] = pl.id;
@@ -387,10 +354,7 @@ if (fs.existsSync(playersDir)) {
 players.forEach(pl => {
   if (pl.id) (nicksOfId[pl.id] = nicksOfId[pl.id] || new Set()).add(pl.nick);
 });
-/* запись игрока в снимке base. Ищем по порядку:
-   1) тот же ник; 2) ник этого ID на момент снимка (снимок игроков с тем же временем);
-   3) ник без лишних пробелов: разные выгрузки по-разному сохраняли пробелы в начале, в конце и внутри ника;
-   4) прошлые ники этого ID. Чужой ник не берём: если у найденного ника сейчас другой ID, это другой игрок */
+/* запись игрока в снимке base. */
 const normNick = n => String(n).normalize("NFKC").replace(/\s+/g, " ").trim();
 const normCache = new WeakMap();
 function normIndex(prev) {
@@ -452,12 +416,7 @@ const compactMap = map => {
   return out;
 };
 
-/* ---------- периоды ----------
-   last - с прошлого обновления, остальные - за срок ms.
-   Снимок годится для периода, если ему не меньше срока за вычетом допуска (SLACK): обновления идут
-   не минута в минуту, и снимок 23,5 часа назад - это «за сутки», а не повод брать позавчерашний.
-   Совпала база у двух периодов - кнопка была бы дублем: «С прошлого обновления» уступает периоду
-   со сроком («За сутки» понятнее при ежедневных обновлениях), из периодов со сроком остаётся первый */
+/* периоды last - с прошлого обновления, остальные - за срок ms. */
 const PERIODS = [
   { key: "last", label: "С прошлого обновления" },
   { key: "d1", label: "За сутки", ms: DAY },
@@ -519,8 +478,7 @@ for (const per of PERIODS) {
   renamed = 0;
 }
 
-/* складываем снимок этого запуска (если данные те же, что в последнем снимке, не плодим дубли).
-   Каждая запись в одну строку, чтобы git-diff читался */
+/* складываем снимок этого запуска (если данные те же, что в последнем снимке, не плодим дубли). */
 fs.mkdirSync(historyDir, { recursive: true });
 if (!unchanged) {
   const snapText =

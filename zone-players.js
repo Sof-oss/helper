@@ -1,9 +1,4 @@
-/* Общие помощники для «Моего места» (my-place.js) и сравнения игроков (compare.js):
-   - «я» - игрок, которого посетитель отметил как себя (localStorage zoneMyPlayer = {id, n});
-   - загрузка карточек игроков top100-players.json (тот же файл, что у player-card.js);
-   - поле поиска игрока по нику с подсказками.
-   Обычный скрипт без общих имён: всё внутри функции, наружу - только window.ZonePlayers.
-   Подключается и на страницах, которые build.js прогоняет в заглушке DOM (top100.html), там ничего не делает */
+/* Поиск игроков и подсказки для полей ввода. */
 (function () {
   "use strict";
   if (typeof window.fetch !== "function" || !document.body || window.ZonePlayers) return;
@@ -24,7 +19,7 @@
   const fmt = n => Math.round(n).toLocaleString("ru-RU");
   const norm = s => String(s).toLowerCase().replace(/ё/g, "е");
 
-  /* ---------- «я» ---------- */
+  /* «я» */
   function getMe() {
     try {
       const m = JSON.parse(localStorage.getItem(ME_KEY) || "null");
@@ -44,9 +39,7 @@
     if (e.key === ME_KEY) document.dispatchEvent(new CustomEvent("zone:me", { detail: getMe() }));
   });
 
-  /* ---------- карточки игроков ----------
-     Адрес - как у player-card.js (с версией выгрузки), чтобы файл скачивался один раз.
-     Без top100-data.js на странице версии нет - тогда просим браузер свериться с сервером */
+  /* карточки игроков: адрес с версией выгрузки, чтобы файл скачивался один раз */
   let data = null,
     loading = null;
   function load() {
@@ -90,8 +83,7 @@
     TABS.forEach(t => (window[t.data] || []).forEach(r => seen.add(r[0])));
     return [...seen].map(n => ({ id: null, n, q: norm(n), rep: 0 }));
   }
-  /* порядок подсказок: ник или слово ника совпадает целиком («sof» -> «[Наёмник] Sof»), потом слово ника
-     начинается с запроса, потом просто содержит; внутри группы - по репутации */
+
   function search(q, limit) {
     const nq = norm(q).trim();
     if (!nq) return [];
@@ -106,8 +98,7 @@
     return groups.flat().slice(0, limit || 8);
   }
 
-  /* ---------- поле выбора игрока ----------
-     picker(input, onPick): под полем список подсказок (стрелки, Enter, Esc), onPick({id, n}) */
+  /* поле выбора игрока picker(input, onPick): под полем список подсказок (стрелки, Enter, Esc), onPick({id, n}) */
   let uid = 0;
   function picker(input, onPick) {
     const list = document.createElement("ul");

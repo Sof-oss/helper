@@ -1,5 +1,4 @@
-/* ===== Вкладка «Задания» на странице «Информация» =====
-   Калькулятор энергии и карточки локаций; по нажатию на карточку - досье с этапами (стили .tl-*) */
+/* Задания и боссы на странице «Информация». */
 [data-section-panel][hidden] {
   display: none !important;
 }
@@ -15,8 +14,6 @@
   border-radius: 8px;
   font-size: var(--fs-sm);
 }
-/* цвет раздела - только у открытой вкладки; неактивные - нейтральные, как у Топ-100 (иначе неактивная
-   «Боссы» выглядела выбранной или тревожной) */
 .info-sections .top100-tab.active[data-section="levels"] {
   --accent: #54bfff;
 }
@@ -85,7 +82,7 @@
   }
 }
 
-/* ---------- Калькулятор энергии (info-tasks.js) ---------- */
+/* Калькулятор энергии (info-tasks.js) */
 .ec-locs {
   display: flex;
   flex-wrap: wrap;
@@ -425,7 +422,7 @@
   color: #8a9aa8;
 }
 
-/* ----- карточки локаций (info-tasks.js, locsMarkup) ----- */
+/* карточки локаций (info-tasks.js, locsMarkup) */
 .tl-cards {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -631,7 +628,7 @@
   background: rgba(255, 183, 77, 0.06);
 }
 
-/* ----- досье выбранной локации ----- */
+/* досье выбранной локации */
 .tl-detail {
   margin-top: 12px;
   overflow: hidden;
@@ -968,9 +965,6 @@
     transform: none;
   }
 }
-
-/* ===== Вкладка «Боссы» (info-bosses.js) =====
-   Карточки по цепочке боссов: портрет, здоровье, требования, награда и комплект, который может выпасть */
 .bosses-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1564,9 +1558,6 @@
     object-fit: contain;
   }
 }
-
-/* заголовок раздела внутри панели повторял H1 страницы и активную вкладку («Прогресс по уровням» трижды подряд):
-   на экране его больше нет, для экранного диктора h2 остаётся */
 [data-section-panel] > .section-heading {
   position: absolute;
   width: 1px;

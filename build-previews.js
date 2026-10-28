@@ -1,13 +1,6 @@
 #!/usr/bin/env node
 "use strict";
-/* Ссылки на карточки игроков с превью «Личное дело сталкера». Запускается после build.js (npm run build).
- * 1. dist/p/<id>.html для каждого игрока: заголовок, описание и картинка для соцсетей и мессенджеров,
- *    посетителя страница сразу переводит на /top100#p=<id> (там открывается карточка).
- *    Ссылки вида /top100#p=<id> тоже работают, но соцсети не видят, что после #, и показывают общее превью Топ-100.
- * 2. dist/og/p/<id>.jpg - личная картинка 1200×630 для игроков, у которых есть место в топ-100 хотя бы одного рейтинга.
- *    Рисует Chrome по шаблону previews/dossier.html (нужен playwright-core и установленный Chrome/Edge;
- *    в GitHub Actions Chrome уже есть). Нет Chrome - у всех будет общая картинка assets/preview-dossier.jpg.
- * node build-previews.js --generic - перерисовать общую картинку assets/preview-dossier.jpg (её коммитят в репозиторий) */
+/* Ссылки на карточки игроков с превью «Личное дело сталкера». */
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
@@ -175,8 +168,7 @@ async function main() {
   }
   const data = JSON.parse(fs.readFileSync(path.join(ROOT, "top100-players.json"), "utf8"));
   const ids = Object.keys(data.players);
-  /* версия картинок меняется и при новых данных, и при смене оформления карточки -
-     иначе мессенджеры и соцсети берут из своего кэша старую картинку по тому же адресу */
+
   const vh = crypto.createHash("sha1").update(String(data.updated));
   for (const f of [
     "build-previews.js",

@@ -1,5 +1,4 @@
-/* «Хэллоуин в Зоне» - стили сезонного оформления. Подключает season.js, поведение - halloween.js.
-   Всё завязано на html.hw: выключили оформление - правила перестают действовать сразу, без перезагрузки */
+/* «Хэллоуин в Зоне» - стили сезонного оформления. */
 
 html.hw body {
   overflow-x: clip;
@@ -26,7 +25,7 @@ html:not(.hw) :is(.hw-layer, .hw-sky, .hw-fog, .hw-light, .hw-burer, .hw-walker,
   display: none;
 }
 
-/* ---------- вороны ---------- */
+/* вороны */
 .hw-crow {
   position: absolute;
   left: 0;
@@ -98,7 +97,7 @@ html:not(.hw) :is(.hw-layer, .hw-sky, .hw-fog, .hw-light, .hw-burer, .hw-walker,
   }
 }
 
-/* ---------- тыквы ---------- */
+/* тыквы */
 .hw-pumpkin {
   position: absolute;
   left: 0;
@@ -244,7 +243,7 @@ html:not(.hw) :is(.hw-layer, .hw-sky, .hw-fog, .hw-light, .hw-burer, .hw-walker,
   }
 }
 
-/* ---------- бюрер в простыне ---------- */
+/* бюрер в простыне */
 .hw-burer {
   position: fixed;
   left: 14px;
@@ -296,7 +295,7 @@ html:not(.hw) :is(.hw-layer, .hw-sky, .hw-fog, .hw-light, .hw-burer, .hw-walker,
   }
 }
 
-/* ---------- призраки ---------- */
+/* призраки */
 .hw-ghost {
   position: absolute;
   left: 0;
@@ -324,7 +323,7 @@ html:not(.hw) :is(.hw-layer, .hw-sky, .hw-fog, .hw-light, .hw-burer, .hw-walker,
   }
 }
 
-/* ---------- зомби-монолитовец ---------- */
+/* зомби-монолитовец */
 .hw-walker {
   position: fixed;
   right: 0;
@@ -396,7 +395,7 @@ html:not(.hw) :is(.hw-layer, .hw-sky, .hw-fog, .hw-light, .hw-burer, .hw-walker,
   text-transform: uppercase;
 }
 
-/* ---------- атмосфера: туман, оттенок, фонарик, «Выброс» ---------- */
+/* атмосфера: туман, оттенок, фонарик, «Выброс» */
 .hw-fog {
   position: fixed;
   left: 0;

@@ -1,4 +1,4 @@
-/* ===== Гайды: список (guides.html), страница гайда (/guide/…, собирает build.js) и форма отправки (guide-submit.js) ===== */
+/* Гайды: список (guides.html), страница гайда (/guide/…, собирает build.js) и форма отправки (guide-submit.js) */
 .guides-head {
   display: flex;
   align-items: center;
@@ -739,9 +739,6 @@
     padding: 12px 14px;
   }
 }
-
-/* что ещё нужно для отправки: серые пункты - не сделано, зелёные - готово;
-   после попытки отправить незаполненное подсвечивается красным */
 .gf-todo {
   display: flex;
   flex-wrap: wrap;

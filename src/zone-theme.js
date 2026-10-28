@@ -1,5 +1,3 @@
-/* Цвета и фон текущей темы (группировки) берём прямо из CSS-переменных сайта,
-   поэтому 3D всегда совпадает с выбранной темой */
 export function hexToRgb(hex) {
   const m = String(hex)
     .trim()
@@ -10,8 +8,7 @@ export function readTheme() {
   const cs = getComputedStyle(document.documentElement);
   const raw = cs.getPropertyValue("--bg-img").trim();
   const m = raw.match(/url\(\s*["']?([^"')]+)["']?\s*\)/);
-  /* Safari (WebKit) отдаёт значение CSS-переменной с экранированием: url(assets\/bg-merc\.webp\?v\=…).
-     Без снятия «\» адрес превращается в assets//bg-merc/.webp/?v… и картинка не грузится */
+  /* Safari (WebKit) отдаёт значение CSS-переменной с экранированием: url(assets\/bg-merc\.webp\?v\=…). */
   const unesc = u =>
     u.replace(/\\(?:([0-9a-f]{1,6})\s?|(.))/gi, (_, hex, ch) => (hex ? String.fromCodePoint(parseInt(hex, 16)) : ch));
   return {

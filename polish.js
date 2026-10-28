@@ -1,5 +1,4 @@
-/* polish.js - дополнение к app.js (калькулятор), ES-модуль; порядок задаёт src/calculator.js.
-   Не меняет логику расчёта: дорисовывает полосу урона и плитки снаряжения, следит за перерисовкой DOM */
+/* polish.js - дополнение к app.js (калькулятор), ES-модуль; порядок задаёт src/calculator.js. */
 import {
   SETS,
   ITEMS,
@@ -16,8 +15,7 @@ import {
   "use strict";
   const $ = id => document.getElementById(id);
 
-  /* Значки снаряжения: противогаз - комплекты, разгрузка - одиночные вещи.
-   Одни и те же в списке снаряжения и в окне «Бонусы снаряжения» */
+  /* Значки снаряжения: противогаз - комплекты, разгрузка - одиночные вещи. */
   const svgIcon = (paths, extra) =>
     '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' +
     (extra || "") +
@@ -31,7 +29,7 @@ import {
     '<path d="M8.6 3.4 6 5v4.4L4.5 11v9.6h15V11L18 9.4V5l-2.6-1.6C14.9 5.5 13.6 7 12 7s-2.9-1.5-3.4-3.6z"/><path d="M12 7v13.6M7 13.6h3M14 13.6h3M7 16.8h3M14 16.8h3"/>'
   );
 
-  /* --- полоса: база / уровень / снаряжение / арена / таланты --- */
+  /* полоса: база / уровень / снаряжение / арена / таланты */
   const PARTS = ["base", "level", "gear", "arena", "talentOut"];
   const num = id => {
     const e = $(id);
@@ -64,7 +62,7 @@ import {
   });
   updateBars();
 
-  /* --- кнопки в боковой панели талантов (их рисует app.js) --- */
+  /* кнопки в боковой панели талантов (их рисует app.js) */
   const ts = $("talentSidebar");
   function fixTalentButtons() {
     const r = ts.querySelector("[data-reset-talents]"),
@@ -76,10 +74,6 @@ import {
   new MutationObserver(fixTalentButtons).observe(ts, { childList: true });
   fixTalentButtons();
 
-  /* --- окно таланта: не «моргает» при прокачке ---
-   renderTalents() в app.js пересоздаёт содержимое окна при каждом клике, и анимация появления проигрывается заново.
-   Первое открытие анимируем, а пока окно уже открыто, ставим .rerender (анимация выключена, см. polish.css).
-   Закрытие (содержимое пустое) сбрасывает флаги */
   const dov = $("talentDetailOverlay");
   if (dov) {
     let wasOpen = false;
@@ -94,13 +88,6 @@ import {
     }).observe(dov, { childList: true });
   }
 
-  /* --- окно «Бонусы снаряжения» ---
-   Заменяет вид окна из app.js (через setGearInfoRenderer): две группы со своей иконкой (комплекты - противогаз,
-   вещи - разгрузка), внутри карточки три строки по оружию с полоской вклада, шкала общая
-   для комплектов и вещей; крит и откат - чипами; сумма - плотными плитками.
-   openGearInfo() в app.js вызывает то, что передано в setGearInfoRenderer */
-  /* семейства: имена совпадают с классами карточек в styles.css (.gi-card.free / .gi-card.paid),
-   иначе не подставляется --ac и у платных комплектов пропадают рейка и полоски */
   const GI_FAM = { free: ["knife", "pistol", "auto"], paid: ["grenade", "gl", "gauss"] };
   const GI_NAMES = { free: "Бесплатные удары", paid: "Оружие за жетоны" };
   const GI_ICON_SET = ICON_SET,

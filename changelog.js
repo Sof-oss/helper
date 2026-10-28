@@ -1,5 +1,4 @@
-/* «Новости сайта». Данные подставляет build-changelog.js из site-news.json.
-   Для изменения новостей редактируйте site-news.json, а не этот массив (он обновляется при сборке). */
+/* «Новости сайта». Данные подставляет build-changelog.js из site-news.json. */
 window.CHANGELOG=[
   {
     "date": "2026-10-26",
@@ -591,8 +590,7 @@ window.CHANGELOG=[
  const MONTHS=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
  const fmtDate=d=>{const[y,m,day]=d.split("-").map(Number);return day+" "+MONTHS[m-1]+" "+y};
  const list=window.CHANGELOG,latest=list[0].date;
- /* компактно: последняя запись целиком (до ITEMS пунктов), ещё COMPACT записей - одной строкой «дата + заголовок»,
-    раскрываются по нажатию; остальное - под кнопкой «Вся история» */
+
  const COMPACT=2,ITEMS=3;
  const plural=n=>n%10==1&&n%100!=11?"изменение":n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?"изменения":"изменений";
  const entry=(e,i)=>{
@@ -617,9 +615,7 @@ window.CHANGELOG=[
   btn.setAttribute("aria-expanded",open);
   btn.querySelector("span").textContent=open?"Свернуть":"Вся история";
  });
- /* Свёрнутый вид на широком экране: колонки одной высоты, и если «Новости Зоны» выше (баннер ивента),
-    под тремя записями оставалась пустота. Добираем записи из «Всей истории», пока они влезают в высоту соседней
-    колонки (пока «Все новости» слева не раскрыты); last - запись, у которой не рисуется хвост линии времени */
+
  const wide=window.matchMedia?window.matchMedia("(min-width: 960px)"):null;
  const other=document.getElementById("zoneNews");
  let fitting=false,raf=0;

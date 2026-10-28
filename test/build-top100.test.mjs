@@ -1,5 +1,4 @@
-/* Тесты расчёта изменений Топ-100 (build-top100.js): npm test.
-   Скрипт запускается целиком на временной папке с CSV и снимками истории, проверяется готовый top100-data.js */
+/* Тесты расчёта изменений Топ-100 (build-top100.js): npm test. */
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";

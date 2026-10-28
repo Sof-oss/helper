@@ -1,4 +1,4 @@
-/* Тесты разметки гайдов (guide-md.js): npm test. Санитайзер - граница безопасности: текст гайда пишет любой игрок */
+/* Тесты разметки гайдов (guide-md.js): npm test. */
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";

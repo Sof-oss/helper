@@ -1,10 +1,4 @@
-/* «Новости сайта»: импорт новых коммитов в site-news.json и подготовка changelog.js для страницы.
-   Редактируйте только site-news.json: date, title, items. Импорт НЕ меняет существующие записи.
-   importedSources - служебная память импорта: не удаляйте её (она защищает от дублей и возвращения удалённых новостей).
-   hidden: true скрывает запись. Можно также удалять запись из entries.
-   node build-changelog.js --dry - проверить без записи файлов.
-   GitHub Actions сохраняет изменённый site-news.json в репозитории, чтобы его можно было править на GitHub.
-*/
+/* «Новости сайта»: импорт новых коммитов в site-news.json и подготовка changelog.js для страницы. */
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
@@ -161,8 +155,7 @@ for (const [date, g] of guideDays) {
   } else groups.set(key, { date, title, items: g.items, sources: g.sources });
 }
 
-/* Первый импорт связывает прежние ручные записи с историей. После него идентификаторы коммитов,
-   а не дата/заголовок, защищают ваши правки от повторного импорта. */
+/* Первый импорт связывает прежние ручные записи с историей. */
 const manual = new Set(news.entries.map(e => e.date + "\n" + e.title));
 const added = [];
 for (const g of groups.values()) {
@@ -174,7 +167,7 @@ news.entries.unshift(...added.sort((a, b) => b.date.localeCompare(a.date)));
 news.importedSources = [...imported].sort();
 news.migrated = true;
 validate(news);
-/* Сортируется только выдача сайта. Ручной порядок/форматирование JSON не трогаем, если импорт ничего не добавил. */
+/* Сортируется только выдача сайта. */
 const visible = news.entries
   .filter(e => !e.hidden)
   .slice()

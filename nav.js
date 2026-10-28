@@ -1,9 +1,5 @@
-/* Активный пункт меню на узком экране центрирует встроенный скрипт шапки (partials/header.html) - до первой
-   отрисовки, чтобы меню не прокручивалось на глазах после загрузки */
-
-/* У страницы два адреса: /calculator и /calculator.html (так отдаёт GitHub Pages). Если открыли старый адрес
-   с .html, без перезагрузки меняем его в строке браузера на канонический - тогда и «Ссылка на билд»,
-   и закладки получаются с коротким адресом. Хвост ?… и #… (билд) сохраняется. На 404 canonical нет - не трогаем */
+/* Навигация: активный пункт меню и нижние вкладки на телефоне. */
+/* У страницы два адреса: /calculator и /calculator.html (так отдаёт GitHub Pages). */
 (() => {
   const c = document.querySelector('link[rel="canonical"]');
   if (!c || !history.replaceState) return;
@@ -15,8 +11,6 @@
   } catch (e) {}
 })();
 
-/* Пункт меню «Информация» ведёт в раздел, который открывали последним: /info-tasks или /info-bosses
-   (info-tasks.js запоминает его в gameHelperInfoSection). Прямые ссылки на /info это не меняет */
 (() => {
   let s = null;
   try {
@@ -29,8 +23,6 @@
     .forEach(a => a.setAttribute("href", url));
 })();
 
-/* вкладки (role="tablist": разделы «Информации», рейтинги Топ-100): стрелки влево/вправо, Home и End
-   переводят фокус на соседнюю вкладку и открывают её, как принято для вкладок */
 document.addEventListener("keydown", e => {
   const tab = e.target.closest && e.target.closest('[role="tab"]');
   if (!tab || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;

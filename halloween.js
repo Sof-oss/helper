@@ -1,9 +1,4 @@
-/* «Хэллоуин в Зоне» - сезонная нечисть. Подгружается из season.js, только когда оформление включено.
-   Уровни (html[data-hw]): quiet - тыквы и вороны; season - всё; surge - всё чаще + фонарик.
-   Все создания не ловят клики (pointer-events: none) - кроме тыквы-пасхалки и бюрера, который прячется от курсора.
-   Пасхалка не ставится на ссылки, кнопки и карточки-ссылки; декоративные тыквы клики пропускают и только не закрывают кнопки.
-   При prefers-reduced-motion ничего не движется: только сидящие вороны и тыквы. На телефоне существ меньше и ничего
-   не закрывает нижнее меню. */
+/* «Хэллоуин в Зоне» - сезонная нечисть. */
 (function () {
   "use strict";
   var d = document;
@@ -81,7 +76,7 @@
     return { x: r.left + window.scrollX + r.width * fx, y: r.top + window.scrollY, r: r };
   }
 
-  /* ---------- вороны ---------- */
+  /* вороны */
   function crowNode(cls) {
     var c = el(
       "div",
@@ -97,8 +92,7 @@
     c.setAttribute("aria-hidden", "true");
     return c;
   }
-  /* Безопасные места: свободный участок верхнего края, вдали от кнопок и других птиц.
-     Если мест меньше, чем ворон, лишние ждут за экраном, а не садятся друг на друга. */
+  /* Безопасные места: свободный участок верхнего края, вдали от кнопок и других птиц. */
   var occupiedControls = [];
   var fixedChrome = [];
   function intersects(a, b, pad) {
@@ -162,7 +156,7 @@
   function freeSeat(p, fx, crow) {
     var r = crowRect(p, fx);
     if (r.left < 6 || r.right > window.innerWidth - 6) return false;
-    /* Не блокируем саму карточку-ссылку: лапы заходят на её рамку лишь на 2px. Остальные кнопки - с запасом. */
+    /* Не блокируем саму карточку-ссылку: лапы заходят на её рамку лишь на 2px. */
     if (
       occupiedControls.some(function (o) {
         return o.node !== p && intersects(r, o.rect, 10);
@@ -208,7 +202,7 @@
     if (!crow.perch) return;
     var at = pageXY(crow.perch, crow.fx);
     crow.node.style.transform = "translate(" + Math.round(at.x) + "px," + Math.round(at.y) + "px)";
-    /* Прокрутка: под шапкой и нижней навигацией птицу не показываем. Жёрдочка остаётся на месте. */
+    /* Прокрутка: под шапкой и нижней навигацией птицу не показываем. */
     var r = crowRect(crow.perch, crow.fx);
     crow.node.style.visibility = fixedChrome.some(function (f) {
       return intersects(r, f, 6);
@@ -334,7 +328,7 @@
     nearCrows(e.clientX, e.clientY, 130);
   }
 
-  /* ---------- тыквы ---------- */
+  /* тыквы */
   var PUMPKINS = ["pumpkin-gasmask", "pumpkin-dosimeter", "pumpkin-helmet", "pumpkin-artifact"];
   var pumpkins = [];
   function spawnPumpkins() {
@@ -357,8 +351,6 @@
     placePumpkins();
   }
   function placePumpkins() {
-    /* Тыква не залезает на монолитовца-мишень, кнопки, ссылки, пасхалку и соседние тыквы:
-       сначала свой угол, потом противоположный, а если тесно и там - прячем */
     var busy = mono && mono.classList.contains("hw-target") ? mono.getBoundingClientRect() : null;
     var placed = [];
     function box(k) {
@@ -372,8 +364,6 @@
       if (eggSpot && intersects(r, eggRect(eggSpot), 12)) return true;
       if (
         occupiedControls.some(function (o) {
-          /* декор не ловит клики, поэтому может сидеть на карточках-ссылках (своей и соседней);
-             не закрываем только обычные кнопки и ссылки */
           return !o.node.matches(PERCH) && !o.node.contains(k.perch) && intersects(r, o.rect, 2);
         })
       )
@@ -411,9 +401,7 @@
     });
   }
 
-  /* пасхалка: в каждом из шести разделов прячется маленькая тыква, по клику она ухает и засчитывается.
-     Подстраницы считаются за свой раздел: «Задания» и «Боссы» - Информация, ссылка на билд - Калькулятор,
-     гайд - Гайды. На страницах вне разделов (404, нет сети) тыквы нет, чтобы не было «пустых» находок */
+  /* пасхалка: в каждом из шести разделов прячется маленькая тыква, по клику она ухает и засчитывается. */
   var EGG_PAGES = ["/", "/info", "/top100", "/compare", "/calculator", "/guides"];
   var EGG_NAMES = {
     "/": "Главная",
@@ -473,9 +461,7 @@
     "Тут поблизости тайник. Или нет",
     "Зона не любит торопливых"
   ];
-  /* Где прятать: любой видимый некликабельный блок страницы (панели, подвал, вложенные секции).
-     Тыква встаёт в пустой угол блока или посередине нижнего края - не поверх текста, картинок,
-     кнопок и ссылок. Место выбирается случайно при каждом заходе, поэтому её приходится искать. */
+  /* Где прятать: любой видимый некликабельный блок страницы (панели, подвал, вложенные секции). */
   var EGG_SPOTS = PERCH + ", .site-footer, main section, main aside, main article, .panel, .card";
   var EGG_W = 20,
     EGG_H = 24,
@@ -516,8 +502,7 @@
     var top = spot.y ? r.bottom - EGG_H - EGG_IN : r.top + EGG_IN;
     return { left: left, top: top, right: left + EGG_W, bottom: top + EGG_H };
   }
-  /* подписи вида «ПДА // ЭФИР» нарисованы через ::before/::after - их не видно в тексте блока,
-     поэтому у блоков с такими подписями верхние углы не используем */
+
   function pseudoText(e) {
     return ["::before", "::after"].some(function (ps) {
       var c = getComputedStyle(e, ps).content;
@@ -541,8 +526,7 @@
     var hit = function (b, pad) {
       return b.width !== 0 && intersects(r, b, pad);
     };
-    /* кнопки, текст и картинки проверяем при выборе места; при прокрутке они не сдвигаются относительно блока,
-       а закреплённые на экране панели только прячут тыкву (см. placeEgg) */
+
     if (!full) return true;
     if (!spot.y && labeledTop(a)) return false;
     if (
@@ -584,8 +568,7 @@
       return;
     }
     var r = eggRect(eggSpot);
-    /* позиция - через left/top, а не transform: transform занят анимацией «ух» и увеличением при наведении,
-       иначе на время анимации тыква улетала в угол страницы и будто пропадала */
+
     egg.style.left = Math.round(r.left + window.scrollX) + "px";
     egg.style.top = Math.round(r.top + window.scrollY) + "px";
     egg.classList.toggle("bl", eggSpot.x !== 1);
@@ -688,7 +671,7 @@
     egg.classList.add(host.classList.contains("left") ? "bl" : "br");
   }
 
-  /* ---------- бюрер в простыне ---------- */
+  /* бюрер в простыне */
   var burer;
   function spawnBurer() {
     if (narrow.matches) return;
@@ -727,7 +710,7 @@
     }, 2400);
   }
 
-  /* ---------- призраки мутантов и бюрер в тумане ---------- */
+  /* призраки мутантов и бюрер в тумане */
   var GHOSTS = ["alpha", "boar", "ghoul", "izlom", "rat", "swamp"];
   function ghost() {
     var sheet = Math.random() < 0.2;
@@ -765,7 +748,7 @@
     later(ghost, rnd(30000, 55000) * speed());
   }
 
-  /* ---------- зомби-монолитовец ---------- */
+  /* зомби-монолитовец */
   var mono;
   function spawnMonolith() {
     var p = location.pathname;
@@ -796,7 +779,7 @@
     later(shamble, rnd(35000, 55000) * speed());
   }
 
-  /* ---------- «Выброс»: заголовок на миг сбоит ---------- */
+  /* «Выброс»: заголовок на миг сбоит */
   function flicker() {
     var hs = [].slice.call(d.querySelectorAll("h1, h2, .section-heading b")).filter(function (h) {
       var r = h.getBoundingClientRect();
@@ -812,7 +795,7 @@
     later(flicker, rnd(20000, 40000) * speed());
   }
 
-  /* ---------- запуск / остановка ---------- */
+  /* запуск / остановка */
   var raf = 0;
   function relayout() {
     if (raf) return;
@@ -900,8 +883,7 @@
   }
 
   window.HOTZ_HW = { start: restart, stop: stop };
-  /* пока открыт ПДА новичка (intro.js), сайт спрятан и тыквам/воронам/пасхалке не на что сесть -
-     запускаемся, когда он закроется */
+
   if (root.classList.contains("intro"))
     window.addEventListener(
       "zone-intro-done",

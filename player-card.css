@@ -1,5 +1,4 @@
-/* ===== Карточки игроков (player-card.js) =====
-   На компьютере - окно по центру, на телефоне - шторка снизу на всю ширину */
+/* Карточки игроков: окно на компьютере, шторка на телефоне. */
 
 /* ник в рейтинге - кнопка, открывающая карточку */
 .t100-player {
@@ -282,10 +281,6 @@ html.pc-lock body {
     transform: rotate(360deg);
   }
 }
-
-/* ===== Оформление «ПДА сталкера» =====
-   Корпус ПДА: тёмный металл, шум, строки развёртки; уголки-скобы - общие --brackets из visual.css.
-   --f - цвет группировки игрока, --c - цвет показателя */
 .pc-dialog {
   border-radius: 4px;
   border-color: color-mix(in srgb, var(--accent) 40%, rgba(255, 255, 255, 0.08));
@@ -326,7 +321,7 @@ html.pc-lock body {
   padding: 20px 20px 18px;
 }
 
-/* --- шапка: личное дело --- */
+/* шапка: личное дело */
 .pc-head {
   --brk-c: var(--f);
   --brk-s: 14px;
@@ -394,8 +389,6 @@ html.pc-lock body {
   line-height: 1;
   color: #7fe0a0;
 }
-/* точка - по центру заглавных букв: у моноширинных шрифтов Windows (Consolas, Cascadia) нижний вынос больше верхнего,
-   поэтому строку обрезаем ровно по высоте заглавных; где text-box не поддерживается, поднимаем точку вручную */
 .pc-signal > span {
   text-box: trim-both cap alphabetic;
 }
@@ -665,7 +658,7 @@ html.pc-lock body {
   color: #6d7a85;
 }
 
-/* --- плитки показателей: блоки ПДА со скошенным углом --- */
+/* плитки показателей: блоки ПДА со скошенным углом */
 .pc-tiles {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -800,7 +793,7 @@ html.pc-lock body {
   margin-top: 4px;
 }
 
-/* --- секции --- */
+/* секции */
 .pc-section {
   --brk-c: color-mix(in srgb, var(--accent) 60%, #fff 0%);
   --brk-s: 10px;

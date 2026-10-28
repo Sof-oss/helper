@@ -1,5 +1,4 @@
-/* Интро для новичков - ПДА сталкера (intro.js). Пока на <html> есть класс intro, сайт спрятан:
-   видны только фон темы (body::before) и ПДА */
+/* Интро для новичков - ПДА сталкера (intro.js). */
 html.intro {
   overflow: hidden;
 }
@@ -34,7 +33,7 @@ html.intro body > :not(.pda-intro) {
   }
 }
 
-/* ---------- корпус ---------- */
+/* корпус */
 .pda {
   position: relative;
   width: min(940px, 94vw);
@@ -243,7 +242,7 @@ html.intro body > :not(.pda-intro) {
   align-items: stretch;
 }
 
-/* ---------- экран ---------- */
+/* экран */
 .pda-bezel {
   padding: 12px;
   border-radius: 16px;
@@ -573,7 +572,7 @@ html.intro body > :not(.pda-intro) {
   }
 }
 
-/* ---------- панель кнопок (декор) ---------- */
+/* панель кнопок (декор) */
 .pda-side {
   display: flex;
   flex-direction: column;
@@ -741,7 +740,7 @@ html.intro body > :not(.pda-intro) {
   opacity: 0;
 }
 
-/* ---------- телефоны и узкие окна: ПДА вертикальный, кнопки под экраном ---------- */
+/* телефоны и узкие окна: ПДА вертикальный, кнопки под экраном */
 @media (max-width: 760px) {
   .pda-intro {
     padding: 30px 8px 46px;

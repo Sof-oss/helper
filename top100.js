@@ -1,10 +1,8 @@
+/* Топ-100: вкладки, сортировка, периоды и фильтры. */
 const $ = id => document.getElementById(id);
 const TOP100_TAB_KEY = "gameHelperTop100Tab";
 const TOP100_PERIOD_KEY = "gameHelperTop100Period";
 
-/* группировки приходят из общей выгрузки (top100-data.js, собирает build-top100.js):
-   TOP100_FACTIONS - группировки текущего рейтинга с цветами, TOP100_GROUPS - ник -> группировка.
-   Новая группировка в рейтинге сама получает плашку и цвет, пропавшая - исчезает */
 const FACTIONS = (Array.isArray(window.TOP100_FACTIONS) ? window.TOP100_FACTIONS : []).map(f => ({
   key: f.name,
   label: f.name,
@@ -28,8 +26,7 @@ let levelSortDesc = false,
   top100Query = "",
   top100Faction = "";
 
-/* период изменений: список отдаёт top100-data.js (TOP100_PERIODS), выбор помним между визитами.
-   Если выбранного периода в данных нет (например, пока не накопилась история), берём первый */
+/* период изменений: список отдаёт top100-data.js (TOP100_PERIODS), выбор помним между визитами. */
 let top100Period = "last";
 try {
   top100Period = localStorage.getItem(TOP100_PERIOD_KEY) || "last";
@@ -265,8 +262,7 @@ function renderTop100Tabs() {
   centerActiveTab(tabsRendered);
   tabsRendered = true;
 }
-/* вкладки на телефоне идут одной строкой: показываем, что строку можно прокрутить, и держим активную на виду.
-   В пререндере (build.js) у элементов нет размеров - тогда ничего не делаем */
+/* вкладки на телефоне идут одной строкой: показываем, что строку можно прокрутить, и держим активную на виду. */
 function updateTabsFade() {
   const t = $("top100Tabs");
   if (!t || typeof t.scrollWidth !== "number") return;
@@ -299,8 +295,7 @@ function renderTop100Table() {
       top100Query.trim() || top100Faction ? (entries.length ? "Найдено: " + entries.length : "Никого не нашли") : "";
 }
 
-/* кнопки периодов и подпись, за какие именно даты показаны изменения.
-   Без периодов в данных (первый запуск, старый top100-data.js) блок скрыт */
+/* кнопки периодов и подпись, за какие именно даты показаны изменения. */
 function renderPeriod() {
   const box = $("top100Period"),
     btns = $("top100PeriodBtns"),
@@ -364,8 +359,6 @@ function shortStamp(s) {
   return m ? { day: m[1], time: m[2] } : { day: String(s), time: "" };
 }
 
-/* поиск, период и фильтр по отрядам стоят в top100.html (место под них занято сразу, таблица не прыгает);
-   если разметки нет (старая страница), вставляются между вкладками и таблицей */
 const SHELL_HTML =
   '<div class="t100-tools"><div class="t100-period" id="top100Period" role="group" aria-label="За какой период показывать изменения" hidden><span class="t100-period-title">Изменения</span><div class="t100-period-btns" id="top100PeriodBtns"></div><p class="t100-period-range" id="top100PeriodRange" role="status" aria-live="polite"></p></div>' +
   '<label class="t100-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="top100Search" type="search" placeholder="Найти ник" autocomplete="off" aria-label="Поиск по нику"></label>' +

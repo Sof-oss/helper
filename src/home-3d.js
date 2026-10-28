@@ -1,15 +1,7 @@
-/* Главная: живой фон Зоны.
-   Подключается только на главной (<script type="module" src="home-3d.js">), собирается build.js.
-   Сам этот файл крошечный: он только решает, нужен ли фон, и догружает его по требованию (папка 3d/ в dist):
-   - живой фон (zone-bg) не скачивается на очень слабых устройствах, при экономии трафика и медленной сети - там остаётся обычный CSS-фон;
-   - фон стартует, когда страница уже загрузилась и браузер свободен, чтобы не мешать первой отрисовке.
-   Вместо three.js - своя маленькая обёртка WebGL (src/zone-gl.js), весь фон - около 20 КБ.
-   При «Уменьшить движение» в системе, без WebGL и на слабых устройствах ничего не запускается - остаётся обычный сайт */
+/* Главная: живой фон Зоны. */
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const conn = navigator.connection || {};
-/* Apple (iPhone, iPad, Mac на Safari и любом браузере на iOS/iPadOS - там все браузеры на движке Safari)
-   ради защиты от слежки занижает число ядер в navigator.hardwareConcurrency, поэтому этому числу там не верим.
-   Остальным: совсем слабое железо (2 ядра или ≤2 ГБ памяти), экономия трафика или медленная сеть (2G/3G) */
+
 const apple = /iP(hone|ad|od)|Macintosh/.test(navigator.userAgent) && !/Android/.test(navigator.userAgent);
 const weak =
   (!apple && (navigator.hardwareConcurrency || 8) <= 2) ||
@@ -28,8 +20,7 @@ const hasGL = () => {
     return false;
   }
 };
-/* поисковые и прочие роботы, проверки скорости, автоматизированные браузеры: им 3D не нужен
-   (Googlebot, YandexBot и т. п. - по слову bot/crawl/spider; телефоны Cubot - не роботы) */
+
 const ua = navigator.userAgent;
 const bot =
   navigator.webdriver === true ||

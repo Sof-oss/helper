@@ -1,6 +1,4 @@
-/* Главная: «живые» строки на плашках разделов.
-   Цифры справочника, Топ-100 и гайдов подставляет build.js, здесь - то, что знает только браузер:
-   «сегодня/вчера» для Топ-100 и сохранённый билд калькулятора (localStorage "gameHelperState", см. app.js) */
+/* Главная: «живые» строки на плашках разделов. */
 (function () {
   "use strict";
   const top = document.getElementById("hcTop");
@@ -23,9 +21,16 @@
   try {
     const s = JSON.parse(localStorage.getItem("gameHelperState") || "null");
     if (!s) return;
+    /* новый формат - gear; items/sets - старые сохранения */
+    const gear = Array.isArray(s.gear) ? s.gear.length : 0;
     const items = Array.isArray(s.items) ? s.items.length : 0;
     const sets = Array.isArray(s.sets) ? s.sets.length : 0;
-    if (!items && !sets) return;
+    const talents =
+      s.talents && typeof s.talents === "object"
+        ? Object.keys(s.talents).filter(k => Number(s.talents[k]) > 0).length
+        : 0;
+    const arena = Number(s.arena) > 0;
+    if (!gear && !items && !sets && !talents && !arena) return;
     const lvl = parseInt(s.level, 10);
     calc.textContent = "Ваш билд сохранён" + (lvl > 0 ? " · ур. " + lvl : "");
     calc.dataset.short = lvl > 0 ? "Билд · ур. " + lvl : "Билд сохранён";

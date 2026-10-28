@@ -1,7 +1,4 @@
-/* Живой фон Зоны на главной: фото группировки с глубиной, туман, пыль и пепел, иногда - аномалия.
-   Камера чуть поворачивается за мышью (на телефоне - за наклоном, если браузер даёт эти данные).
-   Затемнение и виньетка повторяют CSS-фон (body::before в visual.css), так что сайт выглядит как раньше,
-   только оживает. Если что-то пошло не так, остаётся обычный CSS-фон. */
+/* Живой фон Зоны на главной: фото группировки с глубиной, туман, пыль и пепел, иногда - аномалия. */
 import {
   WebGLRenderer,
   Scene,
@@ -53,7 +50,7 @@ export function startBackground() {
   const accent = { value: new Vector3(...theme.accent) };
   const accent2 = { value: new Vector3(...theme.accent2) };
 
-  /* ---------- фото с аномалией ---------- */
+  /* фото с аномалией */
   const loader = new TextureLoader();
   const prepTex = t => {
     t.colorSpace = NoColorSpace;
@@ -112,7 +109,7 @@ export function startBackground() {
   scene.add(photo);
   let imgAspect = 16 / 9;
 
-  /* ---------- туман: три слоя на разной глубине ---------- */
+  /* туман: три слоя на разной глубине */
   const fogs = [
     [-15, 0.012, 2.2, 0.42],
     [-10, 0.02, 3.0, 0.34],
@@ -155,7 +152,7 @@ export function startBackground() {
     return mesh;
   });
 
-  /* ---------- пыль и пепел: движение считает видеокарта ---------- */
+  /* пыль и пепел: движение считает видеокарта */
   const N = lowPower ? 320 : 900,
     BOX = new Vector3(34, 20, 16);
   const pos = new Float32Array(N * 3),
@@ -207,7 +204,7 @@ export function startBackground() {
   dust.frustumCulled = false;
   scene.add(dust);
 
-  /* ---------- искры аномалии ---------- */
+  /* искры аномалии */
   const SN = 70,
     sdir = new Float32Array(SN * 3),
     sspd = new Float32Array(SN);
@@ -243,7 +240,7 @@ export function startBackground() {
   sparks.frustumCulled = false;
   scene.add(sparks);
 
-  /* ---------- размеры: фото и туман всегда закрывают экран с запасом под наклон ---------- */
+  /* размеры: фото и туман всегда закрывают экран с запасом под наклон */
   let W = 1,
     H = 1;
   const viewAt = z => {
@@ -278,7 +275,7 @@ export function startBackground() {
   resize();
   window.addEventListener("resize", resize);
 
-  /* ---------- фон темы и смена группировки (плавно) ---------- */
+  /* фон темы и смена группировки (плавно) */
   let fade = null;
   function loadBg(url, first) {
     if (!url) return;
@@ -310,7 +307,7 @@ export function startBackground() {
     })
   ).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-  /* ---------- мышь и наклон телефона ---------- */
+  /* мышь и наклон телефона */
   const target = new Vector2(),
     cur = new Vector2();
   let lastInput = 0;
@@ -323,7 +320,7 @@ export function startBackground() {
     },
     { passive: true }
   );
-  /* наклон планшета/телефона. В альбомной ориентации оси beta/gamma меняются местами - поворачиваем их по углу экрана */
+  /* наклон планшета/телефона. */
   let base = null;
   const cl = v => Math.max(-1, Math.min(1, v));
   const angle = () => (screen.orientation && screen.orientation.angle) || window.orientation || 0;
@@ -341,8 +338,7 @@ export function startBackground() {
   };
   window.addEventListener("orientationchange", resetBase);
   if (screen.orientation) screen.orientation.addEventListener("change", resetBase);
-  /* iOS/iPadOS (Safari 13+) не присылает наклон без разрешения, а спросить его можно только по нажатию.
-     Поэтому на iPhone/iPad просим при первом касании страницы (или заставки); на Android события идут сразу */
+  /* iOS/iPadOS (Safari 13+) не присылает наклон без разрешения, а спросить его можно только по нажатию. */
   const DOE = window.DeviceOrientationEvent;
   if (DOE && typeof DOE.requestPermission === "function") {
     let busy = false;
@@ -389,7 +385,7 @@ export function startBackground() {
     { passive: true }
   );
 
-  /* ---------- аномалия: раз в 7–14 секунд в случайном месте ---------- */
+  /* аномалия: раз в 7–14 секунд в случайном месте */
   let anom = null,
     nextAnom = performance.now() + 3500 + Math.random() * 3000;
   function spawnAnomaly(now) {
@@ -404,12 +400,6 @@ export function startBackground() {
     nextAnom = now + 7000 + Math.random() * 7000;
   }
 
-  /* ---------- цикл ----------
-     Экономия батареи и процессора:
-     - не чаще FPS кадров в секунду (фон медленный, разницы с 60 не видно);
-     - если IDLE_STOP_MS никто ничего не делает (мышь, касание, прокрутка, клавиши), цикл останавливается:
-       на холсте остаётся последний кадр, процессор и видеокарта отдыхают. Любое действие - фон продолжает с того же места;
-     - в скрытой вкладке браузер сам не вызывает requestAnimationFrame. */
   const FPS = 30,
     FRAME_MS = 1000 / FPS,
     IDLE_STOP_MS = 20000;

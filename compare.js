@@ -1,8 +1,4 @@
-/* Сравнение двух игроков (compare.html): два «Личных дела» рядом по всем семи рейтингам и уровню.
-   Адрес /compare?a=<ID>&b=<ID> - ID как в ссылке на карточку /p/<ID>; адрес обновляется при каждом выборе,
-   поэтому им можно сразу поделиться. Входы: кнопка «Сравнить» в карточке игрока и в панели «Моё место» (Топ-100),
-   на главной в блоке «Моё место».
-   Данные - top100-players.json (как у карточки игрока), помощники и поле поиска - zone-players.js */
+/* Сравнение двух игроков (compare.html): два «Личных дела» рядом по всем семи рейтингам и уровню. */
 (function () {
   "use strict";
   const ZP = window.ZonePlayers;
@@ -21,7 +17,7 @@
     x: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>'
   };
 
-  /* ---------- оболочка: два поля выбора и кнопки ---------- */
+  /* оболочка: два поля выбора и кнопки */
   root.innerHTML =
     '<div class="vs-pickers">' +
     SIDES.map(
@@ -83,7 +79,7 @@
     draw();
   }
 
-  /* ---------- расчёты как в карточке игрока (player-card.js) ---------- */
+  /* расчёты как в карточке игрока (player-card.js) */
   function valueAt(p, mi, di) {
     let v = null;
     for (const pt of p.s) {
@@ -108,7 +104,7 @@
     return was === null ? null : valOf(p, mi) - was;
   }
 
-  /* ---------- шапка «Личного дела» (разметка и стили - как в карточке игрока) ---------- */
+  /* шапка «Личного дела» (разметка и стили - как в карточке игрока) */
   function headMarkup(id, p, mine) {
     const color = ZP.factionColor(p.g),
       emb = p.g && window.__factionEmblem ? window.__factionEmblem(p.g) : null;
@@ -300,7 +296,7 @@
       (ids.a || ids.b ? '<button type="button" class="mp-btn ghost" id="vsClear">' + ICON.x + "Очистить</button>" : "");
   }
 
-  /* ---------- кнопки ---------- */
+  /* кнопки */
   root.addEventListener("click", e => {
     const qp = e.target.closest("[data-vs-pick]");
     if (qp) {

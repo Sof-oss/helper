@@ -1,5 +1,4 @@
-/* Сравнение игроков (compare.html, compare.js). Шапки карточек - .pc-head из player-card.css,
-   кнопки - .mp-btn из my-place.css, поле поиска - zone-players.css. --c - цвет рейтинга, как у вкладок Топ-100 */
+/* Сравнение игроков (compare.html, compare.js). */
 .vs-panel {
   padding: 18px 20px 16px;
 }

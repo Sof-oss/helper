@@ -1,15 +1,6 @@
 #!/usr/bin/env node
 "use strict";
-/* Локальная проверка сайта: node dev.js (или двойной клик по dev.bat).
-   1. Собирает сайт (node build.js) в dist/.
-   2. Запускает сервер http://localhost:3000 с адресами как на GitHub Pages (/top100, /calculator, 404.html).
-   3. Следит за файлами проекта: после сохранения сайт пересобирается сам, а открытые вкладки обновляются.
-      Изменили site-news.json - перед сборкой запускается ещё build-changelog.js.
-   Только для проверки на своём ПК, на сайт не попадает (build.js его пропускает).
-   - Офлайн-кэш (service worker) здесь выключен, чтобы браузер не показывал старую версию.
-     Проверить офлайн-режим: node dev.js --sw
-   - Картинки гайдов и превью (build-guide-images.js, build-previews.js) здесь не пересобираются - их делает деплой.
-   Параметры: --port 3001 - другой порт, --no-open - не открывать браузер */
+/* Локальная проверка сайта: node dev.js (или двойной клик по dev.bat). */
 const fs = require("fs");
 const path = require("path");
 const http = require("http");
@@ -45,7 +36,7 @@ const TYPES = {
   ".webm": "video/webm"
 };
 
-/* ---------- сборка ---------- */
+/* сборка */
 const time = () => new Date().toTimeString().slice(0, 8);
 function run(file) {
   return new Promise(ok => {
@@ -95,7 +86,7 @@ async function build(reason) {
   }
 }
 
-/* ---------- слежение за файлами ---------- */
+/* слежение за файлами */
 const IGNORE = /^(dist|node_modules|\.git|\.github)([\\/]|$)|(^|[\\/])\.|~$|\.(tmp|swp)$/;
 let timer = null,
   changed = new Set();
@@ -120,7 +111,7 @@ function watch() {
   }
 }
 
-/* ---------- живое обновление вкладок ---------- */
+/* живое обновление вкладок */
 const clients = new Set();
 function send(event, data) {
   for (const res of clients) res.write("event: " + event + "\ndata: " + JSON.stringify(data || "") + "\n\n");
@@ -161,7 +152,7 @@ self.addEventListener("activate", function (e) {
 });
 `;
 
-/* ---------- сервер ---------- */
+/* сервер */
 function resolve(urlPath) {
   let p;
   try {

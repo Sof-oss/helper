@@ -1,12 +1,10 @@
-/* Ядро калькулятора без DOM: данные снаряжения, формулы базового урона, уровень и ссылка на билд.
-   Импортируется app.js (собирается в calculator.js) и тестами (test/calc-core.test.mjs) */
+/* Ядро калькулятора без DOM: данные снаряжения, формулы базового урона, уровень и ссылка на билд. */
 import { TALENTS } from "../talents.js";
 import { SETS, ITEMS } from "./gear-data.js";
 import { ARENA_BASE, ARENA_COEF_PERCENT } from "./arena-data.js";
 
 export { SETS, ITEMS };
-/* все вещи одним списком: комплекты идут в порядке данных, затем одиночные;
-   индекс в этом списке - бит в компактной ссылке на билд */
+
 export const ALL_ITEMS = [...SETS.flatMap(s => s.items), ...ITEMS];
 export const ITEM_BY_CODE = Object.fromEntries(ALL_ITEMS.map(i => [i.code, i]));
 /* старые одиночные вещи: индексы прежнего ITEMS - для чтения старых ссылок и localStorage */
@@ -42,10 +40,7 @@ export function arenaBonus(points) {
   };
 }
 
-/* бесплатные удары считаются так же, как оружие за жетоны: «нулевое» значение × 1,02^уровень, округление в конце.
-   Нож 46, пистолет 48, автомат 54 - на 1 уровне это 47/49/55, совпадает с игрой на 1, 24 и 25 уровне.
-   Раньше бралось значение 1 уровня × 1,02^(уровень−1) - из-за уже округлённого 47/49/55 на части уровней
-   (например, 25: нож 76 вместо 75, автомат 88 вместо 89) выходила разница в единицу */
+/* бесплатные удары считаются так же, как оружие за жетоны: «нулевое» значение × 1,02^уровень, округление в конце. */
 export const freeBase = (atLevel0, level) => Math.round(atLevel0 * Math.pow(1.02, level));
 export function baseDamageByLevel(level) {
   return {
@@ -69,7 +64,7 @@ export function sanitizeTalents(raw) {
   return out;
 }
 
-/* индекс вещи -> бит в маске. 36 вещей помещаются в Number: 2^35 < 2^53, без BigInt и 32-битных битовых операций */
+/* индекс вещи -> бит в маске. */
 const itemIndex = new Map(ALL_ITEMS.map((it, i) => [it.code, i]));
 export function gearToMask(gear) {
   let mask = 0;

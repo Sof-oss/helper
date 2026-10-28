@@ -1,17 +1,4 @@
-/* Yandex Cloud Functions: приём гайдов из формы «Отправить свой гайд» (guide-submit.js на сайте).
-   Сервер в России: у части российских провайдеров соединения с Cloudflare обрываются, поэтому не Cloudflare Worker.
-   Проверяет защиту от ботов (Yandex SmartCaptcha или Cloudflare Turnstile) и данные, затем создаёт в репозитории ветку
-   guide/<адрес> с файлами guides/<адрес>/index.md и картинками и открывает pull request.
-   На сайт гайд попадает, только когда pull request принимают (Merge). Настройка - README.md рядом.
-
-   Среда выполнения Node.js 22, точка входа index.handler, таймаут 30 с, функция публичная.
-   Переменные окружения:
-     GITHUB_TOKEN      fine-grained токен только на этот репозиторий, права Contents и Pull requests - Read and write
-     SMARTCAPTCHA_SERVER_KEY  ключ сервера Yandex SmartCaptcha (если на сайте включена SmartCaptcha)
-     TURNSTILE_SECRET  Secret key виджета Turnstile (запасной вариант; можно оставить оба)
-     GITHUB_REPO       Sof-oss/helper
-     GITHUB_BRANCH     main
-     ALLOWED_ORIGINS   https://heart-of-the-zone.ru (через запятую, если адресов несколько) */
+/* Yandex Cloud Functions: приём гайдов из формы «Отправить свой гайд» (guide-submit.js на сайте). */
 "use strict";
 
 /* у Яндекса запрос целиком - до 3,5 МБ, картинки приходят в base64 (+33 %), поэтому такие лимиты */
@@ -26,14 +13,7 @@ const LIM = {
 };
 const IMG_NAME = /^img-[1-9]\.(webp|jpg|png)$/;
 
-/* Защита проверки «дошёл ли гайд» (GET ?check=…). Она без капчи, а каждый вызов - запрос к GitHub API;
-   если долбить её без остановки, кончится лимит токена (5000 запросов в час) и перестанет работать вся форма.
-   Поэтому:
-   - список веток guide/… кэшируется на CHECK_CACHE_MS: сколько бы ни спрашивали, GitHub видит не больше запроса в эти секунды;
-   - с одного адреса - не больше CHECK_PER_IP проверок за CHECK_WINDOW_MS, дальше ответ 429.
-   Форма спрашивает 4 раза с паузой 2,5 с и только если потерялся ответ на отправку, так что обычный посетитель в лимит не упрётся.
-   Счётчики живут в памяти экземпляра функции (Яндекс держит его несколько минут, при нагрузке поднимает ещё) -
-   это не точный лимит, но от простого перебора защищает. Строгий лимит можно включить в API Gateway (см. README). */
+/* Защита проверки «дошёл ли гайд» (GET ?check=…). */
 const CHECK_CACHE_MS = 5000,
   CHECK_PER_IP = 20,
   CHECK_WINDOW_MS = 10 * 60 * 1000;
@@ -80,7 +60,7 @@ module.exports.handler = async function (event) {
   const bad = (msg, status = 400) => reply(status, { ok: false, error: msg });
 
   if (method === "OPTIONS") return { statusCode: 204, headers: cors, body: "" };
-  /* GET ?check=<номер черновика>: дошёл ли гайд. Форма спрашивает, если ответ на отправку потерялся в сети */
+  /* GET ?check=<номер черновика>: дошёл ли гайд. */
   const check = query.check;
   if (method === "GET" && check) {
     if (!/^[a-z0-9]{8,20}$/.test(check)) return bad("Неправильный номер");
@@ -102,15 +82,12 @@ module.exports.handler = async function (event) {
   }
   if (d.website) return reply(200, { ok: true }); /* скрытое поле заполняют только боты */
 
-  /* защита от ботов: форма сообщает, какая капча стояла на странице (captcha: "yandex" | "turnstile").
-     Проверяется только та, для которой в функции задан ключ, - подделать поле и обойти проверку нельзя */
+  /* защита от ботов: форма сообщает, какая капча стояла на странице (captcha: "yandex" | "turnstile"). */
   const token = String(d.token || "");
   const useYandex = d.captcha === "yandex" ? !!env.SMARTCAPTCHA_SERVER_KEY : !env.TURNSTILE_SECRET;
   let human = false;
   if (!token) human = false;
   else if (useYandex) {
-    /* https://yandex.cloud/ru/docs/smartcaptcha/concepts/validation: при ошибке сервиса status != "ok" -
-       такой гайд не пропускаем */
     const q = new URLSearchParams({ secret: env.SMARTCAPTCHA_SERVER_KEY || "", token, ip });
     const sc = await fetch("https://smartcaptcha.yandexcloud.net/validate?" + q, { method: "GET" })
       .then(r => r.json())
@@ -182,8 +159,7 @@ module.exports.handler = async function (event) {
   }
   if (total > LIM.total) return bad("Картинки вместе больше 2,4 МБ");
 
-  /* адрес гайда: транслит заголовка + хвост из номера черновика (форма присылает его в id).
-     По хвосту узнаётся повторная отправка того же гайда: второй pull request не создаётся */
+  /* адрес гайда: транслит заголовка + хвост из номера черновика (форма присылает его в id). */
   const sid = /^[a-z0-9]{8,20}$/.test(d.id || "") ? d.id : Math.random().toString(36).slice(2, 12).padEnd(8, "0");
   const slug = translit(title).slice(0, 60).replace(/-+$/, "") + "-" + sid.slice(0, 6);
   const date = new Date(Date.now() + 3 * 3600e3).toISOString().slice(0, 10); /* по Москве */
@@ -232,8 +208,7 @@ function github(env) {
   };
 }
 
-/* ветка guide/…-<хвост> уже есть - этот гайд уже прислали.
-   cached: для проверки из формы список веток берётся из кэша (см. CHECK_CACHE_MS); при отправке - всегда свежий */
+/* проверяет, есть ли уже ветка гайда; cached - брать список веток из кэша */
 async function findGuideBranch(env, tail, cached) {
   const now = Date.now();
   if (!cached || !refsCache || now - refsCache.at > CHECK_CACHE_MS) {

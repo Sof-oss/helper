@@ -156,8 +156,7 @@ test("история периодов: прирост засчитывается
     const m = res.rank.match(/<script type="application\/json" id="fxRankHistory">([\s\S]*?)<\/script>/);
     assert.ok(m, "история должна попасть в разметку");
     const hist = JSON.parse(m[1]);
-    /* дата 1: +50 у постоянного и +100 у будущего ушедшего; дата 2 - день переходов, не считается;
-       дата 3: +50 у постоянного и +100 у новичка */
+
     assert.deepEqual(hist.factions["f-evil"].reputation, [0, 150, 150, 300]);
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
