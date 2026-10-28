@@ -205,44 +205,34 @@ const authorMarkup = g =>
       : "<b>" + esc(g.author) + "</b>";
 function guidesListMarkup() {
   if (!guides.length) return '<p class="guides-empty">Пока здесь нет ни одного гайда, будьте первым!</p>';
-  return (
-    guides
-      .map(
-        g =>
-          '<a class="guide-card" href="/guide/' +
-          g.slug +
-          '">' +
-          (g.cover
-            ? '<span class="guide-card-img"><img src="' +
-              esc(g.cover) +
-              '"' +
-              (g.coverSize && g.coverSize.srcset
-                ? ' srcset="' + esc(g.coverSize.srcset) + '" sizes="(max-width: 700px) 100vw, 420px"'
-                : "") +
-              (g.coverSize ? ' width="' + g.coverSize.width + '" height="' + g.coverSize.height + '"' : "") +
-              ' alt="" loading="lazy" decoding="async"></span>'
-            : '<span class="guide-card-img guide-card-noimg" aria-hidden="true"></span>') +
-          '<span class="guide-card-body"><b>' +
-          esc(g.title) +
-          "</b>" +
-          (g.description ? "<small>" + esc(g.description) + "</small>" : "") +
-          '<span class="guide-card-meta">' +
-          (g.author ? esc(g.author) : "") +
-          (g.author && g.date ? " · " : "") +
-          (g.date ? '<time datetime="' + esc(g.date) + '">' + ruDate(g.date) + "</time>" : "") +
-          "</span></span></a>"
-      )
-      .join("") + GUIDE_INVITE
-  );
+  return guides
+    .map(
+      g =>
+        '<a class="guide-card" href="/guide/' +
+        g.slug +
+        '">' +
+        (g.cover
+          ? '<span class="guide-card-img"><img src="' +
+            esc(g.cover) +
+            '"' +
+            (g.coverSize && g.coverSize.srcset
+              ? ' srcset="' + esc(g.coverSize.srcset) + '" sizes="(max-width: 700px) 100vw, 420px"'
+              : "") +
+            (g.coverSize ? ' width="' + g.coverSize.width + '" height="' + g.coverSize.height + '"' : "") +
+            ' alt="" loading="lazy" decoding="async"></span>'
+          : '<span class="guide-card-img guide-card-noimg" aria-hidden="true"></span>') +
+        '<span class="guide-card-body"><b>' +
+        esc(g.title) +
+        "</b>" +
+        (g.description ? "<small>" + esc(g.description) + "</small>" : "") +
+        '<span class="guide-card-meta">' +
+        (g.author ? esc(g.author) : "") +
+        (g.author && g.date ? " · " : "") +
+        (g.date ? '<time datetime="' + esc(g.date) + '">' + ruDate(g.date) + "</time>" : "") +
+        "</span></span></a>"
+    )
+    .join("");
 }
-/* последняя карточка списка - приглашение написать свой гайд (открывает форму, как кнопка «Отправить свой гайд») */
-const GUIDE_INVITE =
-  '<a class="guide-card guide-card-invite" href="#send">' +
-  '<span class="guide-card-img guide-card-invite-img" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>' +
-  '<span class="guide-card-body"><b>Напишите свой гайд</b>' +
-  "<small>Поделитесь опытом - после проверки гайд появится здесь с вашей подписью. Идеи: «Как пройти экспедицию», " +
-  "«Билд для новичка», «Как лучше копить жетоны»</small>" +
-  '<span class="guide-card-meta">Открыть форму →</span></span></a>';
 
 {
   const r = esbuild.buildSync({

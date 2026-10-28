@@ -13,11 +13,20 @@ const GROUPS = window.TOP100_GROUPS || {};
 const factionOf = nick => FACTION_BY_KEY.get(GROUPS[nick]) || null;
 const NO_FACTION = "-"; // «-» в выгрузке = без группировки, своей группировкой быть не может
 
+const urlState = (() => {
+  try {
+    return new URLSearchParams(location.search);
+  } catch {
+    return null;
+  }
+})();
 let currentTop100Tab = TOP100_TABS[0].key;
 try {
   const saved = localStorage.getItem(TOP100_TAB_KEY);
   if (TOP100_TABS.some(t => t.key === saved)) currentTop100Tab = saved;
 } catch {}
+const urlMetric = urlState && urlState.get("metric");
+if (urlMetric && TOP100_TABS.some(t => t.key === urlMetric)) currentTop100Tab = urlMetric;
 const currentTab = () => TOP100_TABS.find(t => t.key === currentTop100Tab) || TOP100_TABS[0];
 
 /* сортировка по уровню (только для вкладок с sortLevel), поиск и фильтр по отряду (общие для всех вкладок) */
@@ -25,6 +34,12 @@ let levelSortDesc = false,
   deltaSortDesc = false,
   top100Query = "",
   top100Faction = "";
+const urlFaction = urlState && urlState.get("faction");
+if (urlFaction !== null && (urlFaction === NO_FACTION || FACTIONS.some(f => f.key === urlFaction)))
+  top100Faction = urlFaction;
+if (urlState && urlState.get("sort") === "level") levelSortDesc = true;
+else if (urlState && urlState.get("sort") === "delta") deltaSortDesc = true;
+if (levelSortDesc && !currentTab().sortLevel) levelSortDesc = false;
 
 /* период изменений: список отдаёт top100-data.js (TOP100_PERIODS), выбор помним между визитами. */
 let top100Period = "last";
@@ -32,6 +47,9 @@ try {
   top100Period = localStorage.getItem(TOP100_PERIOD_KEY) || "last";
 } catch {}
 const periodList = () => (Array.isArray(window.TOP100_PERIODS) ? window.TOP100_PERIODS : []);
+const urlPeriod = urlState && urlState.get("period");
+if (urlPeriod && periodList().some(p => p.key === urlPeriod)) top100Period = urlPeriod;
+if (!periodList().some(p => p.key === top100Period)) top100Period = periodList()[0] ? periodList()[0].key : "last";
 const currentPeriod = () => {
   const l = periodList();
   return l.find(p => p.key === top100Period) || l[0] || null;
@@ -42,6 +60,23 @@ function periodChanges() {
     all = window.TOP100_CHANGES;
   if (p && all && all[p.key]) return all[p.key];
   return { delta: window.TOP100_DELTA, rank: window.TOP100_RANK };
+}
+/* выбранная метрика, период, отряд и сортировка - в адресе, чтобы ссылкой делиться */
+function syncUrl() {
+  if (typeof history === "undefined" || !history.replaceState) return;
+  const u = new URL(location.href);
+  u.searchParams.set("metric", currentTop100Tab);
+  if (currentPeriod()) u.searchParams.set("period", top100Period);
+  else u.searchParams.delete("period");
+  if (top100Faction) u.searchParams.set("faction", top100Faction);
+  else u.searchParams.delete("faction");
+  const deltaMap = periodChanges().delta,
+    hasDelta = !!(deltaMap && deltaMap[currentTop100Tab] && Object.keys(deltaMap[currentTop100Tab]).length);
+  if (levelSortDesc && currentTab().sortLevel) u.searchParams.set("sort", "level");
+  else if (deltaSortDesc && hasDelta) u.searchParams.set("sort", "delta");
+  else u.searchParams.delete("sort");
+  const next = u.pathname + u.search + u.hash;
+  if (next !== location.pathname + location.search + location.hash) history.replaceState(null, "", next);
 }
 /* «за неделю», «с прошлого обновления» - для подсказок у стрелок */
 function periodPhrase() {
@@ -158,18 +193,20 @@ function top100TableMarkup(tab) {
   const metricTh = hasDelta
     ? '<th class="top100-sort' +
       (deltaSorted ? " active" : "") +
-      '" data-top100-sort="delta" role="button" tabindex="0" aria-pressed="' +
-      deltaSorted +
-      '" title="Сортировать по приросту">' +
+      '" data-top100-sort="delta" aria-sort="' +
+      (deltaSorted ? "descending" : "none") +
+      '"><button type="button" class="t100-sort-btn" title="Сортировать по приросту (' +
+      escAttr(periodPhrase()) +
+      ')">' +
       tab.metric +
-      '<i aria-hidden="true">▼</i></th>'
+      '<i aria-hidden="true">▼</i></button></th>'
     : "<th>" + tab.metric + "</th>";
   const levelTh = tab.sortLevel
     ? '<th class="top100-sort' +
       (sorted ? " active" : "") +
-      '" data-top100-sort="level" role="button" tabindex="0" aria-pressed="' +
-      sorted +
-      '" title="Сортировать по уровню">Ур.<i aria-hidden="true">▼</i></th>'
+      '" data-top100-sort="level" aria-sort="' +
+      (sorted ? "descending" : "none") +
+      '"><button type="button" class="t100-sort-btn" title="Сортировать по уровню">Ур.<i aria-hidden="true">▼</i></button></th>'
     : "<th>Ур.</th>";
   const body = entries.length
     ? entries.map(e => top100RowMarkup(e.row, e.rank, sorted || deltaSorted, tab.key)).join("")
@@ -293,6 +330,7 @@ function renderTop100Table() {
   if (status)
     status.textContent =
       top100Query.trim() || top100Faction ? (entries.length ? "Найдено: " + entries.length : "Никого не нашли") : "";
+  syncUrl();
 }
 
 /* кнопки периодов и подпись, за какие именно даты показаны изменения. */
@@ -401,15 +439,16 @@ function toggleSort(kind, refocus) {
   }
   renderTop100Table();
   if (refocus) {
-    const th = document.querySelector('[data-top100-sort="' + kind + '"]');
-    if (th) th.focus();
+    const btn = document.querySelector('[data-top100-sort="' + kind + '"] .t100-sort-btn');
+    if (btn) btn.focus();
   }
 }
 
 document.addEventListener("click", e => {
   const sort = e.target.closest("[data-top100-sort]");
   if (sort) {
-    toggleSort(sort.dataset.top100Sort, false);
+    /* Enter и пробел на кнопке дают click с detail = 0 - вернём фокус после перерисовки */
+    toggleSort(sort.dataset.top100Sort, e.detail === 0);
     return;
   }
   /* смена периода: пересчитываются стрелки и прирост, вкладка, поиск и фильтр остаются */
@@ -462,14 +501,6 @@ document.addEventListener("click", e => {
   };
   window.__vt ? window.__vt(swap) : swap();
 });
-document.addEventListener("keydown", e => {
-  if (e.key !== "Enter" && e.key !== " ") return;
-  const sort = e.target.closest && e.target.closest("[data-top100-sort]");
-  if (!sort) return;
-  e.preventDefault();
-  toggleSort(sort.dataset.top100Sort, true);
-});
-
 /* дату отдаёт top100-data.js, в разметке только заглушка */
 const updatedEl = $("top100Updated");
 if (updatedEl && window.TOP100_UPDATED) {

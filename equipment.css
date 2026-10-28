@@ -90,6 +90,13 @@
     "JetBrains Mono",
     monospace;
   text-align: center;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.arena-control input::-webkit-outer-spin-button,
+.arena-control input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
 }
 .arena-control input:focus,
 .arena-control input:focus-visible {

@@ -19,7 +19,7 @@
   const url = { tasks: "/info-tasks", bosses: "/info-bosses" }[s];
   if (!url) return;
   document
-    .querySelectorAll('.main-nav a[href="/info"], .tabbar a[href="/info"]')
+    .querySelectorAll('.main-nav a[href="/info"], .tabbar-more a[href="/info"]')
     .forEach(a => a.setAttribute("href", url));
 })();
 

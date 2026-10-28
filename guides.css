@@ -133,23 +133,6 @@
   font-weight: 600;
 }
 
-/* карточка-приглашение «Напишите свой гайд» в конце списка */
-.guide-card-invite {
-  border-style: dashed;
-  background: color-mix(in srgb, var(--accent) 5%, var(--panel-2));
-}
-.guide-card-invite-img {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: color-mix(in srgb, var(--accent) 70%, #fff);
-  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 65%);
-}
-.guide-card-invite-img svg {
-  width: 56px;
-  height: 56px;
-}
-
 /* кнопка отправки, пока не выполнены условия: выглядит неактивной, но по нажатию подсвечивает пропуски */
 .guide-send-btn.is-incomplete {
   opacity: 0.55;

@@ -314,6 +314,47 @@ window.__roll = function (el, text) {
     d.body.appendChild(bar);
   }
 
+  /* «Ещё» в нижнем меню: Информация и Гайды не занимают отдельные вкладки */
+  var moreBtn = d.getElementById("tabbarMoreBtn"),
+    more = d.getElementById("tabbarMore");
+  if (moreBtn && more) {
+    var herePath =
+      location.pathname
+        .replace(/\.html$/, "")
+        .replace(/\/index$/, "/")
+        .replace(/\/+$/, "") || "/";
+    if (herePath === "/info" || herePath.indexOf("/info-") === 0 || herePath.indexOf("/guide") === 0) {
+      moreBtn.classList.add("active");
+      moreBtn.setAttribute("aria-current", "page");
+    }
+    var setMore = function (open) {
+      more.hidden = !open;
+      moreBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) {
+        var first = more.querySelector("a");
+        if (first) first.focus({ preventScroll: true });
+      }
+    };
+    moreBtn.addEventListener("click", function () {
+      setMore(more.hidden);
+    });
+    more.addEventListener("click", function (e) {
+      if (e.target.closest("a")) setMore(false);
+    });
+    d.addEventListener("click", function (e) {
+      if (!more.hidden && !more.contains(e.target) && !moreBtn.contains(e.target)) setMore(false);
+    });
+    d.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !more.hidden) {
+        setMore(false);
+        moreBtn.focus();
+      }
+    });
+    addEventListener("resize", function () {
+      if (!more.hidden && innerWidth > 760) setMore(false);
+    });
+  }
+
   /* поля с большими числами (жетоны, урон, энергия): разряды через пробел, «1 000 000» вместо «1000000». */
   function groupDigits(el) {
     var v = el.value,

@@ -99,6 +99,46 @@
     pad = pad || 0;
     return a.left < b.right + pad && a.right > b.left - pad && a.top < b.bottom + pad && a.bottom > b.top - pad;
   }
+  function directText(el) {
+    for (var n = el.firstChild; n; n = n.nextSibling) if (n.nodeType === 3 && /\S/.test(n.nodeValue)) return true;
+    return false;
+  }
+  /* под декором не должно быть строк, иконок и кнопок: проверяем точки по его площади */
+  function overContent(perch, r) {
+    var pad = 6,
+      left = r.left - pad,
+      right = r.right + pad,
+      top = r.top - pad,
+      bottom = r.bottom + pad;
+    var pts = [
+      [0.1, 0.1],
+      [0.37, 0.1],
+      [0.63, 0.1],
+      [0.9, 0.1],
+      [0.1, 0.37],
+      [0.37, 0.37],
+      [0.63, 0.37],
+      [0.9, 0.37],
+      [0.1, 0.63],
+      [0.37, 0.63],
+      [0.63, 0.63],
+      [0.9, 0.63],
+      [0.1, 0.9],
+      [0.37, 0.9],
+      [0.63, 0.9],
+      [0.9, 0.9]
+    ];
+    for (var i = 0; i < pts.length; i++) {
+      var x = left + (right - left) * pts[i][0],
+        y = top + (bottom - top) * pts[i][1];
+      if (x < 0 || y < 0 || x > innerWidth || y > innerHeight) continue;
+      var el = d.elementFromPoint(x, y);
+      if (!el || el === perch || el.closest(".hw-layer")) continue;
+      if (perch.contains(el)) return true;
+      if (el.closest(CLICKABLE) || directText(el)) return true;
+    }
+    return false;
+  }
   function refreshObstacles() {
     occupiedControls = [].slice
       .call(d.querySelectorAll("a, button, input, select, textarea, summary, [role=button], [tabindex]"))
@@ -190,13 +230,21 @@
     var preferred = slots.filter(function (slot) {
       return slot.preferred;
     });
-    var slot = pick(preferred.length ? preferred : slots);
-    crow.perch = slot.p;
-    crow.fx = slot.fx;
-    crow.flip = Math.random() < 0.5;
-    crow.node.classList.toggle("flip", crow.flip);
-    moveCrow(crow);
-    return true;
+    var pool = (preferred.length ? preferred : slots).slice();
+    /* сначала примеряем несколько мест: ворона не должна закрывать заголовки и сноски */
+    for (var tries = 0; pool.length && tries < 14; tries++) {
+      var slot = pool.splice(Math.floor(Math.random() * pool.length), 1)[0];
+      if (overContent(slot.p, crowRect(slot.p, slot.fx))) continue;
+      crow.perch = slot.p;
+      crow.fx = slot.fx;
+      crow.flip = Math.random() < 0.5;
+      crow.node.classList.toggle("flip", crow.flip);
+      moveCrow(crow);
+      return true;
+    }
+    crow.perch = null;
+    crow.node.classList.add("gone");
+    return false;
   }
   function moveCrow(crow) {
     if (!crow.perch) return;
@@ -368,6 +416,7 @@
         })
       )
         return true;
+      if (overContent(k.perch, r)) return true;
       return placed.some(function (b) {
         return intersects(r, b, 8);
       });

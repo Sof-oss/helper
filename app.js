@@ -927,6 +927,7 @@ function renderTokens() {
         '<article class="tok-card' +
         (best ? " best" : "") +
         '">' +
+        (best ? '<span class="tok-best">выгоднее</span>' : "") +
         '<div class="tok-card-head"><span class="tok-wicon weapon-' +
         TOKEN_ICON_CLASS[w.key] +
         '"></span><div><b>' +
@@ -1746,9 +1747,9 @@ function askConfirm({ title, text, ok }) {
   $("confirmYes").textContent = ok || "Да";
   const a = document.activeElement;
   confirmOpener = a && a !== document.body ? a : null;
-  confirmInerted = [...document.querySelectorAll(".site-header,.tabbar,.page,.site-footer,.talent-modal.show")].filter(
-    el => el !== m && !el.inert
-  );
+  confirmInerted = [
+    ...document.querySelectorAll(".site-header,.tabbar,.tabbar-more,.page,.site-footer,.talent-modal.show")
+  ].filter(el => el !== m && !el.inert);
   confirmInerted.forEach(el => {
     el.inert = true;
   });

@@ -701,24 +701,28 @@
   background: rgba(8, 10, 11, 0.6);
 }
 .talent-legend i {
-  width: 14px;
-  height: 14px;
-  border-radius: 2px;
-  background: #15181a !important;
+  flex: 0 0 9px;
+  width: 9px;
+  height: 9px;
+  border: 0;
+  border-radius: 50%;
+  background: #3a4046 !important;
 }
 .talent-legend .lg-maxed {
-  border: 2px solid #79c463;
+  background: #79c463 !important;
+  box-shadow: 0 0 6px rgba(121, 196, 99, 0.5);
 }
 .talent-legend .lg-ready {
-  border: 2px solid var(--accent);
-  box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 60%, transparent);
+  background: var(--accent) !important;
+  box-shadow: 0 0 7px color-mix(in srgb, var(--accent) 65%, transparent);
 }
 .talent-legend .lg-open {
-  border: 1px solid rgba(176, 176, 170, 0.6);
+  background: #55595c !important;
 }
 .talent-legend .lg-locked {
-  border: 1px dashed rgba(176, 176, 170, 0.45);
-  opacity: 0.8;
+  border: 1.5px dashed rgba(176, 176, 170, 0.5);
+  background: transparent !important;
+  opacity: 0.9;
 }
 
 /* линии дерева: изученная связь - зелёная, закрытая - пунктир, путь к выбранному таланту - цвет темы */

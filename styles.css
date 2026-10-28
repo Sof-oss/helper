@@ -3093,6 +3093,7 @@ svg.target-icon {
   margin-top: 16px;
 }
 .tok-card {
+  position: relative;
   border: 1px solid #17364b;
   border-radius: 12px;
   background: linear-gradient(180deg, #0a1a27, #081420);
@@ -3102,6 +3103,22 @@ svg.target-icon {
 .tok-card.best {
   border-color: rgba(39, 219, 136, 0.55);
   box-shadow: 0 0 22px rgba(39, 219, 136, 0.13);
+}
+.tok-best {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  padding: 3px 7px;
+  border: 1px solid rgba(39, 219, 136, 0.55);
+  border-radius: 3px;
+  background: rgba(39, 219, 136, 0.14);
+  color: #8ff5bb;
+  font:
+    700 10px/1 "ZoneMono",
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 .tok-card-head {
   display: flex;
@@ -3347,11 +3364,13 @@ svg.target-icon {
   color: #a9bccc;
 }
 .talent-legend i {
-  width: 12px;
-  height: 12px;
-  border-radius: 4px;
+  flex: 0 0 9px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
   display: inline-block;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 0;
+  background: #3a4046;
 }
 .talent-legend .lg-maxed {
   background: #79c463;
@@ -3360,10 +3379,11 @@ svg.target-icon {
   background: var(--accent);
 }
 .talent-legend .lg-open {
-  background: #3a4046;
+  background: #55595c;
 }
 .talent-legend .lg-locked {
-  background: #171c20;
+  border: 1.5px dashed rgba(176, 176, 170, 0.5);
+  background: transparent;
 }
 
 .talent-tip {
@@ -3767,9 +3787,9 @@ svg.target-icon {
     gap: 6px;
   }
   .talent-legend i {
-    width: 10px;
-    height: 10px;
-    border-radius: 3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
   }
   .talent-tip {
     width: min(260px, calc(100% - 16px));
@@ -4264,6 +4284,14 @@ input[type="number"]:focus,
 .t100-search input:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+/* iOS приближает страницу к полю с шрифтом меньше 16px - на телефоне все поля крупные */
+@media (max-width: 760px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
 }
 .info-group-title,
 .section-heading {
@@ -4872,8 +4900,16 @@ input[type="number"]:focus,
 .cmp-btn:hover {
   transform: translateY(-1px);
 }
-.tabbar {
+.tabbar,
+.tabbar-more {
   display: none;
+}
+.tabbar-more-btn {
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 @media (max-width: 760px) {
   .main-nav {
@@ -4890,7 +4926,7 @@ input[type="number"]:focus,
   .tabbar {
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: 1fr; /* сколько пунктов в partials/header.html, столько и колонок */
+    grid-auto-columns: 1fr; /* пять пунктов: четыре раздела и «Ещё» */
     position: fixed;
     left: 0;
     right: 0;
@@ -4902,7 +4938,9 @@ input[type="number"]:focus,
     border-top: 1px solid var(--glass-line);
     box-shadow: 0 -10px 24px rgba(0, 0, 0, 0.45);
   }
-  .tabbar a {
+  .tabbar a,
+  .tabbar-more-btn {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -4912,27 +4950,32 @@ input[type="number"]:focus,
     text-decoration: none;
     font-size: var(--fs-xs);
     font-weight: 600;
-    padding-top: 6px;
+    padding: 6px 2px 0;
     line-height: 1.1;
   }
-  .tabbar a span {
+  .tabbar a span,
+  .tabbar-more-btn span {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
   }
-  .tabbar a .nav-icon {
+  .tabbar a .nav-icon,
+  .tabbar-more-btn .nav-icon {
     width: 22px;
     height: 22px;
     flex: 0 0 22px;
   }
-  .tabbar a.active {
+  .tabbar a.active,
+  .tabbar-more-btn.active {
     color: color-mix(in srgb, var(--accent) 25%, #ffffff);
   }
-  .tabbar a.active .nav-icon {
+  .tabbar a.active .nav-icon,
+  .tabbar-more-btn.active .nav-icon {
     filter: drop-shadow(0 0 7px var(--accent));
   }
-  .tabbar a.active:after {
+  .tabbar a.active:after,
+  .tabbar-more-btn.active:after {
     content: "";
     position: absolute;
     top: 0;
@@ -4942,8 +4985,85 @@ input[type="number"]:focus,
     background: var(--accent);
     box-shadow: 0 0 8px var(--accent);
   }
-  .tabbar a {
-    position: relative;
+  .tabbar-more-btn[aria-expanded="true"] {
+    color: color-mix(in srgb, var(--accent) 25%, #ffffff);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  /* меню «Ещё»: две крупные строки над нижней панелью */
+  .tabbar-more {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 8px);
+    z-index: 61;
+    padding: 8px;
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--glass-line));
+    border-radius: var(--r-sm, 4px);
+    background: linear-gradient(180deg, rgba(10, 18, 26, 0.98), rgba(5, 9, 14, 0.99));
+    box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.55);
+  }
+  .tabbar-more[hidden] {
+    display: none;
+  }
+  .tabbar-more a {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 52px;
+    padding: 7px 10px;
+    border: 1px solid rgba(120, 160, 190, 0.16);
+    border-radius: var(--r-sm, 4px);
+    background: rgba(8, 15, 22, 0.65);
+    color: #d5e1ea;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tabbar-more a:active {
+    background: color-mix(in srgb, var(--accent) 14%, rgba(8, 15, 22, 0.7));
+  }
+  .tabbar-more a.active {
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    background: color-mix(in srgb, var(--accent) 14%, rgba(8, 15, 22, 0.7));
+    color: #fff;
+  }
+  .tabbar-more .nav-icon {
+    flex: 0 0 22px;
+    width: 22px;
+    height: 22px;
+    color: color-mix(in srgb, var(--accent) 60%, #cfe0ec);
+  }
+  .tabbar-more a span {
+    display: block;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .tabbar-more a small {
+    grid-column: 2;
+    font-size: 11px;
+    color: #7f95a8;
+    line-height: 1.25;
+  }
+  .tabbar-more a {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr);
+    grid-template-areas: "icon name" "icon desc";
+    align-content: center;
+    column-gap: 9px;
+    row-gap: 1px;
+  }
+  .tabbar-more a .nav-icon {
+    grid-area: icon;
+    align-self: center;
+  }
+  .tabbar-more a span {
+    grid-area: name;
+  }
+  .tabbar-more a small {
+    grid-area: desc;
   }
 }
 
@@ -5902,14 +6022,16 @@ th.top100-sort {
     background: linear-gradient(180deg, rgba(9, 11, 14, 0.97), rgba(5, 7, 9, 0.99));
     border-top: 1px solid var(--line);
   }
-  .tabbar a span {
+  .tabbar a span,
+  .tabbar-more-btn span {
     font-family: var(--f-display);
     font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     font-size: var(--fs-xs);
   }
-  .tabbar a.active:after {
+  .tabbar a.active:after,
+  .tabbar-more-btn.active:after {
     width: 36px;
     height: 3px;
     border-radius: 0;
@@ -6014,11 +6136,13 @@ th.top100-sort {
 
 /* без синей вспышки системной подсветки касания на телефонах; отклик - лёгкое затемнение пункта */
 .tabbar a,
+.tabbar-more-btn,
 .main-nav a,
 .logo {
   -webkit-tap-highlight-color: transparent;
 }
-.tabbar a:active {
+.tabbar a:active,
+.tabbar-more-btn:active {
   background: rgba(255, 255, 255, 0.04);
 }
 

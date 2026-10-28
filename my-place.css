@@ -503,6 +503,32 @@
   .mp-bar {
     padding: 8px;
   }
+  /* без сохранённого ника - одна компактная строка, чтобы не отодвигать таблицу */
+  .mp-bar.empty:not(.picking) {
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 6px 8px 6px 10px;
+  }
+  .mp-bar.empty:not(.picking) .mp-bar-ic {
+    flex: 0 0 24px;
+    width: 24px;
+    height: 24px;
+  }
+  .mp-bar.empty:not(.picking) .mp-bar-text {
+    flex: 1 1 auto;
+  }
+  .mp-bar.empty:not(.picking) .mp-bar-text b {
+    font-size: 13px;
+  }
+  .mp-bar.empty:not(.picking) .mp-bar-text small {
+    display: none;
+  }
+  .mp-bar.empty:not(.picking) .mp-btn {
+    flex: 0 0 auto;
+    height: 30px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
   .mp-bar-text {
     flex-basis: 120px;
   }

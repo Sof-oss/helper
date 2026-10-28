@@ -1,15 +1,30 @@
 /* Топ-100: сортировка по уровню и изменениям. */
 .top100-sort {
-  cursor: pointer;
   user-select: none;
   white-space: nowrap;
 }
-.top100-sort:hover {
+.t100-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.t100-sort-btn:hover {
   color: #c3d4e2;
 }
-.top100-sort:focus-visible {
+.t100-sort-btn:focus-visible {
   outline: 2px solid #54bfff;
-  outline-offset: -2px;
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 .top100-sort i {
   margin-left: 3px;

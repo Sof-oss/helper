@@ -529,7 +529,7 @@
     if (!hasLoc) return;
     document.title = SECTIONS[k].title;
     /* пункт меню «Информация» ведёт в открытый сейчас раздел (как и после перезагрузки, см. nav.js) */
-    document.querySelectorAll(".main-nav a, .tabbar a").forEach(a => {
+    document.querySelectorAll(".main-nav a, .tabbar-more a").forEach(a => {
       if (/^\/info(-tasks|-bosses)?$/.test(a.getAttribute("href") || "")) a.setAttribute("href", SECTIONS[k].url);
     });
     const c = document.querySelector('link[rel="canonical"]');

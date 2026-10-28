@@ -1,6 +1,36 @@
 /* «Новости сайта». Данные подставляет build-changelog.js из site-news.json. */
 window.CHANGELOG=[
   {
+    "date": "2026-10-28",
+    "title": "Мобильное меню и порядок в интерфейсе",
+    "items": [
+      [
+        "up",
+        "В нижнем меню на телефоне пять вкладок: «Информация» и «Гайды» переехали в «Ещё»"
+      ],
+      [
+        "up",
+        "Поля ввода на телефоне крупнее, а у характеристик арены больше нет лишних стрелок"
+      ],
+      [
+        "up",
+        "«Моё место» в Топ-100 без сохранённого ника занимает одну строку - таблица начинается выше"
+      ],
+      [
+        "up",
+        "Короткий тур по сайту - шесть шагов, подробные подсказки по страницам и окнам открываются значком «?»"
+      ],
+      [
+        "up",
+        "Сезонный декор не закрывает заголовки, подписи и сноски, а заголовки новостей сайта занимают две строки"
+      ],
+      [
+        "up",
+        "В расчёте по жетонам лучший вариант отмечен словом «выгоднее», а легенда талантов показывает состояния цветными точками"
+      ]
+    ]
+  },
+  {
     "date": "2026-10-26",
     "title": "Обратный отсчёт и рейтинг группировок",
     "items": [
@@ -593,13 +623,16 @@ window.CHANGELOG=[
 
  const COMPACT=2,ITEMS=3;
  const plural=n=>n%10==1&&n%100!=11?"изменение":n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?"изменения":"изменений";
+ const attr=s=>String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
  const entry=(e,i)=>{
   const compact=i>0,cls="news-entry"+(compact?" news-compact":"")+(i>COMPACT?" news-more":"");
   const head=compact
-   ?'<button type="button" class="news-head" aria-expanded="false"><time datetime="'+e.date+'">'+fmtDate(e.date)+'</time><b>'+e.title+'</b><span class="news-count">'+e.items.length+" "+plural(e.items.length)+'</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>'
-   :'<div class="news-head"><time datetime="'+e.date+'">'+fmtDate(e.date)+'</time><b>'+e.title+'</b></div>';
+   ?'<button type="button" class="news-head" aria-expanded="false"><time datetime="'+e.date+'">'+fmtDate(e.date)+'</time><b title="'+attr(e.title)+'">'+e.title+'</b><span class="news-count">'+e.items.length+" "+plural(e.items.length)+'</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>'
+   :'<div class="news-head"><time datetime="'+e.date+'">'+fmtDate(e.date)+'</time><b title="'+attr(e.title)+'">'+e.title+'</b></div>';
   const items=e.items.map(([t,text],k)=>'<li'+(!compact&&k>=ITEMS?' class="news-extra"':'')+'><span class="news-tag news-tag-'+t+'">'+(TYPES[t]||t)+'</span><span>'+text+'</span></li>').join("");
-  const more=!compact&&e.items.length>ITEMS?'<button type="button" class="news-extra-btn">Ещё '+(e.items.length-ITEMS)+'</button>':'';
+  const more=!compact&&e.items.length>ITEMS
+   ?'<button type="button" class="news-extra-btn">Ещё '+(e.items.length-ITEMS)+' '+plural(e.items.length-ITEMS)+'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>'
+   :'';
   return '<li class="'+cls+'">'+head+'<ul class="news-items">'+items+'</ul>'+more+'</li>';
  };
  let seen="";try{seen=localStorage.getItem(SEEN_KEY)||""}catch{}
