@@ -11,6 +11,8 @@
   var narrow = window.matchMedia("(max-width: 720px)");
   var finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
   var PERCH = ".home-card, .home-news, .hc-live, .result-panel, .info-lead, .guide-card, .t100-tools";
+  /* тыквам - ещё и большие панели, где у нижних углов нет текста */
+  var PUMPKIN_PERCH = PERCH + ", .home-hero, .home-me, .site-footer";
   /* всё, по чему можно кликнуть: на таких блоках тыкв нет, чтобы клик по тыкве не открывал ссылку */
   var CLICKABLE =
     "a, button, summary, label, select, input, textarea, [role=button], [role=link], [onclick], [tabindex]";
@@ -66,9 +68,10 @@
     return parseFloat(s.borderTopWidth) > 0 || hasBg || s.backgroundImage !== "none";
   }
   /* видимые блоки страницы, на которые можно сесть и поставить тыкву (вложенные друг в друга - только внешний) */
-  function perches() {
-    return [].slice.call(d.querySelectorAll(PERCH)).filter(function (e) {
-      return solid(e) && !(e.parentElement && e.parentElement.closest(PERCH));
+  function perches(selector) {
+    var sel = selector || PERCH;
+    return [].slice.call(d.querySelectorAll(sel)).filter(function (e) {
+      return solid(e) && !(e.parentElement && e.parentElement.closest(sel));
     });
   }
   function pageXY(e, fx) {
@@ -380,7 +383,7 @@
   var PUMPKINS = ["pumpkin-gasmask", "pumpkin-dosimeter", "pumpkin-helmet", "pumpkin-artifact"];
   var pumpkins = [];
   function spawnPumpkins() {
-    var ps = perches().filter(function (p) {
+    var ps = perches(PUMPKIN_PERCH).filter(function (p) {
       return !p.classList.contains("site-header");
     });
     var n = Math.min(ps.length, narrow.matches ? 2 : 4);
@@ -393,18 +396,46 @@
       var k = el("div", "hw-pumpkin" + (i % 2 ? " l" : ""), '<img alt="" src="' + img(kinds[i % 4]) + '">');
       k.setAttribute("aria-hidden", "true");
       k.style.animationDelay = (-Math.random() * 6).toFixed(2) + "s";
+      /* показываем только после проверки места - без вспышки при загрузке */
+      k.style.visibility = "hidden";
       layer.appendChild(k);
-      pumpkins.push({ node: k, perch: p, fx: i % 2 ? 0 : 1, bottom: true });
+      pumpkins.push({ node: k, perch: p, fx: i % 2 ? 0 : 1, home: i % 2 ? 0 : 1, bottom: true });
     }
     placePumpkins();
   }
   function placePumpkins() {
     var busy = mono && mono.classList.contains("hw-target") ? mono.getBoundingClientRect() : null;
-    var placed = [];
+    var placed = [],
+      seats = null,
+      texts = [];
+    function allSeats() {
+      if (!seats)
+        seats = perches(PUMPKIN_PERCH).filter(function (p) {
+          return !p.classList.contains("site-header");
+        });
+      return seats;
+    }
+    /* реальные строки и картинки панели: проверка работает и за пределами экрана */
+    function textRectsOf(p) {
+      for (var i = 0; i < texts.length; i++) if (texts[i].p === p) return texts[i].r;
+      var r = contentRects(p);
+      texts.push({ p: p, r: r });
+      return r;
+    }
+    function overText(p, r) {
+      return textRectsOf(p).some(function (b) {
+        return intersects(r, b, 4);
+      });
+    }
     function box(k) {
       var r = k.node.getBoundingClientRect();
       var h = r.height || r.width;
       return { left: r.left, right: r.right, top: r.top, bottom: r.top + h };
+    }
+    function underChrome(r) {
+      return fixedChrome.some(function (f) {
+        return intersects(r, f, 6);
+      });
     }
     function blocked(k) {
       var r = box(k);
@@ -416,7 +447,7 @@
         })
       )
         return true;
-      if (overContent(k.perch, r)) return true;
+      if (overText(k.perch, r)) return true;
       return placed.some(function (b) {
         return intersects(r, b, 8);
       });
@@ -429,24 +460,44 @@
       k.node.style.transform = "translate(" + Math.round(x) + "px," + Math.round(y) + "px)";
     }
     pumpkins.forEach(function (k) {
-      if (!k.perch.isConnected) return;
-      if (k.home === undefined) k.home = k.fx;
-      k.fx = k.home;
-      k.node.style.visibility = "";
-      put(k);
-      if (blocked(k)) {
-        k.fx = 1 - k.home;
-        put(k);
-      }
-      var r = box(k);
-      if (
-        blocked(k) ||
-        fixedChrome.some(function (f) {
-          return intersects(r, f, 6);
-        })
-      )
+      if (!k.perch || !k.perch.isConnected) {
         k.node.style.visibility = "hidden";
-      else placed.push(r);
+        return;
+      }
+      /* уже посаженную тыкву не перепроверяем: иначе подгрузка контента заставляет её пропасть */
+      if (k.shown) {
+        put(k);
+        var rr = box(k);
+        k.node.style.visibility = underChrome(rr) ? "hidden" : "";
+        placed.push(rr);
+        return;
+      }
+      if (k.failed) {
+        k.node.style.visibility = "hidden";
+        return;
+      }
+      /* первая посадка: перебираем панели и углы, пока не найдём свободный */
+      var ps = allSeats(),
+        order = k.perch && k.perch.isConnected ? [k.perch] : [];
+      ps.forEach(function (p) {
+        if (p !== k.perch) order.push(p);
+      });
+      for (var pn = 0; pn < order.length && pn < 14; pn++) {
+        for (var fn = 0; fn < 2; fn++) {
+          k.perch = order[pn];
+          k.fx = (k.home + fn) % 2;
+          put(k);
+          var r = box(k);
+          if (!blocked(k) && !underChrome(r)) {
+            k.shown = true;
+            k.node.style.visibility = "";
+            placed.push(r);
+            return;
+          }
+        }
+      }
+      k.node.style.visibility = "hidden";
+      k.failed = true;
     });
   }
 
@@ -875,7 +926,8 @@
     refreshObstacles();
     spawnEgg();
     spawnCrows();
-    spawnPumpkins();
+    /* контент и шрифты успевают встать на место - тыквы не прыгают и не исчезают */
+    later(spawnPumpkins, 900);
     if (full()) {
       spawnBurer();
       spawnMonolith();
