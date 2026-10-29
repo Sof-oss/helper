@@ -1,7 +1,25 @@
 {
-  "updated": "2026-10-28T12:02:52+03:00",
+  "updated": "2026-10-29T12:02:13+03:00",
   "source": "API игры: /clans/search",
   "clans": [
+    {
+      "name": "Бродяги",
+      "level": 1,
+      "members": 1,
+      "leader": {
+        "id": 997,
+        "name": "Лёха Патлатый"
+      }
+    },
+    {
+      "name": "Призраки Зоны",
+      "level": 1,
+      "members": 1,
+      "leader": {
+        "id": 3349,
+        "name": "Alex Brain"
+      }
+    },
     {
       "name": "Военные",
       "level": 1,
@@ -14,7 +32,7 @@
     {
       "name": "Бандиты",
       "level": 1,
-      "members": 7,
+      "members": 9,
       "leader": {
         "id": 3178,
         "name": "«Братва» Изверг"
@@ -77,7 +95,7 @@
     {
       "name": "Чистое небо",
       "level": 1,
-      "members": 12,
+      "members": 14,
       "leader": {
         "id": 1220,
         "name": "Петя кок"
@@ -95,7 +113,7 @@
     {
       "name": "Учёные",
       "level": 2,
-      "members": 25,
+      "members": 24,
       "leader": {
         "id": 1223,
         "name": "\"Учёные\"  СаХаРоК"
