@@ -1118,7 +1118,7 @@ function cardMarkup([k, name, icon], withCrit) {
     '</div><i class="delta" id="delta' +
     K +
     '"></i><div class="breakdown">' +
-    cellHtml("", "База 0 ур.", "base") +
+    cellHtml("", "База", "base") +
     cellHtml("bd-level", "Уровень", "level") +
     cellHtml("bd-gear", "Снаряжение", "gear") +
     cellHtml("bd-arena", "Арена", "arena") +
