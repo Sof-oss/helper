@@ -175,10 +175,27 @@ function factionsMarkup(ROOT) {
       hint: m.label + ": суммарно по всем бойцам группировки с прогрессом"
     }))
   ];
+  const visuals = new Map(
+    list.map(f => {
+      const key = KEY[f.c.name],
+        color = colors[f.c.name] || "#8fa3b4";
+      return [
+        f.c.name,
+        {
+          color,
+          emblem:
+            '<svg viewBox="0 0 64 72" aria-hidden="true">' +
+            (key && GLYPHS[key] ? GLYPHS[key] : shield(f.c.name, color)) +
+            "</svg>"
+        }
+      ];
+    })
+  );
   const rankRows = ranked
     .map((f, i) => {
       const attrs = activeMetrics.map(m => " data-" + m.key + '="' + Math.round(f.totals[m.key]) + '"').join("");
-      const members = f.members || 0;
+      const members = f.members || 0,
+        v = visuals.get(f.c.name) || { color: "#8fa3b4", emblem: "" };
       return (
         '<li class="fx-rank-row" data-activity="' +
         f.activity +
@@ -188,6 +205,8 @@ function factionsMarkup(ROOT) {
         members +
         '"><span class="fx-rank-place" aria-hidden="true">' +
         (i + 1) +
+        '</span><span class="fx-rank-emblem" aria-hidden="true">' +
+        v.emblem +
         '</span><a class="fx-rank-name" href="#' +
         anchor(f.c.name) +
         '">' +
@@ -318,22 +337,6 @@ function factionsMarkup(ROOT) {
         "</button>"
     )
     .join("");
-  const visuals = new Map(
-    list.map(f => {
-      const key = KEY[f.c.name],
-        color = colors[f.c.name] || "#8fa3b4";
-      return [
-        f.c.name,
-        {
-          color,
-          emblem:
-            '<svg viewBox="0 0 64 72" aria-hidden="true">' +
-            (key && GLYPHS[key] ? GLYPHS[key] : shield(f.c.name, color)) +
-            "</svg>"
-        }
-      ];
-    })
-  );
   const compactCards = ranked
     .slice(0, 5)
     .map((f, i) => {
