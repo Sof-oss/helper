@@ -1,7 +1,7 @@
 /* Ядро калькулятора без DOM: данные снаряжения, формулы базового урона, уровень и ссылка на билд. */
 import { TALENTS } from "../talents.js";
 import { SETS, ITEMS } from "./gear-data.js";
-import { ARENA_BASE, ARENA_COEF_PERCENT } from "./arena-data.js";
+import { BASE_DAMAGE_LEVEL0, ARENA_COEF_PERCENT } from "./arena-data.js";
 
 export { SETS, ITEMS };
 
@@ -26,31 +26,26 @@ export function clampArena(v) {
   if (!Number.isFinite(n)) return 0;
   return Math.max(0, n);
 }
-/* бонусы к урону: floor(базовый урон × очки × 0.04909 / 100) для каждого оружия */
+/* бонусы к урону: floor(базовый урон 0 уровня × очки × 0.05 / 100) для каждого оружия */
 export function arenaBonus(points) {
   const p = clampArena(points),
     share = (p * ARENA_COEF_PERCENT) / 100;
   return {
-    knife: Math.floor(ARENA_BASE.knife * share),
-    pistol: Math.floor(ARENA_BASE.pistol * share),
-    auto: Math.floor(ARENA_BASE.auto * share),
-    grenade: Math.floor(ARENA_BASE.grenade * share),
-    gl: Math.floor(ARENA_BASE.gl * share),
-    gauss: Math.floor(ARENA_BASE.gauss * share)
+    knife: Math.floor(BASE_DAMAGE_LEVEL0.knife * share),
+    pistol: Math.floor(BASE_DAMAGE_LEVEL0.pistol * share),
+    auto: Math.floor(BASE_DAMAGE_LEVEL0.auto * share),
+    grenade: Math.floor(BASE_DAMAGE_LEVEL0.grenade * share),
+    gl: Math.floor(BASE_DAMAGE_LEVEL0.gl * share),
+    gauss: Math.floor(BASE_DAMAGE_LEVEL0.gauss * share)
   };
 }
 
-/* бесплатные удары считаются так же, как оружие за жетоны: «нулевое» значение × 1,02^уровень, округление в конце. */
+/* базовый урон растёт на 2% за уровень от значения на 0 уровне, округление в конце. */
 export const freeBase = (atLevel0, level) => Math.round(atLevel0 * Math.pow(1.02, level));
 export function baseDamageByLevel(level) {
-  return {
-    grenade: Math.round(55 * Math.pow(1.02, level)),
-    gl: Math.round(113 * Math.pow(1.02, level)),
-    gauss: Math.round(360 * Math.pow(1.02, level)),
-    knife: freeBase(46, level),
-    pistol: freeBase(48, level),
-    auto: freeBase(54, level)
-  };
+  const out = {};
+  for (const k in BASE_DAMAGE_LEVEL0) out[k] = freeBase(BASE_DAMAGE_LEVEL0[k], level);
+  return out;
 }
 
 /* ранги талантов: только известные таланты, целые 0–5, и только если требования (предки на 5/5) выполнены */

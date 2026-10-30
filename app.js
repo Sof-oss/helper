@@ -1118,7 +1118,7 @@ function cardMarkup([k, name, icon], withCrit) {
     '</div><i class="delta" id="delta' +
     K +
     '"></i><div class="breakdown">' +
-    cellHtml("", "База", "base") +
+    cellHtml("", "База 0 ур.", "base") +
     cellHtml("bd-level", "Уровень", "level") +
     cellHtml("bd-gear", "Снаряжение", "gear") +
     cellHtml("bd-arena", "Арена", "arena") +
@@ -1387,12 +1387,12 @@ function calc() {
   const T = totals(),
     tal = T.talentTotal,
     base = baseDamageByLevel(level),
-    baseFlat = baseDamageByLevel(MIN_LEVEL),
+    baseZero = baseDamageByLevel(0),
     r = results(undefined, T);
   keys.forEach(k => {
     const K = cap(k);
-    set("base" + K, fmt(baseFlat[k]));
-    set("level" + K, fmt(base[k] - baseFlat[k]));
+    set("base" + K, fmt(baseZero[k]));
+    set("level" + K, fmt(base[k] - baseZero[k]));
     set("gear" + K, fmt(T.gearTotal[k]));
     set("arena" + K, fmt(T.arena[k]));
     set("talentOut" + K, fmt(tal[k]));

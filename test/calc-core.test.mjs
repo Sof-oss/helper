@@ -28,7 +28,8 @@ test("уровень: целое 1–100", () => {
   assert.equal(clampLevel("37"), 37);
 });
 
-test("базовый урон на 1 уровне совпадает с игрой", () => {
+test("базовый урон на 0 и 1 уровне совпадает с игрой", () => {
+  assert.deepEqual(baseDamageByLevel(0), { grenade: 55, gl: 113, gauss: 360, knife: 46, pistol: 48, auto: 54 });
   assert.deepEqual(baseDamageByLevel(1), { grenade: 56, gl: 115, gauss: 367, knife: 47, pistol: 49, auto: 55 });
 });
 
@@ -90,10 +91,10 @@ test("арена: бонусы по формуле", () => {
   assert.deepEqual(arenaBonus(0), { knife: 0, pistol: 0, auto: 0, grenade: 0, gl: 0, gauss: 0 });
   assert.deepEqual(arenaBonus(250), { knife: 5, pistol: 6, auto: 6, grenade: 6, gl: 14, gauss: 45 });
   assert.deepEqual(arenaBonus(500), { knife: 11, pistol: 12, auto: 13, grenade: 13, gl: 28, gauss: 90 });
-  assert.deepEqual(arenaBonus(1000), { knife: 23, pistol: 24, auto: 26, grenade: 27, gl: 56, gauss: 180 });
+  assert.deepEqual(arenaBonus(1000), { knife: 23, pistol: 24, auto: 27, grenade: 27, gl: 56, gauss: 180 });
   /* на 124 очках подствольник впервые даёт 7 - проверка точной границы коэффициента */
   assert.deepEqual(arenaBonus(124), { knife: 2, pistol: 2, auto: 3, grenade: 3, gl: 7, gauss: 22 });
-  assert.deepEqual(arenaBonus(10000), { knife: 230, pistol: 240, auto: 269, grenade: 274, gl: 564, gauss: 1801 });
+  assert.deepEqual(arenaBonus(10000), { knife: 230, pistol: 240, auto: 270, grenade: 275, gl: 565, gauss: 1800 });
   assert.equal(clampArena(900), 900);
   assert.equal(clampArena(-1), 0);
   assert.equal(clampArena(12.5), 13);

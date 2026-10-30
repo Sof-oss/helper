@@ -1,10 +1,10 @@
-/* Бонус к урону от характеристик арены. */
-export const ARENA_COEF_PERCENT = 0.04909;
-export const ARENA_BASE = {
-  knife: 47,
-  pistol: 49,
-  auto: 55,
-  grenade: 56,
-  gl: 115,
-  gauss: 367
+/* Бонус к урону от характеристик арены и базовый урон оружия на 0 уровне. */
+export const ARENA_COEF_PERCENT = 0.05;
+export const BASE_DAMAGE_LEVEL0 = {
+  knife: 46,
+  pistol: 48,
+  auto: 54,
+  grenade: 55,
+  gl: 113,
+  gauss: 360
 };
