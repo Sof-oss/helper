@@ -1,11 +1,20 @@
 {
-  "updated": "2026-10-29T12:02:13+03:00",
+  "updated": "2026-10-30T12:03:37+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
+      "name": "Last Way",
+      "level": 1,
+      "members": 10,
+      "leader": {
+        "id": 3954,
+        "name": "|LW| РуSSкая"
+      }
+    },
+    {
       "name": "Бродяги",
       "level": 1,
-      "members": 1,
+      "members": 2,
       "leader": {
         "id": 997,
         "name": "Лёха Патлатый"
@@ -23,7 +32,7 @@
     {
       "name": "Военные",
       "level": 1,
-      "members": 3,
+      "members": 4,
       "leader": {
         "id": 4438,
         "name": "\"Военные\" Дымка"
@@ -95,7 +104,7 @@
     {
       "name": "Чистое небо",
       "level": 1,
-      "members": 14,
+      "members": 16,
       "leader": {
         "id": 1220,
         "name": "Петя кок"
@@ -122,7 +131,7 @@
     {
       "name": "Рассвет",
       "level": 1,
-      "members": 20,
+      "members": 19,
       "leader": {
         "id": 62,
         "name": "Меченый"
