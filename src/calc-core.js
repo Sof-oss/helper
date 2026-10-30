@@ -26,7 +26,7 @@ export function clampArena(v) {
   if (!Number.isFinite(n)) return 0;
   return Math.max(0, n);
 }
-/* бонусы к урону: floor(базовый урон × очки × 0.04907 / 100) для каждого оружия */
+/* бонусы к урону: floor(базовый урон × очки × 0.04909 / 100) для каждого оружия */
 export function arenaBonus(points) {
   const p = clampArena(points),
     share = (p * ARENA_COEF_PERCENT) / 100;

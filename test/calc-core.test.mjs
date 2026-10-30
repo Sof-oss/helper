@@ -91,6 +91,9 @@ test("арена: бонусы по формуле", () => {
   assert.deepEqual(arenaBonus(250), { knife: 5, pistol: 6, auto: 6, grenade: 6, gl: 14, gauss: 45 });
   assert.deepEqual(arenaBonus(500), { knife: 11, pistol: 12, auto: 13, grenade: 13, gl: 28, gauss: 90 });
   assert.deepEqual(arenaBonus(1000), { knife: 23, pistol: 24, auto: 26, grenade: 27, gl: 56, gauss: 180 });
+  /* на 124 очках подствольник впервые даёт 7 - проверка точной границы коэффициента */
+  assert.deepEqual(arenaBonus(124), { knife: 2, pistol: 2, auto: 3, grenade: 3, gl: 7, gauss: 22 });
+  assert.deepEqual(arenaBonus(10000), { knife: 230, pistol: 240, auto: 269, grenade: 274, gl: 564, gauss: 1801 });
   assert.equal(clampArena(900), 900);
   assert.equal(clampArena(-1), 0);
   assert.equal(clampArena(12.5), 13);
