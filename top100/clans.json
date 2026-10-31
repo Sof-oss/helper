@@ -1,11 +1,11 @@
 {
-  "updated": "2026-10-30T12:03:37+03:00",
+  "updated": "2026-10-31T12:02:46+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
       "name": "Last Way",
       "level": 1,
-      "members": 10,
+      "members": 15,
       "leader": {
         "id": 3954,
         "name": "|LW| РуSSкая"
@@ -122,7 +122,7 @@
     {
       "name": "Учёные",
       "level": 2,
-      "members": 24,
+      "members": 25,
       "leader": {
         "id": 1223,
         "name": "\"Учёные\"  СаХаРоК"
@@ -131,7 +131,7 @@
     {
       "name": "Рассвет",
       "level": 1,
-      "members": 19,
+      "members": 16,
       "leader": {
         "id": 62,
         "name": "Меченый"
