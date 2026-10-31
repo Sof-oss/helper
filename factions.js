@@ -21,17 +21,26 @@
       shown = 0;
     cards.forEach(function (card) {
       var byName = !q || norm(card.dataset.name).indexOf(q) >= 0,
-        hit = false;
-      [].forEach.call(card.querySelectorAll(".fx-roster li"), function (li) {
-        var a = li.querySelector("a"),
-          m = !!q && !byName && norm(a && a.textContent).indexOf(q) >= 0;
-        li.classList.toggle("fx-hit", m);
-        if (m) hit = true;
-      });
-      var ok = (byName || hit) && (!onlyHiring || card.classList.contains("fx-hiring"));
+        found = [];
+      if (q && !byName) {
+        var names = [];
+        try {
+          names = JSON.parse(card.dataset.players || "[]");
+        } catch (e) {}
+        found = names.filter(function (n) {
+          return norm(n).indexOf(q) >= 0;
+        });
+      }
+      var ok = (byName || found.length > 0) && (!onlyHiring || card.classList.contains("fx-hiring"));
       card.hidden = !ok;
-      var det = card.querySelector(".fx-roster");
-      if (det && hit) det.open = true;
+      /* нашли по бойцу - подсказываем, кто именно в составе */
+      var note = card.querySelector(".fx-found");
+      if (note) {
+        note.hidden = !found.length;
+        note.textContent = found.length
+          ? "В составе: " + found.slice(0, 3).join(", ") + (found.length > 3 ? " и ещё " + (found.length - 3) : "")
+          : "";
+      }
       if (ok) shown++;
     });
     if (empty) empty.hidden = shown > 0;
@@ -414,12 +423,6 @@
         first.focus();
       }
     });
-  }
-  /* переход по ссылке /factions#f-dolg - сразу к карточке и с открытым составом */
-  var target = location.hash && document.getElementById(location.hash.slice(1));
-  if (target && target.classList.contains("fx-card")) {
-    var d = target.querySelector(".fx-roster");
-    if (d) d.open = true;
   }
   if (input.value || (hiring && hiring.checked)) apply();
 })();

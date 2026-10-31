@@ -749,10 +749,6 @@ body.fx-rank-lock {
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 14px;
 }
-/* карточки в ряду одной высоты, «Состав» - внизу карточки. */
-.fx-list:has(.fx-roster[open]) {
-  align-items: start;
-}
 .fx-card {
   position: relative;
   display: flex;
@@ -1029,93 +1025,40 @@ body.fx-rank-lock {
   color: #fff;
 }
 
-/* состав */
-.fx-roster,
-.fx-card > .fx-note:last-child {
+/* ссылка «Состав и история» - внизу карточки, открывает карточку группировки */
+.fx-roster-link {
   margin-top: auto;
-}
-.fx-roster {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 2px 2px;
   border-top: 1px solid var(--panel-line);
-  padding-top: 8px;
-}
-.fx-roster summary {
-  cursor: pointer;
   color: #c9d6e1;
   font-size: var(--fs-md);
   font-weight: 700;
-  list-style-position: inside;
+  text-decoration: none;
 }
-.fx-roster summary span {
+.fx-roster-link b {
   color: #7f95a8;
   font-weight: 600;
-}
-.fx-roster ol {
-  margin: 8px 0 0;
-  padding: 0;
-  list-style: none;
-  max-height: 340px;
-  overflow-y: auto;
-}
-.fx-roster li {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 5px 4px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  font-size: var(--fs-sm);
-}
-.fx-roster li a {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  color: #e3ecf3;
-  text-decoration: none;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
-.fx-roster li a:hover {
+.fx-roster-link:hover,
+.fx-roster-link:focus-visible {
   color: #fff;
-  text-decoration: underline;
 }
-.fx-n {
-  flex: none;
-  width: 22px;
-  color: #5f7486;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-}
-.fx-lvl,
-.fx-rep {
-  flex: none;
-  color: #8ea3b5;
-  font-variant-numeric: tabular-nums;
-}
-.fx-rep {
-  min-width: 56px;
+.fx-roster-link:hover b,
+.fx-roster-link:focus-visible b {
   color: color-mix(in srgb, var(--fx) 55%, #fff);
-  text-align: right;
 }
-.fx-crown {
-  flex: none;
-  color: #f3c64a;
-}
-.fx-lead {
-  background: color-mix(in srgb, var(--fx) 10%, transparent);
-}
-.fx-lead a {
-  font-weight: 700;
-}
-.fx-off a {
-  color: #7f95a8;
-}
-.fx-hit {
-  background: color-mix(in srgb, var(--accent) 22%, transparent);
-  border-radius: 4px;
-}
-.fx-note {
-  margin: 6px 0 0;
-  color: #6f8496;
-  font-size: var(--fs-xs);
+.fx-found {
+  margin: -4px 0 0;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: #e3ecf3;
+  font-size: var(--fs-sm);
 }
 
 @media (max-width: 760px) {
@@ -1130,17 +1073,10 @@ body.fx-rank-lock {
     min-width: 0;
   }
 }
-/* пальцем: строки состава, «Состав», лидер и ссылка на пост - не меньше 32-40 px по высоте, чтобы не промахиваться */
+/* пальцем: «Состав и история», лидер и ссылка на пост - не меньше 32-40 px по высоте, чтобы не промахиваться */
 @media (max-width: 760px), (pointer: coarse) {
-  .fx-roster summary {
-    padding: 8px 0;
-  }
-  .fx-roster li {
-    align-items: center;
-    padding: 0 4px;
-  }
-  .fx-roster li a {
-    padding: 10px 0;
+  .fx-roster-link {
+    padding: 12px 2px 6px;
   }
   .fx-leader a,
   .fx-src {

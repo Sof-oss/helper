@@ -488,41 +488,16 @@ function factionsMarkup(ROOT) {
           (add.recruit ? "" : postHtml) +
           "</div>"
         : "";
-    const known = people.length;
-    const rows = people
-      .map(
-        (p, i) =>
-          "<li" +
-          (p.id === leaderId ? ' class="fx-lead"' : p.off ? ' class="fx-off"' : "") +
-          '><span class="fx-n">' +
-          (i + 1) +
-          '</span><a href="/p/' +
-          esc(p.id) +
-          '" data-pc-open="' +
-          esc(p.id) +
-          '">' +
-          esc(p.n) +
-          "</a>" +
-          (p.id === leaderId ? '<span class="fx-crown" title="Лидер">★</span>' : "") +
-          '<span class="fx-lvl">ур. ' +
-          p.l +
-          '</span><span class="fx-rep" title="Репутация">' +
-          num(p.rep) +
-          "</span></li>"
-      )
-      .join("");
-    const rosterHtml = known
-      ? '<details class="fx-roster"><summary>Состав <span>' +
-        num(known) +
-        (known < members ? " из " + num(members) : "") +
-        "</span></summary><ol>" +
-        rows +
-        "</ol>" +
-        (known < members
-          ? '<p class="fx-note">Остальные пока без прогресса и в ежедневную выгрузку не попадают</p>'
-          : "") +
-        "</details>"
-      : '<p class="fx-note">' + (members ? "Бойцов с прогрессом пока нет" : "В группировке пока никого нет") + "</p>";
+    /* сам состав - в карточке группировки (faction-card.js), здесь только ссылка на неё;
+       ники лежат в data-players, чтобы поиск «Группировка или игрок» находил группировку по бойцу */
+    const rosterHtml =
+      '<a class="fx-roster-link" href="/f/' +
+      esc(slugOf(name)) +
+      '" data-fc-open="' +
+      esc(slugOf(name)) +
+      '"><span>Состав и история</span><b>' +
+      plural(members, "боец", "бойца", "бойцов") +
+      ' <span aria-hidden="true">→</span></b></a><p class="fx-found" hidden></p>';
     return (
       '<article class="fx-card' +
       (add.recruit ? " fx-hiring" : "") +
@@ -530,6 +505,8 @@ function factionsMarkup(ROOT) {
       anchor(name) +
       '" data-name="' +
       esc(name.toLowerCase()) +
+      '" data-players="' +
+      esc(JSON.stringify(people.map(p => p.n))) +
       '" style="--fx:' +
       esc(color) +
       '">' +
