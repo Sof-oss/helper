@@ -259,6 +259,100 @@ html body .fc-overlay .fc-dialog:focus-visible {
 .fc-table a:focus-visible {
   border-bottom-color: currentColor;
 }
+/* связь: ники - заметные кнопки на личные страницы ВК */
+.fc-contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.fc-kv .fc-contact {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  min-height: 30px;
+  padding: 3px 9px 3px 3px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #e6eef5;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.fc-kv .fc-contact-vk {
+  border-color: rgba(64, 150, 255, 0.55);
+  background: rgba(39, 135, 245, 0.18);
+  color: #d4e6ff;
+}
+.fc-kv .fc-contact-plain {
+  padding: 3px 10px;
+  font-weight: 500;
+  color: #c9d6e1;
+}
+.fc-contact > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fc-contact i {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+.fc-contact-vk i {
+  background: #2787f5;
+}
+.fc-contact i svg {
+  width: 15px;
+  height: 15px;
+}
+.fc-out {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.75;
+}
+.fc-kv .fc-contact:hover,
+.fc-kv .fc-contact:focus-visible {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  outline: none;
+}
+.fc-kv .fc-contact-vk:hover,
+.fc-kv .fc-contact-vk:focus-visible {
+  border-color: #5aa5ff;
+  background: rgba(39, 135, 245, 0.34);
+}
+.fc-kv .fc-contact:focus-visible {
+  box-shadow: 0 0 0 2px #5aa5ff;
+}
+.fc-contact:hover > span {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.fc-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
 .fc-leader {
   color: #e3a24a;
 }
@@ -627,5 +721,11 @@ html body .fc-overlay .fc-dialog:focus-visible {
 @media (max-width: 420px) {
   .fc-col-b {
     display: none;
+  }
+}
+@media (pointer: coarse) {
+  .fc-kv .fc-contact {
+    min-height: 38px;
+    padding-right: 12px;
   }
 }

@@ -168,6 +168,11 @@
     );
   }
 
+  const VK_ICON =
+    '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12.8 17.5C6.6 17.5 3.1 13.3 3 6.3h3.1c.1 5.1 2.4 7.3 4.2 7.8V6.3h2.9v4.4c1.8-.2 3.7-2.2 4.3-4.4h2.9c-.5 2.7-2.5 4.7-3.9 5.5 1.4.7 3.7 2.4 4.5 5.7h-3.2c-.7-2.2-2.4-3.9-4.6-4.1v4.1z"/></svg>';
+  const LINK_ICON =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1"/></svg>';
+
   function render(f) {
     const theme = f.k
       ? ";--fc-bg:url(/assets/bg-" + f.k + "-1280.webp);--fc-bg-m:url(/assets/bg-" + f.k + "-m.webp)"
@@ -189,32 +194,46 @@
         "Набор",
         '<span class="fc-tag">Открыт</span>' + (f.req ? ' <span class="fc-req">приём ' + esc(f.req) + "</span>" : "")
       ]);
+    /* связь - заметные «кнопки» с иконкой ВК и стрелкой: сразу видно, что ник ведёт на личную страницу */
     if (f.contacts.length)
       kv.push([
         "Связь",
-        f.contacts
-          .map(c =>
-            c.url
-              ? '<a href="' + esc(c.url) + '" target="_blank" rel="noopener">' + esc(c.n) + "</a>"
-              : "<b>" + esc(c.n) + "</b>"
-          )
-          .join(", ")
+        '<span class="fc-contacts">' +
+          f.contacts
+            .map(c => {
+              if (!c.url) return '<span class="fc-contact fc-contact-plain">' + esc(c.n) + "</span>";
+              const isVk = /^https:\/\/(m\.)?vk\.(ru|com)\//i.test(c.url);
+              return (
+                '<a class="fc-contact' +
+                (isVk ? " fc-contact-vk" : "") +
+                '" href="' +
+                esc(c.url) +
+                '" target="_blank" rel="noopener" title="' +
+                (isVk ? "Написать во ВКонтакте" : "Открыть ссылку") +
+                '"><i aria-hidden="true">' +
+                (isVk ? VK_ICON : LINK_ICON) +
+                "</i><span>" +
+                esc(c.n) +
+                '</span><svg class="fc-out" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16 16 8M9 8h7v7"/></svg>' +
+                (isVk ? '<span class="fc-sr"> - страница ВКонтакте</span>' : "") +
+                "</a>"
+              );
+            })
+            .join("") +
+          "</span>"
       ]);
     const vk = f.vk
       ? '<a class="fc-vk" href="' +
         esc(f.vk.url) +
-        '" target="_blank" rel="noopener"><i aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12.8 17.5C6.6 17.5 3.1 13.3 3 6.3h3.1c.1 5.1 2.4 7.3 4.2 7.8V6.3h2.9v4.4c1.8-.2 3.7-2.2 4.3-4.4h2.9c-.5 2.7-2.5 4.7-3.9 5.5 1.4.7 3.7 2.4 4.5 5.7h-3.2c-.7-2.2-2.4-3.9-4.6-4.1v4.1z"/></svg></i><span><small>Группа ВКонтакте</small>' +
+        '" target="_blank" rel="noopener"><i aria-hidden="true">' +
+        VK_ICON +
+        "</i><span><small>Группа ВКонтакте</small>" +
         esc(f.vk.n) +
         "</span></a>"
       : "";
-    /* вступление показываем всегда, даже если мест сейчас нет */
-    const joinUrl = f.post || (f.vk && f.vk.url);
-    const join = joinUrl
-      ? '<a class="fc-join" href="' +
-        esc(joinUrl) +
-        '" target="_blank" rel="noopener">Вступить · ' +
-        (f.post ? "пост о наборе" : "группа ВК") +
-        "</a>"
+    /* пост о наборе - отдельной кнопкой; группа ВК уже есть выше */
+    const join = f.post
+      ? '<a class="fc-join" href="' + esc(f.post) + '" target="_blank" rel="noopener">Пост о наборе</a>'
       : "";
     const rows = f.r
       .map(

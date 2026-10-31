@@ -5,8 +5,12 @@
   var main = document.getElementById("main");
   if (main && main.dataset.history && !window.TOP100_HISTORY) window.TOP100_HISTORY = { id: main.dataset.history };
   var input = document.getElementById("fxSearch"),
-    hiring = document.getElementById("fxHiring"),
-    empty = document.getElementById("fxEmpty");
+    empty = document.getElementById("fxEmpty"),
+    count = document.getElementById("fxCount"),
+    sort = document.getElementById("fxSort"),
+    list = document.getElementById("factionsList"),
+    filterBtns = [].slice.call(document.querySelectorAll("[data-fx-filter]")),
+    filter = "all";
   if (!input) return;
   var cards = [].slice.call(document.querySelectorAll(".fx-card"));
   var norm = function (s) {
@@ -15,9 +19,35 @@
       .replace(/ё/g, "е")
       .trim();
   };
+  var numOf = function (card, key) {
+    return Number(card.dataset[key] || 0);
+  };
+  var pass = {
+    all: function () {
+      return true;
+    },
+    hiring: function (card) {
+      return card.classList.contains("fx-hiring");
+    },
+    free: function (card) {
+      return numOf(card, "free") > 0;
+    }
+  };
+  /* счётчики на фильтрах */
+  [].forEach.call(document.querySelectorAll("[data-fx-num]"), function (el) {
+    el.textContent = cards.filter(pass[el.dataset.fxNum] || pass.all).length;
+  });
+  var plural = function (n) {
+    var a = n % 10,
+      b = n % 100;
+    return (
+      n +
+      " " +
+      (a === 1 && b !== 11 ? "группировка" : a >= 2 && a <= 4 && (b < 12 || b > 14) ? "группировки" : "группировок")
+    );
+  };
   function apply() {
     var q = norm(input.value),
-      onlyHiring = hiring && hiring.checked,
       shown = 0;
     cards.forEach(function (card) {
       var byName = !q || norm(card.dataset.name).indexOf(q) >= 0,
@@ -31,7 +61,7 @@
           return norm(n).indexOf(q) >= 0;
         });
       }
-      var ok = (byName || found.length > 0) && (!onlyHiring || card.classList.contains("fx-hiring"));
+      var ok = (byName || found.length > 0) && (pass[filter] || pass.all)(card);
       card.hidden = !ok;
       /* нашли по бойцу - подсказываем, кто именно в составе */
       var note = card.querySelector(".fx-found");
@@ -41,12 +71,45 @@
           ? "В составе: " + found.slice(0, 3).join(", ") + (found.length > 3 ? " и ещё " + (found.length - 3) : "")
           : "";
       }
+      card.classList.toggle("fx-has-found", found.length > 0);
       if (ok) shown++;
     });
     if (empty) empty.hidden = shown > 0;
+    if (count) count.textContent = shown === cards.length ? plural(shown) : shown + " из " + cards.length;
+  }
+  function order() {
+    var key = sort ? sort.value : "rank";
+    cards
+      .slice()
+      .sort(function (a, b) {
+        if (key === "name") return a.dataset.name.localeCompare(b.dataset.name, "ru");
+        var d = key === "rank" ? 0 : numOf(b, key) - numOf(a, key);
+        if (!d && key === "level") d = numOf(b, "members") - numOf(a, "members");
+        return d || numOf(a, "rank") - numOf(b, "rank");
+      })
+      .forEach(function (card) {
+        list.appendChild(card);
+      });
+  }
+  function setFilter(key) {
+    filter = pass[key] ? key : "all";
+    filterBtns.forEach(function (b) {
+      var on = b.dataset.fxFilter === filter;
+      b.classList.toggle("on", on);
+      b.setAttribute("aria-pressed", String(on));
+    });
+    apply();
   }
   input.addEventListener("input", apply);
-  if (hiring) hiring.addEventListener("change", apply);
+  filterBtns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      setFilter(b.dataset.fxFilter);
+    });
+  });
+  if (sort && list)
+    sort.addEventListener("change", function () {
+      order();
+    });
 
   /* рейтинг активности: компактный топ-5 на странице и полный рейтинг в окне */
   var rank = document.querySelector("[data-fx-rank]");
@@ -318,8 +381,7 @@
         var a = e.target.closest && e.target.closest('a[href^="#f-"]');
         if (!a) return;
         if (input.value) input.value = "";
-        if (hiring && hiring.checked) hiring.checked = false;
-        apply();
+        setFilter("all");
         if (rankModal && rankModal.classList.contains("show")) {
           e.preventDefault();
           closeRank();
@@ -424,5 +486,7 @@
       }
     });
   }
-  if (input.value || (hiring && hiring.checked)) apply();
+  /* поле поиска браузер может восстановить после «Назад» */
+  if (sort && sort.value !== "rank") order();
+  apply();
 })();

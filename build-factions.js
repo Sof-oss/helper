@@ -137,16 +137,12 @@ function factionsMarkup(ROOT) {
     .sort((a, b) => b.members - a.members || (b.c.level || 1) - (a.c.level || 1) || b.rep - a.rep);
 
   const total = list.reduce((s, f) => s + f.members, 0);
+  const hiringCount = list.filter(f => (info[f.c.name] || {}).recruit).length;
+  const stat = (n, label) => '<div class="fx-stat"><b>' + num(n) + "</b><span>" + label + "</span></div>";
   const stats =
-    '<div class="fx-stat"><b>' +
-    num(list.length) +
-    "</b><span>" +
-    plural(list.length, "группировка", "группировки", "группировок").replace(/^\S+ /, "") +
-    '</span></div><div class="fx-stat"><b>' +
-    num(total) +
-    "</b><span>" +
-    plural(total, "боец", "бойца", "бойцов").replace(/^\S+ /, "") +
-    " в группировках</span></div>";
+    stat(list.length, plural(list.length, "группировка", "группировки", "группировок").replace(/^\S+ /, "")) +
+    stat(total, plural(total, "боец", "бойца", "бойцов").replace(/^\S+ /, "")) +
+    stat(hiringCount, hiringCount === 1 ? "ведёт набор" : "ведут набор");
 
   /* рейтинг активности: суммарные показатели всех бойцов группировки. */
   const METRICS = [
@@ -425,122 +421,6 @@ function factionsMarkup(ROOT) {
     modal +
     "</div>";
 
-  const cards = list.map(({ c, people, leaderId, members }) => {
-    const name = c.name,
-      color = colors[name] || "#8fa3b4",
-      key = KEY[name],
-      add = info[name] || {};
-    const emblem =
-      '<svg viewBox="0 0 64 72" aria-hidden="true">' +
-      (key && GLYPHS[key] ? GLYPHS[key] : shield(name, color)) +
-      "</svg>";
-    const meta = ["Уровень " + (c.level || 1), plural(members, "боец", "бойца", "бойцов")];
-    const leaderInData = leaderId && data.players[leaderId];
-    const leaderName = leaderInData ? data.players[leaderId].n : c.leader && c.leader.name;
-    const leader = leaderName
-      ? '<p class="fx-leader"><span class="fx-label">Лидер</span>' +
-        (leaderInData
-          ? '<a href="/p/' + esc(leaderId) + '" data-pc-open="' + esc(leaderId) + '">' + esc(leaderName) + "</a>"
-          : "<b>" + esc(leaderName) + "</b>") +
-        "</p>"
-      : '<p class="fx-leader fx-muted"><span class="fx-label">Лидер</span>не назначен</p>';
-    const motto = add.motto ? '<blockquote class="fx-motto">«' + esc(add.motto) + "»</blockquote>" : "";
-    const post = safeUrl(add.post);
-    const postHtml = post
-      ? '<a class="fx-src" href="' + esc(post) + '" target="_blank" rel="noopener">Пост о наборе ВК</a>'
-      : "";
-    /* пост о наборе - в шапке объявления справа, у всех карточек на одном месте */
-    const recruit = add.recruit
-      ? '<div class="fx-recruit"><div class="fx-recruit-head"><span class="fx-tag">Набор открыт</span>' +
-        (add.requirement ? '<span class="fx-req">Приём ' + esc(add.requirement) + "</span>" : "") +
-        postHtml +
-        "</div><p>" +
-        esc(add.recruit) +
-        "</p></div>"
-      : "";
-    /* группа ВК - отдельной заметной кнопкой, контакты - своей строкой ниже */
-    const vk = add.vk && safeUrl(add.vk.url);
-    const vkHtml = vk
-      ? '<a class="fx-vk" href="' +
-        esc(vk) +
-        '" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.8 17.5C6.6 17.5 3.1 13.3 3 6.3h3.1c.1 5.1 2.4 7.3 4.2 7.8V6.3h2.9v4.4c1.8-.2 3.7-2.2 4.3-4.4h2.9c-.5 2.7-2.5 4.7-3.9 5.5 1.4.7 3.7 2.4 4.5 5.7h-3.2c-.7-2.2-2.4-3.9-4.6-4.1v4.1z"/></svg><span><small>Группа ВКонтакте</small>' +
-        esc(add.vk.name || "Перейти") +
-        "</span></a>"
-      : "";
-    const contacts = (add.contacts || [])
-      .map(p => [
-        safeUrl(p.url),
-        String(p.name || "")
-          .replace(/^@+/, "")
-          .trim()
-      ])
-      .filter(([, n]) => n)
-      /* контакт без ссылки (url не указан) - просто имя, без перехода */
-      .map(([u, n]) =>
-        u
-          ? '<a class="fx-btn" href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(n) + "</a>"
-          : '<span class="fx-btn fx-btn-plain">' + esc(n) + "</span>"
-      );
-    const linksHtml =
-      contacts.length || (post && !add.recruit)
-        ? '<div class="fx-links">' +
-          (contacts.length ? '<span class="fx-label">Связь</span>' + contacts.join("") : "") +
-          (add.recruit ? "" : postHtml) +
-          "</div>"
-        : "";
-    /* сам состав - в карточке группировки (faction-card.js), здесь только ссылка на неё;
-       ники лежат в data-players, чтобы поиск «Группировка или игрок» находил группировку по бойцу */
-    const rosterHtml =
-      '<a class="fx-roster-link" href="/f/' +
-      esc(slugOf(name)) +
-      '" data-fc-open="' +
-      esc(slugOf(name)) +
-      '"><span>Состав и история</span><b>' +
-      plural(members, "боец", "бойца", "бойцов") +
-      ' <span aria-hidden="true">→</span></b></a><p class="fx-found" hidden></p>';
-    return (
-      '<article class="fx-card' +
-      (add.recruit ? " fx-hiring" : "") +
-      '" id="' +
-      anchor(name) +
-      '" data-name="' +
-      esc(name.toLowerCase()) +
-      '" data-players="' +
-      esc(JSON.stringify(people.map(p => p.n))) +
-      '" style="--fx:' +
-      esc(color) +
-      '">' +
-      (key && cardBg(key)
-        ? '<span class="fx-bg" style="background-image:url(' + cardBg(key) + ')" aria-hidden="true"></span>'
-        : '<span class="fx-bg fx-bg-tint" aria-hidden="true"></span>') +
-      '<header class="fx-head"><a class="fx-emblem" href="/f/' +
-      esc(slugOf(name)) +
-      '" data-fc-open="' +
-      esc(slugOf(name)) +
-      '" tabindex="-1" aria-hidden="true">' +
-      emblem +
-      '</a><div><h2><a href="/f/' +
-      esc(slugOf(name)) +
-      '" data-fc-open="' +
-      esc(slugOf(name)) +
-      '">' +
-      esc(name) +
-      '</a></h2><p class="fx-meta">' +
-      meta.map(esc).join(" · ") +
-      '</p></div><a class="fx-open" href="/f/' +
-      esc(slugOf(name)) +
-      '" data-fc-open="' +
-      esc(slugOf(name)) +
-      '">Карточка <span aria-hidden="true">→</span></a></header>' +
-      motto +
-      leader +
-      vkHtml +
-      recruit +
-      linksHtml +
-      rosterHtml +
-      "</article>"
-    );
-  });
   /* данные для карточек группировок (faction-card.js): состав, показатели и история.
      Вступления и уходы - из истории группировок игроков (gh в top100-players.json, по ежедневным выгрузкам),
      уровень, места и лидер - из top100/clans-history.json (копится с каждой выгрузкой, см. fetch-players.js) */
@@ -627,6 +507,87 @@ function factionsMarkup(ROOT) {
       ev: ev.slice(0, 300)
     };
   });
+  /* карточки на странице: фото базы, эмблема, уровень, место в рейтинге, девиз, заполненность и лидер.
+     Вся карточка открывает штаб группировки (faction-card.js), подробности - там.
+     Ники бойцов лежат в data-players, чтобы поиск «Группировка или игрок» находил группировку по бойцу */
+  const CROWN =
+    '<svg class="fx-crown" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 8l4.5 3.5L12 5l4.5 6.5L21 8l-2 11H5z"/></svg>';
+  const cards = ranked.map(f => {
+    const d = cardsData[list.indexOf(f)],
+      name = d.n,
+      slug = esc(d.s),
+      open = '" href="/f/' + slug + '" data-fc-open="' + slug + '"';
+    const bg = d.k && cardBg(d.k);
+    const free = d.cap ? Math.max(0, d.cap - d.m) : 0;
+    const text = d.motto
+      ? '<p class="fx-motto">«' + esc(d.motto) + "»</p>"
+      : d.recruit
+        ? '<p class="fx-motto fx-motto-rec">' + esc(d.recruit) + "</p>"
+        : '<p class="fx-motto fx-muted">Девиз пока не указан</p>';
+    const leader = d.lead
+      ? d.lead.id
+        ? '<a class="fx-leader" href="/p/' +
+          esc(d.lead.id) +
+          '" data-pc-open="' +
+          esc(d.lead.id) +
+          '" title="Лидер">' +
+          CROWN +
+          "<span>" +
+          esc(d.lead.n) +
+          "</span></a>"
+        : '<span class="fx-leader" title="Лидер">' + CROWN + "<span>" + esc(d.lead.n) + "</span></span>"
+      : '<span class="fx-leader fx-muted">лидер не назначен</span>';
+    const fill = d.cap ? Math.min(100, Math.round((d.m / d.cap) * 100)) : 100;
+    return (
+      '<article class="fx-card' +
+      (d.recruit ? " fx-hiring" : "") +
+      '" id="' +
+      anchor(name) +
+      '" data-name="' +
+      esc(name.toLowerCase()) +
+      '" data-players="' +
+      esc(JSON.stringify(f.people.map(p => p.n))) +
+      '" data-rank="' +
+      d.rank +
+      '" data-level="' +
+      d.lv +
+      '" data-members="' +
+      d.m +
+      '" data-free="' +
+      free +
+      '" style="--fx:' +
+      esc(d.c) +
+      '"><span class="fx-photo' +
+      (bg ? '" style="background-image:url(' + bg + ')"' : ' fx-photo-tint"') +
+      ' aria-hidden="true"></span><a class="fx-emblem' +
+      open +
+      ' tabindex="-1" aria-hidden="true">' +
+      d.e +
+      "</a>" +
+      (d.recruit ? '<span class="fx-tag">Набор открыт</span>' : "") +
+      '<div class="fx-title"><h2><a class="fx-name' +
+      open +
+      ">" +
+      esc(name) +
+      '</a></h2><p class="fx-meta"><span class="fx-lvl">УР ' +
+      d.lv +
+      "</span><span>#" +
+      d.rank +
+      " в рейтинге</span></p></div>" +
+      text +
+      '<p class="fx-found" hidden></p><span class="fx-cap" aria-hidden="true"><i style="width:' +
+      fill +
+      '%"></i></span><footer class="fx-foot">' +
+      leader +
+      '<span class="fx-count">' +
+      (d.cap ? d.m + "/" + d.cap : d.m) +
+      " " +
+      plural(d.cap || d.m, "боец", "бойца", "бойцов").replace(/^\S+ /, "") +
+      '</span><a class="fx-open' +
+      open +
+      ' tabindex="-1">Штаб <span aria-hidden="true">→</span></a></footer></article>'
+    );
+  });
   const hist = /TOP100_HISTORY=(\{[^\n]*\})/.exec(fs.readFileSync(path.join(ROOT, "top100-data.js"), "utf8"));
   let history = "";
   try {
@@ -639,7 +600,7 @@ function factionsMarkup(ROOT) {
     cards: { updated, total: list.length, factions: cardsData },
     history,
     count: list.length,
-    hiring: list.filter(f => (info[f.c.name] || {}).recruit).length
+    hiring: hiringCount
   };
 }
 

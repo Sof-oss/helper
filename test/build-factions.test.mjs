@@ -76,6 +76,11 @@ test("рендер: ники, девизы и ссылки из данных н�
     assert.match(res.list, /&lt;script&gt;motto&lt;\/script&gt;/);
     assert.match(res.list, /&lt;img src=x onerror=&quot;alert\(1\)&quot;&gt;/);
     assert.match(res.list, /data-pc-open="1"/);
+    assert.match(res.stats, /ведёт набор/);
+    assert.match(res.list, /class="fx-name" href="\/f\/[^"]+" data-fc-open=/);
+    assert.match(res.list, /data-rank="1"/);
+    assert.match(res.list, /data-free="\d+"/);
+    assert.match(res.list, /fx-tag">Набор открыт/);
     assert.equal(res.history, "2026-10-25");
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
