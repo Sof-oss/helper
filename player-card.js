@@ -845,7 +845,16 @@
       esc(p.n) +
       "</h2>" +
       '<dl class="pc-dossier">' +
-      row("Группировка", '<span class="pc-faction"><i></i>' + (p.g ? esc(p.g) : "Одиночка") + "</span>") +
+      row(
+        "Группировка",
+        p.g
+          ? '<a class="pc-faction" href="/factions" data-fc-name="' +
+              escAttr(p.g) +
+              '" title="Карточка группировки"><i></i>' +
+              esc(p.g) +
+              "</a>"
+          : '<span class="pc-faction"><i></i>Одиночка</span>'
+      ) +
       row("Звание", esc(titleOf(p.l))) +
       row("Уровень", "<b>" + p.l + "</b>") +
       (p.z ? row("В Зоне", esc(p.z)) : "") +

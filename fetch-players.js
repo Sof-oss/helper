@@ -123,6 +123,33 @@ async function fetchClans(now) {
     JSON.stringify({ updated: msk, source: "API игры: /clans/search", clans }, null, 2) + "\n"
   );
   console.log(`Группировки: ${clans.length} -> ${path.relative(process.cwd(), CLANS_OUT)}`);
+  recordClansHistory(clans, msk.slice(0, 10));
+}
+
+/* история группировок для карточек (уровень, бойцы, лидер): clans.json каждый раз перезаписывается,
+   поэтому изменения копятся в clans-history.json - по строке [дата, уровень, бойцов, id лидера], только когда что-то поменялось */
+const CLANS_HISTORY = path.join(__dirname, "top100", "clans-history.json");
+function recordClansHistory(clans, date) {
+  let hist = { clans: {} };
+  try {
+    hist = JSON.parse(fs.readFileSync(CLANS_HISTORY, "utf8"));
+  } catch (e) {}
+  hist.clans = hist.clans || {};
+  let changed = 0;
+  for (const c of clans) {
+    const row = [date, c.level, c.members, c.leader ? c.leader.id : null];
+    const rows = (hist.clans[c.name] = hist.clans[c.name] || []);
+    const last = rows[rows.length - 1];
+    if (last && last[0] === date) rows.pop();
+    const prev = rows[rows.length - 1];
+    if (!prev || prev[1] !== row[1] || prev[2] !== row[2] || prev[3] !== row[3]) {
+      rows.push(row);
+      changed++;
+    }
+  }
+  hist.updated = date;
+  fs.writeFileSync(CLANS_HISTORY, JSON.stringify(hist) + "\n");
+  console.log(`История группировок: ${changed} изменений -> ${path.relative(process.cwd(), CLANS_HISTORY)}`);
 }
 
 (async () => {

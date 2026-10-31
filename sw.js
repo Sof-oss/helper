@@ -148,7 +148,7 @@ self.addEventListener("fetch", e => {
     e.respondWith(page(req, url));
     return;
   }
-  if (/^\/top100-(?:data\.js|players\.json)$/.test(url.pathname)) {
+  if (/^\/(?:top100-(?:data\.js|players\.json)|factions-cards\.json)$/.test(url.pathname)) {
     e.respondWith(networkFirst(req, DATA));
     return;
   }

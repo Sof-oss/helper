@@ -127,7 +127,7 @@
       },
       anchorOf = function (row) {
         var a = row.querySelector(".fx-rank-name");
-        return a ? a.getAttribute("href").slice(1) : "";
+        return a ? a.dataset.anchor || a.getAttribute("href").slice(1) : "";
       },
       gainFor = function (anchor, key, info) {
         if (!info || !hist || !hist.factions[anchor] || !hist.factions[anchor][key]) return 0;
@@ -257,7 +257,7 @@
               var a = x.row.querySelector(".fx-rank-name"),
                 name = a.firstChild.textContent.trim(),
                 link = a.getAttribute("href"),
-                card = document.getElementById(link.slice(1)),
+                card = document.getElementById(a.dataset.anchor || link.slice(1)),
                 emblem = card && card.querySelector(".fx-emblem svg"),
                 color = card ? getComputedStyle(card).getPropertyValue("--fx").trim() : "#8fa3b4",
                 value = metric === "activity" ? Math.round(x.v) : fmtRank(x.v),
@@ -265,6 +265,7 @@
               return (
                 '<a class="fx-rank-card" href="' +
                 link +
+                (a.dataset.fcOpen ? '" data-fc-open="' + a.dataset.fcOpen : "") +
                 '" style="--fx:' +
                 color +
                 '"><span class="fx-rank-card-medal" aria-hidden="true">' +
@@ -300,6 +301,11 @@
           );
       },
       clearForCard = function (e) {
+        /* карточка группировки (faction-card.js) открывается поверх страницы - окно рейтинга под ней не нужно */
+        if (e.target.closest && e.target.closest("[data-fc-open]")) {
+          closeRank();
+          return;
+        }
         var a = e.target.closest && e.target.closest('a[href^="#f-"]');
         if (!a) return;
         if (input.value) input.value = "";

@@ -162,3 +162,86 @@ test("история периодов: прирост засчитывается
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 });
+
+test("места: 20 сначала, 25 / 30 / 40 - необязательные расширения на 2 / 5 / 10 уровне", () => {
+  const { slotCap, slugOf } = factions;
+  assert.deepEqual(slotCap(1, 15), { cap: 20, sure: true });
+  assert.deepEqual(slotCap(4, 25), { cap: 25, sure: true });
+  /* 2 уровень и 18 бойцов: расширение могли взять, а могли и нет - лимит неизвестен */
+  assert.equal(slotCap(2, 18).sure, false);
+  assert.deepEqual(slotCap(5, 26), { cap: 30, sure: true });
+  assert.deepEqual(slotCap(12, 31), { cap: 40, sure: true });
+  assert.equal(slugOf("Наёмники"), "naemniki");
+  assert.match(slugOf("★★★"), /^g[0-9a-z]+$/);
+});
+
+test("карточки группировок: вступления, уходы, уровень, места и лидер", () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "hotz-factions-cards-"));
+  const write = (file, data) => {
+    fs.mkdirSync(path.dirname(path.join(tmp, file)), { recursive: true });
+    fs.writeFileSync(path.join(tmp, file), typeof data === "string" ? data : JSON.stringify(data));
+  };
+  try {
+    write("ui.js", fs.readFileSync(path.join(ROOT, "ui.js"), "utf8"));
+    write("top100/factions.json", { Evil: "#ff0000" });
+    write("top100/clans.json", { clans: [{ name: "Evil", level: 2, members: 22, leader: { id: 2, name: "Второй" } }] });
+    write("top100/clans-history.json", {
+      clans: {
+        Evil: [
+          ["2026-10-20", 1, 19, 1],
+          ["2026-10-21", 2, 20, 1],
+          ["2026-10-22", 2, 22, 2]
+        ]
+      }
+    });
+    write("factions-info.json", { Evil: { motto: "Девиз", post: "https://vk.com/wall-1_1" } });
+    write("top100-data.js", 'window.TOP100_HISTORY={"id":"2026-10-22"};');
+    write("top100-players.json", {
+      updated: "2026-10-22 12:00",
+      dates: [0, 1, 2].map(d => Date.UTC(2026, 9, 20 + d, 9)),
+      metrics: ["reputation", "bosses"],
+      players: {
+        1: {
+          n: "Первый",
+          g: "Good",
+          l: 5,
+          v: [10, 1],
+          gh: [
+            [0, "Evil"],
+            [2, "Good"]
+          ]
+        },
+        2: {
+          n: "Второй",
+          g: "Evil",
+          l: 7,
+          v: [50, 3],
+          gh: [
+            [0, ""],
+            [1, "Evil"]
+          ]
+        }
+      }
+    });
+    const res = factions(tmp);
+    const evil = res.cards.factions.find(f => f.n === "Evil");
+    assert.equal(evil.s, "evil");
+    assert.equal(evil.cap, 25);
+    assert.equal(evil.lead.id, "2");
+    assert.equal(evil.post, "https://vk.com/wall-1_1");
+    assert.deepEqual(
+      evil.ev.map(e => e.d + " " + e.t + " " + (e.n || e.x)),
+      [
+        "2026-10-22 slots 20→25",
+        "2026-10-22 leader Второй",
+        "2026-10-22 left Первый",
+        "2026-10-21 level 1→2",
+        "2026-10-21 join Второй"
+      ]
+    );
+    assert.deepEqual(evil.r[0].slice(0, 5), ["2", "Второй", 7, 50, 3]);
+    assert.match(res.list, /data-fc-open="evil"/);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});

@@ -37,6 +37,23 @@ const anchor = name =>
     .replace(/^-|-$/g, "")
     .replace(/[а-яё]/g, ch => TRANSLIT[ch] || "")
     .replace(/-+/g, "-");
+/* адрес карточки группировки: /f/<slug> (тот же якорь без «f-») */
+const slugOf = name =>
+  anchor(name).replace(/^f-/, "") ||
+  "g" + [...String(name)].reduce((h, ch) => (h * 31 + ch.codePointAt(0)) >>> 0, 7).toString(36);
+/* места в группировке: 20 с самого начала, расширение до 25 / 30 / 40 можно взять на 2 / 5 / 10 уровне
+   (а можно выбрать другое улучшение). Лимит берём наименьший из доступных по уровню, в который помещались все бойцы;
+   если подходит больше одного варианта - лимит неизвестен (null) */
+const SLOT_TIERS = [
+  [1, 20],
+  [2, 25],
+  [5, 30],
+  [10, 40]
+];
+function slotCap(level, maxMembers) {
+  const fit = SLOT_TIERS.filter(t => (level || 1) >= t[0] && t[1] >= (maxMembers || 0)).map(t => t[1]);
+  return { cap: fit.length ? fit[0] : null, sure: fit.length === 1 };
+}
 const TRANSLIT = Object.fromEntries(
   "а:a б:b в:v г:g д:d е:e ё:e ж:zh з:z и:i й:y к:k л:l м:m н:n о:o п:p р:r с:s т:t у:u ф:f х:h ц:ts ч:ch ш:sh щ:sch ъ: ы:y ь: э:e ю:yu я:ya"
     .split(" ")
@@ -207,7 +224,11 @@ function factionsMarkup(ROOT) {
         (i + 1) +
         '</span><span class="fx-rank-emblem" aria-hidden="true">' +
         v.emblem +
-        '</span><a class="fx-rank-name" href="#' +
+        '</span><a class="fx-rank-name" href="/f/' +
+        esc(slugOf(f.c.name)) +
+        '" data-fc-open="' +
+        esc(slugOf(f.c.name)) +
+        '" data-anchor="' +
         anchor(f.c.name) +
         '">' +
         esc(f.c.name) +
@@ -342,8 +363,10 @@ function factionsMarkup(ROOT) {
     .map((f, i) => {
       const v = visuals.get(f.c.name) || { color: "#8fa3b4", emblem: "" };
       return (
-        '<a class="fx-rank-card" href="#' +
-        anchor(f.c.name) +
+        '<a class="fx-rank-card" href="/f/' +
+        esc(slugOf(f.c.name)) +
+        '" data-fc-open="' +
+        esc(slugOf(f.c.name)) +
         '" style="--fx:' +
         esc(v.color) +
         '"><span class="fx-rank-card-medal" aria-hidden="true">' +
@@ -513,15 +536,25 @@ function factionsMarkup(ROOT) {
       (key && cardBg(key)
         ? '<span class="fx-bg" style="background-image:url(' + cardBg(key) + ')" aria-hidden="true"></span>'
         : '<span class="fx-bg fx-bg-tint" aria-hidden="true"></span>') +
-      '<header class="fx-head"><span class="fx-emblem">' +
+      '<header class="fx-head"><a class="fx-emblem" href="/f/' +
+      esc(slugOf(name)) +
+      '" data-fc-open="' +
+      esc(slugOf(name)) +
+      '" tabindex="-1" aria-hidden="true">' +
       emblem +
-      '</span><div><h2><a href="#' +
-      anchor(name) +
+      '</a><div><h2><a href="/f/' +
+      esc(slugOf(name)) +
+      '" data-fc-open="' +
+      esc(slugOf(name)) +
       '">' +
       esc(name) +
       '</a></h2><p class="fx-meta">' +
       meta.map(esc).join(" · ") +
-      "</p></div></header>" +
+      '</p></div><a class="fx-open" href="/f/' +
+      esc(slugOf(name)) +
+      '" data-fc-open="' +
+      esc(slugOf(name)) +
+      '">Карточка <span aria-hidden="true">→</span></a></header>' +
       motto +
       leader +
       vkHtml +
@@ -530,6 +563,92 @@ function factionsMarkup(ROOT) {
       rosterHtml +
       "</article>"
     );
+  });
+  /* данные для карточек группировок (faction-card.js): состав, показатели и история.
+     Вступления и уходы - из истории группировок игроков (gh в top100-players.json, по ежедневным выгрузкам),
+     уровень, места и лидер - из top100/clans-history.json (копится с каждой выгрузкой, см. fetch-players.js) */
+  const clansHistory = readJson(path.join(ROOT, "top100", "clans-history.json"), { clans: {} }).clans || {};
+  const BOSSES = data.metrics.indexOf("bosses");
+  const noGroup = g => (!g || g === "-" ? "" : g);
+  const events = new Map(list.map(f => [f.c.name, []]));
+  for (const [id, p] of Object.entries(data.players)) {
+    const gh = p.gh || [];
+    for (let i = 1; i < gh.length; i++) {
+      const prev = noGroup(gh[i - 1][1]),
+        next = noGroup(gh[i][1]),
+        d = histDates[gh[i][0]];
+      if (!d || prev === next) continue;
+      if (events.has(next)) events.get(next).push({ d, t: "join", id, n: p.n, x: prev });
+      if (events.has(prev)) events.get(prev).push({ d, t: "left", id, n: p.n, x: next });
+    }
+  }
+  const nameOf = id => (id != null && data.players[String(id)] ? data.players[String(id)].n : "");
+  const cardsData = list.map(f => {
+    const c = f.c,
+      name = c.name,
+      add = info[name] || {},
+      v = visuals.get(name) || { color: "#8fa3b4", emblem: "" },
+      ev = events.get(name) || [];
+    const rows = Array.isArray(clansHistory[name]) ? clansHistory[name] : [];
+    let maxM = 0,
+      prev = null;
+    for (const r of rows) {
+      const [d, lv, m, lead] = r;
+      maxM = Math.max(maxM, m || 0);
+      const cap = slotCap(lv, maxM).cap;
+      if (prev) {
+        if (lv > prev.lv) ev.push({ d, t: "level", x: prev.lv + "→" + lv });
+        if (cap && prev.cap && cap > prev.cap) ev.push({ d, t: "slots", x: prev.cap + "→" + cap });
+        if (lead != null && prev.lead != null && lead !== prev.lead)
+          ev.push({
+            d,
+            t: "leader",
+            id: data.players[String(lead)] ? String(lead) : null,
+            n: nameOf(lead) || (c.leader && c.leader.id === lead ? c.leader.name : "")
+          });
+      }
+      prev = { lv, cap, lead };
+    }
+    const slots = slotCap(c.level || 1, Math.max(maxM, f.members));
+    const order = { level: 0, slots: 1, leader: 2, join: 3, left: 4 };
+    ev.sort((a, b) =>
+      a.d < b.d ? 1 : a.d > b.d ? -1 : order[a.t] - order[b.t] || String(a.n).localeCompare(String(b.n), "ru")
+    );
+    const leaderId = f.leaderId && data.players[f.leaderId] ? f.leaderId : null;
+    const post = safeUrl(add.post),
+      vkUrl = add.vk && safeUrl(add.vk.url);
+    return {
+      s: slugOf(name),
+      n: name,
+      c: v.color,
+      k: KEY[name] && GLYPHS[KEY[name]] ? KEY[name] : null,
+      e: v.emblem,
+      lv: c.level || 1,
+      m: f.members,
+      cap: slots.sure ? slots.cap : null,
+      lead: leaderId
+        ? { id: leaderId, n: data.players[leaderId].n }
+        : c.leader && c.leader.name
+          ? { id: null, n: c.leader.name }
+          : null,
+      motto: add.motto || "",
+      recruit: add.recruit || "",
+      req: add.requirement || "",
+      post,
+      vk: vkUrl ? { url: vkUrl, n: add.vk.name || "Группа ВКонтакте" } : null,
+      contacts: (add.contacts || [])
+        .map(p => ({
+          n: String(p.name || "")
+            .replace(/^@+/, "")
+            .trim(),
+          url: safeUrl(p.url)
+        }))
+        .filter(p => p.n),
+      t: { reputation: f.totals.reputation || 0, bosses: f.totals.bosses || 0, expeditions: f.totals.expeditions || 0 },
+      rank: ranked.indexOf(f) + 1,
+      r: f.people.map(p => [p.id, p.n, p.l, p.rep, BOSSES >= 0 ? (p.v || [])[BOSSES] || 0 : 0, p.off ? 1 : 0]),
+      ev: ev.slice(0, 300)
+    };
   });
   const hist = /TOP100_HISTORY=(\{[^\n]*\})/.exec(fs.readFileSync(path.join(ROOT, "top100-data.js"), "utf8"));
   let history = "";
@@ -540,6 +659,7 @@ function factionsMarkup(ROOT) {
     stats,
     rank,
     list: cards.join("\n"),
+    cards: { updated, total: list.length, factions: cardsData },
     history,
     count: list.length,
     hiring: list.filter(f => (info[f.c.name] || {}).recruit).length
@@ -551,3 +671,5 @@ module.exports = factionsMarkup;
 module.exports.esc = esc;
 module.exports.safeUrl = safeUrl;
 module.exports.anchor = anchor;
+module.exports.slugOf = slugOf;
+module.exports.slotCap = slotCap;

@@ -1,0 +1,631 @@
+/* Карточка группировки «Штаб»: фото базы на всю карточку, панели из «жидкого стекла». */
+html.fc-lock,
+html.fc-lock body {
+  overflow: hidden;
+}
+.fc-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 990;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(3, 5, 8, 0.74);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  animation: fc-fade 0.18s ease;
+}
+.fc-overlay[hidden] {
+  display: none;
+}
+@keyframes fc-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes fc-up {
+  from {
+    transform: translateY(16px) scale(0.99);
+    opacity: 0;
+  }
+}
+.fc-dialog {
+  --c: var(--accent);
+  position: relative;
+  width: min(1240px, 100%);
+  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border-radius: 30px;
+  /* фото базы не уезжает при прокрутке (фон самого прокручиваемого окна) - стекло скользит поверх;
+     сверху тонировка: цвет группировки слева и затемнение книзу */
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--c) 38%, transparent), transparent 45%),
+    linear-gradient(180deg, rgba(5, 8, 12, 0) 0, rgba(5, 8, 12, 0.18) 30%, rgba(5, 8, 12, 0.6) 100%),
+    var(--fc-bg, none) center 30% / cover no-repeat,
+    #070a0e;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.7),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  outline: none;
+  animation: fc-up 0.24s ease;
+  color: #e6eef5;
+  isolation: isolate;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+.fc-body {
+  position: relative;
+  min-height: 100%;
+  padding: 190px 18px 18px;
+}
+.fc-dialog.fc-nobg {
+  background:
+    radial-gradient(90% 70% at 20% 0, color-mix(in srgb, var(--c) 45%, transparent), transparent 70%),
+    radial-gradient(70% 60% at 100% 100%, color-mix(in srgb, var(--c) 22%, transparent), transparent 70%), #070a0e;
+}
+/* окно получает фокус программно - общая рамка фокуса (sector.css) вокруг всей карточки не нужна */
+html body .fc-overlay .fc-dialog:focus-visible {
+  outline: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fc-overlay,
+  .fc-dialog {
+    animation: none;
+  }
+}
+
+/* жидкое стекло */
+.fc-glass {
+  position: relative;
+  border-radius: 22px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.14),
+      rgba(255, 255, 255, 0.03) 38%,
+      rgba(255, 255, 255, 0.01) 62%,
+      rgba(255, 255, 255, 0.07)
+    ),
+    color-mix(in srgb, var(--c) 7%, rgba(10, 17, 26, 0.36));
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.19);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.44),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.11),
+    inset 1px 0 0 rgba(255, 255, 255, 0.1),
+    inset -1px 0 0 rgba(255, 255, 255, 0.07),
+    0 12px 34px rgba(0, 0, 0, 0.45);
+}
+.fc-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(120% 60% at 15% 0, rgba(255, 255, 255, 0.15), transparent 55%);
+  pointer-events: none;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .fc-glass {
+    background: color-mix(in srgb, var(--c) 10%, rgba(10, 16, 24, 0.86));
+  }
+}
+
+.fc-top {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  right: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  z-index: 2;
+}
+.fc-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font:
+    700 11px/1.2 "ZoneMono",
+    monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.fc-tools {
+  display: flex;
+  gap: 8px;
+}
+.fc-ibtn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+}
+.fc-ibtn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.fc-ibtn:hover,
+.fc-ibtn:focus-visible {
+  background: rgba(255, 255, 255, 0.18);
+}
+.fc-ibtn.ok {
+  color: #7fe0a0;
+}
+
+.fc-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 290px minmax(0, 1fr) 300px;
+  gap: 14px;
+  align-items: start;
+}
+.fc-side {
+  padding: 0 20px 22px;
+}
+.fc-chev {
+  width: 128px;
+  margin: -96px auto 10px;
+  filter: drop-shadow(0 12px 22px rgba(0, 0, 0, 0.8));
+}
+.fc-chev svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.fc-side h2 {
+  margin: 0;
+  font:
+    600 31px/1.1 "Oswald",
+    sans-serif;
+  text-align: center;
+  color: #fff;
+  overflow-wrap: anywhere;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+}
+.fc-ring {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 14px;
+  color: #c8d6e2;
+  font:
+    12px "ZoneMono",
+    monospace;
+}
+.fc-lvl {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #e3eef7;
+  font:
+    700 11px/1 "ZoneMono",
+    monospace;
+}
+.fc-motto {
+  margin: 0 0 14px;
+  padding: 11px 13px;
+  border-radius: 14px;
+  border-left: 3px solid #e3a24a;
+  background: rgba(255, 255, 255, 0.06);
+  font-style: italic;
+  color: #e6eef5;
+}
+.fc-kv {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 7px 10px;
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+.fc-kv dt {
+  color: #a9bccc;
+}
+.fc-kv dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.fc-kv a,
+.fc-ev a,
+.fc-table a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dashed transparent;
+}
+.fc-kv a:hover,
+.fc-ev a:hover,
+.fc-table a:hover,
+.fc-kv a:focus-visible,
+.fc-ev a:focus-visible,
+.fc-table a:focus-visible {
+  border-bottom-color: currentColor;
+}
+.fc-leader {
+  color: #e3a24a;
+}
+.fc-crown {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.12em;
+}
+.fc-tag {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(47, 174, 90, 0.16);
+  border: 1px solid rgba(47, 174, 90, 0.45);
+  color: #7fe0a0;
+  font:
+    700 10px/1.4 "ZoneMono",
+    monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.fc-req {
+  color: #a9bccc;
+  font-size: 12px;
+}
+.fc-rec {
+  margin: 0 0 12px;
+  color: #d3dee8;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.fc-vk {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 11px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e6eef5;
+  text-decoration: none;
+}
+.fc-vk:hover,
+.fc-vk:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+}
+.fc-vk i {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #2787f5;
+  color: #fff;
+}
+.fc-vk i svg {
+  width: 20px;
+  height: 20px;
+}
+.fc-vk small {
+  display: block;
+  color: #a9bccc;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.fc-join {
+  display: block;
+  margin-top: 12px;
+  padding: 11px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 78%, #fff), color-mix(in srgb, var(--c) 88%, #000));
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+  font:
+    600 13px/1.2 "Oswald",
+    sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 6px 18px color-mix(in srgb, var(--c) 40%, transparent);
+}
+.fc-join:hover,
+.fc-join:focus-visible {
+  filter: brightness(1.1);
+}
+
+.fc-main {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+.fc-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.fc-st {
+  padding: 12px 14px;
+  border-radius: 18px;
+  min-width: 0;
+}
+.fc-st small {
+  display: block;
+  color: #b3c4d2;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.fc-st b {
+  font:
+    700 20px/1.3 "ZoneMono",
+    monospace;
+  color: color-mix(in srgb, var(--c) 30%, #fff);
+  white-space: nowrap;
+}
+.fc-pad {
+  padding: 16px 18px;
+  min-width: 0;
+}
+.fc-pad h3 {
+  margin: 0 0 8px;
+  font:
+    600 14px/1.3 "Oswald",
+    sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--c) 55%, #fff);
+}
+.fc-table {
+  overflow-x: auto;
+}
+.fc-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.fc-table th {
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.11);
+  color: #a9bccc;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: left;
+}
+.fc-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  overflow-wrap: anywhere;
+}
+.fc-table tr:last-child td {
+  border-bottom: 0;
+}
+.fc-table .fc-extra,
+.fc-evs .fc-ev:nth-child(n + 13) {
+  display: none;
+}
+.fc-all .fc-extra {
+  display: table-row;
+}
+.fc-evs.fc-all .fc-ev {
+  display: grid;
+}
+.fc-off td {
+  opacity: 0.55;
+}
+.fc-mono {
+  font-family: "ZoneMono", monospace;
+  white-space: nowrap;
+}
+.fc-more {
+  display: block;
+  margin: 10px auto 0;
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #d4e1ec;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.fc-more:hover,
+.fc-more:focus-visible {
+  background: rgba(255, 255, 255, 0.14);
+}
+.fc-note {
+  margin: 10px 0 0;
+  color: #a9bccc;
+  font-size: 12px;
+}
+
+.fc-hist {
+  padding: 16px 16px 12px;
+}
+.fc-evs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.fc-ev {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  gap: 9px;
+  align-items: center;
+  padding: 7px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+.fc-ev b {
+  display: block;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.fc-ev small {
+  display: block;
+  color: #a9bccc;
+  font-size: 11.5px;
+}
+.fc-ev time {
+  color: #a9bccc;
+  font:
+    11px "ZoneMono",
+    monospace;
+}
+.fc-ic {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font:
+    700 13px/1 "Rubik",
+    sans-serif;
+}
+.fc-ic svg {
+  width: 13px;
+  height: 13px;
+}
+.fc-ic-join {
+  background: rgba(47, 174, 90, 0.16);
+  color: #6fdc94;
+  border: 1px solid rgba(47, 174, 90, 0.4);
+}
+.fc-ic-left {
+  background: rgba(217, 72, 63, 0.16);
+  color: #ff8a80;
+  border: 1px solid rgba(217, 72, 63, 0.4);
+}
+.fc-ic-level {
+  background: rgba(227, 162, 74, 0.16);
+  color: #ffd08a;
+  border: 1px solid rgba(227, 162, 74, 0.45);
+}
+.fc-ic-slots {
+  background: rgba(87, 196, 240, 0.16);
+  color: #8fdcff;
+  border: 1px solid rgba(87, 196, 240, 0.4);
+}
+.fc-ic-leader {
+  background: rgba(185, 138, 224, 0.16);
+  color: #d9b8ff;
+  border: 1px solid rgba(185, 138, 224, 0.4);
+}
+.fc-loading {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 60px 20px;
+  color: #c8d6e2;
+  text-align: center;
+}
+.fc-loading i {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: var(--c);
+  border-radius: 50%;
+  animation: fc-spin 0.8s linear infinite;
+}
+@keyframes fc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* планшет: история уходит под состав */
+@media (max-width: 1099px) {
+  .fc-grid {
+    grid-template-columns: 280px minmax(0, 1fr);
+  }
+  .fc-hist {
+    grid-column: 1 / -1;
+  }
+}
+/* телефон: шторка на весь экран, панели друг под другом, фото - вертикальное */
+@media (max-width: 759px) {
+  .fc-overlay {
+    padding: 0;
+  }
+  .fc-dialog {
+    width: 100%;
+    max-height: none;
+    height: 100%;
+    border-radius: 0;
+    background:
+      linear-gradient(180deg, rgba(5, 8, 12, 0) 0, rgba(5, 8, 12, 0.25) 35%, rgba(5, 8, 12, 0.65) 100%),
+      var(--fc-bg-m, none) center top / cover no-repeat,
+      #070a0e;
+    box-shadow: none;
+  }
+  .fc-dialog.fc-nobg {
+    background-image:
+      radial-gradient(90% 50% at 20% 0, color-mix(in srgb, var(--c) 45%, transparent), transparent 70%),
+      radial-gradient(70% 60% at 100% 100%, color-mix(in srgb, var(--c) 22%, transparent), transparent 70%);
+  }
+  .fc-body {
+    padding: 150px 10px calc(14px + env(safe-area-inset-bottom));
+  }
+  .fc-top {
+    top: calc(12px + env(safe-area-inset-top));
+    left: 12px;
+    right: 12px;
+  }
+  .fc-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .fc-glass {
+    -webkit-backdrop-filter: blur(16px) saturate(170%);
+    backdrop-filter: blur(16px) saturate(170%);
+    border-radius: 20px;
+  }
+  .fc-chev {
+    width: 112px;
+    margin-top: -78px;
+  }
+  .fc-side h2 {
+    font-size: 28px;
+  }
+  .fc-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .fc-st {
+    padding: 10px 12px;
+    border-radius: 16px;
+  }
+  .fc-st b {
+    font-size: 17px;
+  }
+  .fc-pad {
+    padding: 14px 12px;
+  }
+  .fc-table th,
+  .fc-table td {
+    padding: 7px 5px;
+  }
+}
+@media (max-width: 420px) {
+  .fc-col-b {
+    display: none;
+  }
+}

@@ -420,6 +420,57 @@ function homeLive(html) {
   return html;
 }
 
+/* карточки группировок: данные для faction-card.js (factions-cards.json) и страницы-ссылки /f/<slug> с превью
+   для мессенджеров - они сразу открывают карточку на «Группировках» (/factions#f=<slug>) */
+function writeFactionCards(cards) {
+  fs.writeFileSync(path.join(OUT, "factions-cards.json"), JSON.stringify(cards));
+  fs.mkdirSync(path.join(OUT, "f"), { recursive: true });
+  const ogImg = SITE + "/assets/preview.jpg?v=3";
+  for (const c of cards.factions) {
+    const target = "/factions#f=" + encodeURIComponent(c.s);
+    const title = c.n + " - группировка";
+    const desc = [
+      "Уровень " + c.lv,
+      plural(c.m, "боец", "бойца", "бойцов"),
+      c.lead ? "лидер " + c.lead.n : "",
+      c.motto ? "«" + c.motto + "»" : ""
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    const url = SITE + "/f/" + encodeURIComponent(c.s);
+    const js = "location.replace(" + JSON.stringify(target) + ")";
+    fs.writeFileSync(
+      path.join(OUT, "f", c.s + ".html"),
+      '<!doctype html>\n<html lang="ru"><head><meta charset="utf-8">\n<title>' +
+        esc(title) +
+        " · Сердце Зоны</title>\n" +
+        '<meta name="viewport" content="width=device-width,initial-scale=1">\n<meta name="robots" content="noindex,follow">\n' +
+        '<meta name="description" content="' +
+        esc(desc) +
+        '">\n<link rel="canonical" href="' +
+        url +
+        '">\n<meta property="og:type" content="website">\n<meta property="og:site_name" content="Сердце Зоны">\n' +
+        '<meta property="og:title" content="' +
+        esc(title) +
+        '">\n<meta property="og:description" content="' +
+        esc(desc) +
+        '">\n<meta property="og:url" content="' +
+        url +
+        '">\n<meta property="og:image" content="' +
+        ogImg +
+        '">\n<meta property="og:locale" content="ru_RU">\n<meta name="twitter:card" content="summary_large_image">\n' +
+        '<meta name="theme-color" content="#070d18">\n<script>' +
+        js +
+        '</script>\n</head><body style="background:#07090b;color:#dfe7ee;font:16px system-ui,sans-serif;padding:40px;text-align:center">' +
+        '<a href="' +
+        target +
+        '" style="color:#aec8ec">Открыть карточку группировки ' +
+        esc(c.n) +
+        "</a></body></html>\n"
+    );
+  }
+}
+
 const PRERENDER = {
   /* список гайдов; пока гайдов нет, страница закрыта от индексации */
   "guides.html": html => {
@@ -430,6 +481,7 @@ const PRERENDER = {
   "factions.html": html => {
     const f = require("./build-factions.js")(ROOT);
     html = html.replace('id="main" data-history=""', 'id="main" data-history="' + f.history + '"');
+    writeFactionCards(f.cards);
     return fill(fill(fill(html, "factionsStats", f.stats), "factionsRank", f.rank), "factionsList", f.list);
   },
 
