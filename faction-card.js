@@ -194,7 +194,7 @@
         "Набор",
         '<span class="fc-tag">Открыт</span>' + (f.req ? ' <span class="fc-req">приём ' + esc(f.req) + "</span>" : "")
       ]);
-    /* связь - заметные «кнопки» с иконкой ВК и стрелкой: сразу видно, что ник ведёт на личную страницу */
+    /* связь - компактные «кнопки» с иконкой ВК и стрелкой в строку на всю ширину: видно, что ник ведёт на личную страницу */
     if (f.contacts.length)
       kv.push([
         "Связь",
@@ -220,7 +220,8 @@
               );
             })
             .join("") +
-          "</span>"
+          "</span>",
+        "fc-kv-wide"
       ]);
     const vk = f.vk
       ? '<a class="fc-vk" href="' +
@@ -297,7 +298,11 @@
       "</span></div>" +
       (f.motto ? '<blockquote class="fc-motto">«' + esc(f.motto) + "»</blockquote>" : "") +
       (kv.length
-        ? '<dl class="fc-kv">' + kv.map(x => "<dt>" + x[0] + "</dt><dd>" + x[1] + "</dd>").join("") + "</dl>"
+        ? '<dl class="fc-kv">' +
+          kv
+            .map(x => "<dt>" + x[0] + "</dt><dd" + (x[2] ? ' class="' + x[2] + '"' : "") + ">" + x[1] + "</dd>")
+            .join("") +
+          "</dl>"
         : "") +
       (f.recruit ? '<p class="fc-rec">' + esc(f.recruit) + "</p>" : "") +
       vk +

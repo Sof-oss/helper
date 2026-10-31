@@ -20,19 +20,19 @@
 <meta property="og:image:alt" content="Сердце Зоны - Группировки">
 <meta property="og:locale" content="ru_RU">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <!-- свои шрифты (assets/fonts, @font-face в styles.css); Oswald нужен сразу - заголовки и меню -->
-<link rel="preload" href="assets/fonts/oswald-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/fonts/graffiti-logo.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="player-card.css">
-<link rel="stylesheet" href="faction-card.css">
-<link rel="stylesheet" href="factions.css">
-<link rel="stylesheet" href="tour.css">
-<link rel="stylesheet" href="sector.css">
+<link rel="preload" href="/assets/fonts/oswald-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/graffiti-logo.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/player-card.css">
+<link rel="stylesheet" href="/faction-card.css">
+<link rel="stylesheet" href="/factions.css">
+<link rel="stylesheet" href="/tour.css">
+<link rel="stylesheet" href="/sector.css">
 </head>
 <body>
 <!-- @include header active="/factions" -->
@@ -55,7 +55,7 @@
     <button type="button" class="fx-chip" data-fx-filter="hiring" aria-pressed="false">Набор открыт <b data-fx-num="hiring"></b></button>
     <button type="button" class="fx-chip" data-fx-filter="free" aria-pressed="false">Есть места <b data-fx-num="free"></b></button>
   </div>
-  <label class="fx-chip fx-sort">Сортировка:<select id="fxSort" aria-label="Сортировка группировок"><option value="rank">активность</option><option value="level">уровень</option><option value="members">бойцы</option><option value="free">свободные места</option><option value="name">название</option></select></label>
+  <label class="fx-chip fx-sort">Сортировка:<select id="fxSort" aria-label="Сортировка группировок"><option value="rank">активность</option><option value="level">уровень</option><option value="members">бойцы</option></select></label>
 </div>
 <p class="fx-empty" id="fxEmpty" hidden>Ничего не нашлось</p>
 <div class="fx-list" id="factionsList"></div>
@@ -63,5 +63,5 @@
 
 <!-- @include footer -->
 
-<script src="ui.js" defer></script><script src="nav.js" defer></script><script src="factions.js" defer></script><script src="top100-common.js" defer></script><script src="awards.js" defer></script><script src="player-card.js" defer></script><script src="faction-card.js" defer></script><script src="tour.js" defer></script>
+<script src="/ui.js" defer></script><script src="/nav.js" defer></script><script src="/factions.js" defer></script><script src="/top100-common.js" defer></script><script src="/awards.js" defer></script><script src="/player-card.js" defer></script><script src="/faction-card.js" defer></script><script src="/tour.js" defer></script>
 </body></html>

@@ -82,7 +82,6 @@
     cards
       .slice()
       .sort(function (a, b) {
-        if (key === "name") return a.dataset.name.localeCompare(b.dataset.name, "ru");
         var d = key === "rank" ? 0 : numOf(b, key) - numOf(a, key);
         if (!d && key === "level") d = numOf(b, "members") - numOf(a, "members");
         return d || numOf(a, "rank") - numOf(b, "rank");

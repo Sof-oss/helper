@@ -1168,11 +1168,11 @@ function addCsp(file) {
       urls.add(u);
     }
   }
-  /* картинки и шрифты из стилей оболочки (иконки оружия, woff2), кроме фонов тем и запасных ttf/woff */
+  /* картинки и шрифты из стилей оболочки (иконки оружия, woff2), кроме фонов тем, их карт глубины и запасных ttf/woff */
   for (const u of [...urls].filter(x => /\.css\?/.test(x))) {
     const css = fs.readFileSync(path.join(OUT, u.split("?")[0].slice(1)), "utf8");
     for (const m of css.matchAll(/url\((["']?)([^"')]+\?v=[^"')]+)\1\)/g))
-      if (!/^([a-z]+:)?\/\//i.test(m[2]) && !/(^|\/)assets\/bg-|\.(ttf|woff)\?/.test(m[2]))
+      if (!/^([a-z]+:)?\/\//i.test(m[2]) && !/(^|\/)assets\/(bg|depth)-|\.(ttf|woff)\?/.test(m[2]))
         urls.add(m[2].startsWith("/") ? m[2] : "/" + m[2]);
   }
 

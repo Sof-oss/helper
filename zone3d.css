@@ -1,4 +1,4 @@
-/* Главная: живой 3D-фон и заставка (код - src/home-3d.js) */
+/* Главная: живой 3D-фон и заставка (код - src/home-3d.js, src/zone-bg.js) */
 
 /* холст фона лежит поверх CSS-фона (body::before) и под содержимым; появляется плавно, когда загрузилось фото. */
 .zone-bg {
@@ -20,5 +20,81 @@
 @media (prefers-reduced-motion: reduce) {
   .zone-bg {
     display: none;
+  }
+}
+
+/* карты глубины фото тем для живого фона (build-depth.py): белое - близко; на телефоне своя - под вертикальное фото */
+:root {
+  --depth-img: url("assets/depth-merc.webp");
+}
+:root[data-theme="merc"] {
+  --depth-img: url("assets/depth-merc.webp");
+}
+:root[data-theme="dolg"] {
+  --depth-img: url("assets/depth-dolg.webp");
+}
+:root[data-theme="svoboda"] {
+  --depth-img: url("assets/depth-svoboda.webp");
+}
+:root[data-theme="science"] {
+  --depth-img: url("assets/depth-science.webp");
+}
+:root[data-theme="monolith"] {
+  --depth-img: url("assets/depth-monolith.webp");
+}
+:root[data-theme="rassvet"] {
+  --depth-img: url("assets/depth-rassvet.webp");
+}
+:root[data-theme="loners"] {
+  --depth-img: url("assets/depth-loners.webp");
+}
+:root[data-theme="traders"] {
+  --depth-img: url("assets/depth-traders.webp");
+}
+:root[data-theme="renegades"] {
+  --depth-img: url("assets/depth-renegades.webp");
+}
+:root[data-theme="clearsky"] {
+  --depth-img: url("assets/depth-clearsky.webp");
+}
+:root[data-theme="bandits"] {
+  --depth-img: url("assets/depth-bandits.webp");
+}
+@media (max-width: 760px) {
+  :root {
+    --depth-img: url("assets/depth-merc-m.webp");
+  }
+  :root[data-theme="merc"] {
+    --depth-img: url("assets/depth-merc-m.webp");
+  }
+  :root[data-theme="dolg"] {
+    --depth-img: url("assets/depth-dolg-m.webp");
+  }
+  :root[data-theme="svoboda"] {
+    --depth-img: url("assets/depth-svoboda-m.webp");
+  }
+  :root[data-theme="science"] {
+    --depth-img: url("assets/depth-science-m.webp");
+  }
+  :root[data-theme="monolith"] {
+    --depth-img: url("assets/depth-monolith-m.webp");
+  }
+  :root[data-theme="rassvet"] {
+    --depth-img: url("assets/depth-rassvet-m.webp");
+  }
+  :root[data-theme="loners"] {
+    --depth-img: url("assets/depth-loners-m.webp");
+  }
+  :root[data-theme="traders"] {
+    --depth-img: url("assets/depth-traders-m.webp");
+  }
+  :root[data-theme="renegades"] {
+    --depth-img: url("assets/depth-renegades-m.webp");
+  }
+  :root[data-theme="clearsky"] {
+    --depth-img: url("assets/depth-clearsky-m.webp");
+  }
+  :root[data-theme="bandits"] {
+    --depth-img: url("assets/depth-bandits-m.webp");
   }
 }
