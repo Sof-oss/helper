@@ -84,7 +84,7 @@
 </aside>
 <div class="content">
 <noscript><section class="result-panel placeholder-panel"><p>Калькулятор считает урон оружия за жетоны и бесплатных ударов с учётом уровня, снаряжения, арены и талантов. Для работы нужен включённый JavaScript.</p></section></noscript>
-<section class="result-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-ammo"/></svg></span><h2><b>Урон (оружие за жетоны)</b></h2><button type="button" id="openTokens" class="tokens-btn">Расчёт по жетонам</button></div><div class="damage-grid" id="paidCards"></div><p class="damage-footnote">* Без учёта базового шанса критического удара и базовой прибавки критического урона. Число в углу карточки - на сколько изменился урон после последней правки</p></section>
+<section class="result-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-ammo"/></svg></span><h2><b>Урон (оружие за жетоны)</b></h2><button type="button" id="openTokens" class="tokens-btn">Расчёт по жетонам</button></div><div class="damage-grid" id="paidCards"></div><p class="damage-footnote">* Без учёта базового шанса критического удара. Число в углу карточки - на сколько изменился урон после последней правки</p></section>
 <section class="result-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-knife"/></svg></span><h2><b>Урон (бесплатные удары)</b></h2></div><div class="damage-grid" id="freeCards"></div><p class="damage-footnote">В скобках <span class="first-hit">зелёным</span> - урон первого бесплатного удара с бонусом от таланта «Засада»</p></section>
 <section class="result-panel extra-panel"><div class="section-heading"><span><svg class="ic" aria-hidden="true"><use href="#i-gauge"/></svg></span><h2><b>Дополнительные характеристики</b></h2></div><div class="extra-grid"><div><i class="delta" id="deltaNoCooldown"></i><span><svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg></span><small>Шанс удара без отката*</small><strong id="noCooldown">0%</strong></div><div><i class="delta" id="deltaCooldown"></i><span><svg class="ic" aria-hidden="true"><use href="#i-clock"/></svg></span><small>Сокращение отката</small><strong id="cooldown">0%</strong></div><div><i class="delta" id="deltaFirstFreeHit"></i><span><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg></span><small>Урон первого бесплатного удара</small><strong id="firstFreeHit">+0%</strong></div></div><p class="damage-footnote">* Без учёта базового шанса удара без отката</p></section>
 </div>
@@ -137,7 +137,7 @@
         </div>
         <p class="tok-hint">Жетоны считаются на целые удары: граната - 3, гранатомёт - 5, гаусс - 15. Во второе поле удобно вписать запас здоровья босса.</p>
         <div class="tok-cards" id="tokCards"></div>
-        <p class="tok-note">Средний урон с критом = урон + шанс крита × бонус крита; в карточках указан именно он. Крит считается без учёта базового шанса критического удара и базовой прибавки критического урона.</p>
+        <p class="tok-note">Средний урон с критом = урон + шанс крита × бонус крита; в карточках указан именно он. Крит считается без учёта базового шанса критического удара; базовая прибавка критического урона учтена.</p>
         </div>
         <div class="tok-pane" id="tokPaneArsenal" role="tabpanel" aria-labelledby="tokTabArsenal" hidden>
           <p class="tok-hint">Впишите, сколько жетонного оружия у вас есть: гранат, гранатомётов и гауссов. Количество запоминается в браузере.</p>
@@ -145,7 +145,7 @@
             <div class="ars-list" id="arsList"></div>
             <div class="ars-sum" id="arsSum"></div>
           </div>
-          <p class="tok-note">Урон считается средним с учётом крита: урон + шанс крита × бонус крита, по текущему уровню, снаряжению, характеристикам арены и талантам. Крит - без учёта базового шанса критического удара и базовой прибавки критического урона.</p>
+          <p class="tok-note">Урон считается средним с учётом крита: урон + шанс крита × бонус крита, по текущему уровню, снаряжению, характеристикам арены и талантам. Крит - без учёта базового шанса критического удара, базовая прибавка критического урона учтена.</p>
         </div>
       </div>
     </div>

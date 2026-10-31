@@ -14,7 +14,8 @@ import {
   toBits,
   buildHashOf,
   parseBuild,
-  sanitizeTalents
+  sanitizeTalents,
+  BASE_CRIT_DAMAGE
 } from "../src/calc-core.js";
 
 test("уровень: целое 1–100", () => {
@@ -133,4 +134,8 @@ test("сумма очков талантов не больше 135", () => {
 test("toBits", () => {
   assert.equal(toBits(new Set([0, 2])), 5);
   assert.equal(toBits([]), 0);
+});
+
+test("базовый критический урон жетонного оружия", () => {
+  assert.deepEqual(BASE_CRIT_DAMAGE, { grenade: 20, gl: 40, gauss: 100 });
 });

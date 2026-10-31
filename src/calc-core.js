@@ -1,9 +1,9 @@
 /* Ядро калькулятора без DOM: данные снаряжения, формулы базового урона, уровень и ссылка на билд. */
 import { TALENTS } from "../talents.js";
 import { SETS, ITEMS } from "./gear-data.js";
-import { BASE_DAMAGE_LEVEL0, ARENA_COEF_PERCENT } from "./arena-data.js";
+import { BASE_DAMAGE_LEVEL0, ARENA_COEF_PERCENT, BASE_CRIT_DAMAGE } from "./arena-data.js";
 
-export { SETS, ITEMS };
+export { SETS, ITEMS, BASE_CRIT_DAMAGE };
 
 export const ALL_ITEMS = [...SETS.flatMap(s => s.items), ...ITEMS];
 export const ITEM_BY_CODE = Object.fromEntries(ALL_ITEMS.map(i => [i.code, i]));

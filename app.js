@@ -11,6 +11,7 @@ import {
   MIN_LEVEL,
   MAX_LEVEL,
   baseDamageByLevel,
+  BASE_CRIT_DAMAGE,
   buildHashOf as buildHashOfCore,
   parseBuild as parseBuildCore,
   sanitizeTalents
@@ -431,9 +432,10 @@ function results(lvl, pre) {
   r.critGrenade = T.critChance + T.critGrenadeChance;
   r.critGl = T.critChance;
   r.critGauss = T.critChance + T.critGaussChance;
-  r.critDmgGrenade = T.critDamage + T.critGrenadeDamage;
-  r.critDmgGl = T.critDamage + T.critGlDamageTal;
-  r.critDmgGauss = T.critDamage + T.critGaussDamage;
+  /* урон крита = базовая прибавка оружия + снаряжение + таланты */
+  r.critDmgGrenade = BASE_CRIT_DAMAGE.grenade + T.critDamage + T.critGrenadeDamage;
+  r.critDmgGl = BASE_CRIT_DAMAGE.gl + T.critDamage + T.critGlDamageTal;
+  r.critDmgGauss = BASE_CRIT_DAMAGE.gauss + T.critDamage + T.critGaussDamage;
   r.noCooldown = T.noCooldown;
   r.cooldown = T.cooldown;
   r.firstFreeHit = T.firstFreeHit;
@@ -1403,9 +1405,9 @@ function calc() {
   ["Grenade", "Gl", "Gauss"].forEach(K => {
     set("crit" + K, (r["crit" + K] * 100).toFixed(0) + "%");
     set("critDmg" + K, fmt(r["critDmg" + K]));
-    /* пока крита нет (0% и 0), плашка приглушённая, а не тревожно-красная */
+    /* пока шанса крита нет, а урон крита только базовый, плашка приглушённая, а не тревожно-красная */
     const chip = $("crit" + K) && $("crit" + K).closest(".crit-chip");
-    if (chip) chip.classList.toggle("is-zero", !r["crit" + K] && !r["critDmg" + K]);
+    if (chip) chip.classList.toggle("is-zero", !r["crit" + K] && r["critDmg" + K] <= BASE_CRIT_DAMAGE[K.toLowerCase()]);
   });
   set("noCooldown", (r.noCooldown * 100).toFixed(0) + "%");
   set("cooldown", (r.cooldown * 100).toFixed(0) + "%");

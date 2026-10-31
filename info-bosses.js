@@ -121,9 +121,22 @@
   };
   const VEST_ICO =
     '<svg class="boss-rw-vest" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.6 3.4 6 5v4.4L4.5 11v9.6h15V11L18 9.4V5l-2.6-1.6C14.9 5.5 13.6 7 12 7s-2.9-1.5-3.4-3.6z"/><path d="M12 7v13.6M7 13.6h3M14 13.6h3M7 16.8h3M14 16.8h3"/></svg>';
-  const rewardValue = (icon, value, title) =>
-    '<span class="boss-rw" title="' + title + '">' + icon + "<b>" + value + "</b></span>";
+  /* награда - плитка с иконкой и количеством, как в окне наград игры */
+  const rewardValue = (icon, value, title, kind, color) =>
+    '<span class="boss-rw' +
+    (kind ? " boss-rw-" + kind : "") +
+    '" title="' +
+    title +
+    '"' +
+    (color ? ' style="--c:' + color + '"' : "") +
+    '><i class="boss-rw-ico">' +
+    icon +
+    "</i><b>" +
+    value +
+    "</b></span>";
   const dash = '<span class="boss-rw-none" aria-hidden="true">—</span>';
+  /* места 1–3 - медалью, как в рейтинге */
+  const placeMark = p => (/^[123]$/.test(p) ? '<span class="boss-medal boss-medal-' + p + '">' + p + "</span>" : p);
   const rewardCell = (label, html, aria) =>
     '<td data-label="' + label + '" aria-label="' + aria + '">' + html + "</td>";
   /* значок ключа: белая карточка с цветной полосой, как в игре */
@@ -242,31 +255,54 @@
       rows
         .map(
           r =>
-            '<tr role="row"><th scope="row" role="rowheader">' +
-            r.place +
+            '<tr role="row"' +
+            (/^[123]$/.test(r.place) ? ' class="boss-place-' + r.place + '"' : "") +
+            '><th scope="row" role="rowheader">' +
+            placeMark(r.place) +
             "</th>" +
-            rewardCell("Опыт", rewardValue(RES.exp.icon, n0(r.exp), "Опыт: " + n0(r.exp)), "Опыт: " + n0(r.exp)) +
-            rewardCell("Жетоны", rewardValue(RES.tokens.icon, r.tokens, "Жетоны: " + r.tokens), "Жетоны: " + r.tokens) +
+            rewardCell(
+              "Опыт",
+              rewardValue(RES.exp.icon, n0(r.exp), "Опыт: " + n0(r.exp), "exp"),
+              "Опыт: " + n0(r.exp)
+            ) +
+            rewardCell(
+              "Жетоны",
+              rewardValue(RES.tokens.icon, r.tokens, "Жетоны: " + r.tokens, "tok"),
+              "Жетоны: " + r.tokens
+            ) +
             rewardCell(
               "ПДА",
-              r.pda ? rewardValue(PDA_ICO, r.pda, "Взломы ПДА: " + r.pda) : dash,
+              r.pda ? rewardValue(PDA_ICO, r.pda, "Взломы ПДА: " + r.pda, "pda") : dash,
               "Взломы ПДА: " + (r.pda || "нет")
             ) +
             rewardCell(
               "Ключ",
-              r.key ? rewardValue(cardIcon(r.key), "×" + r.keyCount, CARDS[r.key].one + ": ×" + r.keyCount) : dash,
+              r.key
+                ? rewardValue(
+                    cardIcon(r.key),
+                    "×" + r.keyCount,
+                    CARDS[r.key].one + ": ×" + r.keyCount,
+                    "key",
+                    CARDS[r.key].color
+                  )
+                : dash,
               r.key ? CARDS[r.key].one + ": ×" + r.keyCount : "Ключ: нет"
             ) +
             rewardCell(
               "Доп.",
               r.extra
-                ? rewardValue(EXTRA[r.extra].icon, "×" + r.extraCount, EXTRA[r.extra].name + ": ×" + r.extraCount)
+                ? rewardValue(
+                    EXTRA[r.extra].icon,
+                    "×" + r.extraCount,
+                    EXTRA[r.extra].name + ": ×" + r.extraCount,
+                    r.extra
+                  )
                 : dash,
               r.extra ? EXTRA[r.extra].name + ": ×" + r.extraCount : "Дополнительно: нет"
             ) +
             rewardCell(
               "Сет",
-              rewardValue(VEST_ICO, r.set + "%", "Шанс комплекта: " + r.set + "%"),
+              rewardValue(VEST_ICO, r.set + "%", "Шанс комплекта: " + r.set + "%", "set"),
               "Шанс комплекта: " + r.set + "%"
             ) +
             "</tr>"

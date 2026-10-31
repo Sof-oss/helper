@@ -255,9 +255,6 @@
 .fx-rank-row:first-child {
   border-top: 0;
 }
-.fx-rank-row:nth-child(-n + 3) {
-  background: linear-gradient(90deg, color-mix(in srgb, var(--m, var(--accent)) 7%, transparent), transparent 72%);
-}
 .fx-rank-place {
   display: grid;
   place-items: center;
@@ -272,21 +269,42 @@
     ui-monospace,
     monospace;
 }
-.fx-rank-row:nth-child(1) .fx-rank-place {
-  border-color: #f6d36b;
-  background: linear-gradient(180deg, #f6d36b, #b98a1f);
-  color: #221a05;
-  box-shadow: 0 0 16px rgba(246, 211, 107, 0.45);
+/* 1–3 место - медали на колодке, как в «Топ-100» */
+.fx-rank-row:nth-child(-n + 3) .fx-rank-place,
+.fx-rank-card:nth-child(-n + 3) .fx-rank-card-medal {
+  width: 28px;
+  height: 32px;
+  padding-top: 7px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 0;
+  background: url("assets/medal-1.svg") center/contain no-repeat;
+  color: #ffe08a;
+  font:
+    600 14px/1 Oswald,
+    "Segoe UI",
+    sans-serif;
+  box-shadow: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
 }
-.fx-rank-row:nth-child(2) .fx-rank-place {
-  border-color: #dfe6ee;
-  background: linear-gradient(180deg, #dfe6ee, #9aa6b3);
-  color: #1a2026;
+.fx-rank-row:nth-child(2) .fx-rank-place,
+.fx-rank-card:nth-child(2) .fx-rank-card-medal {
+  background-image: url("assets/medal-2.svg");
+  color: #eef2f4;
 }
-.fx-rank-row:nth-child(3) .fx-rank-place {
-  border-color: #e0a06a;
-  background: linear-gradient(180deg, #e0a06a, #a5642f);
-  color: #221205;
+.fx-rank-row:nth-child(3) .fx-rank-place,
+.fx-rank-card:nth-child(3) .fx-rank-card-medal {
+  background-image: url("assets/medal-3.svg");
+  color: #f0b07e;
+}
+.fx-rank-row:nth-child(1) {
+  background: linear-gradient(90deg, rgba(232, 174, 61, 0.1), transparent 72%);
+}
+.fx-rank-row:nth-child(2) {
+  background: linear-gradient(90deg, rgba(169, 186, 198, 0.08), transparent 72%);
+}
+.fx-rank-row:nth-child(3) {
+  background: linear-gradient(90deg, rgba(200, 121, 74, 0.08), transparent 72%);
 }
 .fx-rank-emblem {
   display: grid;
@@ -372,9 +390,21 @@
   border: 1px solid color-mix(in srgb, var(--fx, var(--accent)) 28%, var(--panel-line));
   border-radius: 7px;
   background: linear-gradient(170deg, color-mix(in srgb, var(--fx, var(--accent)) 10%, var(--panel)), var(--panel-2));
+  overflow: hidden;
   color: inherit;
   text-align: center;
   text-decoration: none;
+}
+/* полоса цвета группировки сверху карточки */
+.fx-rank-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--fx, var(--accent)), transparent);
+  opacity: 0.85;
 }
 .fx-rank-card:nth-child(1) {
   border-color: #f6d36b70;
@@ -399,38 +429,24 @@
   left: 7px;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  border: 1px solid #f6d36b;
+  width: 26px;
+  height: 26px;
+  border: 1px solid #33485a;
   border-radius: 50%;
   background: #0a0f14;
-  color: #f6d36b;
+  color: #b9c9d6;
   font:
     700 12px/1 "ZoneMono",
     ui-monospace,
     monospace;
-}
-.fx-rank-card:nth-child(1) .fx-rank-card-medal {
-  background: linear-gradient(180deg, #f6d36b, #b98a1f);
-  color: #221a05;
-  box-shadow: 0 0 14px rgba(246, 211, 107, 0.45);
-}
-.fx-rank-card:nth-child(2) .fx-rank-card-medal {
-  border-color: #dfe6ee;
-  background: linear-gradient(180deg, #dfe6ee, #9aa6b3);
-  color: #1a2026;
-}
-.fx-rank-card:nth-child(3) .fx-rank-card-medal {
-  border-color: #e0a06a;
-  background: linear-gradient(180deg, #e0a06a, #a5642f);
-  color: #221205;
 }
 .fx-rank-card-emblem {
   display: grid;
   place-items: center;
   width: 46px;
   height: 52px;
-  margin: 1px 0 5px;
+  margin: 1px 0 6px;
+  filter: drop-shadow(0 3px 8px color-mix(in srgb, var(--fx, #000) 35%, transparent));
 }
 .fx-rank-card-emblem svg {
   width: 46px;
@@ -439,7 +455,6 @@
 .fx-rank-card b {
   display: -webkit-box;
   max-width: 100%;
-  min-height: 2.3em;
   overflow: hidden;
   color: #eef4f8;
   font:
@@ -457,7 +472,8 @@
     sans-serif;
 }
 .fx-rank-card strong {
-  margin: 7px 0 5px;
+  margin: auto 0 6px;
+  padding-top: 8px;
   color: var(--m, var(--accent));
   font:
     700 24px/1 "ZoneMono",
@@ -622,7 +638,7 @@ body.fx-rank-lock {
   }
   .fx-rank-tabs {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(86px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 4px;
     overflow: visible;
     padding-bottom: 0;
@@ -633,6 +649,17 @@ body.fx-rank-lock {
     line-height: 1.15;
     text-align: center;
     white-space: normal;
+  }
+  /* окно на телефоне: крестик в углу, а не отдельной строкой под заголовком */
+  .fx-rank-dialog .fx-rank-head {
+    padding-right: 46px;
+  }
+  .fx-rank-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
   }
   .fx-rank-row {
     grid-template-columns: 30px 24px minmax(0, 1fr) auto;
