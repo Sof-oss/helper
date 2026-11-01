@@ -226,53 +226,7 @@
   color: var(--c, #fff);
 }
 
-/* своя строка в таблице */
-.top100-table tr.mp-me td {
-  background: color-mix(in srgb, var(--accent) 20%, rgba(8, 11, 15, 0.6));
-  border-top: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
-}
-.top100-table tr.mp-me td:first-child {
-  box-shadow: inset 3px 0 0 var(--accent);
-}
-.top100-table tr.mp-me .t100-player {
-  font-weight: 700;
-  color: #fff;
-}
-.top100-table tr.mp-me .t100-player::after {
-  content: "вы";
-  display: inline-block;
-  margin-left: 7px;
-  padding: 1px 6px;
-  border-radius: 3px;
-  background: var(--accent);
-  color: var(--accent-ink, #000);
-  font:
-    700 10px/1.4 "ZoneMono",
-    ui-monospace,
-    monospace;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  vertical-align: 1px;
-}
-@keyframes mp-flash {
-  0%,
-  60% {
-    background: color-mix(in srgb, var(--accent) 55%, transparent);
-  }
-}
-.top100-table tr.mp-flash td {
-  animation: mp-flash 1.6s ease-out;
-}
-@media (prefers-reduced-motion: reduce) {
-  .top100-table tr.mp-flash td {
-    animation: none;
-  }
-}
-/* шапка таблицы прилипает под шапкой сайта: строка при прокрутке не прячется под ней */
-.top100-table tr {
-  scroll-margin-top: calc(var(--t100-head, 64px) + 48px);
-}
+/* своя строка в таблице Топ-100 (подсветка и вспышка «К моему месту») - в top100-sort.css */
 
 /* кнопки в карточке игрока */
 .mp-card-acts {

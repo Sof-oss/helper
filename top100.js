@@ -84,13 +84,48 @@ function periodPhrase() {
   return p ? p.label.charAt(0).toLowerCase() + p.label.slice(1) : "с прошлого обновления";
 }
 
-/* медали 1–3 мест: жетон на колодке (assets/medal-N.svg), номер места - текстом поверх */
+/* место: 1–3 - медаль (круг цвета металла), дальше - просто номер */
 function rankCell(rank) {
   if (rank > 3) return '<span class="top100-rank-num">' + rank + "</span>";
   return '<span class="top100-medal top100-medal-' + rank + '" title="' + rank + ' место">' + rank + "</span>";
 }
-const dotMarkup = (f, cls) =>
-  f ? '<i class="' + cls + '" style="--f:' + escAttr(f.color) + '" title="' + escAttr(f.label) + '"></i>' : "";
+
+/* эмблемы группировок: один спрайт <symbol id="t100e-N"> на страницу, в строках - <use>.
+   Каноничные эмблемы - из ui.js (window.__factionEmblem), для остальных - щиток цвета группировки с буквой */
+function emblemSymbol(f) {
+  const e = window.__factionEmblem && window.__factionEmblem(f.label);
+  if (e && e.svg) return e.svg;
+  const c = escAttr(f.color),
+    ch = esc((f.label.replace(/[^\p{L}\p{N}]/gu, "")[0] || "?").toUpperCase());
+  return (
+    '<path d="M7 3h50a3 3 0 0 1 3 3v34c0 14-12 24-28 30C16 64 4 54 4 40V6a3 3 0 0 1 3-3z" fill="#0b0f14" stroke="' +
+    c +
+    '" stroke-width="3.5" stroke-linejoin="round"/><path d="M5.8 4.8h52.4V13H5.8z" fill="' +
+    c +
+    '"/><text x="32" y="50" text-anchor="middle" font-family="Oswald,Arial,sans-serif" font-size="30" font-weight="600" fill="' +
+    c +
+    '">' +
+    ch +
+    "</text>"
+  );
+}
+function renderEmblems() {
+  const box = $("top100Emblems");
+  if (!box || box.innerHTML || !FACTIONS.length) return;
+  box.innerHTML =
+    "<defs>" +
+    FACTIONS.map((f, i) => '<symbol id="t100e-' + i + '" viewBox="0 0 64 72">' + emblemSymbol(f) + "</symbol>").join(
+      ""
+    ) +
+    "</defs>";
+}
+const FACTION_INDEX = new Map(FACTIONS.map((f, i) => [f.key, i]));
+const emblemMarkup = f =>
+  f
+    ? '<svg class="t100-emb" viewBox="0 0 64 72" aria-hidden="true"><use href="#t100e-' +
+      FACTION_INDEX.get(f.key) +
+      '"/></svg>'
+    : '<span class="t100-emb t100-emb-none" aria-hidden="true"></span>';
 
 /* изменение места за выбранный период (TOP100_CHANGES -> rank): данных может не быть */
 function rankMoveMarkup(nick, tabKey) {
@@ -114,20 +149,23 @@ function rankMoveMarkup(nick, tabKey) {
     "</i>"
   );
 }
-/* прирост метрики за выбранный период (TOP100_CHANGES -> delta) */
+/* прирост метрики за выбранный период (TOP100_CHANGES -> delta): плашка в своей колонке, без данных - прочерк */
+const TREND_UP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16l6-6 4 4 6-7"/></svg>';
+const TREND_DOWN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8l6 6 4-4 6 7"/></svg>';
 function metricDeltaMarkup(nick, tabKey) {
   const r = periodChanges().delta,
-    d = r && r[tabKey];
-  if (!d || !(nick in d)) return "";
-  const v = d[nick];
-  if (v === null || v === undefined) return "";
-  if (!v) return '<span class="t100-delta same">без изменений</span>';
+    d = r && r[tabKey],
+    v = d && nick in d ? d[nick] : null;
+  if (v === null || v === undefined)
+    return '<span class="t100-delta none" title="Нет данных (' + escAttr(periodPhrase()) + ')">-</span>';
+  if (!v) return '<span class="t100-delta same" title="Без изменений (' + escAttr(periodPhrase()) + ')">0</span>';
   return (
     '<span class="t100-delta ' +
     (v > 0 ? "up" : "down") +
-    '">' +
-    (v > 0 ? "▲" : "▼") +
-    " " +
+    '" title="Прирост (' +
+    escAttr(periodPhrase()) +
+    ')">' +
+    (v > 0 ? TREND_UP + "+" : TREND_DOWN + "−") +
     fmt(Math.abs(v)) +
     "</span>"
   );
@@ -135,19 +173,24 @@ function metricDeltaMarkup(nick, tabKey) {
 
 /* «давно не заходил»: fetch-players.js ставит отметку, если игрок не заходил дольше OFFLINE_DAYS (5) дней */
 const INACTIVE_TITLE = "не заходил в игру больше 5 дней";
-/* rank - реальное место. plain - без медалей и подсветки (при сортировке по уровню места вразброс) */
-function top100RowMarkup(row, rank, plain, tabKey) {
+/* строка - отдельная стеклянная капсула (display: grid в top100-sort.css), поэтому роли таблицы прописаны явно.
+   rank - реальное место. plain - без медалей и подсветки (при сортировке по уровню или приросту места вразброс) */
+function top100RowMarkup(row, rank, plain, tabKey, hasDelta) {
   const [nick, level, value, inactive] = row;
   const podium = !plain && rank <= 3;
+  const f = factionOf(nick);
   return (
-    '<tr class="' +
-    (podium ? "top100-podium top100-podium-" + rank : "") +
-    (inactive ? ' top100-inactive" title="' + INACTIVE_TITLE : "") +
-    '"><td class="top100-rank"><div class="top100-rank-in">' +
+    '<tr role="row" class="t100-row' +
+    (podium ? " top100-podium top100-podium-" + rank : "") +
+    (inactive ? " top100-inactive" : "") +
+    '"' +
+    (f ? ' style="--c:' + escAttr(f.color) + '"' : "") +
+    (inactive ? ' title="' + INACTIVE_TITLE + '"' : "") +
+    '><td role="cell" class="top100-rank"><div class="top100-rank-in">' +
     (plain ? '<span class="top100-rank-num">' + rank + "</span>" : rankCell(rank)) +
     rankMoveMarkup(nick, tabKey) +
-    '</div></td><td class="top100-nick">' +
-    dotMarkup(factionOf(nick), "t100-dot") +
+    '</div></td><td role="cell" class="top100-nick">' +
+    emblemMarkup(f) +
     '<button type="button" class="t100-player" data-t100-player="' +
     escAttr(nick) +
     '" title="Карточка игрока">' +
@@ -156,12 +199,17 @@ function top100RowMarkup(row, rank, plain, tabKey) {
     (inactive
       ? '<span class="t100-off" aria-hidden="true">💤</span><span class="sr-only">, ' + INACTIVE_TITLE + "</span>"
       : "") +
-    "</td><td>" +
+    '</td><td role="cell" class="t100-fac">' +
+    (f
+      ? esc(f.label)
+      : '<span class="t100-fac-none" aria-hidden="true">-</span><span class="sr-only">без группировки</span>') +
+    '</td><td role="cell" class="t100-lvl"><span title="Уровень">' +
     level +
-    '</td><td class="top100-value">' +
+    '</span></td><td role="cell" class="top100-value">' +
     fmt(value) +
-    metricDeltaMarkup(nick, tabKey) +
-    "</td></tr>"
+    "</td>" +
+    (hasDelta ? '<td role="cell" class="t100-dcell">' + metricDeltaMarkup(nick, tabKey) + "</td>" : "") +
+    "</tr>"
   );
 }
 
@@ -179,6 +227,23 @@ function top100Entries(tab) {
     });
 }
 
+/* заголовок колонки с сортировкой: место (по умолчанию), уровень, прирост */
+function sortTh(kind, label, active, title, cls) {
+  return (
+    '<th role="columnheader" class="top100-sort ' +
+    cls +
+    (active ? " active" : "") +
+    '" data-top100-sort="' +
+    kind +
+    '" aria-sort="' +
+    (active ? "descending" : "none") +
+    '"><button type="button" class="t100-sort-btn" title="' +
+    escAttr(title) +
+    '">' +
+    label +
+    '<i aria-hidden="true">▼</i></button></th>'
+  );
+}
 function top100TableMarkup(tab) {
   const entries = top100Entries(tab);
   const sorted = !!tab.sortLevel && levelSortDesc;
@@ -190,36 +255,31 @@ function top100TableMarkup(tab) {
   if (sorted) entries.sort((a, b) => b.row[1] - a.row[1] || a.rank - b.rank);
   else if (deltaSorted)
     entries.sort((a, b) => (deltaMap[b.row[0]] || 0) - (deltaMap[a.row[0]] || 0) || a.rank - b.rank);
-  const metricTh = hasDelta
-    ? '<th class="top100-sort' +
-      (deltaSorted ? " active" : "") +
-      '" data-top100-sort="delta" aria-sort="' +
-      (deltaSorted ? "descending" : "none") +
-      '"><button type="button" class="t100-sort-btn" title="Сортировать по приросту (' +
-      escAttr(periodPhrase()) +
-      ')">' +
-      tab.metric +
-      '<i aria-hidden="true">▼</i></button></th>'
-    : "<th>" + tab.metric + "</th>";
+  /* у колонки показателя сортировка «по месту» - обычный порядок, по умолчанию включена */
+  const metricTh = sortTh("rank", tab.metric, !(sorted || deltaSorted), "Сортировать по месту", "top100-value");
   const levelTh = tab.sortLevel
-    ? '<th class="top100-sort' +
-      (sorted ? " active" : "") +
-      '" data-top100-sort="level" aria-sort="' +
-      (sorted ? "descending" : "none") +
-      '"><button type="button" class="t100-sort-btn" title="Сортировать по уровню">Ур.<i aria-hidden="true">▼</i></button></th>'
-    : "<th>Ур.</th>";
+    ? sortTh("level", "Ур.", sorted, "Сортировать по уровню", "t100-lvl")
+    : '<th role="columnheader" class="t100-lvl">Ур.</th>';
+  const deltaTh = hasDelta
+    ? sortTh("delta", "Прирост", deltaSorted, "Сортировать по приросту (" + periodPhrase() + ")", "t100-dcell")
+    : "";
   const body = entries.length
-    ? entries.map(e => top100RowMarkup(e.row, e.rank, sorted || deltaSorted, tab.key)).join("")
-    : '<tr class="t100-empty"><td colspan="4">Никого не нашли. Попробуй другой ник или сбрось фильтр</td></tr>';
+    ? entries.map(e => top100RowMarkup(e.row, e.rank, sorted || deltaSorted, tab.key, hasDelta)).join("")
+    : '<tr role="row" class="t100-empty"><td role="cell" colspan="6">Никого не нашли. Попробуй другой ник или сбрось фильтр</td></tr>';
   return (
-    '<div class="data-wrap top100-scroll" style="--accent:' +
+    '<div class="t100-board' +
+    (hasDelta ? "" : " t100-nodelta") +
+    '" style="--accent:' +
     tab.accent +
-    '"><table class="data-table top100-table' +
+    '"><table class="top100-table' +
     (tab.sortLevel ? " top100-sortable" : "") +
-    '"><thead><tr><th>#</th><th>Ник</th>' +
+    '" role="table" aria-label="' +
+    escAttr("Рейтинг: " + tab.label) +
+    '"><thead role="rowgroup"><tr role="row" class="t100-head"><th role="columnheader" class="top100-rank">#</th><th role="columnheader" class="top100-nick">Сталкер</th><th role="columnheader" class="t100-fac">Группировка</th>' +
     levelTh +
     metricTh +
-    "</tr></thead><tbody>" +
+    deltaTh +
+    '</tr></thead><tbody role="rowgroup">' +
     body +
     "</tbody></table></div>"
   );
@@ -277,11 +337,22 @@ function renderFactions() {
   renderFactionSummary();
 }
 
+/* иконки вкладок (ключи как в TOP100_TABS) */
+const TAB_ICONS = {
+  reputation: '<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/>',
+  bosses:
+    '<path d="M12 3c-4.4 0-8 3.2-8 7.3 0 2.4 1.2 4.4 3 5.7V20h3v-2h4v2h3v-4c1.8-1.3 3-3.3 3-5.7C20 6.2 16.4 3 12 3zm-3 9.5a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6zm6 0a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6z"/>',
+  stashes: '<path d="M3 8l9-4 9 4v9l-9 4-9-4zm9 1.8L6.2 7.3 12 5l5.8 2.3z"/>',
+  talents: '<path d="M13 2L4 14h6l-1 8 9-12h-6z"/>',
+  collections: '<path d="M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z"/>',
+  expeditions: '<path d="M9 4l6 2 5-2v16l-5 2-6-2-5 2V6zm0 2.2v11.6l6 2V8.2z"/>',
+  defense: '<path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5z"/>'
+};
 let tabsRendered = false;
 function renderTop100Tabs() {
   $("top100Tabs").innerHTML = TOP100_TABS.map(
     t =>
-      '<button type="button" class="top100-tab' +
+      '<button type="button" class="t100-mtab' +
       (t.key === currentTop100Tab ? " active" : "") +
       '" role="tab" aria-selected="' +
       (t.key === currentTop100Tab) +
@@ -292,6 +363,7 @@ function renderTop100Tabs() {
       '" style="--accent:' +
       t.accent +
       '">' +
+      (TAB_ICONS[t.key] ? '<svg viewBox="0 0 24 24" aria-hidden="true">' + TAB_ICONS[t.key] + "</svg>" : "") +
       t.label +
       "</button>"
   ).join("");
@@ -310,7 +382,7 @@ function updateTabsFade() {
 function centerActiveTab(smooth) {
   const t = $("top100Tabs");
   if (!t || typeof t.scrollWidth !== "number") return;
-  const a = t.querySelector(".top100-tab.active");
+  const a = t.querySelector(".t100-mtab.active");
   if (a && t.scrollWidth > t.clientWidth) {
     const left =
       t.scrollLeft +
@@ -397,9 +469,81 @@ function shortStamp(s) {
   return m ? { day: m[1], time: m[2] } : { day: String(s), time: "" };
 }
 
+/* сводка в шапке: лидер, лучший рост за период, порог входа в сотню и время обновления (МСК) */
+const MONTHS = [
+  "января",
+  "февраля",
+  "марта",
+  "апреля",
+  "мая",
+  "июня",
+  "июля",
+  "августа",
+  "сентября",
+  "октября",
+  "ноября",
+  "декабря"
+];
+function statTile(cls, label, main, sub, title) {
+  return (
+    '<div class="t100-stat ' +
+    cls +
+    '"' +
+    (title ? ' title="' + escAttr(title) + '"' : "") +
+    "><small>" +
+    label +
+    "</small><b>" +
+    main +
+    "</b><span>" +
+    sub +
+    "</span></div>"
+  );
+}
+const statNick = nick =>
+  '<button type="button" class="t100-stat-nick" data-t100-player="' +
+  escAttr(nick) +
+  '" title="Карточка игрока: ' +
+  escAttr(nick) +
+  '">' +
+  esc(nick) +
+  "</button>";
+function renderStats() {
+  const box = $("top100Stats");
+  if (!box) return;
+  const tab = currentTab(),
+    rows = tab.data() || [];
+  if (!rows.length) {
+    box.innerHTML = "";
+    return;
+  }
+  const lead = rows[0],
+    last = rows[rows.length - 1],
+    lastRank = last[4] || rows.length;
+  /* лучший прирост за выбранный период в этом рейтинге */
+  const pd = periodChanges().delta,
+    dm = (pd && pd[tab.key]) || {};
+  let best = null;
+  for (const nick in dm) if (dm[nick] > 0 && (!best || dm[nick] > dm[best])) best = nick;
+  const p = currentPeriod(),
+    growLabel = p ? "Рост " + p.label.charAt(0).toLowerCase() + p.label.slice(1) : "Рост";
+  const upd = String(window.TOP100_UPDATED || ""),
+    m = upd.match(/^(\d\d)\.(\d\d)\.\d{4}\s+(\d\d:\d\d)/);
+  box.innerHTML =
+    statTile("lead", "Лидер", statNick(lead[0]), fmt(lead[2]) + " · " + esc(tab.metric.toLowerCase())) +
+    (best
+      ? statTile("grow", growLabel, "+" + fmt(dm[best]), statNick(best))
+      : statTile("grow", growLabel, "-", "пока без изменений")) +
+    statTile("gate", "Порог входа", fmt(last[2]), lastRank + "-е место") +
+    (m
+      ? statTile("time", "Обновлено", m[3], +m[1] + " " + MONTHS[+m[2] - 1], "Обновлено: " + upd + " (МСК)")
+      : upd
+        ? statTile("time", "Обновлено", esc(upd), "МСК")
+        : "");
+}
+
 const SHELL_HTML =
-  '<div class="t100-tools"><div class="t100-period" id="top100Period" role="group" aria-label="За какой период показывать изменения" hidden><span class="t100-period-title">Изменения</span><div class="t100-period-btns" id="top100PeriodBtns"></div><p class="t100-period-range" id="top100PeriodRange" role="status" aria-live="polite"></p></div>' +
-  '<label class="t100-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="top100Search" type="search" placeholder="Найти ник" autocomplete="off" aria-label="Поиск по нику"></label>' +
+  '<div class="t100-tools"><label class="t100-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="top100Search" type="search" placeholder="Найти ник" autocomplete="off" aria-label="Поиск по нику"></label>' +
+  '<div class="t100-period" id="top100Period" role="group" aria-label="За какой период показывать изменения" hidden><span class="t100-period-title">Изменения</span><p class="t100-period-range" id="top100PeriodRange" role="status" aria-live="polite"></p><div class="t100-period-btns" id="top100PeriodBtns"></div></div>' +
   '<button type="button" class="t100-factions-toggle" id="top100FactionsToggle" aria-expanded="false" aria-controls="top100Factions">Отряды: <b id="top100FactionSummary">Все</b><svg class="t100-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
   '<div class="t100-factions" id="top100Factions"></div></div>';
 let shellReady = false;
@@ -423,14 +567,19 @@ function ensureShell() {
 }
 function renderTop100() {
   ensureShell();
+  renderEmblems();
   renderTop100Tabs();
+  renderStats();
   renderPeriod();
   renderFactions();
   renderTop100Table();
 }
 
 function toggleSort(kind, refocus) {
-  if (kind === "delta") {
+  if (kind === "rank") {
+    levelSortDesc = false;
+    deltaSortDesc = false;
+  } else if (kind === "delta") {
     deltaSortDesc = !deltaSortDesc;
     levelSortDesc = false;
   } else {
@@ -459,6 +608,7 @@ document.addEventListener("click", e => {
       localStorage.setItem(TOP100_PERIOD_KEY, top100Period);
     } catch {}
     renderPeriod();
+    renderStats();
     renderTop100Table();
     const again = document.querySelector('[data-t100-period="' + top100Period + '"]');
     if (again) again.focus();
@@ -501,16 +651,6 @@ document.addEventListener("click", e => {
   };
   window.__vt ? window.__vt(swap) : swap();
 });
-/* дату отдаёт top100-data.js, в разметке только заглушка */
-const updatedEl = $("top100Updated");
-if (updatedEl && window.TOP100_UPDATED) {
-  /* в шапке коротко «05.10 19:29», полная дата - в подсказке */
-  const st = shortStamp(window.TOP100_UPDATED),
-    box = $("top100UpdatedBox");
-  updatedEl.textContent = st.time ? st.day + " " + st.time : window.TOP100_UPDATED;
-  if (box) box.title = "Обновлено: " + window.TOP100_UPDATED + " (МСК)";
-}
-
 renderTop100();
 {
   const t = $("top100Tabs");

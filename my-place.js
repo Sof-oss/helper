@@ -99,7 +99,7 @@
     let picking = false;
 
     const currentTab = () => {
-      const a = document.querySelector("#top100Tabs .top100-tab.active");
+      const a = document.querySelector('#top100Tabs [aria-selected="true"]');
       return (a && a.dataset.top100Tab) || TABS[0].key;
     };
     const tabMeta = k => TABS.find(t => t.key === k) || TABS[0];

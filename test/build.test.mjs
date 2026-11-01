@@ -29,6 +29,18 @@ test("build.js: страницы, CSP, sitemap и статическая обо�
     const top100 = read("top100.html");
     assert.match(top100, /id="top100Results" role="status"/);
     assert.match(top100, /top100-data\.js\?v=/);
+    /* сводка в шапке, строки-капсулы и спрайт эмблем - сразу в HTML; эмблемы из ui.js, а не только щитки с буквой */
+    assert.match(top100, /class="t100-stat lead"/);
+    assert.match(top100, /<tr role="row" class="t100-row/);
+    const sprite = /<svg id="top100Emblems"[^>]*>([\s\S]*?)<\/svg>/.exec(top100);
+    assert.ok(sprite && /<symbol id="t100e-0"/.test(sprite[1]), "спрайт эмблем группировок в HTML");
+    assert.ok(
+      sprite[1]
+        .split("<symbol")
+        .slice(1)
+        .some(x => !x.includes("<text")),
+      "в спрайте есть эмблемы ui.js"
+    );
 
     const sw = read("sw.js");
     const m = /PRECACHE=(\[[^\]]*\])/.exec(sw);

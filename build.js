@@ -333,10 +333,30 @@ function fakeDom() {
   return { els, document };
 }
 
+/* ui.js объявляет window.__factionEmblem (эмблемы группировок) только в настоящем браузере. Для пререндера та же
+   функция собирается из его исходника - эмблемы в готовом HTML совпадают с тем, что нарисовал бы браузер */
+let factionEmblemFn = null;
+function factionEmblem(name) {
+  if (!factionEmblemFn) {
+    const src = fs.readFileSync(path.join(ROOT, "ui.js"), "utf8");
+    const part = (from, to) => src.slice(src.indexOf(from), src.indexOf(to, src.indexOf(from)));
+    const glyphs = Object.fromEntries(
+      [...part("var GLYPHS = {", "function emblem(").matchAll(/^\s*(\w+):\s*'(<.*)',?\s*$/gm)].map(m => [m[1], m[2]])
+    );
+    const keys = Object.fromEntries(
+      [...part("var THEMES = [", "];").matchAll(/\{\s*key:\s*"(\w+)",\s*label:\s*"([^"]+)"/g)].map(m => [m[2], m[1]])
+    );
+    if (Object.keys(glyphs).length < 11 || Object.keys(keys).length < 11)
+      throw new Error("build: не удалось прочитать эмблемы группировок из ui.js");
+    factionEmblemFn = n => (keys[n] && glyphs[keys[n]] ? { key: keys[n], svg: glyphs[keys[n]] } : null);
+  }
+  return factionEmblemFn(name);
+}
+
 /* прогоняет скрипты страницы в том же порядке, что в HTML, возвращает заполненные элементы */
 function runPageScripts(htmlSrc) {
   const { els, document } = fakeDom();
-  const sandbox = { document, console };
+  const sandbox = { document, console, __factionEmblem: factionEmblem };
   sandbox.window = sandbox;
   vm.createContext(sandbox);
   for (const m of htmlSrc.matchAll(/<script src="([^"]+)"(?: defer)?><\/script>/g)) {
@@ -524,7 +544,9 @@ const PRERENDER = {
       html = html.replace(/(id="top100Period"[^>]*?) hidden>/, "$1>");
       if (els.top100PeriodBtns.hidden) html = html.replace('id="top100PeriodBtns"', 'id="top100PeriodBtns" hidden');
     }
-    return fill(html, "top100Updated", els.top100Updated.textContent);
+    /* сводка в шапке и спрайт эмблем для строк - тоже сразу, иначе эмблемы и плитки появляются с задержкой */
+    html = fill(html, "top100Stats", els.top100Stats.innerHTML);
+    return fill(html, "top100Emblems", els.top100Emblems.innerHTML);
   }
 };
 
