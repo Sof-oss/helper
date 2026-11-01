@@ -1,4 +1,4 @@
-/* Информация: прогресс по уровням, ПДА и персонажу. */
+/* Информация: прогресс по уровням, ПДА, персонажу и мастерству в картах «21». */
 const $ = id => document.getElementById(id);
 const fmt = n => Math.round(n).toLocaleString("ru-RU");
 
@@ -129,14 +129,15 @@ const INFO_TAB_KEY = "gameHelperInfoTab";
 const INFO_TABS = [
   { key: "talents", label: "Таланты", accent: "#ffb74d" },
   { key: "pda", label: "ПДА", accent: "#9fdc9f" },
-  { key: "char", label: "Персонаж", accent: "#54bfff" }
+  { key: "char", label: "Персонаж", accent: "#54bfff" },
+  { key: "t21", label: "Карты «21»", accent: "#c792ea" }
 ];
 let currentInfoTab = "talents";
 try {
   const saved = localStorage.getItem(INFO_TAB_KEY);
   if (INFO_TABS.some(t => t.key === saved)) currentInfoTab = saved;
 } catch {}
-/* вкладку можно открыть ссылкой: /info#pda, /info#char, /info#talents - метка важнее запомненной вкладки */
+/* вкладку можно открыть ссылкой: /info#pda, /info#char, /info#talents, /info#t21 - метка важнее запомненной вкладки */
 const INFO_HASH = typeof location !== "undefined" ? location.hash.slice(1) : "";
 if (INFO_TABS.some(t => t.key === INFO_HASH)) currentInfoTab = INFO_HASH;
 
@@ -165,7 +166,7 @@ try {
   if (localStorage.getItem(INFO_VIEW_KEY) === "table") currentInfoView = "table";
 } catch {}
 
-/* описание трёх блоков: данные, подписи и сколько уровней уже получено по калькулятору */
+/* описание блоков: данные, подписи и сколько уровней уже получено по калькулятору */
 function infoGroupsData(p) {
   return [
     {
@@ -184,7 +185,7 @@ function infoGroupsData(p) {
       color: "#9fdc9f",
       rows: PDA_LEVELS,
       /* уровня ПДА нет в калькуляторе - берём тот, что посетитель ввёл в «С уровня» на этой вкладке */
-      reached: readPdaFrom(PDA_LEVELS.length),
+      reached: readPlanFrom("pda", PDA_LEVELS.length),
       step: "Опыт",
       need: "Нужно опыта",
       gen: "опыта",
@@ -199,6 +200,17 @@ function infoGroupsData(p) {
       step: "Опыт",
       need: "Нужно опыта",
       gen: "опыта"
+    },
+    {
+      key: "t21",
+      title: "Мастерство «21»",
+      color: "#c792ea",
+      rows: T21_LEVELS,
+      /* мастерства тоже нет в калькуляторе - как у ПДА, берём «С уровня» с этой вкладки */
+      reached: readPlanFrom("t21", T21_LEVELS.length),
+      step: "Мастерство",
+      need: "Нужно мастерства",
+      gen: "мастерства"
     }
   ];
 }
@@ -367,11 +379,11 @@ function chartCardsMarkup(g) {
 function planSum(g, a, b) {
   return g.rows[b - 1][2] - g.rows[a - 1][2];
 }
-/* уровня ПДА нет в калькуляторе, поэтому «С уровня» на вкладке ПДА запоминается на этом устройстве */
-const PDA_FROM_KEY = "gameHelperInfoPdaFrom";
-function readPdaFrom(n) {
+/* уровней ПДА и мастерства «21» нет в калькуляторе, поэтому «С уровня» на их вкладках запоминается на этом устройстве */
+const PLAN_FROM_KEYS = { pda: "gameHelperInfoPdaFrom", t21: "gameHelperInfoT21From" };
+function readPlanFrom(key, n) {
   try {
-    const v = Math.round(Number(localStorage.getItem(PDA_FROM_KEY)));
+    const v = Math.round(Number(localStorage.getItem(PLAN_FROM_KEYS[key])));
     return v >= 1 && v <= n ? v : 0;
   } catch {
     return 0;
@@ -436,6 +448,13 @@ function renderInfo() {
           infoTableMarkup(CHAR_LEVELS, ["Уровень", "Опыт", "Всего"], p.level),
         null,
         "char"
+      ) +
+      infoGroupMarkup(
+        "Мастерство «21»",
+        "#c792ea",
+        infoTableMarkup(T21_LEVELS, ["Уровень", "Очки", "Всего"]),
+        null,
+        "t21"
       );
   } else {
     $("infoGroups").innerHTML = groups
@@ -541,13 +560,13 @@ document.addEventListener("input", e => {
   const val = s => Math.max(1, Math.min(n, Math.round(Number(plan.querySelector(s).value) || 1)));
   const a = val("[data-plan-from]"),
     b = val("[data-plan-to]");
-  if (g.key === "pda" && e.target.matches("[data-plan-from]") && e.target.value !== "") {
+  if (PLAN_FROM_KEYS[g.key] && e.target.matches("[data-plan-from]") && e.target.value !== "") {
     try {
-      localStorage.setItem(PDA_FROM_KEY, a);
+      localStorage.setItem(PLAN_FROM_KEYS[g.key], a);
     } catch {}
-    /* график и карточки ПДА сразу перерисовываются под введённый уровень; поля ввода не трогаем, чтобы не сбить набор */
+    /* график и карточки сразу перерисовываются под введённый уровень; поля ввода не трогаем, чтобы не сбить набор */
     const box = plan.closest(".info-group"),
-      pg = infoGroupByKey("pda");
+      pg = infoGroupByKey(g.key);
     box.querySelector(".ich").outerHTML = chartMarkup(pg);
     box.querySelector(".ich-cards").outerHTML = chartCardsMarkup(pg);
   }

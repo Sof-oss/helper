@@ -38,7 +38,8 @@ export default [
         CHAR_LEVELS: "readonly",
         TALENT_LEVELS: "readonly",
         PDA_LEVELS: "readonly",
-        PDA_LEVEL_NOTES: "readonly"
+        PDA_LEVEL_NOTES: "readonly",
+        T21_LEVELS: "readonly"
       }
     }
   },
