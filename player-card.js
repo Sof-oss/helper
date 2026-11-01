@@ -4,9 +4,12 @@
   /* пререндер в build.js гоняет скрипты без браузера - там карточкам делать нечего */
   if (typeof window.fetch !== "function" || !document.body) return;
 
-  const URL_DATA =
-    "/top100-players.json" +
-    (window.TOP100_HISTORY && window.TOP100_HISTORY.id ? "?v=" + encodeURIComponent(window.TOP100_HISTORY.id) : "");
+  /* версия выгрузки: на «Топ-100» - из top100-data.js, на «Группировках» - из data-history у #main (как в faction-card.js).
+     Без ?v= браузер мог отдать вчерашний файл из кэша, и карточка игрока расходилась с историей группировки. */
+  const main = document.getElementById("main");
+  const ver =
+    (window.TOP100_HISTORY && window.TOP100_HISTORY.id) || (main && main.dataset && main.dataset.history) || "";
+  const URL_DATA = "/top100-players.json" + (ver ? "?v=" + encodeURIComponent(ver) : "");
   const DAY = 864e5;
   const PERIODS = [
     { key: "last", label: "С прошлого обновления" },
