@@ -151,7 +151,7 @@ function factionsMarkup(ROOT) {
     { key: "stashes", label: "Тайники", color: "#26c6da" },
     { key: "talents", label: "Таланты", color: "#ffb74d" },
     { key: "collections", label: "Коллекции", color: "#c9a6ff" },
-    { key: "expeditions", label: "Экспедиции", color: "#9fdc9f" },
+    { key: "expeditions", label: "Вылазки", color: "#9fdc9f" },
     { key: "defense", label: "Защита лагеря", color: "#54bfff" }
   ];
   const metricIdx = Object.fromEntries(METRICS.map(m => [m.key, data.metrics.indexOf(m.key)]));

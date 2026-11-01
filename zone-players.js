@@ -11,7 +11,7 @@
     { key: "stashes", label: "Тайники", accent: "#26c6da", data: "TOP100_STASHES" },
     { key: "talents", label: "Таланты", accent: "#ffb74d", data: "TOP100_TALENTS" },
     { key: "collections", label: "Коллекции", accent: "#c9a6ff", data: "TOP100_COLLECTIONS" },
-    { key: "expeditions", label: "Экспедиции", accent: "#9fdc9f", data: "TOP100_EXPEDITIONS" },
+    { key: "expeditions", label: "Вылазки", accent: "#9fdc9f", data: "TOP100_EXPEDITIONS" },
     { key: "defense", label: "Защита лагеря", accent: "#54bfff", data: "TOP100_DEFENSE" }
   ];
   const esc = s =>

@@ -184,7 +184,7 @@
       ["Бойцов", f.cap ? f.m + " / " + f.cap : f.m],
       ["Репутация", num(f.t.reputation)],
       ["Боссы", num(f.t.bosses)],
-      ["Экспедиции", num(f.t.expeditions)],
+      ["Вылазки", num(f.t.expeditions)],
       ["Рейтинг активности", "#" + f.rank]
     ];
     const kv = [];

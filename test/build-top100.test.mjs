@@ -20,7 +20,7 @@ const HEAD = [
   "ID",
   "Таланты",
   "Защищено лагерей",
-  "Завершено экспедиций",
+  "Завершено вылазок",
   "Собрано коллекций",
   "Собрано тайников",
   "Репутация",
@@ -146,5 +146,20 @@ test("неполный период: истории меньше недели - 
   assert.equal(window.TOP100_CHANGES.d1.delta.talents["Альфа"], 200);
   /* за неделю и за месяц база та же, что у «за сутки» - кнопки не дублируются */
   assert.ok(!byKey.d7 && !byKey.d30);
+  fs.rmSync(dir, { recursive: true });
+});
+
+test("CSV со старой колонкой «Завершено экспедиций» (до переименования в «Вылазки») читается", () => {
+  const dir = setup([row(1, "Альфа", "1 900", 50), row(2, "Бета", "1 800", 40)], {});
+  const csv = path.join(dir, "heart-of-the-zone-top100-all.csv");
+  fs.writeFileSync(csv, fs.readFileSync(csv, "utf8").replace("Завершено вылазок", "Завершено экспедиций"));
+  const { window } = run(dir);
+  assert.deepEqual(
+    window.TOP100_EXPEDITIONS.map(r => [r[0], r[2]]),
+    [
+      ["Альфа", 50],
+      ["Бета", 40]
+    ]
+  );
   fs.rmSync(dir, { recursive: true });
 });

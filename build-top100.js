@@ -47,11 +47,12 @@ const CSV_FILE = "heart-of-the-zone-top100-all.csv";
 const NO_GROUP = new Set(["", "\u2014", "-", "\u2013"]);
 let BOSS_COLS = []; // виды боссов из CSV, заполняет readPlayers
 
-/* разделы рейтинга: колонка общего CSV -> переменная в top100-data.js */
+/* разделы рейтинга: колонка общего CSV -> переменная в top100-data.js.
+   alt - прежние названия колонки (в игре «Экспедиции» стали «Вылазками»; ключ expeditions в данных прежний) */
 const SOURCES = [
   { column: "Таланты", varName: "TOP100_TALENTS", key: "talents" },
   { column: "Защищено лагерей", varName: "TOP100_DEFENSE", key: "defense" },
-  { column: "Завершено экспедиций", varName: "TOP100_EXPEDITIONS", key: "expeditions" },
+  { column: "Завершено вылазок", alt: ["Завершено экспедиций"], varName: "TOP100_EXPEDITIONS", key: "expeditions" },
   { column: "Собрано коллекций", varName: "TOP100_COLLECTIONS", key: "collections" },
   { column: "Собрано тайников", varName: "TOP100_STASHES", key: "stashes" },
   { column: "Репутация", varName: "TOP100_REPUTATION", key: "reputation" },
@@ -65,8 +66,9 @@ function readPlayers(filePath) {
   const sep = (firstLine.match(/;/g) || []).length >= (firstLine.match(/,/g) || []).length ? ";" : ",";
   const table = parseCsv(text, sep);
   const head = (table[0] || []).map(h => h.trim());
-  const col = name => {
-    const i = head.findIndex(h => h.toLowerCase() === name.toLowerCase());
+  const col = (name, alt = []) => {
+    const names = [name, ...alt].map(n => n.toLowerCase());
+    const i = head.findIndex(h => names.includes(h.toLowerCase()));
     if (i < 0) throw new Error(`В ${path.basename(filePath)} нет колонки «${name}». Колонки: ${head.join(", ")}`);
     return i;
   };
@@ -84,7 +86,7 @@ function readPlayers(filePath) {
     .filter(([h]) => /^Боссы:\s*/i.test(h))
     .map(([h, i]) => [h.replace(/^Боссы:\s*/i, ""), i]);
   BOSS_COLS = bossIdx.map(b => b[0]);
-  const metricIdx = Object.fromEntries(SOURCES.map(s => [s.column, col(s.column)]));
+  const metricIdx = Object.fromEntries(SOURCES.map(s => [s.column, col(s.column, s.alt)]));
   return table
     .slice(1)
     .filter(r => r.length > 1 && String(r[iNick] || "").trim())

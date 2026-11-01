@@ -27,8 +27,8 @@ const TOP100_TABS = [
   },
   {
     key: "expeditions",
-    label: "Экспедиции",
-    metric: "Экспедиции",
+    label: "Вылазки",
+    metric: "Вылазки",
     data: () => window.TOP100_EXPEDITIONS,
     accent: "#9fdc9f"
   },
