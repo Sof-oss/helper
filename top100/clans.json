@@ -1,11 +1,11 @@
 {
-  "updated": "2026-10-31T12:02:46+03:00",
+  "updated": "2026-11-01T12:01:49+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
       "name": "Last Way",
       "level": 1,
-      "members": 15,
+      "members": 14,
       "leader": {
         "id": 3954,
         "name": "|LW| РуSSкая"
@@ -131,7 +131,7 @@
     {
       "name": "Рассвет",
       "level": 1,
-      "members": 16,
+      "members": 17,
       "leader": {
         "id": 62,
         "name": "Меченый"
