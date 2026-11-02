@@ -718,6 +718,18 @@ function version(url, from) {
   return url + "?v=" + fileHash(rel);
 }
 
+/* манифест: иконкам тоже ?v=<хэш>. Установленное приложение (Android) раз в день сверяет манифест: новый адрес
+   иконки - сигнал обновить значок и заставку при запуске, а service worker не отдаст старую картинку из кэша.
+   Манифест - раньше страниц: в них ссылка на него с ?v=<хэш>, и хэш должен быть уже от нового содержимого */
+{
+  const file = path.join(OUT, "manifest.webmanifest");
+  const m = JSON.parse(fs.readFileSync(file, "utf8"));
+  const ver = icons => (icons || []).forEach(i => (i.src = version(i.src, "manifest.webmanifest")));
+  ver(m.icons);
+  (m.shortcuts || []).forEach(x => ver(x.icons));
+  fs.writeFileSync(file, JSON.stringify(m, null, 2) + "\n");
+}
+
 /* сначала css: версии картинок и шрифтов внутри, потом хэш самих css попадёт в HTML уже с ними */
 for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".css"))) {
   const file = path.join(OUT, name);

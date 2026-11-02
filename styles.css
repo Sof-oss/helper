@@ -5231,11 +5231,12 @@ body::after {
   height: 100%;
   display: block;
 }
-/* Удар сердца. Всё на одном такте --beat: по кардиограмме под надписью бежит импульс, на пике QRS сердце делает
-   двойной удар «тук-тук» (сжатие, вспышка плазмы, второй удар слабее), от него к кольцу идёт волна, по очереди
-   вспыхивают гравировка, кромка лопастей и кольцо. Ключевые точки: 16.6% - импульс на пике и первый удар, 25% - второй */
+/* Удар сердца. Всё на одном такте --beat: по кардиограмме под надписью идёт развёртка, и когда точка проходит
+   пик R, сердце делает двойной удар «тук-тук» (сжатие, вспышка плазмы, второй удар слабее), от него к кольцу идёт
+   волна, по очереди вспыхивают гравировка, кромка лопастей и кольцо. Проценты - из миллисекунд при такте 4.5 с
+   (пик первого удара - 626 мс); поменяли такт - пересчитайте их (сейчас: мс / 4500 × 100) */
 :root {
-  --beat: 3.6s;
+  --beat: 4.5s;
   --beat-delay: 1.2s;
 }
 .rad-logo img {
@@ -5244,32 +5245,32 @@ body::after {
 }
 @keyframes heart-beat {
   0%,
-  13% {
+  10.4% {
     transform: none;
     filter: none;
     animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
   }
-  14.6% {
+  11.69% {
     transform: scale(0.95);
     filter: brightness(0.92);
     animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
   }
-  17.4% {
+  13.91% {
     transform: scale(1.14);
     filter: brightness(1.55) saturate(1.15);
     animation-timing-function: ease-in-out;
   }
-  21.5% {
+  17.2% {
     transform: scale(0.99);
     filter: brightness(1.08);
     animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
   }
-  25% {
+  20% {
     transform: scale(1.07);
     filter: brightness(1.3) saturate(1.1);
     animation-timing-function: ease-out;
   }
-  36%,
+  28.8%,
   100% {
     transform: none;
     filter: none;
@@ -5286,14 +5287,14 @@ body::after {
 }
 @keyframes rs-pulse {
   0%,
-  16.6% {
+  13.29% {
     opacity: 0;
     transform: scale(0.32);
   }
-  18.5% {
+  14.8% {
     opacity: 0.85;
   }
-  31%,
+  24.8%,
   100% {
     opacity: 0;
     transform: scale(1);
@@ -5301,14 +5302,14 @@ body::after {
 }
 @keyframes rs-pulse2 {
   0%,
-  24.5% {
+  19.6% {
     opacity: 0;
     transform: scale(0.32);
   }
-  26.5% {
+  21.2% {
     opacity: 0.6;
   }
-  39%,
+  31.2%,
   100% {
     opacity: 0;
     transform: scale(1);
@@ -5319,19 +5320,19 @@ body::after {
 }
 @keyframes rs-heat {
   0%,
-  16.6% {
+  13.29% {
     opacity: 0;
   }
-  19% {
+  15.2% {
     opacity: 0.9;
   }
-  23% {
+  18.4% {
     opacity: 0.45;
   }
-  26.5% {
+  21.2% {
     opacity: 0.7;
   }
-  42%,
+  33.6%,
   100% {
     opacity: 0;
   }
@@ -5351,57 +5352,57 @@ body::after {
 }
 @keyframes rs-flare {
   0%,
-  17.5% {
+  14% {
     opacity: 0;
   }
-  19.5% {
+  15.6% {
     opacity: 1;
   }
-  23% {
+  18.4% {
     opacity: 0.25;
   }
-  27% {
+  21.6% {
     opacity: 0.8;
   }
-  33%,
+  26.4%,
   100% {
     opacity: 0;
   }
 }
 @keyframes rs-flare2 {
   0%,
-  19.5% {
+  15.6% {
     opacity: 0;
   }
-  21.5% {
+  17.2% {
     opacity: 1;
   }
-  25% {
+  20% {
     opacity: 0.25;
   }
-  29% {
+  23.2% {
     opacity: 0.8;
   }
-  35%,
+  28%,
   100% {
     opacity: 0;
   }
 }
 @keyframes rs-flare3 {
   0%,
-  21.5% {
+  17.2% {
     opacity: 0;
   }
-  23.5% {
-    opacity: 0.95;
+  18.8% {
+    opacity: 1;
   }
-  27% {
-    opacity: 0.3;
+  21.6% {
+    opacity: 0.25;
   }
-  31% {
-    opacity: 0.75;
+  24.8% {
+    opacity: 0.8;
   }
-  38%,
+  29.6%,
   100% {
     opacity: 0;
   }
@@ -5409,19 +5410,19 @@ body::after {
 /* волна доходит до кольца - оно вспыхивает (второй раз - от второго удара) */
 @keyframes rs-ring {
   0%,
-  28% {
+  22.4% {
     opacity: 0;
   }
-  30.5% {
-    opacity: 1;
+  24.4% {
+    opacity: 0.75;
   }
-  34% {
-    opacity: 0.3;
+  27.2% {
+    opacity: 0.2;
   }
-  37.5% {
-    opacity: 0.7;
+  30% {
+    opacity: 0.5;
   }
-  46%,
+  36.8%,
   100% {
     opacity: 0;
   }
@@ -5444,22 +5445,26 @@ body::after {
 }
 @keyframes lt-z {
   0%,
-  16%,
-  40%,
+  12.8%,
+  32%,
   100% {
     color: #ff4a3a;
   }
-  18.5% {
+  14.8% {
     color: #ff7a5c;
   }
-  23% {
+  18.4% {
     color: #ff5240;
   }
-  26% {
+  20.8% {
     color: #ff6a50;
   }
 }
-/* кардиограмма: ширина - по надписи, высота - от размера шрифта, поэтому она сама подстраивается под телефон */
+
+/* Кардиограмма - как на мониторе: светящаяся точка с постоянной скоростью рисует линию слева направо, перед ней
+   небольшой просвет стирает прошлый проход, после края точка возвращается в начало. Пик R точка проходит ровно
+   в момент удара сердца. Слои одной длины пути (pathLength=100, период штриха 100): линия с просветом, след, ореол
+   и точка; у всех stroke-dashoffset = --c - H, где H - пройденная доля пути (ключевые кадры ecg-sweep) */
 .logo-ecg {
   display: block;
   width: 100%;
@@ -5467,62 +5472,90 @@ body::after {
   margin-top: 0.12em;
   overflow: visible;
 }
-.logo-ecg .ecg-line {
+.logo-ecg path {
+  animation: ecg-sweep var(--beat) linear var(--beat-delay) infinite both;
+}
+.logo-ecg .ecg-trace {
+  --c: 95;
   stroke: #ff4a3a;
   stroke-width: 1.4;
-  opacity: 0.55;
+  stroke-dasharray: 95 5;
+  opacity: 0.8;
 }
-.logo-ecg .ecg-run {
-  stroke-dasharray: var(--len) 300;
-  stroke-dashoffset: calc(var(--len) + 6);
-  animation: ecg-run var(--beat) linear var(--beat-delay) infinite both;
-}
-/* три слоя «кометы» одной длины пути (pathLength=100), голова у всех в одной точке: ореол, след и яркая голова */
-.logo-ecg .ecg-r1 {
-  --len: 26;
+.logo-ecg .ecg-glow {
+  --c: 12;
   stroke: #ff3a24;
-  stroke-width: 4.2;
+  stroke-width: 4.4;
+  stroke-dasharray: 12 88;
   opacity: 0.22;
 }
-.logo-ecg .ecg-r2 {
-  --len: 14;
-  stroke: #ff6a3c;
-  stroke-width: 2;
-  opacity: 0.75;
+.logo-ecg .ecg-tail {
+  --c: 20;
+  stroke: #ff7a4c;
+  stroke-width: 1.9;
+  stroke-dasharray: 20 80;
+  opacity: 0.7;
 }
-.logo-ecg .ecg-r3 {
-  --len: 4;
-  stroke: #ffe2c4;
-  stroke-width: 1.5;
+.logo-ecg .ecg-head {
+  --c: 0.01;
+  stroke: #fff0dc;
+  stroke-width: 2.6;
+  stroke-dasharray: 0.01 99.99;
 }
-/* голова идёт от -6 до 132 (за конец пути, чтобы ушёл и самый длинный след) за 37% такта
-   и на 16.6% стоит на пике QRS (55.7% пути) - в этот момент бьётся сердце */
-@keyframes ecg-run {
+@keyframes ecg-sweep {
   0% {
-    stroke-dashoffset: calc(var(--len) + 6);
+    stroke-dashoffset: calc(var(--c) - 32.909);
   }
-  37.1%,
+  2.411% {
+    stroke-dashoffset: calc(var(--c) - 35.077);
+  }
+  3.911% {
+    stroke-dashoffset: calc(var(--c) - 36.622);
+  }
+  5.411% {
+    stroke-dashoffset: calc(var(--c) - 38.001);
+  }
+  6.911% {
+    stroke-dashoffset: calc(var(--c) - 39.379);
+  }
+  8.411% {
+    stroke-dashoffset: calc(var(--c) - 40.924);
+  }
+  11.411% {
+    stroke-dashoffset: calc(var(--c) - 43.622);
+  }
+  12.411% {
+    stroke-dashoffset: calc(var(--c) - 44.746);
+  }
+  13.911% {
+    stroke-dashoffset: calc(var(--c) - 49.442);
+  }
+  15.411% {
+    stroke-dashoffset: calc(var(--c) - 55.222);
+  }
+  16.911% {
+    stroke-dashoffset: calc(var(--c) - 57.471);
+  }
+  20.411% {
+    stroke-dashoffset: calc(var(--c) - 60.619);
+  }
+  22.411% {
+    stroke-dashoffset: calc(var(--c) - 62.724);
+  }
+  24.411% {
+    stroke-dashoffset: calc(var(--c) - 64.57);
+  }
+  26.411% {
+    stroke-dashoffset: calc(var(--c) - 66.415);
+  }
+  28.411% {
+    stroke-dashoffset: calc(var(--c) - 68.52);
+  }
+  63.411% {
+    stroke-dashoffset: calc(var(--c) - 100);
+  }
   100% {
-    stroke-dashoffset: calc(var(--len) - 132);
-  }
-}
-.logo-ecg .ecg-qrs {
-  stroke: #ffb48a;
-  stroke-width: 2.2;
-  opacity: 0;
-  animation: ecg-qrs var(--beat) ease-out var(--beat-delay) infinite both;
-}
-@keyframes ecg-qrs {
-  0%,
-  15% {
-    opacity: 0;
-  }
-  17.5% {
-    opacity: 1;
-  }
-  33%,
-  100% {
-    opacity: 0;
+    stroke-dashoffset: calc(var(--c) - 132.909);
   }
 }
 .main-nav {
@@ -6105,12 +6138,17 @@ input[type="checkbox"] {
   .rad-sign .rs-ring,
   .rad-sign .rs-heat,
   .logo-title .lt-z,
-  .logo-ecg .ecg-run,
-  .logo-ecg .ecg-qrs {
+  .logo-ecg path {
     animation: none;
   }
-  .logo-ecg .ecg-run {
-    opacity: 0;
+  /* без движения - просто линия кардиограммы, без точки и просвета */
+  .logo-ecg .ecg-trace {
+    stroke-dasharray: none;
+  }
+  .logo-ecg .ecg-glow,
+  .logo-ecg .ecg-tail,
+  .logo-ecg .ecg-head {
+    display: none;
   }
 }
 @media (max-width: 760px) {

@@ -1,7 +1,8 @@
 /* Знак радиации логотипа: цельные лопасти с неоновой кромкой и гравировкой, вокруг - кольцо со шкалой, как у дозиметра.
-   r0/r1 - внутренний и внешний радиус лопастей, edge - толщина кромки, engrave - радиусы гравировки, ring - кольцо */
+   r0/r1 - внутренний и внешний радиус лопастей, edge - толщина кромки, engrave - радиусы гравировки,
+   ring - кольцо (r - радиус, w - толщина, scale - радиус шкалы, opacity - насколько оно заметно) */
 export const SIGN = {
-  logo: { r0: 24, r1: 45.5, edge: 1.6, engrave: [31, 38.5], ring: { r: 49.2, w: 1.4, scale: 47.3 } },
+  logo: { r0: 24, r1: 45.5, edge: 1.6, engrave: [31, 38.5], ring: { r: 49.2, w: 1, scale: 47.3, opacity: 0.7 } },
   /* favicon и мелкие иконки: без кольца и гравировки, кромка толще - читается и в 16 px */
   small: { r0: 22, r1: 47, edge: 2.6, engrave: [], ring: null }
 };
@@ -61,8 +62,8 @@ export function signSVG(o = SIGN.logo, id = "rs") {
   s += neon(blades, edge);
   if (rg)
     s +=
-      neon(ring(rg.r), rg.w) +
-      `<path d="${ring(rg.scale)}" stroke="#ffb060" stroke-width="1.1" stroke-dasharray=".9 1.6" opacity=".8"/>`;
+      `<g opacity="${rg.opacity}">${neon(ring(rg.r), rg.w)}</g>` +
+      `<path d="${ring(rg.scale)}" stroke="#ffb060" stroke-width="1" stroke-dasharray=".9 1.6" opacity=".5"/>`;
   /* вспышки: гравировка (по очереди), потом кромка лопастей, потом кольцо */
   eng.forEach(
     (d, i) =>
@@ -77,16 +78,15 @@ export function signSVG(o = SIGN.logo, id = "rs") {
   return s + `</g></svg>`;
 }
 
-/* кардиограмма под надписью логотипа: тусклая линия, по ней бежит яркая «комета» (три слоя - ореол, след и голова),
-   а пик QRS вспыхивает в момент удара сердца (styles.css). Ширина - по надписи, поэтому preserveAspectRatio="none" */
-const ECG = "M0 8H92l3-3 3 3h5l3 6 4-14 4 12 3-4H200";
-const QRS = "M103 8l3 6 4-14 4 12 3-4";
+/* кардиограмма под надписью логотипа (зубцы P, QRS и T): её «рисует» светящаяся точка, как развёртка на мониторе,
+   - слои линии с просветом, ореола, следа и точки оживляет CSS (styles.css, ecg-sweep). Ширина - по надписи,
+   поэтому preserveAspectRatio="none" */
+const ECG = "M0 9H78Q84 4.6 90 9H96L98 10.5L101 0.5L104 13L107 9H114Q122 2.6 130 9H200";
 export function ecgSVG() {
   return (
     `<svg class="logo-ecg" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true">` +
     `<g fill="none" stroke-linejoin="round" stroke-linecap="round">` +
-    `<path class="ecg-line" d="${ECG}"/>` +
-    [1, 2, 3].map(i => `<path class="ecg-run ecg-r${i}" pathLength="100" d="${ECG}"/>`).join("") +
-    `<path class="ecg-qrs" d="${QRS}"/></g></svg>`
+    ["trace", "glow", "tail", "head"].map(k => `<path class="ecg-${k}" pathLength="100" d="${ECG}"/>`).join("") +
+    `</g></svg>`
   );
 }
