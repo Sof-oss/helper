@@ -1,48 +1,16 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8">
-<!-- Логотип «Сердце Зоны»: знак радиации из волн-дуг (SVG из src/zone-sign.js) и 3D-сердце в центре (src/zone-heart.js) -
-     та же модель, свет и знак, что в заставке. Рисует build-logo.js: открывает страницу через локальный сервер
-     и вызывает window.renderLogo(...) -->
+<!-- Логотип «Сердце Зоны»: неоновый знак радиации (SVG из src/zone-sign.js) и сердце-артефакт «Огненный шар» в центре
+     (src/zone-artifact.js). Рисует build-logo.js: открывает страницу через локальный сервер и вызывает window.renderLogo(...) -->
 <script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
 <style>html,body{margin:0;background:#11161c}</style>
 </head><body>
 <script type="module">
-import { WebGLRenderer, Scene, PerspectiveCamera, PMREMGenerator, Euler, Vector3, SRGBColorSpace, ACESFilmicToneMapping } from "three";
-import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { createHeart, createHeartLights, LOGO_HEART, LOGO_BEAT } from "/src/zone-heart.js";
+import { renderArtifact } from "/src/zone-artifact.js";
 import { SIGN, signSVG } from "/src/zone-sign.js";
 
 const BIG = 1536; // рабочий размер, итог - уменьшением (сглаживание без зубцов)
-
-/* 3D-сердце на прозрачном фоне: кадр = сторона знака, центр тела - в центре кадра */
-function renderHeart(px) {
-  const canvas = document.createElement("canvas");
-  const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
-  renderer.setPixelRatio(1);
-  renderer.setSize(px, px, false);
-  renderer.setClearColor(0x000000, 0);
-  renderer.toneMapping = ACESFilmicToneMapping;
-  renderer.outputColorSpace = SRGBColorSpace;
-  const scene = new Scene();
-  const camera = new PerspectiveCamera(35, 1, 0.1, 50);
-  camera.position.set(0, 0, 8.6);
-  const pm = new PMREMGenerator(renderer);
-  scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture;
-  scene.environmentIntensity = 0.6;
-  const heart = createHeart();
-  heart.beat(LOGO_BEAT);
-  scene.add(heart.group);
-  const vh = 2 * camera.position.z * Math.tan((camera.fov * Math.PI) / 360);
-  const s = (LOGO_HEART.h * vh) / heart.height;
-  heart.group.scale.setScalar(s);
-  heart.group.position.copy(heart.anchor).multiplyScalar(-s);
-  createHeartLights(scene).place(new Vector3(), new Euler(), s);
-  renderer.render(scene, camera);
-  const out = document.createElement("canvas");
-  out.width = out.height = px;
-  out.getContext("2d").drawImage(canvas, 0, 0);
-  heart.dispose(); pm.dispose(); renderer.dispose();
-  return out;
-}
+/* сердце чуть больше внутреннего круга знака и заходит на лопасти; в мелких иконках - ещё крупнее */
+const HEART_K = { logo: 1.1, small: 1.2 };
 
 function downscale(src, size) {
   let c = src;
@@ -71,11 +39,12 @@ const svgImage = svg =>
   });
 
 let heartCache = null;
-/* o: size - итоговый размер, bands - 3 (логотип) или 2 (favicon), heartOnly - только сердце (для шапки, знак там - живой SVG),
+/* o: size - итоговый размер, small - мелкая иконка (favicon: знак без кольца, сердце крупнее),
+   heartOnly - только сердце (для шапки, знак там - живой SVG),
    bg - фон (apple-touch-icon), pad - поле, type */
 window.renderLogo = async o => {
   const S = BIG;
-  const preset = o.bands === 2 ? SIGN.small : SIGN.logo;
+  const preset = o.small ? SIGN.small : SIGN.logo;
   const c = document.createElement("canvas");
   c.width = c.height = S;
   const g = c.getContext("2d");
@@ -92,8 +61,8 @@ window.renderLogo = async o => {
   g.translate(S * pad, S * pad);
   g.scale(1 - 2 * pad, 1 - 2 * pad);
   if (!o.heartOnly) g.drawImage(await svgImage(signSVG(preset).replace("<svg", `<svg width="${S}" height="${S}"`)), 0, 0, S, S);
-  heartCache = heartCache || renderHeart(S);
-  const k = o.bands === 2 ? 1.12 : 1; // в favicon сердце крупнее
+  heartCache = heartCache || renderArtifact(S);
+  const k = o.small ? HEART_K.small : HEART_K.logo;
   g.drawImage(heartCache, (S - S * k) / 2, (S - S * k) / 2, S * k, S * k);
   g.restore();
   return downscale(c, o.size).toDataURL(o.type || "image/png", o.quality || 0.95);

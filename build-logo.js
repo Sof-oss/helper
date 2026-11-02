@@ -96,30 +96,35 @@ const out = (name, data) => fs.writeFileSync(path.join(ROOT, name), data);
   const render = o => page.evaluate(o => window.renderLogo(o), o);
 
   out("assets/heart-logo.webp", buf(await render({ size: 192, type: "image/webp", quality: 0.92 })));
-  /* шапка: живой SVG-знак (бьётся вместе с сердцем, styles.css) и поверх - картинка одного сердца */
+  /* шапка: живой SVG-знак (бьётся вместе с сердцем, styles.css) и поверх - картинка одного сердца;
+     рядом надпись с кардиограммой - по ней пробегает импульс, и сердце бьётся, когда он проходит пик */
   out("assets/heart-core.webp", buf(await render({ size: 208, heartOnly: true, type: "image/webp", quality: 0.92 })));
-  const { signSVG } = await import("./src/zone-sign.js");
+  const { signSVG, ecgSVG } = await import("./src/zone-sign.js");
   const hp = path.join(ROOT, "partials/header.html");
   const header = fs.readFileSync(hp, "utf8");
   const logo =
     '<span class="rad-logo" aria-hidden="true">' +
     signSVG() +
-    '<img src="/assets/heart-core.webp" width="52" height="52" alt="" decoding="async"></span>';
-  const re = /<span class="rad-logo" aria-hidden="true">[\s\S]*?<\/span>/;
+    '<img src="/assets/heart-core.webp" width="52" height="52" alt="" decoding="async"></span>' +
+    '<div class="logo-copy"><div class="logo-title">Сердце <span class="lt-z">Зоны</span>' +
+    ecgSVG() +
+    "</div></div>";
+  const re =
+    /<span class="rad-logo" aria-hidden="true">[\s\S]*?<\/svg><img [^>]*><\/span><div class="logo-copy">[\s\S]*?<\/div><\/div>/;
   if (!re.test(header)) throw new Error("build-logo: не найден логотип в partials/header.html");
   fs.writeFileSync(
     hp,
     header.replace(re, () => logo)
   );
 
-  out("favicon-32.png", buf(await render({ size: 32, bands: 2 })));
+  out("favicon-32.png", buf(await render({ size: 32, small: true })));
   out("apple-touch-icon.png", buf(await render({ size: 180, bg: true, pad: 0.08 })));
   /* иконки приложения (manifest.webmanifest); у maskable поле шире - Android обрезает её кругом или скруглённым квадратом */
   out("icon-192.png", buf(await render({ size: 192, bg: true, pad: 0.08 })));
   out("icon-512.png", buf(await render({ size: 512, bg: true, pad: 0.08 })));
   out("icon-maskable-512.png", buf(await render({ size: 512, bg: true, pad: 0.2 })));
   /* favicon.svg - картинка 64 px в WebP внутри SVG (~4 КБ вместо 22 КБ с PNG 96 px) */
-  const fav = (await render({ size: 64, bands: 2, type: "image/webp", quality: 0.8 })).split(",")[1];
+  const fav = (await render({ size: 64, small: true, type: "image/webp", quality: 0.8 })).split(",")[1];
   out(
     "favicon.svg",
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><image width="64" height="64" href="data:image/webp;base64,' +
@@ -128,7 +133,7 @@ const out = (name, data) => fs.writeFileSync(path.join(ROOT, name), data);
   );
   /* favicon.ico для ботов, RSS-читалок и старых браузеров: 16, 32 и 48 px, внутри - PNG */
   const icons = [];
-  for (const size of [16, 32, 48]) icons.push({ size, png: buf(await render({ size, bands: 2 })) });
+  for (const size of [16, 32, 48]) icons.push({ size, png: buf(await render({ size, small: true })) });
   out("favicon.ico", icoFile(icons));
 
   /* общее превью сайта 1200×628 */

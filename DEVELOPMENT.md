@@ -52,8 +52,12 @@ npx serve dist       # сайт откроется на http://localhost:3000
   (`<meta http-equiv>`) с хэшами встроенных скриптов. Новый встроенный `<script>` разрешится сам при сборке;
   внешний скрипт или новый адрес для `fetch` нужно добавить в `cspFor()` в `build.js`.
 - Шрифты лежат в `assets/fonts/`, лицензия OFL - `assets/fonts/OFL.txt`. Моноширинный - ZoneMono (JetBrains Mono)
-  в `mono-*.woff2`. Логотип - `graffiti-logo.woff2`, в нём только буквы «Сердце Зоны»; полный шрифт для превью -
+  в `mono-*.woff2`. Заголовок главной - `graffiti-logo.woff2`, в нём только буквы «Сердце Зоны»; полный шрифт для превью -
   `previews/fonts/graffiti-stalker.ttf`.
+- Логотип: знак радиации - живой SVG из `src/zone-sign.js` (там же кардиограмма под надписью), сердце-артефакт
+  «Огненный шар» - картинка `assets/heart-core.webp`, её рисует `src/zone-artifact.js` (three.js) при `build-logo.js`.
+  Скрипт же вписывает знак и надпись в `partials/header.html` и рисует иконки и превью. Удар сердца, импульс по
+  кардиограмме и вспышки знака - CSS в `styles.css` на одном такте `--beat`.
 - Общие куски страниц - `partials/header.html` (меню) и `partials/footer.html` (подвал со строкой «Неофициальный
   фан-сайт»); стили калькулятора - `calculator.css`. Кнопки шапки (тыква, тема, «?» тура) тоже в `partials/header.html`:
   они в разметке с первого кадра, а какие видны, решает встроенный скрипт шапки до отрисовки (классы `hw-season`,
