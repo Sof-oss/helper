@@ -99,7 +99,7 @@ const out = (name, data) => fs.writeFileSync(path.join(ROOT, name), data);
   /* шапка: живой SVG-знак (бьётся вместе с сердцем, styles.css) и поверх - картинка одного сердца;
      рядом надпись с кардиограммой - по ней пробегает импульс, и сердце бьётся, когда он проходит пик */
   out("assets/heart-core.webp", buf(await render({ size: 208, heartOnly: true, type: "image/webp", quality: 0.92 })));
-  const { signSVG, ecgSVG } = await import("./src/zone-sign.js");
+  const { signSVG, ecgHTML } = await import("./src/zone-sign.js");
   const hp = path.join(ROOT, "partials/header.html");
   const header = fs.readFileSync(hp, "utf8");
   const logo =
@@ -107,7 +107,7 @@ const out = (name, data) => fs.writeFileSync(path.join(ROOT, name), data);
     signSVG() +
     '<img src="/assets/heart-core.webp" width="52" height="52" alt="" decoding="async"></span>' +
     '<div class="logo-copy"><div class="logo-title">Сердце <span class="lt-z">Зоны</span>' +
-    ecgSVG() +
+    ecgHTML() +
     "</div></div>";
   const re =
     /<span class="rad-logo" aria-hidden="true">[\s\S]*?<\/svg><img [^>]*><\/span><div class="logo-copy">[\s\S]*?<\/div><\/div>/;

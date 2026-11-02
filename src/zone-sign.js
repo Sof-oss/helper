@@ -78,15 +78,24 @@ export function signSVG(o = SIGN.logo, id = "rs") {
   return s + `</g></svg>`;
 }
 
-/* кардиограмма под надписью логотипа (зубцы P, QRS и T): её «рисует» светящаяся точка, как развёртка на мониторе,
-   - слои линии с просветом, ореола, следа и точки оживляет CSS (styles.css, ecg-sweep). Ширина - по надписи,
-   поэтому preserveAspectRatio="none" */
-const ECG = "M0 9H78Q84 4.6 90 9H96L98 10.5L101 0.5L104 13L107 9H114Q122 2.6 130 9H200";
-export function ecgSVG() {
+/* кардиограмма под надписью логотипа: её пишет светящаяся точка, как развёртка на кардиомониторе. Двигает всё CSS
+   (styles.css, .logo-ecg) - только transform и opacity, без перерисовки страницы. Путь удара (зубцы P, QRS и T)
+   в рамке 200×14, пик R - на x 83.5: проход занимает треть такта (--beat / 3), и точка бывает там через 626 мс,
+   в момент удара сердца; по этому пути построена траектория точки (ecg-y). Ширина - по надписи, поэтому
+   preserveAspectRatio="none" */
+const ECG_BEAT = "M0 9H60.5Q66.5 4.6 72.5 9H78.5L80.5 10.5L83.5 0.5L86.5 13L89.5 9H96.5Q104.5 2.6 112.5 9H200";
+const ECG_FLAT = "M0 9H200";
+export function ecgHTML() {
+  const svg = (cls, d, glow) =>
+    `<svg class="${cls}" viewBox="0 0 200 14" preserveAspectRatio="none">` +
+    (glow ? `<path class="ecg-g" d="${d}"/>` : "") +
+    `<path d="${d}"/></svg>`;
+  /* линия в окне: вариант с ударом и ровный; glow - для яркого следа за точкой */
+  const line = glow => `<span class="ecg-t">${svg("ecg-b", ECG_BEAT, glow)}${svg("ecg-f", ECG_FLAT, glow)}</span>`;
   return (
-    `<svg class="logo-ecg" viewBox="0 0 200 14" preserveAspectRatio="none" aria-hidden="true">` +
-    `<g fill="none" stroke-linejoin="round" stroke-linecap="round">` +
-    ["trace", "glow", "tail", "head"].map(k => `<path class="ecg-${k}" pathLength="100" d="${ECG}"/>`).join("") +
-    `</g></svg>`
+    `<span class="logo-ecg" aria-hidden="true"><span class="ecg-clip"><span class="ecg-m">` +
+    `<span class="ecg-w ecg-new">${line()}</span><span class="ecg-w ecg-old">${line()}</span>` +
+    `<span class="ecg-w ecg-tail">${line(true)}</span><span class="ecg-head"></span>` +
+    `</span></span></span>`
   );
 }

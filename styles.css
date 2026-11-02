@@ -5461,101 +5461,276 @@ body::after {
   }
 }
 
-/* Кардиограмма - как на мониторе: светящаяся точка с постоянной скоростью рисует линию слева направо, перед ней
-   небольшой просвет стирает прошлый проход, после края точка возвращается в начало. Пик R точка проходит ровно
-   в момент удара сердца. Слои одной длины пути (pathLength=100, период штриха 100): линия с просветом, след, ореол
-   и точка; у всех stroke-dashoffset = --c - H, где H - пройденная доля пути (ключевые кадры ecg-sweep) */
+/* Кардиограмма - как на кардиомониторе: светящаяся точка с постоянной скоростью пишет линию слева направо, перед
+   ней небольшой просвет стирает прошлый проход, от правого края точка перескакивает в начало. Проход в 3 раза
+   короче такта (--beat / 3), удар - раз в такт: в первом проходе точка пишет зубцы P, QRS и T и проходит пик R
+   ровно в момент удара сердца, в следующих - ровную линию.
+   Двигаются только transform и opacity: их считает видеокарта (композитор) без перерисовки страницы, поэтому линия
+   идёт ровно, даже когда браузер занят (живой фон, прокрутка). Анимация самого пути (stroke-dashoffset) требовала
+   перерисовки на каждом кадре и заикалась.
+   Устройство: .ecg-m - «каретка», её левый край - точка. На каретке окна с overflow: hidden: .ecg-new - новый
+   проход слева от точки, .ecg-old - прошлый справа от неё (после просвета 5%), .ecg-tail - яркий след. Внутри
+   окна линия .ecg-t едет навстречу каретке и потому стоит на месте. В каждом окне два варианта линии - с ударом
+   (.ecg-b) и ровная (.ecg-f), нужный по проходам включает opacity. Траектория точки (ecg-y) - по пути удара
+   из src/zone-sign.js; поменяли путь или число проходов - пересчитайте её */
 .logo-ecg {
+  position: relative;
   display: block;
   width: 100%;
   height: 0.46em;
   margin-top: 0.12em;
+}
+/* рамка с запасом под ореол: обрезает окна, уехавшие за края надписи */
+.ecg-clip {
+  position: absolute;
+  inset: -6px -5px;
+  overflow: hidden;
+}
+.ecg-m {
+  position: absolute;
+  inset: 6px 5px;
+}
+.ecg-m,
+.ecg-t {
+  animation: ecg-x calc(var(--beat) / 3) linear var(--beat-delay) infinite both;
+}
+.ecg-w {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  overflow: hidden;
+}
+.ecg-t {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 0;
+}
+.ecg-new {
+  left: -95%;
+  width: 95%;
+}
+.ecg-new .ecg-t {
+  width: calc(100% / 0.95);
+  animation-name: ecg-new;
+}
+.ecg-old {
+  left: 5%;
+  width: 100%;
+}
+.ecg-old .ecg-t {
+  width: 100%;
+  animation-name: ecg-old;
+}
+.ecg-tail {
+  left: -16%;
+  width: 16%;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 85%);
+  mask-image: linear-gradient(90deg, transparent, #000 85%);
+}
+.ecg-tail .ecg-t {
+  width: calc(100% / 0.16);
+  animation-name: ecg-tail;
+}
+.logo-ecg svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   overflow: visible;
-}
-.logo-ecg path {
-  animation: ecg-sweep var(--beat) linear var(--beat-delay) infinite both;
-}
-.logo-ecg .ecg-trace {
-  --c: 95;
-  stroke: #ff4a3a;
+  fill: none;
+  stroke: rgba(255, 74, 58, 0.8);
   stroke-width: 1.4;
-  stroke-dasharray: 95 5;
-  opacity: 0.8;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  animation: ecg-b1 var(--beat) step-end var(--beat-delay) infinite both;
 }
-.logo-ecg .ecg-glow {
-  --c: 12;
-  stroke: #ff3a24;
+.ecg-tail svg {
+  stroke: #ff9466;
+  stroke-width: 1.8;
+}
+.ecg-tail .ecg-g {
+  stroke: rgba(255, 58, 36, 0.25);
   stroke-width: 4.4;
-  stroke-dasharray: 12 88;
-  opacity: 0.22;
 }
-.logo-ecg .ecg-tail {
-  --c: 20;
-  stroke: #ff7a4c;
-  stroke-width: 1.9;
-  stroke-dasharray: 20 80;
-  opacity: 0.7;
+.ecg-new .ecg-f,
+.ecg-tail .ecg-f {
+  animation-name: ecg-f1;
 }
-.logo-ecg .ecg-head {
-  --c: 0.01;
-  stroke: #fff0dc;
-  stroke-width: 2.6;
-  stroke-dasharray: 0.01 99.99;
+.ecg-old .ecg-b {
+  animation-name: ecg-b2;
 }
-@keyframes ecg-sweep {
+.ecg-old .ecg-f {
+  animation-name: ecg-f2;
+}
+.ecg-head {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 100%;
+  animation: ecg-y var(--beat) linear var(--beat-delay) infinite both;
+}
+.ecg-head::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fff0dc;
+  box-shadow:
+    0 0 3px 1px rgba(255, 150, 80, 0.9),
+    0 0 8px 2px rgba(255, 70, 40, 0.5);
+}
+@keyframes ecg-x {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes ecg-new {
+  from {
+    transform: translateX(95%);
+  }
+  to {
+    transform: translateX(-5%);
+  }
+}
+@keyframes ecg-old {
+  from {
+    transform: translateX(-5%);
+  }
+  to {
+    transform: translateX(-105%);
+  }
+}
+@keyframes ecg-tail {
+  from {
+    transform: translateX(16%);
+  }
+  to {
+    transform: translateX(-84%);
+  }
+}
+/* какой вариант линии виден: удар пишется в первом проходе такта (новый проход и след), во втором он уже прошлый */
+@keyframes ecg-b1 {
   0% {
-    stroke-dashoffset: calc(var(--c) - 32.909);
+    opacity: 1;
   }
-  2.411% {
-    stroke-dashoffset: calc(var(--c) - 35.077);
-  }
-  3.911% {
-    stroke-dashoffset: calc(var(--c) - 36.622);
-  }
-  5.411% {
-    stroke-dashoffset: calc(var(--c) - 38.001);
-  }
-  6.911% {
-    stroke-dashoffset: calc(var(--c) - 39.379);
-  }
-  8.411% {
-    stroke-dashoffset: calc(var(--c) - 40.924);
-  }
-  11.411% {
-    stroke-dashoffset: calc(var(--c) - 43.622);
-  }
-  12.411% {
-    stroke-dashoffset: calc(var(--c) - 44.746);
-  }
-  13.911% {
-    stroke-dashoffset: calc(var(--c) - 49.442);
-  }
-  15.411% {
-    stroke-dashoffset: calc(var(--c) - 55.222);
-  }
-  16.911% {
-    stroke-dashoffset: calc(var(--c) - 57.471);
-  }
-  20.411% {
-    stroke-dashoffset: calc(var(--c) - 60.619);
-  }
-  22.411% {
-    stroke-dashoffset: calc(var(--c) - 62.724);
-  }
-  24.411% {
-    stroke-dashoffset: calc(var(--c) - 64.57);
-  }
-  26.411% {
-    stroke-dashoffset: calc(var(--c) - 66.415);
-  }
-  28.411% {
-    stroke-dashoffset: calc(var(--c) - 68.52);
-  }
-  63.411% {
-    stroke-dashoffset: calc(var(--c) - 100);
-  }
+  33.3333%,
   100% {
-    stroke-dashoffset: calc(var(--c) - 132.909);
+    opacity: 0;
+  }
+}
+@keyframes ecg-f1 {
+  0% {
+    opacity: 0;
+  }
+  33.3333%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes ecg-b2 {
+  0% {
+    opacity: 0;
+  }
+  33.3333% {
+    opacity: 1;
+  }
+  66.6667%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes ecg-f2 {
+  0% {
+    opacity: 1;
+  }
+  33.3333% {
+    opacity: 0;
+  }
+  66.6667%,
+  100% {
+    opacity: 1;
+  }
+}
+/* точка по высоте: идёт по пути удара в первом проходе, дальше - по ровной линии */
+@keyframes ecg-y {
+  0%,
+  10.0833% {
+    transform: translateY(64.286%);
+  }
+  10.3333% {
+    transform: translateY(57.411%);
+  }
+  10.5833% {
+    transform: translateY(52.5%);
+  }
+  10.8333% {
+    transform: translateY(49.554%);
+  }
+  11.0833% {
+    transform: translateY(48.571%);
+  }
+  11.3333% {
+    transform: translateY(49.554%);
+  }
+  11.5833% {
+    transform: translateY(52.5%);
+  }
+  11.8333% {
+    transform: translateY(57.411%);
+  }
+  12.0833% {
+    transform: translateY(64.286%);
+  }
+  13.0833% {
+    transform: translateY(64.286%);
+  }
+  13.4167% {
+    transform: translateY(75%);
+  }
+  13.9167% {
+    transform: translateY(3.571%);
+  }
+  14.4167% {
+    transform: translateY(92.857%);
+  }
+  14.9167% {
+    transform: translateY(64.286%);
+  }
+  16.0833% {
+    transform: translateY(64.286%);
+  }
+  16.4167% {
+    transform: translateY(54.286%);
+  }
+  16.75% {
+    transform: translateY(47.143%);
+  }
+  17.0833% {
+    transform: translateY(42.857%);
+  }
+  17.4167% {
+    transform: translateY(41.429%);
+  }
+  17.75% {
+    transform: translateY(42.857%);
+  }
+  18.0833% {
+    transform: translateY(47.143%);
+  }
+  18.4167% {
+    transform: translateY(54.286%);
+  }
+  18.75%,
+  100% {
+    transform: translateY(64.286%);
   }
 }
 .main-nav {
@@ -6138,16 +6313,21 @@ input[type="checkbox"] {
   .rad-sign .rs-ring,
   .rad-sign .rs-heat,
   .logo-title .lt-z,
-  .logo-ecg path {
+  .logo-ecg * {
     animation: none;
   }
-  /* без движения - просто линия кардиограммы, без точки и просвета */
-  .logo-ecg .ecg-trace {
-    stroke-dasharray: none;
+  /* без движения - просто кардиограмма с ударом, без точки, следа и просвета */
+  .ecg-new {
+    left: 0;
+    width: 100%;
   }
-  .logo-ecg .ecg-glow,
-  .logo-ecg .ecg-tail,
-  .logo-ecg .ecg-head {
+  .ecg-new .ecg-t {
+    width: 100%;
+  }
+  .ecg-new .ecg-f,
+  .ecg-old,
+  .ecg-tail,
+  .ecg-head {
     display: none;
   }
 }
