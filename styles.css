@@ -5234,7 +5234,7 @@ body::after {
 /* Удар сердца - раз в такт --beat (15 с). Такт начинается с прохода точки по кардиограмме под надписью;
    когда она проходит пик R, сердце делает двойной удар «тук-тук» (сжатие, вспышка плазмы, второй удар слабее), от
    него к кольцу идёт волна, по очереди вспыхивают гравировка, кромка лопастей и кольцо. Проценты - из миллисекунд
-   при такте 15 с (пик первого удара - 757.5 мс); поменяли такт - пересчитайте их (сейчас: мс / 15000 × 100) */
+   при такте 15 с (пик первого удара - 825 мс); поменяли такт - пересчитайте их (сейчас: мс / 15000 × 100) */
 :root {
   --beat: 15s;
   --beat-delay: 1.2s;
@@ -5245,32 +5245,32 @@ body::after {
 }
 @keyframes heart-beat {
   0%,
-  3.997% {
+  4.447% {
     transform: none;
     filter: none;
     animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
   }
-  4.383% {
+  4.833% {
     transform: scale(0.95);
     filter: brightness(0.92);
     animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
   }
-  5.05% {
+  5.5% {
     transform: scale(1.14);
     filter: brightness(1.55) saturate(1.15);
     animation-timing-function: ease-in-out;
   }
-  6.037% {
+  6.487% {
     transform: scale(0.99);
     filter: brightness(1.08);
     animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
   }
-  6.877% {
+  7.327% {
     transform: scale(1.07);
     filter: brightness(1.3) saturate(1.1);
     animation-timing-function: ease-out;
   }
-  9.517%,
+  9.967%,
   100% {
     transform: none;
     filter: none;
@@ -5287,14 +5287,14 @@ body::after {
 }
 @keyframes rs-pulse {
   0%,
-  4.863% {
+  5.313% {
     opacity: 0;
     transform: scale(0.32);
   }
-  5.317% {
+  5.767% {
     opacity: 0.85;
   }
-  8.317%,
+  8.767%,
   100% {
     opacity: 0;
     transform: scale(1);
@@ -5302,14 +5302,14 @@ body::after {
 }
 @keyframes rs-pulse2 {
   0%,
-  6.757% {
+  7.207% {
     opacity: 0;
     transform: scale(0.32);
   }
-  7.237% {
+  7.687% {
     opacity: 0.6;
   }
-  10.237%,
+  10.687%,
   100% {
     opacity: 0;
     transform: scale(1);
@@ -5320,19 +5320,19 @@ body::after {
 }
 @keyframes rs-heat {
   0%,
-  4.863% {
+  5.313% {
     opacity: 0;
   }
-  5.437% {
+  5.887% {
     opacity: 0.9;
   }
-  6.397% {
+  6.847% {
     opacity: 0.45;
   }
-  7.237% {
+  7.687% {
     opacity: 0.7;
   }
-  10.957%,
+  11.407%,
   100% {
     opacity: 0;
   }
@@ -5352,57 +5352,57 @@ body::after {
 }
 @keyframes rs-flare {
   0%,
-  5.077% {
+  5.527% {
     opacity: 0;
   }
-  5.557% {
+  6.007% {
     opacity: 1;
   }
-  6.397% {
+  6.847% {
     opacity: 0.25;
   }
-  7.357% {
+  7.807% {
     opacity: 0.8;
   }
-  8.797%,
+  9.247%,
   100% {
     opacity: 0;
   }
 }
 @keyframes rs-flare2 {
   0%,
-  5.557% {
+  6.007% {
     opacity: 0;
   }
-  6.037% {
+  6.487% {
     opacity: 1;
   }
-  6.877% {
+  7.327% {
     opacity: 0.25;
   }
-  7.837% {
+  8.287% {
     opacity: 0.8;
   }
-  9.277%,
+  9.727%,
   100% {
     opacity: 0;
   }
 }
 @keyframes rs-flare3 {
   0%,
-  6.037% {
+  6.487% {
     opacity: 0;
   }
-  6.517% {
+  6.967% {
     opacity: 1;
   }
-  7.357% {
+  7.807% {
     opacity: 0.25;
   }
-  8.317% {
+  8.767% {
     opacity: 0.8;
   }
-  9.757%,
+  10.207%,
   100% {
     opacity: 0;
   }
@@ -5410,19 +5410,19 @@ body::after {
 /* волна доходит до кольца - оно вспыхивает (второй раз - от второго удара) */
 @keyframes rs-ring {
   0%,
-  7.597% {
+  8.047% {
     opacity: 0;
   }
-  8.197% {
+  8.647% {
     opacity: 0.75;
   }
-  9.037% {
+  9.487% {
     opacity: 0.2;
   }
-  9.877% {
+  10.327% {
     opacity: 0.5;
   }
-  11.917%,
+  12.367%,
   100% {
     opacity: 0;
   }
@@ -5445,18 +5445,18 @@ body::after {
 }
 @keyframes lt-z {
   0%,
-  4.717%,
-  10.477%,
+  5.167%,
+  10.927%,
   100% {
     color: #ff4a3a;
   }
-  5.317% {
+  5.767% {
     color: #ff7a5c;
   }
-  6.397% {
+  6.847% {
     color: #ff5240;
   }
-  7.117% {
+  7.567% {
     color: #ff6a50;
   }
 }
@@ -5475,8 +5475,8 @@ body::after {
   position: relative;
   display: block;
   width: 100%;
-  height: 0.46em;
-  margin-top: 0.12em;
+  height: 0.42em;
+  margin-top: 0.1em;
 }
 /* рамка с запасом под ореол: обрезает окна, уехавшие за края надписи (слева - ровно по началу линии) */
 .ecg-clip {
@@ -5537,18 +5537,26 @@ body::after {
   height: 100%;
   overflow: visible;
   fill: none;
-  stroke: rgba(255, 74, 58, 0.8);
-  stroke-width: 1.4;
+  stroke: #ff4a3a;
+  stroke-width: 1.5;
   stroke-linejoin: round;
   stroke-linecap: round;
 }
+/* толщина линии - в пикселях, она не растягивается вместе с рамкой */
+.logo-ecg path {
+  vector-effect: non-scaling-stroke;
+}
+.ecg-new svg,
+.ecg-old svg {
+  filter: drop-shadow(0 0 3px rgba(255, 60, 40, 0.8));
+}
 .ecg-tail svg {
-  stroke: #ff9466;
-  stroke-width: 1.8;
+  stroke: #ffa070;
+  stroke-width: 1.9;
 }
 .ecg-tail .ecg-g {
-  stroke: rgba(255, 58, 36, 0.25);
-  stroke-width: 4.4;
+  stroke: rgba(255, 70, 40, 0.3);
+  stroke-width: 5;
 }
 .ecg-head {
   position: absolute;
@@ -5623,78 +5631,33 @@ body::after {
     opacity: 0;
   }
 }
-/* точка по высоте - по пути: зубцы P, QRS и T, дальше ровная линия */
+/* точка по высоте - по пути: зубцы P, Q, R, S, дальше ровная линия */
 @keyframes ecg-y {
   0%,
-  3.9% {
-    transform: translateY(64.286%);
+  4.6% {
+    transform: translateY(57.143%);
   }
-  3.975% {
-    transform: translateY(57.411%);
-  }
-  4.05% {
-    transform: translateY(52.5%);
-  }
-  4.125% {
-    transform: translateY(49.554%);
-  }
-  4.2% {
-    transform: translateY(48.571%);
-  }
-  4.275% {
-    transform: translateY(49.554%);
-  }
-  4.35% {
-    transform: translateY(52.5%);
-  }
-  4.425% {
-    transform: translateY(57.411%);
-  }
-  4.5% {
-    transform: translateY(64.286%);
-  }
-  4.8% {
-    transform: translateY(64.286%);
+  4.75% {
+    transform: translateY(35.714%);
   }
   4.9% {
-    transform: translateY(75%);
+    transform: translateY(57.143%);
   }
-  5.05% {
-    transform: translateY(3.571%);
+  5.15% {
+    transform: translateY(57.143%);
   }
-  5.2% {
-    transform: translateY(92.857%);
+  5.3% {
+    transform: translateY(100%);
   }
-  5.35% {
-    transform: translateY(64.286%);
+  5.5% {
+    transform: translateY(0%);
   }
   5.7% {
-    transform: translateY(64.286%);
+    transform: translateY(85.714%);
   }
-  5.8% {
-    transform: translateY(54.286%);
-  }
-  5.9% {
-    transform: translateY(47.143%);
-  }
-  6% {
-    transform: translateY(42.857%);
-  }
-  6.1% {
-    transform: translateY(41.429%);
-  }
-  6.2% {
-    transform: translateY(42.857%);
-  }
-  6.3% {
-    transform: translateY(47.143%);
-  }
-  6.4% {
-    transform: translateY(54.286%);
-  }
-  6.5%,
+  5.85%,
   100% {
-    transform: translateY(64.286%);
+    transform: translateY(57.143%);
   }
 }
 .main-nav {
