@@ -5231,12 +5231,12 @@ body::after {
   height: 100%;
   display: block;
 }
-/* Удар сердца. Всё на одном такте --beat: по кардиограмме под надписью идёт развёртка, и когда точка проходит
-   пик R, сердце делает двойной удар «тук-тук» (сжатие, вспышка плазмы, второй удар слабее), от него к кольцу идёт
-   волна, по очереди вспыхивают гравировка, кромка лопастей и кольцо. Проценты - из миллисекунд при такте 4.5 с
-   (пик первого удара - 626 мс); поменяли такт - пересчитайте их (сейчас: мс / 4500 × 100) */
+/* Удар сердца - раз в такт --beat (15 с). Такт начинается с прохода точки по кардиограмме под надписью;
+   когда она проходит пик R, сердце делает двойной удар «тук-тук» (сжатие, вспышка плазмы, второй удар слабее), от
+   него к кольцу идёт волна, по очереди вспыхивают гравировка, кромка лопастей и кольцо. Проценты - из миллисекунд
+   при такте 15 с (пик первого удара - 757.5 мс); поменяли такт - пересчитайте их (сейчас: мс / 15000 × 100) */
 :root {
-  --beat: 4.5s;
+  --beat: 15s;
   --beat-delay: 1.2s;
 }
 .rad-logo img {
@@ -5245,32 +5245,32 @@ body::after {
 }
 @keyframes heart-beat {
   0%,
-  10.4% {
+  3.997% {
     transform: none;
     filter: none;
     animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
   }
-  11.69% {
+  4.383% {
     transform: scale(0.95);
     filter: brightness(0.92);
     animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
   }
-  13.91% {
+  5.05% {
     transform: scale(1.14);
     filter: brightness(1.55) saturate(1.15);
     animation-timing-function: ease-in-out;
   }
-  17.2% {
+  6.037% {
     transform: scale(0.99);
     filter: brightness(1.08);
     animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
   }
-  20% {
+  6.877% {
     transform: scale(1.07);
     filter: brightness(1.3) saturate(1.1);
     animation-timing-function: ease-out;
   }
-  28.8%,
+  9.517%,
   100% {
     transform: none;
     filter: none;
@@ -5287,14 +5287,14 @@ body::after {
 }
 @keyframes rs-pulse {
   0%,
-  13.29% {
+  4.863% {
     opacity: 0;
     transform: scale(0.32);
   }
-  14.8% {
+  5.317% {
     opacity: 0.85;
   }
-  24.8%,
+  8.317%,
   100% {
     opacity: 0;
     transform: scale(1);
@@ -5302,14 +5302,14 @@ body::after {
 }
 @keyframes rs-pulse2 {
   0%,
-  19.6% {
+  6.757% {
     opacity: 0;
     transform: scale(0.32);
   }
-  21.2% {
+  7.237% {
     opacity: 0.6;
   }
-  31.2%,
+  10.237%,
   100% {
     opacity: 0;
     transform: scale(1);
@@ -5320,19 +5320,19 @@ body::after {
 }
 @keyframes rs-heat {
   0%,
-  13.29% {
+  4.863% {
     opacity: 0;
   }
-  15.2% {
+  5.437% {
     opacity: 0.9;
   }
-  18.4% {
+  6.397% {
     opacity: 0.45;
   }
-  21.2% {
+  7.237% {
     opacity: 0.7;
   }
-  33.6%,
+  10.957%,
   100% {
     opacity: 0;
   }
@@ -5352,57 +5352,57 @@ body::after {
 }
 @keyframes rs-flare {
   0%,
-  14% {
+  5.077% {
     opacity: 0;
   }
-  15.6% {
+  5.557% {
     opacity: 1;
   }
-  18.4% {
+  6.397% {
     opacity: 0.25;
   }
-  21.6% {
+  7.357% {
     opacity: 0.8;
   }
-  26.4%,
+  8.797%,
   100% {
     opacity: 0;
   }
 }
 @keyframes rs-flare2 {
   0%,
-  15.6% {
+  5.557% {
     opacity: 0;
   }
-  17.2% {
+  6.037% {
     opacity: 1;
   }
-  20% {
+  6.877% {
     opacity: 0.25;
   }
-  23.2% {
+  7.837% {
     opacity: 0.8;
   }
-  28%,
+  9.277%,
   100% {
     opacity: 0;
   }
 }
 @keyframes rs-flare3 {
   0%,
-  17.2% {
+  6.037% {
     opacity: 0;
   }
-  18.8% {
+  6.517% {
     opacity: 1;
   }
-  21.6% {
+  7.357% {
     opacity: 0.25;
   }
-  24.8% {
+  8.317% {
     opacity: 0.8;
   }
-  29.6%,
+  9.757%,
   100% {
     opacity: 0;
   }
@@ -5410,19 +5410,19 @@ body::after {
 /* волна доходит до кольца - оно вспыхивает (второй раз - от второго удара) */
 @keyframes rs-ring {
   0%,
-  22.4% {
+  7.597% {
     opacity: 0;
   }
-  24.4% {
+  8.197% {
     opacity: 0.75;
   }
-  27.2% {
+  9.037% {
     opacity: 0.2;
   }
-  30% {
+  9.877% {
     opacity: 0.5;
   }
-  36.8%,
+  11.917%,
   100% {
     opacity: 0;
   }
@@ -5445,34 +5445,32 @@ body::after {
 }
 @keyframes lt-z {
   0%,
-  12.8%,
-  32%,
+  4.717%,
+  10.477%,
   100% {
     color: #ff4a3a;
   }
-  14.8% {
+  5.317% {
     color: #ff7a5c;
   }
-  18.4% {
+  6.397% {
     color: #ff5240;
   }
-  20.8% {
+  7.117% {
     color: #ff6a50;
   }
 }
 
-/* Кардиограмма - как на кардиомониторе: светящаяся точка с постоянной скоростью пишет линию слева направо, перед
-   ней небольшой просвет стирает прошлый проход, от правого края точка перескакивает в начало. Проход в 3 раза
-   короче такта (--beat / 3), удар - раз в такт: в первом проходе точка пишет зубцы P, QRS и T и проходит пик R
-   ровно в момент удара сердца, в следующих - ровную линию.
+/* Кардиограмма - как на кардиомониторе: раз в такт светящаяся точка быстро (за 1.5 с) пишет линию слева направо,
+   перед ней небольшой просвет стирает прошлую запись. Пик R - между словами: точка проходит его ровно в момент удара
+   сердца. У правого края точка гаснет, а записанная линия остаётся до следующего удара.
    Двигаются только transform и opacity: их считает видеокарта (композитор) без перерисовки страницы, поэтому линия
-   идёт ровно, даже когда браузер занят (живой фон, прокрутка). Анимация самого пути (stroke-dashoffset) требовала
-   перерисовки на каждом кадре и заикалась.
-   Устройство: .ecg-m - «каретка», её левый край - точка. На каретке окна с overflow: hidden: .ecg-new - новый
-   проход слева от точки, .ecg-old - прошлый справа от неё (после просвета 5%), .ecg-tail - яркий след. Внутри
-   окна линия .ecg-t едет навстречу каретке и потому стоит на месте. В каждом окне два варианта линии - с ударом
-   (.ecg-b) и ровная (.ecg-f), нужный по проходам включает opacity. Траектория точки (ecg-y) - по пути удара
-   из src/zone-sign.js; поменяли путь или число проходов - пересчитайте её */
+   идёт ровно, даже когда браузер занят (живой фон, прокрутка).
+   Устройство: .ecg-m - «каретка», её левый край - точка. На каретке окна с overflow: hidden: .ecg-new - новая
+   запись слева от точки, .ecg-old - прошлая справа от неё (после просвета 5%), .ecg-tail - яркий след. Внутри окна
+   линия .ecg-t едет навстречу каретке и потому стоит на месте. Проценты - доли такта: проход 0-10%
+   (1.5 с из 15), траектория точки (ecg-y) - по пути из src/zone-sign.js; поменяли такт, проход или путь -
+   пересчитайте их */
 .logo-ecg {
   position: relative;
   display: block;
@@ -5480,19 +5478,19 @@ body::after {
   height: 0.46em;
   margin-top: 0.12em;
 }
-/* рамка с запасом под ореол: обрезает окна, уехавшие за края надписи */
+/* рамка с запасом под ореол: обрезает окна, уехавшие за края надписи (слева - ровно по началу линии) */
 .ecg-clip {
   position: absolute;
-  inset: -6px -5px;
+  inset: -6px -5px -6px 0;
   overflow: hidden;
 }
 .ecg-m {
   position: absolute;
-  inset: 6px 5px;
+  inset: 6px 5px 6px 0;
 }
 .ecg-m,
 .ecg-t {
-  animation: ecg-x calc(var(--beat) / 3) linear var(--beat-delay) infinite both;
+  animation: ecg-x var(--beat) linear var(--beat-delay) infinite both;
 }
 .ecg-w {
   position: absolute;
@@ -5505,13 +5503,13 @@ body::after {
   top: 6px;
   bottom: 6px;
   left: 0;
+  width: 100%;
 }
 .ecg-new {
-  left: -95%;
-  width: 95%;
+  left: -100%;
+  width: 100%;
 }
 .ecg-new .ecg-t {
-  width: calc(100% / 0.95);
   animation-name: ecg-new;
 }
 .ecg-old {
@@ -5519,7 +5517,6 @@ body::after {
   width: 100%;
 }
 .ecg-old .ecg-t {
-  width: 100%;
   animation-name: ecg-old;
 }
 .ecg-tail {
@@ -5527,6 +5524,7 @@ body::after {
   width: 16%;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 85%);
   mask-image: linear-gradient(90deg, transparent, #000 85%);
+  animation: ecg-on var(--beat) linear var(--beat-delay) infinite both;
 }
 .ecg-tail .ecg-t {
   width: calc(100% / 0.16);
@@ -5543,7 +5541,6 @@ body::after {
   stroke-width: 1.4;
   stroke-linejoin: round;
   stroke-linecap: round;
-  animation: ecg-b1 var(--beat) step-end var(--beat-delay) infinite both;
 }
 .ecg-tail svg {
   stroke: #ff9466;
@@ -5553,23 +5550,15 @@ body::after {
   stroke: rgba(255, 58, 36, 0.25);
   stroke-width: 4.4;
 }
-.ecg-new .ecg-f,
-.ecg-tail .ecg-f {
-  animation-name: ecg-f1;
-}
-.ecg-old .ecg-b {
-  animation-name: ecg-b2;
-}
-.ecg-old .ecg-f {
-  animation-name: ecg-f2;
-}
 .ecg-head {
   position: absolute;
   top: 0;
   left: 0;
   width: 0;
   height: 100%;
-  animation: ecg-y var(--beat) linear var(--beat-delay) infinite both;
+  animation:
+    ecg-y var(--beat) linear var(--beat-delay) infinite both,
+    ecg-on var(--beat) linear var(--beat-delay) infinite both;
 }
 .ecg-head::before {
   content: "";
@@ -5585,150 +5574,125 @@ body::after {
     0 0 8px 2px rgba(255, 70, 40, 0.5);
 }
 @keyframes ecg-x {
-  from {
-    transform: translateX(0);
+  0% {
+    transform: translateX(0%);
   }
-  to {
+  10%,
+  100% {
     transform: translateX(100%);
   }
 }
 @keyframes ecg-new {
-  from {
-    transform: translateX(95%);
+  0% {
+    transform: translateX(100%);
   }
-  to {
-    transform: translateX(-5%);
+  10%,
+  100% {
+    transform: translateX(0%);
   }
 }
 @keyframes ecg-old {
-  from {
+  0% {
     transform: translateX(-5%);
   }
-  to {
+  10%,
+  100% {
     transform: translateX(-105%);
   }
 }
 @keyframes ecg-tail {
-  from {
+  0% {
     transform: translateX(16%);
   }
-  to {
+  10%,
+  100% {
     transform: translateX(-84%);
   }
 }
-/* какой вариант линии виден: удар пишется в первом проходе такта (новый проход и след), во втором он уже прошлый */
-@keyframes ecg-b1 {
+/* точка и след видны только во время прохода: зажигаются в начале, гаснут у правого края */
+@keyframes ecg-on {
   0% {
+    opacity: 0;
+  }
+  0.4%,
+  10% {
     opacity: 1;
   }
-  33.3333%,
+  11.667%,
   100% {
     opacity: 0;
   }
 }
-@keyframes ecg-f1 {
-  0% {
-    opacity: 0;
-  }
-  33.3333%,
-  100% {
-    opacity: 1;
-  }
-}
-@keyframes ecg-b2 {
-  0% {
-    opacity: 0;
-  }
-  33.3333% {
-    opacity: 1;
-  }
-  66.6667%,
-  100% {
-    opacity: 0;
-  }
-}
-@keyframes ecg-f2 {
-  0% {
-    opacity: 1;
-  }
-  33.3333% {
-    opacity: 0;
-  }
-  66.6667%,
-  100% {
-    opacity: 1;
-  }
-}
-/* точка по высоте: идёт по пути удара в первом проходе, дальше - по ровной линии */
+/* точка по высоте - по пути: зубцы P, QRS и T, дальше ровная линия */
 @keyframes ecg-y {
   0%,
-  10.0833% {
+  3.9% {
     transform: translateY(64.286%);
   }
-  10.3333% {
+  3.975% {
     transform: translateY(57.411%);
   }
-  10.5833% {
+  4.05% {
     transform: translateY(52.5%);
   }
-  10.8333% {
+  4.125% {
     transform: translateY(49.554%);
   }
-  11.0833% {
+  4.2% {
     transform: translateY(48.571%);
   }
-  11.3333% {
+  4.275% {
     transform: translateY(49.554%);
   }
-  11.5833% {
+  4.35% {
     transform: translateY(52.5%);
   }
-  11.8333% {
+  4.425% {
     transform: translateY(57.411%);
   }
-  12.0833% {
+  4.5% {
     transform: translateY(64.286%);
   }
-  13.0833% {
+  4.8% {
     transform: translateY(64.286%);
   }
-  13.4167% {
+  4.9% {
     transform: translateY(75%);
   }
-  13.9167% {
+  5.05% {
     transform: translateY(3.571%);
   }
-  14.4167% {
+  5.2% {
     transform: translateY(92.857%);
   }
-  14.9167% {
+  5.35% {
     transform: translateY(64.286%);
   }
-  16.0833% {
+  5.7% {
     transform: translateY(64.286%);
   }
-  16.4167% {
+  5.8% {
     transform: translateY(54.286%);
   }
-  16.75% {
+  5.9% {
     transform: translateY(47.143%);
   }
-  17.0833% {
+  6% {
     transform: translateY(42.857%);
   }
-  17.4167% {
+  6.1% {
     transform: translateY(41.429%);
   }
-  17.75% {
+  6.2% {
     transform: translateY(42.857%);
   }
-  18.0833% {
+  6.3% {
     transform: translateY(47.143%);
   }
-  18.4167% {
+  6.4% {
     transform: translateY(54.286%);
   }
-  18.75%,
+  6.5%,
   100% {
     transform: translateY(64.286%);
   }
@@ -6316,15 +6280,10 @@ input[type="checkbox"] {
   .logo-ecg * {
     animation: none;
   }
-  /* без движения - просто кардиограмма с ударом, без точки, следа и просвета */
+  /* без движения - просто кардиограмма, без точки, следа и просвета */
   .ecg-new {
     left: 0;
-    width: 100%;
   }
-  .ecg-new .ecg-t {
-    width: 100%;
-  }
-  .ecg-new .ecg-f,
   .ecg-old,
   .ecg-tail,
   .ecg-head {
