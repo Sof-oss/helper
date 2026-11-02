@@ -1,11 +1,20 @@
 {
-  "updated": "2026-11-01T12:01:49+03:00",
+  "updated": "2026-11-02T12:18:12+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
+      "name": "Last Way 2",
+      "level": 1,
+      "members": 2,
+      "leader": {
+        "id": 5197,
+        "name": "|LW| ЭнДоРфИнКа"
+      }
+    },
+    {
       "name": "Last Way",
       "level": 1,
-      "members": 14,
+      "members": 19,
       "leader": {
         "id": 3954,
         "name": "|LW| РуSSкая"
@@ -104,7 +113,7 @@
     {
       "name": "Чистое небо",
       "level": 1,
-      "members": 16,
+      "members": 18,
       "leader": {
         "id": 1220,
         "name": "Петя кок"
@@ -131,7 +140,7 @@
     {
       "name": "Рассвет",
       "level": 1,
-      "members": 17,
+      "members": 18,
       "leader": {
         "id": 62,
         "name": "Меченый"
