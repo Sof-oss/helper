@@ -480,6 +480,7 @@
     help.title = helpLabel;
     /* на главной - полный тур, на остальных страницах - короткий тур только по этой странице */
     help.addEventListener("click", function () {
+      goal("tour_start");
       if (here() === "/") start();
       else startPage();
     });
@@ -562,7 +563,7 @@
       else if (k === "prev") go(i - 1);
       else if (k === "next") {
         if (i < hi) go(i + 1);
-        else finish();
+        else done();
       }
     });
     d.addEventListener("keydown", onKey, true);
@@ -590,7 +591,7 @@
     } else if (!typing && e.key === "ArrowRight") {
       e.preventDefault();
       if (i < hi) go(i + 1);
-      else finish();
+      else done();
     } else if (!typing && e.key === "ArrowLeft" && i > 0) {
       e.preventDefault();
       go(i - 1);
@@ -851,6 +852,14 @@
     i = -1;
     closing = false;
   }
+  /* цели Метрики (build.js: window.zoneGoal): тур запустили / дошли до последнего шага и нажали «Готово» */
+  function goal(g) {
+    if (window.zoneGoal) window.zoneGoal(g);
+  }
+  function done() {
+    goal("tour_done");
+    finish();
+  }
   /* завершение («Готово», крестик, Esc): окно сворачивается в значок «?» в шапке */
   function finish() {
     if (!panel || closing) return;
@@ -908,7 +917,11 @@
 
   /* запуск */
   syncEntry();
-  if (startBtn) startBtn.addEventListener("click", start);
+  if (startBtn)
+    startBtn.addEventListener("click", function () {
+      goal("tour_start");
+      start();
+    });
   var saved = ss(STEP);
   if (saved !== null && saved !== undefined) {
     var n = +saved;
@@ -919,6 +932,7 @@
     else ss(STEP, null); /* игрок ушёл в другой раздел сам - тур прерывается без сообщений */
   } else if (location.hash === "#tour") {
     history.replaceState(null, "", location.pathname + location.search);
+    goal("tour_start");
     start();
   }
 })();

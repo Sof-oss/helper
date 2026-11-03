@@ -998,6 +998,8 @@ const talentsUI = lazyPart(() => import("./src/calc-talents.js")),
 
 render();
 if (linked) compareUI.run(t => t.open());
+/* цель Метрики: открыли билд по чужой ссылке (build.js: window.zoneGoal) */
+if (linked && window.zoneGoal) window.zoneGoal("calc_build_open");
 
 /* сводка урона для телефона (#calcDock): на телефоне настройки идут перед результатами, и при правке уровня или арены
    итог не виден. Сводка показывается, пока конец настроек (.side-actions) ниже экрана, и прячется, как только он

@@ -336,6 +336,11 @@
           baseSearch = location.search;
         }
         history.replaceState(null, "", "/p/" + encodeURIComponent(id));
+        /* Метрика (build.js): цель «открыли карточку игрока» и просмотр адреса /p/<id> */
+        if (window.zoneGoal) {
+          window.zoneGoal("player_card");
+          window.zoneHit();
+        }
         root.querySelector(".pc-dialog").focus({ preventScroll: true });
         root.querySelector(".pc-dialog").scrollTop = 0;
       })

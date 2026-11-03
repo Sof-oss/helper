@@ -5289,3 +5289,59 @@ html.tour-seen .tour-help {
     animation: none;
   }
 }
+/* уведомление о cookie и статистике (Яндекс Метрика): его ставит встроенный скрипт build.js, пока не нажали «Понятно» */
+.ym-note {
+  position: fixed;
+  left: 16px;
+  bottom: 16px;
+  z-index: 65;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 430px;
+  padding: 10px 12px 10px 14px;
+  border: 1px solid #2b4762;
+  border-radius: 8px;
+  background: rgba(8, 18, 28, 0.97);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55);
+  color: #c8d6e2;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.ym-note p {
+  margin: 0;
+}
+.ym-note a {
+  color: #8fc3ff;
+}
+.ym-note-ok {
+  flex: none;
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid #3a6a96;
+  border-radius: 6px;
+  background: #12324d;
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ym-note-ok:hover {
+  background: #1a4266;
+}
+html.tour-on .ym-note {
+  display: none;
+}
+@media (max-width: 760px) {
+  .ym-note {
+    left: 8px;
+    right: 8px;
+    max-width: none;
+    bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 8px);
+  }
+}
+@media print {
+  .ym-note {
+    display: none;
+  }
+}

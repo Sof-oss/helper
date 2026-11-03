@@ -546,6 +546,8 @@
       try {
         history.pushState({ infoSection: k }, "", SECTIONS[k].url);
       } catch {}
+      /* Метрика (build.js): раздел открыт без перезагрузки - отдельный просмотр страницы */
+      if (window.zoneHit) window.zoneHit();
       try {
         localStorage.setItem(SEC_KEY, k);
       } catch {}
@@ -558,7 +560,11 @@
       try {
         localStorage.setItem(SEC_KEY, k);
       } catch {}
-      window.__vt ? window.__vt(() => setSection(k)) : setSection(k);
+      const show = () => {
+        setSection(k);
+        if (window.zoneHit) window.zoneHit();
+      };
+      window.__vt ? window.__vt(show) : show();
     });
   renderTasks();
   const sec = secFromPath();

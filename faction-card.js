@@ -343,6 +343,11 @@
           baseSearch = location.search;
         }
         history.replaceState(null, "", "/f/" + encodeURIComponent(f.s));
+        /* Метрика (build.js): цель «открыли карточку группировки» и просмотр адреса /f/<slug> */
+        if (window.zoneGoal) {
+          window.zoneGoal("faction_card");
+          window.zoneHit();
+        }
         root.querySelector(".fc-dialog").focus({ preventScroll: true });
       })
       .catch(() => {
