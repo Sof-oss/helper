@@ -15,7 +15,7 @@ test("build.js: страницы, CSP, sitemap и статическая обо�
       cwd: ROOT,
       encoding: "utf8",
       timeout: 180000,
-      env: { ...process.env, BUILD_OUT: out, METRIKA_ID: "12345678" }
+      env: { ...process.env, BUILD_OUT: out }
     });
     assert.equal(r.status, 0, r.stderr || r.stdout);
     const read = f => fs.readFileSync(path.join(out, f), "utf8");
@@ -77,32 +77,6 @@ test("build.js: страницы, CSP, sitemap и статическая обо�
     assert.ok(!precache.includes("/"), "страницы не входят в статическую оболочку");
     assert.ok(!precache.includes("/top100"), "страница Топ-100 не входит в оболочку");
     assert.ok(!precache.some(u => /^\/top100-data\.js/.test(u)), "данные Топ-100 не входят в оболочку");
-
-    /* Яндекс Метрика: счётчик и уведомление о cookie на страницах (и собранных из них), адреса Метрики в CSP;
-       на офлайн-странице счётчика нет */
-    const csp = html => /<meta http-equiv="Content-Security-Policy" content="([^"]*)"/.exec(html)[1];
-    const guidePage = fs.readdirSync(path.join(out, "guide")).find(f => f.endsWith(".html"));
-    for (const f of [
-      "index.html",
-      "calculator.html",
-      "build.html",
-      "info-tasks.html",
-      "404.html",
-      "guide/" + guidePage
-    ]) {
-      const html = read(f);
-      assert.equal(html.match(/mc\.yandex\.ru\/metrika\/tag\.js/g)?.length, 1, f + ": один счётчик Метрики");
-      assert.match(html, /var id=12345678/, f);
-      assert.match(html, /tag\.js\?id="\+id/, f + ": tag.js с номером счётчика, как в коде из Метрики");
-      assert.match(csp(html), /script-src [^;]*https:\/\/mc\.yandex\.ru/, f + ": CSP разрешает tag.js");
-      assert.match(csp(html), /connect-src [^;]*https:\/\/mc\.yandex\.com/, f + ": CSP разрешает отправку");
-      assert.match(csp(html), /frame-src [^;]*blob: https:\/\/mc\.yandex\.ru/, f + ": CSP для карты кликов");
-    }
-    assert.match(index, /<p id="privacy">/, "абзац о статистике в «Правовой информации»");
-    assert.match(read("calculator.html"), /id="shareBuild" data-goal="calc_share"/);
-    const offline = read("offline.html");
-    assert.doesNotMatch(offline, /mc\.yandex/, "на офлайн-странице счётчика нет");
-    assert.match(csp(offline), /frame-src 'none'/);
 
     const sitemap = read("sitemap.xml");
     assert.match(sitemap, /https:\/\/heart-of-the-zone\.ru\/top100/);

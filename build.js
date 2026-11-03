@@ -89,9 +89,6 @@ for (const name of fs.readdirSync(ROOT)) {
 /* гайды guides/<адрес>/index.md + картинки рядом. */
 const GuideMD = require("./guide-md.js");
 const SITE = "https://heart-of-the-zone.ru";
-/* Яндекс Метрика: номер счётчика «Сердце Зоны» (metrika.yandex.ru). Пустой - счётчика, уведомления о cookie и абзаца
-   о статистике в «Правовой информации» на сайте нет. METRIKA_ID в окружении заменяет номер (тесты сборки). */
-const METRIKA_ID = process.env.METRIKA_ID !== undefined ? process.env.METRIKA_ID : "114058611";
 const GUIDES_DIR = path.join(ROOT, "guides");
 const MONTHS = [
   "января",
@@ -328,44 +325,9 @@ function applyIncludes(html, from) {
     return part.endsWith("\n") ? part : part + "\n";
   });
 }
-/* Яндекс Метрика - встроенный скрипт в <head> каждой страницы (кроме офлайн-страницы). Работает только на самом сайте
-   (не на localhost); tag.js грузится, когда страница уже загрузилась, чтобы не отнимать у неё время.
-   - window.zoneGoal("id") - цель «JavaScript-событие» (id совпадает с идентификатором цели в настройках счётчика);
-     у кнопок проще атрибут data-goal="id" - нажатие засчитает этот скрипт;
-   - window.zoneHit() - просмотр «страницы» без перезагрузки (карточка игрока /p/…, группировки /f/…, раздел «Информации»);
-     до загрузки tag.js не шлётся: первый просмотр - адрес, с которым открыли страницу.
-   Уведомление о cookie показывается, пока не нажали «Понятно» (localStorage.zoneCookieOk). Гайды, /build и разделы
-   «Информации» собираются из уже обработанных страниц и получают скрипт вместе с ними. */
-const metrikaTag = id =>
-  "<script>/* Яндекс Метрика и уведомление о cookie (build.js) */(function(w,d){var id=" +
-  JSON.stringify(Number(id)) +
-  ",ready=0,last=location.href;w.zoneGoal=w.zoneHit=function(){};" +
-  'if(location.hostname!=="heart-of-the-zone.ru")return;' +
-  "w.ym=w.ym||function(){(w.ym.a=w.ym.a||[]).push(arguments)};w.ym.l=1*new Date;" +
-  'ym(id,"init",{ssr:true,clickmap:true,trackLinks:true,accurateTrackBounce:true,referrer:d.referrer,url:last});' +
-  'w.zoneGoal=function(g){ym(id,"reachGoal",g)};' +
-  'w.zoneHit=function(){var u=location.href;if(!ready||u===last)return;ym(id,"hit",u,{title:d.title,referer:last});last=u};' +
-  'd.addEventListener("click",function(e){var t=e.target.closest&&e.target.closest("[data-goal]");if(t)ym(id,"reachGoal",t.getAttribute("data-goal"))},true);' +
-  'function load(){var s=d.createElement("script");s.async=1;s.src="https://mc.yandex.ru/metrika/tag.js?id="+id;s.onload=function(){ready=1;last=location.href};d.head.appendChild(s)}' +
-  "function idle(){w.requestIdleCallback?requestIdleCallback(load,{timeout:3000}):setTimeout(load,1)}" +
-  'if(d.readyState==="complete")idle();else w.addEventListener("load",idle);' +
-  'try{if(localStorage.getItem("zoneCookieOk"))return}catch(e){return}' +
-  'd.addEventListener("DOMContentLoaded",function(){var n=d.createElement("div");n.className="ym-note";n.setAttribute("role","region");n.setAttribute("aria-label","Файлы cookie");' +
-  'n.innerHTML=\'<p>Сайт собирает обезличенную статистику посещений: Яндекс Метрика и файлы cookie. <a href="#privacy" data-privacy>Подробнее</a></p><button type="button" class="ym-note-ok">Понятно</button>\';' +
-  'n.addEventListener("click",function(e){if(e.target.closest(".ym-note-ok")){try{localStorage.setItem("zoneCookieOk","1")}catch(x){}n.remove()}' +
-  'else if(e.target.closest("[data-privacy]")){var l=d.getElementById("legal"),p=d.getElementById("privacy");if(!l||!p)return;e.preventDefault();l.open=true;p.scrollIntoView({block:"center"})}});' +
-  "d.body.appendChild(n)})})(window,document);</script>";
-function withMetrika(html, name) {
-  /* без счётчика не нужен и абзац о статистике в подвале */
-  if (!METRIKA_ID || name === "offline.html")
-    return METRIKA_ID ? html : html.replace(/<p id="privacy">[\s\S]*?<\/p>\n?/, "");
-  if (!/^\d+$/.test(METRIKA_ID)) throw new Error("METRIKA_ID: номер счётчика - только цифры, сейчас " + METRIKA_ID);
-  if (!html.includes("</head>")) throw new Error(name + ": нет </head> для счётчика Метрики");
-  return html.replace("</head>", metrikaTag(METRIKA_ID) + "\n</head>");
-}
 for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
   const file = path.join(OUT, name);
-  fs.writeFileSync(file, withMetrika(applyIncludes(fs.readFileSync(file, "utf8"), name), name));
+  fs.writeFileSync(file, applyIncludes(fs.readFileSync(file, "utf8"), name));
 }
 
 /* пререндер */
@@ -1216,48 +1178,20 @@ if (fs.existsSync(smSrc)) {
 }
 /* Content-Security-Policy GitHub Pages не умеет свои заголовки, поэтому политика - <meta http-equiv> в каждой странице. */
 const CAPTCHA_ORIGINS = ["https://smartcaptcha.yandexcloud.net", "https://challenges.cloudflare.com"];
-/* адреса Метрики из её справки «Установка счётчика на сайт с CSP» (без Вебвизора): данные могут уходить на mc.yandex.<страна> */
-const METRIKA_MC = [
-  "ru",
-  "az",
-  "by",
-  "co.il",
-  "com",
-  "com.am",
-  "com.ge",
-  "com.tr",
-  "ee",
-  "fr",
-  "kg",
-  "kz",
-  "lt",
-  "lv",
-  "md",
-  "tj",
-  "tm",
-  "uz"
-].map(z => "https://mc.yandex." + z);
 function cspFor(html) {
   const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(
     m => "'sha256-" + crypto.createHash("sha256").update(m[1], "utf8").digest("base64") + "'"
   );
   const form = /guide-submit\.js/.test(html);
   const cap = form ? CAPTCHA_ORIGINS : [];
-  /* Метрика: tag.js, отправка данных, а для карты кликов в её интерфейсе - кадры blob: и mc.yandex.ru */
-  const ym = html.includes("https://mc.yandex.ru/metrika/tag.js");
-  const frames = [...cap, ...(ym ? ["blob:", "https://mc.yandex.ru"] : [])];
   return [
     "default-src 'self'",
-    ["script-src 'self'", ...hashes, ...cap, ...(ym ? ["https://mc.yandex.ru", "https://yastatic.net"] : [])].join(" "),
+    ["script-src 'self'", ...hashes, ...cap].join(" "),
     ["style-src 'self' 'unsafe-inline'", ...cap].join(" "),
-    ["img-src 'self' data: blob:", ...(ym ? METRIKA_MC : [])].join(" "),
+    "img-src 'self' data: blob:",
     "font-src 'self'",
-    [
-      "connect-src 'self'",
-      ...(form ? ["https://functions.yandexcloud.net", ...cap] : []),
-      ...(ym ? METRIKA_MC : [])
-    ].join(" "),
-    frames.length ? "frame-src " + frames.join(" ") : "frame-src 'none'",
+    ["connect-src 'self'", ...(form ? ["https://functions.yandexcloud.net", ...cap] : [])].join(" "),
+    form ? "frame-src " + cap.join(" ") : "frame-src 'none'",
     "worker-src 'self' blob:",
     "object-src 'none'",
     "base-uri 'self'",

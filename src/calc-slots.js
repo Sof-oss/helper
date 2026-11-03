@@ -174,8 +174,6 @@ function addSlot(hash, name) {
   slots.active = s.id;
   save();
   applyBuild(hash);
-  /* цель Метрики «сохранили билд в «Мои билды»» (build.js: window.zoneGoal) */
-  if (window.zoneGoal) window.zoneGoal("calc_slot_save");
   return s;
 }
 

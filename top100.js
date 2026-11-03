@@ -560,15 +560,9 @@ function ensureShell() {
         '<p class="sr-only" id="top100Results" role="status" aria-live="polite"></p>'
       );
   }
-  let searched = false;
   $("top100Search").addEventListener("input", e => {
     top100Query = e.target.value;
     renderTop100Table();
-    /* цель Метрики «искали игрока» (build.js: window.zoneGoal) - один раз за открытие страницы */
-    if (!searched && top100Query.trim().length >= 2 && window.zoneGoal) {
-      searched = true;
-      window.zoneGoal("top100_search");
-    }
   });
 }
 function renderTop100() {

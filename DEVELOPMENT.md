@@ -51,16 +51,6 @@ npx serve dist       # сайт откроется на http://localhost:3000
 - `build.js` проставляет `?v=<хэш>` всем css/js/картинкам и добавляет в каждую страницу Content-Security-Policy
   (`<meta http-equiv>`) с хэшами встроенных скриптов. Новый встроенный `<script>` разрешится сам при сборке;
   внешний скрипт или новый адрес для `fetch` нужно добавить в `cspFor()` в `build.js`.
-- Яндекс Метрика: номер счётчика - константа `METRIKA_ID` в начале `build.js` (114058611; пусто - счётчика нет, а из подвала
-  пропадает абзац `#privacy` о статистике). С номером `build.js` вставляет перед `</head>` всех страниц, кроме
-  `offline.html`, встроенный скрипт `metrikaTag()` и сам дописывает адреса Метрики в CSP. Счётчик работает только на
-  `heart-of-the-zone.ru` (на localhost и в `dev.js` молчит), `tag.js` грузится после загрузки страницы, когда браузер
-  свободен. Там же - уведомление о cookie (`.ym-note` в `styles.css`, «Понятно» запоминается в
-  `localStorage.zoneCookieOk`). Цели: атрибут `data-goal="имя"` на кнопке или `window.zoneGoal("имя")` из скрипта;
-  виртуальный просмотр после смены адреса без перезагрузки (`pushState`/`replaceState`) - `window.zoneHit()`. Обе
-  функции есть всегда (без счётчика ничего не делают). Сейчас цели: `calc_talents`, `calc_gear`, `calc_tokens`,
-  `calc_compare`, `calc_share`, `calc_slot_save`, `calc_build_open`, `tour_start`, `tour_done`, `top100_search`,
-  `player_card`, `faction_card` - новую цель нужно завести и в интерфейсе Метрики («JavaScript-событие»).
 - Шрифты лежат в `assets/fonts/`, лицензия OFL - `assets/fonts/OFL.txt`. Моноширинный - ZoneMono (JetBrains Mono)
   в `mono-*.woff2`. Заголовок главной - `graffiti-logo.woff2`, в нём только буквы «Сердце Зоны»; полный шрифт для превью -
   `previews/fonts/graffiti-stalker.ttf`.
