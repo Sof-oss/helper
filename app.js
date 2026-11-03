@@ -14,10 +14,14 @@ import {
   BASE_CRIT_DAMAGE,
   buildHashOf as buildHashOfCore,
   parseBuild as parseBuildCore,
-  sanitizeTalents
+  sanitizeTalents,
+  DAMAGE_KEYS,
+  buildTotals,
+  buildResults,
+  firstFreeHitDamage
 } from "./src/calc-core.js";
 const state = { items: new Set(), talents: {}, arena: 0 };
-const keys = ["knife", "pistol", "auto", "grenade", "gl", "gauss"];
+const keys = DAMAGE_KEYS;
 const ARENA_ICON = { knife: "knife", pistol: "pistol", auto: "rifle", grenade: "grenade", gl: "ubgl", gauss: "gauss" };
 const ARENA_LABEL = {
   knife: "Нож",
@@ -26,35 +30,6 @@ const ARENA_LABEL = {
   grenade: "Граната",
   gl: "Подствольник",
   gauss: "Гаусс"
-};
-const TALENT_ASSETS = {
-  TALENT_0001: "TALENT_0001-sfcxbYqa.webp",
-  TALENT_0002: "TALENT_0002-DJDfGX4a.webp",
-  TALENT_0003: "TALENT_0003-DmaMfCbv.webp",
-  TALENT_0004: "TALENT_0004-CA2yMivx.webp",
-  TALENT_0005: "TALENT_0005-CgjISMXn.webp",
-  TALENT_0006: "TALENT_0006-ClsyoGm3.webp",
-  TALENT_0007: "TALENT_0007-DAY6ZOOP.webp",
-  TALENT_0008: "TALENT_0008-y6cx_aDt.webp",
-  TALENT_0009: "TALENT_0009-Bp-oNrB8.webp",
-  TALENT_0010: "TALENT_0010-BlkwiBNG.webp",
-  TALENT_0011: "TALENT_0011-waaRueAG.webp",
-  TALENT_0012: "TALENT_0012-DJYHMNfz.webp",
-  TALENT_0013: "TALENT_0013-CW8z33mi.webp",
-  TALENT_0014: "TALENT_0014-D0Z0I1wp.webp",
-  TALENT_0015: "TALENT_0015-NxBLj8iX.webp",
-  TALENT_0016: "TALENT_0016-C10xeuwP.webp",
-  TALENT_0017: "TALENT_0017-B6yciWom.webp",
-  TALENT_0018: "TALENT_0018-Bl6lQcmT.webp",
-  TALENT_0019: "TALENT_0019-CK1oIt-A.webp",
-  TALENT_0020: "TALENT_0020-fFMuuMjC.webp",
-  TALENT_0021: "TALENT_0021-BoNRfcSz.webp",
-  TALENT_0022: "TALENT_0022-BPLJgAH0.webp",
-  TALENT_0023: "TALENT_0023-BiqFfm_b.webp",
-  TALENT_0024: "TALENT_0024-BfcgPQN4.webp",
-  TALENT_0025: "TALENT_0025-CadiUFM_.webp",
-  TALENT_0026: "TALENT_0026-BYzW7dE1.webp",
-  TALENT_0027: "TALENT_0027-CioKjBsV.webp"
 };
 const $ = id => document.getElementById(id),
   STORAGE_KEY = "gameHelperState",
@@ -115,355 +90,18 @@ function plural(n, one, few, many) {
   if (b === 1) return one;
   return many;
 }
-function canUpgrade(t) {
-  return talentRank(t[0]) < 5 && t[9].every(req => talentRank(req) >= 5);
-}
-function canDowngrade(t) {
-  return talentRank(t[0]) > 0 && !TALENTS.some(x => talentRank(x[0]) > 0 && x[9].includes(t[0]));
-}
 function spentTalentPoints() {
   return Object.values(state.talents).reduce((a, b) => a + b, 0);
 }
-function talentTotals() {
-  const total = Object.fromEntries(keys.map(k => [k, 0]));
-  const critDamageByWeapon = { grenade: 0, gl: 0, gauss: 0 };
-  let critChance = 0,
-    noCooldown = 0,
-    cooldown = 0,
-    firstFreeHit = 0;
-  TALENTS.forEach(t => {
-    const rank = talentRank(t[0]);
-    if (!rank) return;
-    const stat = t[7],
-      target = Array.isArray(t[8]) ? t[8][0] : t[8],
-      value = t[6][rank - 1];
-    if (stat === "free_boss_damage_flat") ["knife", "pistol", "auto"].forEach(k => (total[k] += value));
-    if (stat === "free_hit_damage_flat") total[target === "rifle" ? "auto" : target] += value;
-    if (stat === "paid_hit_damage_flat") total[target === "ubgl" ? "gl" : target] += value;
-    if (stat === "paid_hit_crit_damage_flat") critDamageByWeapon[target === "ubgl" ? "gl" : target] += value;
-    if (stat === "paid_hit_crit_chance_pct") critChance += value / 100;
-    if (stat === "first_free_hit_damage_bonus_pct") firstFreeHit += value / 100;
-    if (stat === "free_hit_cooldown_reduction_pct") cooldown += value / 100;
-    if (stat === "free_hit_cooldown_dodge_chance_pct") noCooldown += value / 100;
-  });
-  return { total, critChance, critDamageByWeapon, noCooldown, cooldown, firstFreeHit };
-}
-function talentNodeStatus(t) {
-  const rank = talentRank(t[0]),
-    ready = canUpgrade(t),
-    locked = t[9].some(req => talentRank(req) < 5);
-  return rank >= 5 ? "maxed" : ready ? "ready" : locked ? "locked" : "open";
-}
-function talentNodeIcon(t) {
-  const file = TALENT_ASSETS[t[0]],
-    alt = t[2].replace(/"/g, "&quot;");
-  return file
-    ? '<img src="assets/' + file + '" alt="' + alt + '" width="200" height="200" loading="lazy" decoding="async">'
-    : "✥";
-}
-const ROMAN = ["", "I", "II", "III", "IV", "V"];
-const TALENT_STAT_LABELS = {
-  free_boss_damage_flat: "Урон от бесплатных ударов",
-  free_hit_damage_flat: "Урон",
-  first_free_hit_damage_bonus_pct: "Урон от первого бесплатного удара",
-  paid_hit_damage_flat: "Урон",
-  paid_hit_crit_damage_flat: "Бонус к критическому урону",
-  paid_hit_crit_chance_pct: "Шанс критического удара",
-  free_hit_cooldown_reduction_pct: "Уменьшение времени перезарядки",
-  free_hit_cooldown_dodge_chance_pct: "Шанс удара без отката"
-};
-const TALENT_TARGET_NAMES = {
-  knife: "Нож",
-  pistol: "Пистолет",
-  rifle: "Автомат",
-  grenade: "Граната",
-  ubgl: "Гранатомёт",
-  gauss: "Гаусс"
-};
-const TD_CHECK =
-  '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="m7.8 12.4 3 3 5.6-6.2"/></svg>';
-/* окно таланта: ромбы рангов, значения по рангам с подсветкой текущего, требования со статусом */
-function renderTalentDetails(t) {
-  const rank = talentRank(t[0]),
-    up = canUpgrade(t),
-    down = canDowngrade(t),
-    stat = t[7],
-    unit = stat && stat.endsWith("_pct") ? "%" : "",
-    target = Array.isArray(t[8]) ? t[8][0] : t[8],
-    next = rank < 5 ? t[6][rank] : t[6][4];
-  const pips = [1, 2, 3, 4, 5].map(i => '<i class="td-pip' + (i <= rank ? " on" : "") + '"></i>').join("");
-  const values = t[6]
-    .map((v, i) => "<span" + (i === rank - 1 ? ' class="td-cur"' : "") + ">+" + v + unit + "</span>")
-    .join("<em>/</em>");
-  const reqs = t[9].length
-    ? t[9]
-        .map(code => {
-          const d = talentDef(code),
-            ok = talentRank(code) >= 5;
-          return (
-            '<div class="td-req' +
-            (ok ? " ok" : "") +
-            '">' +
-            TD_CHECK +
-            "<b>" +
-            (d ? d[2] : code) +
-            " " +
-            ROMAN[5] +
-            "</b><span>" +
-            (ok ? "Выполнено" : "Не выполнено") +
-            "</span></div>"
-          );
-        })
-        .join("")
-    : '<div class="td-req none">Нет требований</div>';
-  return (
-    '<div class="talent-detail"><div class="td-head"><span class="td-art" aria-hidden="true">' +
-    (TALENT_ASSETS[t[0]] ? '<img src="assets/' + TALENT_ASSETS[t[0]] + '" alt="" width="200" height="200">' : "") +
-    "</span><h3>" +
-    t[2] +
-    '</h3><button type="button" class="td-close" data-close-talent-detail aria-label="Закрыть">×</button></div><div class="td-rank"><div class="td-pips">' +
-    pips +
-    "</div><b>" +
-    rank +
-    '/5</b><span>Текущий уровень</span></div><p class="td-desc">' +
-    t[3] +
-    '</p><div class="td-sec">Эффекты</div><div class="td-effect"><small>' +
-    TALENT_STAT_LABELS[stat] +
-    (target ? " · " + TALENT_TARGET_NAMES[target] : "") +
-    '</small><div class="td-vals">' +
-    values +
-    '</div></div><div class="td-sec">Требования</div>' +
-    reqs +
-    '<div class="td-actions">' +
-    (down
-      ? '<button type="button" class="td-minus" data-talent-down="' + t[0] + '" aria-label="Понизить ранг">−</button>'
-      : "") +
-    '<button type="button" class="td-up" data-talent-up="' +
-    t[0] +
-    '" ' +
-    (up ? "" : "disabled") +
-    ">" +
-    (rank >= 5 ? "Максимум" : (rank ? "Прокачать" : "Изучить") + " · +" + next + unit) +
-    "</button></div></div>"
-  );
-}
-
-/* путь от таланта до его требований, для подсветки */
-function talentAncestors(code) {
-  const seen = new Set();
-  const walk = c => {
-    if (seen.has(c)) return;
-    seen.add(c);
-    const t = talentDef(c);
-    if (!t) return;
-    t[9].forEach(walk);
-  };
-  walk(code);
-  return seen;
-}
-
-/* Дерево статичное: пользователь его не двигает и не масштабирует. */
-const treeT = { s: 1, x: 0, y: 0 };
-function clampTreeScale(s) {
-  return Math.min(2.5, Math.max(0.2, s));
-}
-function applyTreeTransform() {
-  const c = document.querySelector(".talent-flow-canvas");
-  if (c) c.style.transform = "translate(" + treeT.x + "px," + treeT.y + "px) scale(" + treeT.s + ")";
-}
-/* вписать дерево в окно и отцентровать (offsetLeft/Top не учитывают transform). */
-function talentNodeBox() {
-  const nodes = [...document.querySelectorAll(".talent-flow-canvas .talent-node-game")];
-  if (!nodes.length) return null;
-  let x0 = Infinity,
-    y0 = Infinity,
-    x1 = -Infinity,
-    y1 = -Infinity;
-  nodes.forEach(n => {
-    const l = parseFloat(n.style.left) || 0,
-      t = parseFloat(n.style.top) || 0,
-      w = n.offsetWidth || 100,
-      h = n.offsetHeight || 100;
-    x0 = Math.min(x0, l);
-    y0 = Math.min(y0, t);
-    x1 = Math.max(x1, l + w);
-    y1 = Math.max(y1, t + h);
-  });
-  return { x0, y0, w: x1 - x0, h: y1 - y0 };
-}
-function resetTreeTransform() {
-  const wrap = document.querySelector(".talent-flow-wrap"),
-    canvas = document.querySelector(".talent-flow-canvas");
-  if (wrap && canvas && wrap.clientWidth && canvas.offsetWidth) {
-    const ww = wrap.clientWidth,
-      wh = wrap.clientHeight || ww,
-      pad = 20,
-      box = talentNodeBox();
-    const bw = box ? box.w : canvas.offsetWidth,
-      bh = box ? box.h : canvas.offsetHeight;
-    const s = clampTreeScale(Math.min(1.4, (ww - pad * 2) / bw, (wh - pad * 2) / bh));
-    const bx = box ? box.x0 + box.w / 2 : canvas.offsetWidth / 2,
-      by = box ? box.y0 + box.h / 2 : canvas.offsetHeight / 2;
-    treeT.s = s;
-    treeT.x = ww / 2 - bx * s - canvas.offsetLeft;
-    treeT.y = wh / 2 - by * s - canvas.offsetTop;
-  } else {
-    treeT.s = 1;
-    treeT.x = 0;
-    treeT.y = 0;
-  }
-  applyTreeTransform();
-}
-/* при повороте телефона или изменении размера окна дерево снова вписывается */
-let treeFitFrame = 0;
-window.addEventListener("resize", () => {
-  const modal = document.getElementById("talentModal");
-  if (!modal || !modal.classList.contains("show")) return;
-  cancelAnimationFrame(treeFitFrame);
-  treeFitFrame = requestAnimationFrame(resetTreeTransform);
-});
-
-/* подсказка при наведении на узел: без клика видно, что даёт талант */
-function showTalentTip(code, node) {
-  const tip = $("talentTip") || document.getElementById("talentTip");
-  if (!tip || !node) return;
-  const t = talentDef(code);
-  if (!t) return;
-  const rank = talentRank(code),
-    stat = t[7],
-    unit = stat && stat.endsWith("_pct") ? "%" : "",
-    target = Array.isArray(t[8]) ? t[8][0] : t[8];
-  const label = (TALENT_STAT_LABELS[stat] || "Эффект") + (target ? " · " + TALENT_TARGET_NAMES[target] : "");
-  const left =
-    rank >= 5
-      ? "изучено до максимума"
-      : rank
-        ? "сейчас " + rank + " " + plural(rank, "ранг", "ранга", "рангов") + " · до максимума " + (5 - rank)
-        : "не изучен · до максимума 5";
-  tip.innerHTML =
-    "<b>" +
-    t[2] +
-    "</b><p>" +
-    t[3] +
-    '</p><div class="talent-tip-eff">' +
-    label +
-    " <b>" +
-    t[6].map(v => "+" + v + unit).join(" / ") +
-    '</b></div><div class="talent-tip-rank">' +
-    left +
-    "</div>";
-  const wrap = document.querySelector(".talent-flow-wrap");
-  if (!wrap) return;
-  const w = wrap.getBoundingClientRect(),
-    r = node.getBoundingClientRect();
-  tip.hidden = false;
-  const tw = tip.offsetWidth || 260,
-    th = tip.offsetHeight || 110;
-  tip.style.left = Math.max(8, Math.min(w.width - tw - 8, r.left - w.left + r.width + 14)) + "px";
-  tip.style.top = Math.max(8, Math.min(w.height - th - 8, r.top - w.top - 10)) + "px";
-}
-function hideTalentTip() {
-  const tip = document.getElementById("talentTip");
-  if (tip && !tip.hidden) {
-    tip.hidden = true;
-    tip.innerHTML = "";
-  }
-}
-
-/* суммарные бонусы, урон и крит */
-function totals() {
-  const total = Object.fromEntries(keys.map(k => [k, 0]));
-  const gearTotal = Object.fromEntries(keys.map(k => [k, 0]));
-  let critChance = 0,
-    critDamage = 0,
-    critGaussChance = 0,
-    critGrenadeChance = 0,
-    critGaussDamage = 0,
-    critGrenadeDamage = 0,
-    noCooldown = 0,
-    cooldown = 0;
-  const addBonuses = x => {
-    const ex = x.extras || x;
-    keys.forEach(k => {
-      const v = x.bonuses[k] || 0;
-      gearTotal[k] += v;
-      total[k] += v;
-    });
-    critChance += ex.critChance || 0;
-    critDamage += ex.critDamage || 0;
-    critGaussChance += ex.critGaussChance || 0;
-    critGrenadeChance += ex.critGrenadeChance || 0;
-    critGaussDamage += ex.critGaussDamage || 0;
-    critGrenadeDamage += ex.critGrenadeDamage || 0;
-    noCooldown += ex.freeNoCooldown || 0;
-    cooldown += ex.cooldown || 0;
-  };
-  state.items.forEach(code => {
-    const x = ITEM_BY_CODE[code];
-    if (x) addBonuses(x);
-  });
-  const arena = arenaBonus(state.arena);
-  keys.forEach(k => (total[k] += arena[k]));
-  const t = talentTotals();
-  keys.forEach(k => (total[k] += t.total[k]));
-  return {
-    total,
-    gearTotal,
-    arena,
-    critChance: critChance + t.critChance,
-    critDamage,
-    critGaussChance,
-    critGrenadeChance,
-    critGaussDamage: critGaussDamage + t.critDamageByWeapon.gauss,
-    critGrenadeDamage: critGrenadeDamage + t.critDamageByWeapon.grenade,
-    critGlDamageTal: t.critDamageByWeapon.gl,
-    noCooldown: noCooldown + t.noCooldown,
-    cooldown: cooldown + t.cooldown,
-    firstFreeHit: t.firstFreeHit,
-    talentTotal: t.total
-  };
-}
+/* суммарные бонусы, урон и крит текущего билда - формулы в src/calc-core.js */
+const totals = () => buildTotals({ gear: state.items, arena: state.arena, talents: state.talents });
 function results(lvl, pre) {
-  const level = clampLevel(lvl === undefined ? $("level").value : lvl),
-    base = baseDamageByLevel(level),
-    T = pre || totals(),
-    r = {};
-  keys.forEach(k => (r[k] = base[k] + T.total[k]));
-  r.critGrenade = T.critChance + T.critGrenadeChance;
-  r.critGl = T.critChance;
-  r.critGauss = T.critChance + T.critGaussChance;
-  /* урон крита = базовая прибавка оружия + снаряжение + таланты */
-  r.critDmgGrenade = BASE_CRIT_DAMAGE.grenade + T.critDamage + T.critGrenadeDamage;
-  r.critDmgGl = BASE_CRIT_DAMAGE.gl + T.critDamage + T.critGlDamageTal;
-  r.critDmgGauss = BASE_CRIT_DAMAGE.gauss + T.critDamage + T.critGaussDamage;
-  r.noCooldown = T.noCooldown;
-  r.cooldown = T.cooldown;
-  r.firstFreeHit = T.firstFreeHit;
-  return r;
+  return buildResults(lvl === undefined ? $("level").value : lvl, pre || totals());
 }
 
-/* подписи для сводки изменений: [ключ, подпись, в процентах?] */
-const RES_META = [
-  ["knife", "Нож"],
-  ["pistol", "Пистолет"],
-  ["auto", "Автомат"],
-  ["grenade", "Граната"],
-  ["gl", "Гранатомёт"],
-  ["gauss", "Гаусс"],
-  ["critDmgGrenade", "Крит гранаты"],
-  ["critDmgGl", "Крит гранатомёта"],
-  ["critDmgGauss", "Крит гаусса"],
-  ["critGl", "Шанс крита", 1],
-  ["noCooldown", "Удар без отката", 1],
-  ["cooldown", "Сокращение отката", 1],
-  ["firstFreeHit", "Первый удар", 1]
-];
 const isZero = (v, pct) => (pct ? Math.round(v * 100) === 0 : v === 0);
 function fmtDelta(v, pct) {
   return (v > 0 ? "+" : "−") + (pct ? Math.abs(Math.round(v * 100)) + "%" : fmt(Math.abs(v)));
-}
-function diffSummary(a, b) {
-  return RES_META.map(([k, l, p]) => ({ l, v: b[k] - a[k], p })).filter(c => !isZero(c.v, c.p));
 }
 function pulse(id, v, pct) {
   const el = $(id);
@@ -476,287 +114,7 @@ function pulse(id, v, pct) {
     el.className = "delta";
   }, 3500);
 }
-let prevResults = null,
-  lastTalentChange = null;
-function changeTalent(code, dir) {
-  const t = talentDef(code),
-    r = talentRank(code);
-  if (!t || (dir > 0 ? !canUpgrade(t) : !(r > 0 && canDowngrade(t)))) return;
-  const before = results();
-  state.talents[code] = r + dir;
-  lastTalentChange = diffSummary(before, results());
-  saveState();
-  render();
-}
-
-let currentTalentBranch = "free_hits",
-  selectedTalentCode = null,
-  talentDetailOpen = false,
-  detailWasOpen = false;
-/* renderTalents пересоздаёт кнопки, поэтому запоминаем, где стоял фокус, и возвращаем его на такую же кнопку */
-const FOCUS_ATTRS = [
-  "data-talent-up",
-  "data-talent-down",
-  "data-select-talent",
-  "data-talent-branch",
-  "data-reset-talents"
-];
-function focusKey() {
-  const a = document.activeElement;
-  if (!a || !a.closest || !a.closest("#talentModal")) return null;
-  for (const at of FOCUS_ATTRS)
-    if (a.hasAttribute(at)) {
-      const v = a.getAttribute(at);
-      return "[" + at + (v ? '="' + v + '"' : "") + "]";
-    }
-  return null;
-}
-function setDetailInert(on) {
-  ["#talentSidebar", ".talent-flow-wrap", ".talent-game-header"].forEach(s => {
-    const el = document.querySelector("#talentModal " + s);
-    if (el) el.inert = on;
-  });
-}
-function renderTalents() {
-  const keep = focusKey();
-  const branches = [
-      { code: "free_hits", name: "Боевая подготовка", desc: "Ветка бесплатных ударов по боссам" },
-      { code: "paid_hits", name: "Арсенал", desc: "Ветка платных ударов по боссам" }
-    ],
-    branch = branches.find(b => b.code === currentTalentBranch) || branches[0],
-    talents = TALENTS.filter(t => t[1] === branch.code);
-  if (selectedTalentCode && !talents.some(t => t[0] === selectedTalentCode)) {
-    selectedTalentCode = null;
-    talentDetailOpen = false;
-  }
-  const pathSet = selectedTalentCode ? talentAncestors(selectedTalentCode) : new Set();
-  const maxX = Math.max(
-      0,
-      ...talents.map(t => {
-        const a = talents.filter(x => x[4] === t[4]);
-        return Math.abs((a.indexOf(t) - (a.length - 1) / 2) * 164);
-      })
-    ),
-    graphWidth = Math.max(760, Math.ceil(maxX * 2 + 100 + 40)),
-    nodePos = new Map();
-  talents.forEach(t => {
-    const a = talents.filter(x => x[4] === t[4]),
-      i = a.indexOf(t);
-    nodePos.set(t[0], { x: graphWidth / 2 + (i - (a.length - 1) / 2) * 164 - 50, y: 28 + (t[4] - 1) * 148 });
-  });
-  const edges = talents
-    .flatMap(t =>
-      t[9].map(req => {
-        const a = nodePos.get(req),
-          b = nodePos.get(t[0]);
-        if (!a || !b) return "";
-        const x1 = a.x + 50,
-          y1 = a.y + 100,
-          x2 = b.x + 50,
-          y2 = b.y,
-          mid = (y1 + y2) / 2,
-          met = talentRank(req) >= 5,
-          onPath = pathSet.has(t[0]),
-          cls = onPath ? "te-path" : met ? "te-met" : "te-off";
-        return (
-          '<path d="M' +
-          x1 +
-          " " +
-          y1 +
-          " L " +
-          x1 +
-          " " +
-          mid +
-          " L " +
-          x2 +
-          " " +
-          mid +
-          " L " +
-          x2 +
-          " " +
-          y2 +
-          '" class="' +
-          cls +
-          '" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>'
-        );
-      })
-    )
-    .join("");
-  const nodes = talents
-    .map(t => {
-      const p = nodePos.get(t[0]),
-        rank = talentRank(t[0]),
-        status = talentNodeStatus(t);
-      return (
-        '<button type="button" class="talent-node-game ' +
-        status +
-        (t[0] === selectedTalentCode ? " selected" : "") +
-        (pathSet.has(t[0]) ? " on-path" : "") +
-        '" data-select-talent="' +
-        t[0] +
-        '" style="left:' +
-        p.x +
-        "px;top:" +
-        p.y +
-        'px"><span class="talent-node-art">' +
-        talentNodeIcon(t) +
-        '</span><span class="talent-node-rank">' +
-        rank +
-        '/5</span><span class="talent-node-bar"><i style="width:' +
-        rank * 20 +
-        '%"></i></span></button>'
-      );
-    })
-    .join("");
-  $("talentFlow").innerHTML =
-    '<div class="talent-flow-canvas" style="width:' +
-    graphWidth +
-    'px;height:760px"><svg class="talent-edge-layer" width="' +
-    graphWidth +
-    '" height="760" viewBox="0 0 ' +
-    graphWidth +
-    ' 760">' +
-    edges +
-    "</svg>" +
-    nodes +
-    "</div>";
-  const spent = spentTalentPoints(),
-    pct = Math.min(100, Math.round((spent / MAX_TALENT_POINTS) * 100));
-  /* прогресс по ветвям: сколько очков вложено из возможных */
-  const branchSpent = {},
-    branchMax = {};
-  TALENTS.forEach(t => {
-    branchSpent[t[1]] = (branchSpent[t[1]] || 0) + (talentRank(t[0]) || 0);
-    branchMax[t[1]] = (branchMax[t[1]] || 0) + 5;
-  });
-  const maxedCount = TALENTS.filter(t => talentRank(t[0]) >= 5).length;
-  const last =
-    lastTalentChange && lastTalentChange.length
-      ? '<div class="talent-last"><small>Последнее изменение</small><div class="talent-last-list">' +
-        lastTalentChange
-          .map(
-            c => '<span class="' + (c.v > 0 ? "up" : "down") + '">' + c.l + " <b>" + fmtDelta(c.v, c.p) + "</b></span>"
-          )
-          .join("") +
-        "</div></div>"
-      : "";
-  /* кнопки в .talent-side-footer, на телефоне он липнет ко дну панели (styles.css) */
-  /* легенда состояний живёт в панели, а не поверх дерева: иначе она перекрывает крайние узлы */
-  const legend =
-    '<div class="talent-legend" aria-hidden="true"><span><i class="lg-maxed"></i>Изучен полностью</span><span><i class="lg-ready"></i>Можно прокачать</span><span><i class="lg-open"></i>Открыт, очков нет</span><span><i class="lg-locked"></i>Закрыт требованием</span></div>';
-  $("talentSidebar").innerHTML =
-    /* «Таланты N / 135» уже есть в шапке окна - здесь не повторяем */
-    '<div class="talent-gauge" style="--pct:' +
-    pct +
-    '"><div class="talent-gauge-ticks"></div><div class="talent-gauge-value"><b>' +
-    Math.max(0, MAX_TALENT_POINTS - spent) +
-    "</b><small>свободно</small></div></div>" +
-    '<div class="talent-side-stats"><div><b>' +
-    spent +
-    "</b><small>распределено</small></div><div><b>" +
-    maxedCount +
-    "<em>/" +
-    TALENTS.length +
-    "</em></b><small>изучено полностью</small></div></div>" +
-    last +
-    /* ветки: кнопка выбора сразу показывает, сколько очков в ней вложено */
-    '<div class="talent-branch-tabs">' +
-    branches
-      .map(b => {
-        const got = branchSpent[b.code] || 0,
-          all = branchMax[b.code] || 1;
-        return (
-          '<button type="button" class="' +
-          (b.code === currentTalentBranch ? "active" : "") +
-          '" aria-pressed="' +
-          (b.code === currentTalentBranch) +
-          '" data-talent-branch="' +
-          b.code +
-          '"><span class="tb-name">' +
-          b.name +
-          '</span><b class="tb-count">' +
-          got +
-          " / " +
-          all +
-          '</b><small class="tb-desc">' +
-          b.desc +
-          '</small><span class="talent-branch-bar"><i style="width:' +
-          Math.round((got / all) * 100) +
-          '%"></i></span></button>'
-        );
-      })
-      .join("") +
-    "</div>" +
-    legend +
-    '<div class="talent-side-hint">Нажмите на талант в дереве, чтобы открыть описание и прокачку</div><div class="talent-side-footer"><button type="button" class="talent-hide talent-hide-reset" data-reset-talents ' +
-    (spent ? "" : "disabled") +
-    ">↻ Сбросить таланты</button></div>";
-  const detailOverlay = $("talentDetailOverlay"),
-    detailOn = talentDetailOpen && !!selectedTalentCode;
-  if (detailOn) {
-    const dt = talentDef(selectedTalentCode);
-    detailOverlay.innerHTML =
-      '<div class="talent-detail-backdrop" data-close-talent-detail></div><div class="talent-detail-modal" role="dialog" aria-modal="true" aria-label="' +
-      dt[2].replace(/"/g, "&quot;") +
-      '" tabindex="-1">' +
-      renderTalentDetails(dt) +
-      "</div>";
-    detailOverlay.classList.add("show");
-  } else {
-    detailOverlay.classList.remove("show");
-    detailOverlay.innerHTML = "";
-  }
-  $("modalSpentPoints").textContent = spent;
-  $("modalMaxPoints").textContent = MAX_TALENT_POINTS;
-  $("talentPointsBadge").textContent = spent + " / " + MAX_TALENT_POINTS;
-  applyTreeTransform();
-
-  if ($("talentModal").classList.contains("show")) {
-    const box = detailOverlay.querySelector(".talent-detail-modal");
-    setDetailInert(detailOn);
-    if (detailOn && !detailWasOpen) box.focus({ preventScroll: true });
-    else if (!detailOn && detailWasOpen) {
-      const n = document.querySelector('#talentFlow [data-select-talent="' + selectedTalentCode + '"]');
-      if (n) n.focus({ preventScroll: true });
-    } else if (keep) {
-      const el = document.querySelector("#talentModal " + keep);
-      if (el && !el.disabled) el.focus({ preventScroll: true });
-      else if (box) box.focus({ preventScroll: true });
-    }
-  }
-  detailWasOpen = detailOn;
-}
-function openTalents() {
-  lastTalentChange = null;
-  $("talentModal").classList.add("show");
-  $("talentModal").setAttribute("aria-hidden", "false");
-  renderTalents();
-  resetTreeTransform();
-}
-function closeTalents() {
-  $("talentModal").classList.remove("show");
-  $("talentModal").setAttribute("aria-hidden", "true");
-  talentDetailOpen = false;
-}
-function resetTalents() {
-  if (!spentTalentPoints()) return;
-  askConfirm({
-    title: "Сбросить таланты?",
-    text: "Все очки талантов вернутся в запас. Уровень и снаряжение останутся без изменений.",
-    ok: "Сбросить таланты"
-  }).then(yes => {
-    if (yes) doResetTalents();
-  });
-}
-function doResetTalents() {
-  state.talents = {};
-  selectedTalentCode = null;
-  talentDetailOpen = false;
-  lastTalentChange = null;
-  saveState();
-  render();
-}
-
+let prevResults = null;
 /* бонусы всех комплектов и вещей для справки */
 const GEAR_BONUS_LABELS = {
   knife: "Нож",
@@ -797,66 +155,6 @@ const GEAR_EXTRA = [
   "freeNoCooldown",
   "cooldown"
 ];
-function gearBonusTags(x) {
-  const tags = [];
-  keys.forEach(k => {
-    const v = x.bonuses && x.bonuses[k];
-    if (v) tags.push({ label: GEAR_BONUS_LABELS[k], value: "+" + fmt(v) });
-  });
-  GEAR_EXTRA.forEach(k => {
-    const v = x[k];
-    if (v)
-      tags.push({
-        label: GEAR_BONUS_LABELS[k],
-        value: "+" + (GEAR_BONUS_PCT.has(k) ? Math.round(v * 100) + "%" : fmt(v))
-      });
-  });
-  return tags;
-}
-function gearInfoCard(x, extraClass) {
-  const tags = gearBonusTags(x);
-  return (
-    '<div class="gear-info-card' +
-    (extraClass ? " " + extraClass : "") +
-    '"><b>' +
-    x.name +
-    '</b><div class="gear-info-tags">' +
-    (tags.length
-      ? tags.map(t => '<span class="gear-info-tag">' + t.label + " <b>" + t.value + "</b></span>").join("")
-      : '<span class="gear-info-tag">Нет бонусов</span>') +
-    "</div></div>"
-  );
-}
-function gearTotalItem() {
-  const sum = { name: "Сумма всех бонусов", bonuses: {} };
-  [...SETS, ...ITEMS].forEach(x => {
-    keys.forEach(k => {
-      sum.bonuses[k] = (sum.bonuses[k] || 0) + ((x.bonuses && x.bonuses[k]) || 0);
-    });
-    GEAR_EXTRA.forEach(k => {
-      sum[k] = (sum[k] || 0) + (x[k] || 0);
-    });
-  });
-  return sum;
-}
-/* базовый список; окно «Бонусы снаряжения» дорисовывает polish.js (полоски, фильтр, группы) */
-/* окно «Бонусы снаряжения»: polish.js подставляет свой вид через setGearInfoRenderer */
-let renderGearInfo = defaultRenderGearInfo;
-function setGearInfoRenderer(fn) {
-  renderGearInfo = fn;
-}
-/* старый рендерер оставлен для polish.js; новое окно рисует renderEquipment() */
-void renderGearInfo;
-function defaultRenderGearInfo() {
-  $("gearInfoBody").innerHTML =
-    '<div class="gear-info-group-title">Комплекты</div>' +
-    SETS.map(x => gearInfoCard(x)).join("") +
-    '<div class="gear-info-group-title">Одиночные вещи</div>' +
-    ITEMS.map(x => gearInfoCard(x)).join("") +
-    '<div class="gear-info-total-wrap">' +
-    gearInfoCard(gearTotalItem(), "gear-info-total") +
-    "</div>";
-}
 function openGearInfo() {
   $("gearInfoModal").classList.add("show");
   $("gearInfoModal").setAttribute("aria-hidden", "false");
@@ -868,227 +166,6 @@ function closeGearInfo() {
   $("gearInfoModal").classList.remove("show");
   $("gearInfoModal").setAttribute("aria-hidden", "true");
   if ($("openEquipment")) $("openEquipment").focus({ preventScroll: true });
-}
-
-/* расчёт по жетонам */
-const TOKEN_PRICES = { grenade: 3, gl: 5, gauss: 15 },
-  TOKEN_KEY = "gameHelperTokens",
-  TOKEN_WEAPONS = [
-    ["grenade", "Граната"],
-    ["gl", "Гранатомёт"],
-    ["gauss", "Гаусс"]
-  ],
-  TOKEN_CRIT = {
-    grenade: ["critGrenade", "critDmgGrenade"],
-    gl: ["critGl", "critDmgGl"],
-    gauss: ["critGauss", "critDmgGauss"]
-  };
-const tokenInt = id => Math.max(0, Math.floor(Number(String($(id).value).replace(/\D/g, "")) || 0));
-function saveTokens() {
-  try {
-    localStorage.setItem(TOKEN_KEY, JSON.stringify({ count: $("tokenCount").value, target: $("tokenTarget").value }));
-  } catch {}
-}
-function loadTokens() {
-  try {
-    const d = JSON.parse(localStorage.getItem(TOKEN_KEY) || "null");
-    if (!d) return;
-    if (d.count !== undefined) $("tokenCount").value = d.count;
-    if (d.target !== undefined) $("tokenTarget").value = d.target;
-    ["tokenCount", "tokenTarget"].forEach(id => window.__groupDigits && window.__groupDigits($(id)));
-  } catch {}
-}
-/* урон за удар и средний урон с критом: урон + шанс * бонус */
-function tokenWeaponStats() {
-  const r = results();
-  return TOKEN_WEAPONS.map(([k, name]) => {
-    const dmg = r[k],
-      chance = Math.min(1, r[TOKEN_CRIT[k][0]]),
-      bonus = r[TOKEN_CRIT[k][1]];
-    return { key: k, name, price: TOKEN_PRICES[k], dmg, chance, bonus, avg: dmg + chance * bonus };
-  });
-}
-/* карточки оружия: урон за жетон, полоска выгоды и три строки расчёта. */
-const TOKEN_ICON_CLASS = { grenade: "grenade", gl: "ubgl", gauss: "gauss" };
-function renderTokens() {
-  const tokens = tokenInt("tokenCount"),
-    target = tokenInt("tokenTarget"),
-    st = tokenWeaponStats();
-  const bestCrit = Math.max.apply(
-    null,
-    st.map(w => w.avg / w.price)
-  );
-  $("tokCards").innerHTML = st
-    .map(w => {
-      const perToken = w.avg / w.price,
-        best = Math.abs(perToken - bestCrit) < 1e-9;
-      const shots = Math.floor(tokens / w.price);
-      const needed = target > 0 ? Math.ceil(target / w.avg) * w.price : 0;
-      const width = Math.max(4, Math.round((perToken / bestCrit) * 100));
-      return (
-        '<article class="tok-card' +
-        (best ? " best" : "") +
-        '">' +
-        (best ? '<span class="tok-best">выгоднее</span>' : "") +
-        '<div class="tok-card-head"><span class="tok-wicon weapon-' +
-        TOKEN_ICON_CLASS[w.key] +
-        '"></span><div><b>' +
-        w.name +
-        "</b><small>" +
-        w.price +
-        " " +
-        plural(w.price, "жетон", "жетона", "жетонов") +
-        " за удар · крит " +
-        (w.chance * 100).toFixed(0) +
-        "% / +" +
-        fmt(w.bonus) +
-        "</small></div></div>" +
-        '<div class="tok-card-big">' +
-        fmtD(perToken) +
-        '</div><div class="tok-card-unit">урона за жетон</div>' +
-        '<div class="tok-card-bar"><i style="width:' +
-        width +
-        '%"></i></div>' +
-        '<div class="tok-card-rows">' +
-        "<div><span>" +
-        fmt(tokens) +
-        " " +
-        plural(tokens, "жетон", "жетона", "жетонов") +
-        "</span><b>" +
-        fmt(shots) +
-        " " +
-        plural(shots, "удар", "удара", "ударов") +
-        "</b></div>" +
-        "<div><span>это урона</span><b>" +
-        fmt(shots * w.avg) +
-        "</b></div>" +
-        '<div class="acc"><span>на ' +
-        fmt(target) +
-        " урона нужно</span><b>" +
-        fmt(needed) +
-        " " +
-        plural(needed, "жетон", "жетона", "жетонов") +
-        "</b></div>" +
-        "</div></article>"
-      );
-    })
-    .join("");
-}
-/* «Мой арсенал»: сколько у игрока гранат, гранатомётов и гауссов -> урон каждого и общий (средний с критом). */
-const ARSENAL_KEY = "gameHelperArsenal",
-  ARSENAL_MAX = 999999,
-  ARSENAL_COLOR = { grenade: "#54bfff", gl: "#f2b544", gauss: "#3fdc8a" };
-let arsenal = { grenade: 0, gl: 0, gauss: 0 },
-  tokTab = "tokens";
-function saveArsenal() {
-  try {
-    localStorage.setItem(ARSENAL_KEY, JSON.stringify({ count: arsenal, tab: tokTab }));
-  } catch {}
-}
-function loadArsenal() {
-  try {
-    const d = JSON.parse(localStorage.getItem(ARSENAL_KEY) || "null");
-    if (!d) return;
-    if (d.count)
-      TOKEN_WEAPONS.forEach(([k]) => {
-        const n = Math.floor(Number(d.count[k]) || 0);
-        arsenal[k] = Math.max(0, Math.min(ARSENAL_MAX, n));
-      });
-    if (d.tab === "arsenal") tokTab = "arsenal";
-  } catch {}
-}
-function setTokTab(tab) {
-  tokTab = tab === "arsenal" ? "arsenal" : "tokens";
-  document.querySelectorAll("[data-tok-tab]").forEach(b => {
-    const on = b.dataset.tokTab === tokTab;
-    b.classList.toggle("on", on);
-    b.setAttribute("aria-selected", on ? "true" : "false");
-    b.tabIndex = on ? 0 : -1;
-  });
-  $("tokPaneTokens").hidden = tokTab !== "tokens";
-  $("tokPaneArsenal").hidden = tokTab !== "arsenal";
-  if (tokTab === "arsenal") renderArsenal();
-  else renderTokens();
-}
-
-function renderArsenal() {
-  const st = tokenWeaponStats();
-  if (!$("arsList").children.length)
-    $("arsList").innerHTML = st
-      .map(
-        w =>
-          '<div class="ars-item" style="--c:' +
-          ARSENAL_COLOR[w.key] +
-          '"><span class="tok-wicon weapon-' +
-          TOKEN_ICON_CLASS[w.key] +
-          '" aria-hidden="true"></span><div class="ars-name"><b>' +
-          w.name +
-          '</b><small id="arsPer-' +
-          w.key +
-          '"></small></div><div class="ars-step"><button type="button" data-ars-step="' +
-          w.key +
-          '" data-d="-1" aria-label="Меньше: ' +
-          w.name +
-          '">−</button><input id="ars-' +
-          w.key +
-          '" data-ars="' +
-          w.key +
-          '" type="text" inputmode="numeric" autocomplete="off" maxlength="7" data-group-digits aria-label="Сколько у вас: ' +
-          w.name +
-          '"><button type="button" data-ars-step="' +
-          w.key +
-          '" data-d="1" aria-label="Больше: ' +
-          w.name +
-          '">+</button></div><div class="ars-sub"><span id="arsShare-' +
-          w.key +
-          '"></span><em id="arsDmg-' +
-          w.key +
-          '"></em></div></div>'
-      )
-      .join("");
-  const rows = st.map(w => ({ w, dmg: arsenal[w.key] * w.avg }));
-  const total = rows.reduce((s, r) => s + r.dmg, 0);
-  let deg = 0;
-  const parts = [];
-  rows.forEach(({ w, dmg }) => {
-    const inp = $("ars-" + w.key),
-      val = arsenal[w.key] ? fmt(arsenal[w.key]) : "";
-    if (document.activeElement !== inp && inp.value !== val) inp.value = val;
-    $("arsPer-" + w.key).textContent =
-      fmt(w.avg) + " урона за удар" + (w.chance > 0 ? " · крит " + (w.chance * 100).toFixed(0) + "%" : "");
-    $("arsShare-" + w.key).textContent = total > 0 ? Math.round((dmg / total) * 100) + "% от общего" : "-";
-    $("arsDmg-" + w.key).textContent = fmt(dmg);
-    if (dmg > 0) {
-      const to = deg + (dmg / total) * 360;
-      parts.push(ARSENAL_COLOR[w.key] + " " + deg.toFixed(2) + "deg " + to.toFixed(2) + "deg");
-      deg = to;
-    }
-  });
-  $("arsSum").innerHTML =
-    '<div class="ars-donut' +
-    (total > 0 ? "" : " empty") +
-    '"' +
-    (parts.length ? ' style="background:conic-gradient(' + parts.join(",") + ')"' : "") +
-    "><div><small>Всего урона</small><strong>" +
-    fmt(total) +
-    "</strong></div></div>" +
-    '<div class="ars-leg">' +
-    st.map(w => '<span style="--c:' + ARSENAL_COLOR[w.key] + '"><i></i>' + w.name + "</span>").join("") +
-    "</div>";
-}
-function setArsenal(key, n) {
-  arsenal[key] = Math.max(0, Math.min(ARSENAL_MAX, Math.floor(n) || 0));
-  saveArsenal();
-  renderArsenal();
-}
-function openTokens() {
-  $("tokensModal").classList.add("show");
-  $("tokensModal").setAttribute("aria-hidden", "false");
-  setTokTab(tokTab);
-}
-function closeTokens() {
-  $("tokensModal").classList.remove("show");
-  $("tokensModal").setAttribute("aria-hidden", "true");
 }
 
 /* карточки урона */
@@ -1104,10 +181,25 @@ const CARDS = {
     ["auto", "Автомат", "rifle"]
   ]
 };
+/* составляющие урона: [класс ячейки, подпись, короткая подпись для телефона, начало id] - в том же порядке, что и полоса */
+const BD_PARTS = [
+  ["", "База", "", "base"],
+  ["bd-level", "Уровень", "", "level"],
+  ["bd-gear", "Снаряжение", "Вещи", "gear"],
+  ["bd-arena", "Арена", "", "arena"],
+  ["bd-talent", "Таланты", "", "talentOut"]
+];
 function cardMarkup([k, name, icon], withCrit) {
   const K = cap(k),
-    cellHtml = (cls, label, id) =>
-      '<div class="bd-cell ' + cls + '"><small>' + label + '</small><em id="' + id + K + '">0</em></div>';
+    cellHtml = ([cls, label, short, id]) =>
+      '<div class="bd-cell ' +
+      cls +
+      '"><small>' +
+      (short ? '<span class="bd-long">' + label + '</span><span class="bd-short">' + short + "</span>" : label) +
+      '</small><em id="' +
+      id +
+      K +
+      '">0</em></div>';
   return (
     '<article class="damage-card"><div class="weapon-icon weapon-' +
     icon +
@@ -1116,22 +208,29 @@ function cardMarkup([k, name, icon], withCrit) {
     '</h3><strong id="result' +
     K +
     '">0</strong>' +
-    (withCrit ? "" : '<span class="first-hit" id="first' + K + '">(0)</span>') +
+    /* первый бесплатный удар: значок и число, пояснение - при наведении или нажатии (как у «?»), видно при вкачанной «Засаде» */
+    (withCrit
+      ? ""
+      : '<button type="button" class="first-hit" hidden aria-expanded="false" aria-describedby="fhTip' +
+        K +
+        '"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg><span class="sr-only">Первый удар: </span><b id="first' +
+        K +
+        '">0</b><span class="fh-tip" id="fhTip' +
+        K +
+        '" role="tooltip"></span></button>') +
     '</div><i class="delta" id="delta' +
     K +
-    '"></i><div class="breakdown">' +
-    cellHtml("", "База", "base") +
-    cellHtml("bd-level", "Уровень", "level") +
-    cellHtml("bd-gear", "Снаряжение", "gear") +
-    cellHtml("bd-arena", "Арена", "arena") +
-    cellHtml("bd-talent", "Таланты", "talentOut") +
+    '"></i><div class="dmg-bar" id="bar' +
+    K +
+    '" aria-hidden="true"><i class="s0"></i><i class="s1"></i><i class="s2"></i><i class="s-arena"></i><i class="s3"></i></div><div class="breakdown">' +
+    BD_PARTS.map(cellHtml).join("") +
     "</div>" +
     (withCrit
-      ? '<span class="crit-chip"><span class="crit-chip-label">Крит*</span><em id="crit' +
+      ? '<span class="crit-chip"><span class="crit-chip-label">Крит</span><em id="crit' +
         K +
-        '">0%</em><span class="crit-chip-sep">/</span><em id="critDmg' +
+        '">0%</em><span class="crit-chip-sep">·</span><em id="critDmg' +
         K +
-        '">0</em></span>'
+        '">+0</em><span class="crit-chip-unit">к удару</span></span>'
       : "") +
     "</article>"
   );
@@ -1391,20 +490,46 @@ function calc() {
     base = baseDamageByLevel(level),
     baseZero = baseDamageByLevel(0),
     r = results(undefined, T);
+  if ($("levelRange")) $("levelRange").value = level;
   keys.forEach(k => {
     const K = cap(k);
-    set("base" + K, fmt(baseZero[k]));
-    set("level" + K, fmt(base[k] - baseZero[k]));
-    set("gear" + K, fmt(T.gearTotal[k]));
-    set("arena" + K, fmt(T.arena[k]));
-    set("talentOut" + K, fmt(tal[k]));
+    /* составляющие урона (порядок BD_PARTS): ячейки под числом и полоса с теми же долями */
+    const parts = [baseZero[k], base[k] - baseZero[k], T.gearTotal[k], T.arena[k], tal[k]],
+      sum = parts.reduce((a, b) => a + b, 0) || 1,
+      bar = $("bar" + K);
+    parts.forEach((v, i) => {
+      const id = BD_PARTS[i][3] + K,
+        el = $(id),
+        /* подсказка при наведении: «Снаряжение: 612 (40%)» - и на ячейке, и на её части полосы */
+        tip = BD_PARTS[i][1] + ": " + fmt(v) + " (" + Math.round((v / sum) * 100) + "%)";
+      set(id, fmt(v));
+      if (el) {
+        el.parentElement.classList.toggle("is-zero", !v);
+        el.parentElement.title = tip;
+      }
+      if (bar) {
+        bar.children[i].style.width = (v / sum) * 100 + "%";
+        bar.children[i].title = tip;
+      }
+    });
     set("result" + K, fmt(r[k]), true);
+    set("dock" + K, fmt(r[k]));
   });
   /* первый бесплатный удар: итоговый урон плюс процентный бонус таланта */
-  ["knife", "pistol", "auto"].forEach(k => set("first" + cap(k), "(" + fmt(r[k] * (1 + r.firstFreeHit)) + ")"));
+  /* видно только при вкачанной «Засаде»: без неё первый удар равен обычному */
+  ["knife", "pistol", "auto"].forEach(k => {
+    const el = $("first" + cap(k));
+    set("first" + cap(k), fmt(firstFreeHitDamage(r[k], r.firstFreeHit)));
+    if (!el) return;
+    el.parentElement.hidden = !r.firstFreeHit;
+    set(
+      "fhTip" + cap(k),
+      "Урон первого бесплатного удара с талантом «Засада» (+" + (r.firstFreeHit * 100).toFixed(0) + "%)"
+    );
+  });
   ["Grenade", "Gl", "Gauss"].forEach(K => {
     set("crit" + K, (r["crit" + K] * 100).toFixed(0) + "%");
-    set("critDmg" + K, fmt(r["critDmg" + K]));
+    set("critDmg" + K, "+" + fmt(r["critDmg" + K]));
     /* пока шанса крита нет, а урон крита только базовый, плашка приглушённая, а не тревожно-красная */
     const chip = $("crit" + K) && $("crit" + K).closest(".crit-chip");
     if (chip) chip.classList.toggle("is-zero", !r["crit" + K] && r["critDmg" + K] <= BASE_CRIT_DAMAGE[K.toLowerCase()]);
@@ -1441,7 +566,10 @@ function levelHint(raw) {
 }
 function render() {
   updateEquipmentSummary();
-  renderTalents();
+  $("talentPointsBadge").textContent = spentTalentPoints() + " / " + MAX_TALENT_POINTS;
+  /* дерево перерисовывается, только пока окно открыто; при открытии оно рисуется заново */
+  const t = talentsUI.now();
+  if (t && isShown("talentModal")) t.render();
   calc();
 }
 function showToast(text, kind) {
@@ -1467,213 +595,11 @@ function buildHash() {
 }
 /* разбор билда - src/calc-core.js */
 const parseBuild = raw => parseBuildCore(raw);
-/* расчёт чужого билда: на время подменяем состояние и возвращаем как было */
-function resultsFor(b) {
-  const keep = { items: state.items, arena: state.arena, talents: state.talents };
-  state.items = new Set(b.gear);
-  state.arena = b.arena;
-  state.talents = b.talents;
-  try {
-    return results(b.level);
-  } finally {
-    Object.assign(state, keep);
-  }
-}
+/* расчёт чужого билда */
+const resultsFor = b => buildResults(b.level, buildTotals(b));
 
-/* сравнение: второй билд хранится отдельно и не трогает основной */
+/* сравнение: второй билд хранится отдельно и не трогает основной (окно - src/calc-compare.js) */
 const CMP_KEY = "gameHelperCompare";
-let cmpBuild = null;
-function saveCompare() {
-  try {
-    if (cmpBuild) localStorage.setItem(CMP_KEY, buildHashOf(cmpBuild));
-    else localStorage.removeItem(CMP_KEY);
-  } catch {}
-}
-function loadCompare() {
-  try {
-    const h = localStorage.getItem(CMP_KEY);
-    if (h) cmpBuild = parseBuild(h);
-  } catch {}
-}
-const CMP_GROUPS = [
-  [
-    "⚔ Урон за удар",
-    [
-      ["knife", "Нож"],
-      ["pistol", "Пистолет"],
-      ["auto", "Автомат"],
-      ["grenade", "Граната"],
-      ["gl", "Гранатомёт"],
-      ["gauss", "Гаусс"]
-    ]
-  ],
-  [
-    "✦ Крит",
-    [
-      ["critDmgGrenade", "Урон крита, граната"],
-      ["critDmgGl", "Урон крита, гранатомёт"],
-      ["critDmgGauss", "Урон крита, гаусс"],
-      ["critGrenade", "Шанс крита, граната", 1],
-      ["critGl", "Шанс крита, гранатомёт", 1],
-      ["critGauss", "Шанс крита, гаусс", 1]
-    ]
-  ],
-  [
-    "◷ Дополнительно",
-    [
-      ["noCooldown", "Удар без отката", 1],
-      ["cooldown", "Сокращение отката", 1],
-      ["firstFreeHit", "Первый бесплатный удар", 1]
-    ]
-  ]
-];
-const sumRanks = t => Object.values(t).reduce((a, b) => a + b, 0);
-/* у большего значения зелёная стрелка вверх, у меньшего красная вниз, рядом на сколько; поровну - без отметок. */
-function cmpRow(label, x, y, pct) {
-  const d = Math.abs(y - x),
-    eq = d < (pct ? 0.005 : 0.5),
-    show = v => (pct ? Math.round(v * 100) + "%" : fmt(v)),
-    gap = pct ? Math.round(d * 100) + "%" : fmt(d);
-  const total = x + y || 1,
-    wa = Math.max(4, Math.round((x / total) * 100)),
-    wb = Math.max(4, 100 - wa);
-  const cell = (v, hi, w) =>
-    eq
-      ? '<td class="cmp-cell"><span class="cmp-v">' + show(v) + "</span></td>"
-      : '<td class="cmp-cell ' +
-        (hi ? "cmp-up" : "cmp-down") +
-        '"><span class="cmp-v">' +
-        show(v) +
-        "</span>" +
-        '<i class="cmp-arr">' +
-        (hi ? "▲" : "▼") +
-        " " +
-        gap +
-        '</i><span class="cmp-bar"><i style="width:' +
-        w +
-        '%"></i></span></td>';
-  return (
-    '<tr class="' +
-    (eq ? "cmp-eq" : "") +
-    '"><th scope="row">' +
-    label +
-    "</th>" +
-    cell(x, x > y, wa) +
-    cell(y, y > x, wb) +
-    "</tr>"
-  );
-}
-const cmpTags = (arr, cls) => arr.map(t => '<span class="gear-info-tag cmp-tag ' + cls + '">' + t + "</span>").join("");
-/* сводка сверху: уровень, очки талантов и сколько собрано снаряжения */
-function cmpHead(a, b) {
-  const gear = x => x.gear.length,
-    total = ALL_ITEMS.length;
-  const card = (cls, title, x) =>
-    '<div class="cmp-card ' +
-    cls +
-    '"><small>' +
-    title +
-    "</small><b>" +
-    x.level +
-    " уровень</b>" +
-    "<span>" +
-    sumRanks(x.talents) +
-    " " +
-    plural(sumRanks(x.talents), "очко", "очка", "очков") +
-    " талантов</span>" +
-    "<span>снаряжение " +
-    gear(x) +
-    " из " +
-    total +
-    "</span><span>арена " +
-    x.arena +
-    " очков</span></div>";
-  return (
-    '<div class="cmp-head">' +
-    card("a", "Ваш билд", a) +
-    '<div class="cmp-vs">против</div>' +
-    card("b", "Другой билд", b) +
-    "</div>"
-  );
-}
-function renderCompare() {
-  const body = $("compareBody");
-  $("cmpClear").disabled = !cmpBuild;
-  if (!cmpBuild) {
-    body.innerHTML = '<p class="cmp-note">Пока не с чем сравнивать. Вставьте ссылку на билд в поле выше.</p>';
-    return;
-  }
-  const a = currentBuild(),
-    b = cmpBuild,
-    ra = results(),
-    rb = resultsFor(b);
-  let rows =
-    '<tr class="cmp-group"><td colspan="3">★ Общее</td></tr>' +
-    cmpRow("Уровень", a.level, b.level) +
-    cmpRow("Очки талантов", sumRanks(a.talents), sumRanks(b.talents)) +
-    cmpRow("Снаряжение", a.gear.length, b.gear.length) +
-    cmpRow("Арена", a.arena, b.arena);
-  CMP_GROUPS.forEach(([title, list]) => {
-    rows +=
-      '<tr class="cmp-group"><td colspan="3">' +
-      title +
-      "</td></tr>" +
-      list.map(([k, l, p]) => cmpRow(l, ra[k], rb[k], p)).join("");
-  });
-  const only = (x, y) =>
-    x
-      .filter(code => !y.includes(code))
-      .map(code => ITEM_BY_CODE[code] && ITEM_BY_CODE[code].name)
-      .filter(Boolean);
-  const mine = only(a.gear, b.gear),
-    theirs = only(b.gear, a.gear);
-  const tal = TALENTS.filter(t => (a.talents[t[0]] || 0) !== (b.talents[t[0]] || 0)).map(t => {
-    const x = a.talents[t[0]] || 0,
-      y = b.talents[t[0]] || 0;
-    return { t: t[2] + " " + x + " → " + y, cls: y > x ? "b" : "a" };
-  });
-  const block = (title, html) =>
-    html
-      ? '<div class="cmp-diff-row"><small>' + title + '</small><div class="gear-info-tags">' + html + "</div></div>"
-      : "";
-  const diff =
-    block("Снаряжение только у вас", cmpTags(mine, "a")) +
-    block("Снаряжение только у другого билда", cmpTags(theirs, "b")) +
-    block("Таланты (ваш → другого билда)", tal.map(x => cmpTags([x.t], x.cls)).join(""));
-  body.innerHTML =
-    cmpHead(a, b) +
-    '<table class="data-table cmp-table"><colgroup><col class="cmp-c0"><col><col></colgroup><thead><tr><th>Параметр</th>' +
-    '<th class="cmp-h-a"><i class="cmp-dot"></i>Ваш билд</th><th class="cmp-h-b"><i class="cmp-dot"></i>Другой билд</th></tr></thead><tbody>' +
-    rows +
-    "</tbody></table>" +
-    '<p class="cmp-note">▲ больше, ▼ меньше; рядом показано, на сколько, а полоска - насколько значение больше второго билда.</p>' +
-    '<details class="cmp-diff"' +
-    (diff ? " open" : "") +
-    "><summary>Что отличается</summary>" +
-    (diff || "<p>Снаряжение и таланты совпадают.</p>") +
-    "</details>";
-}
-function openCompare() {
-  $("compareModal").classList.add("show");
-  $("compareModal").setAttribute("aria-hidden", "false");
-  renderCompare();
-}
-function closeCompare() {
-  $("compareModal").classList.remove("show");
-  $("compareModal").setAttribute("aria-hidden", "true");
-}
-function loadCmpFromInput() {
-  const v = $("cmpInput").value.trim(),
-    b = v && parseBuild(v);
-  if (!b) {
-    showToast("Не похоже на ссылку на билд");
-    return;
-  }
-  cmpBuild = b;
-  saveCompare();
-  $("cmpInput").value = "";
-  renderCompare();
-}
 function fallbackCopy(s) {
   const a = document.createElement("textarea");
   a.value = s;
@@ -1703,9 +629,14 @@ function shareBuild() {
 }
 
 /* Окна и озвучка */
+const isShown = id => $(id).classList.contains("show");
+function closeModal(id) {
+  $(id).classList.remove("show");
+  $(id).setAttribute("aria-hidden", "true");
+}
 const openedModals = new Map();
 function setPageInert(on) {
-  document.querySelectorAll(".site-header,.page,.site-footer").forEach(el => {
+  document.querySelectorAll(".site-header,.page,.site-footer,.calc-dock").forEach(el => {
     el.inert = on;
   });
 }
@@ -1721,10 +652,7 @@ function modalHidden(m) {
   const opener = openedModals.get(m);
   openedModals.delete(m);
   if (!openedModals.size) setPageInert(false);
-  if (m.id === "talentModal") {
-    setDetailInert(false);
-    detailWasOpen = false;
-  }
+  if (m.id === "talentModal" && talentsUI.now()) talentsUI.now().onHidden();
   if (opener && opener.isConnected) opener.focus({ preventScroll: true });
 }
 ["talentModal", "gearInfoModal", "tokensModal", "compareModal"].forEach(id => {
@@ -1853,50 +781,9 @@ document.addEventListener("click", e => {
     selectAllEquipment(false);
     return;
   }
-  /* зум дерева талантов кнопками и вписать в окно */
-  const closeDetail = e.target.closest("[data-close-talent-detail]");
-  if (closeDetail) {
-    talentDetailOpen = false;
-    renderTalents();
-    return;
-  }
-  const up = e.target.closest("[data-talent-up]");
-  if (up) {
-    changeTalent(up.dataset.talentUp, 1);
-    return;
-  }
-  const branch = e.target.closest("[data-talent-branch]");
-  if (branch) {
-    currentTalentBranch = branch.dataset.talentBranch;
-    selectedTalentCode = null;
-    talentDetailOpen = false;
-    renderTalents();
-    resetTreeTransform();
-    return;
-  }
-  const select = e.target.closest("[data-select-talent]");
-  if (select) {
-    hideTalentTip();
-    selectedTalentCode = select.dataset.selectTalent;
-    talentDetailOpen = true;
-    renderTalents();
-    return;
-  }
-  const down = e.target.closest("[data-talent-down]");
-  if (down) {
-    changeTalent(down.dataset.talentDown, -1);
-    return;
-  }
+  /* кнопки внутри окна талантов обрабатывает src/calc-talents.js */
   if (e.target.closest("#openTalents")) {
-    openTalents();
-    return;
-  }
-  if (e.target.closest("[data-reset-talents]")) {
-    resetTalents();
-    return;
-  }
-  if (e.target.closest("[data-close-talents]")) {
-    closeTalents();
+    talentsUI.run(t => t.open());
     return;
   }
   if (e.target.closest("#openGearInfo")) {
@@ -1908,23 +795,18 @@ document.addEventListener("click", e => {
     return;
   }
   if (e.target.closest("#openTokens")) {
-    openTokens();
+    tokensUI.run(t => t.open());
     return;
   }
   if (e.target.closest("[data-close-tokens]")) {
-    closeTokens();
+    closeModal("tokensModal");
     return;
   }
+  /* вкладку ловим здесь, а не в src/calc-tokens.js: тур нажимает её сразу после «Расчёт по жетонам»,
+     и пока кусок окна грузится, нажатие встаёт в очередь за открытием */
   const tokTabBtn = e.target.closest("[data-tok-tab]");
   if (tokTabBtn) {
-    setTokTab(tokTabBtn.dataset.tokTab);
-    saveArsenal();
-    return;
-  }
-  const arsStep = e.target.closest("[data-ars-step]");
-  if (arsStep) {
-    const k = arsStep.dataset.arsStep;
-    setArsenal(k, arsenal[k] + Number(arsStep.dataset.d));
+    tokensUI.run(t => t.tab(tokTabBtn.dataset.tokTab));
     return;
   }
   if (e.target.closest("#shareBuild")) {
@@ -1932,48 +814,29 @@ document.addEventListener("click", e => {
     return;
   }
   if (e.target.closest("#openCompare")) {
-    openCompare();
+    compareUI.run(t => t.open());
     return;
   }
-  if (e.target.closest("[data-close-compare]")) {
-    closeCompare();
-    return;
-  }
-  if (e.target.closest("#cmpLoad")) {
-    loadCmpFromInput();
-    return;
-  }
-  if (e.target.closest("#cmpClear")) {
-    cmpBuild = null;
-    saveCompare();
-    renderCompare();
-    return;
-  }
+  if (e.target.closest("[data-close-compare]")) closeModal("compareModal");
+});
+/* «?» у заголовков результатов и значок первого удара: пояснение вместо сноски. На компьютере видно при наведении и фокусе,
+   на телефоне (там нет наведения, а кнопки в Safari не получают фокус) - по нажатию, закрывается нажатием мимо или Esc */
+const openTips = () => document.querySelectorAll('.sec-help[aria-expanded="true"],.first-hit[aria-expanded="true"]');
+document.addEventListener("click", e => {
+  const b = e.target.closest(".sec-help,.first-hit");
+  openTips().forEach(x => x !== b && x.setAttribute("aria-expanded", "false"));
+  if (b) b.setAttribute("aria-expanded", String(b.getAttribute("aria-expanded") !== "true"));
 });
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") {
-    if (confirmOpen()) {
-      closeConfirm(false);
-    } else if (talentDetailOpen) {
-      talentDetailOpen = false;
-      renderTalents();
-    } else if ($("compareModal").classList.contains("show")) {
-      closeCompare();
-    } else if ($("tokensModal").classList.contains("show")) {
-      closeTokens();
-    } else if ($("gearInfoModal").classList.contains("show")) {
-      closeGearInfo();
-    } else closeTalents();
-  }
-});
-/* подсказка к узлу дерева: появляется при наведении, исчезает при уходе курсора */
-document.addEventListener("mouseover", e => {
-  const n = e.target.closest && e.target.closest(".talent-node-game");
-  if (!n || !$("talentModal").classList.contains("show")) return;
-  showTalentTip(n.dataset.selectTalent, n);
-});
-document.addEventListener("mouseout", e => {
-  if (e.target.closest && e.target.closest(".talent-node-game")) hideTalentTip();
+  if (e.key !== "Escape") return;
+  const t = talentsUI.now();
+  if (openTips().length) openTips().forEach(x => x.setAttribute("aria-expanded", "false"));
+  else if (confirmOpen()) closeConfirm(false);
+  else if (t && t.detailOpen()) t.closeDetail();
+  else if (isShown("compareModal")) closeModal("compareModal");
+  else if (isShown("tokensModal")) closeModal("tokensModal");
+  else if (isShown("gearInfoModal")) closeGearInfo();
+  else if (t) t.close();
 });
 const arenaInput = $("arenaPoints");
 if (arenaInput) {
@@ -1983,11 +846,9 @@ if (arenaInput) {
     setArena(arenaInput.value);
   });
 }
-document.addEventListener("click", e => {
-  const b = e.target.closest("[data-step]");
-  if (!b) return;
+function stepInput(b, mult) {
   const input = $(b.dataset.step),
-    dir = Number(b.dataset.dir) || 0,
+    dir = (Number(b.dataset.dir) || 0) * mult,
     min = Number(input.min) || 0,
     max = Number(input.max) || 999;
   input.value = Math.min(max, Math.max(min, (Number(input.value) || 0) + dir));
@@ -1995,6 +856,51 @@ document.addEventListener("click", e => {
     setArena(input.value);
     return;
   }
+  saveState();
+  calc();
+}
+/* −/+ можно зажать: после паузы шаг повторяется всё чаще, у арены (сотни очков) через пару секунд - по 5.
+   Если повтор сработал, клик после отпускания уже не считается: иначе вышел бы лишний шаг */
+let holdTimer = 0,
+  holdUsed = false;
+const stopHold = () => clearTimeout(holdTimer);
+document.addEventListener("pointerdown", e => {
+  const b = e.button === 0 && e.target.closest("[data-step]");
+  if (!b) return;
+  stopHold();
+  holdUsed = false;
+  let n = 0;
+  const tick = () => {
+    holdUsed = true;
+    n++;
+    stepInput(b, b.dataset.step === "arenaPoints" && n > 25 ? 5 : 1);
+    holdTimer = setTimeout(tick, n < 4 ? 160 : n < 12 ? 90 : 50);
+  };
+  holdTimer = setTimeout(tick, 420);
+});
+["pointerup", "pointercancel"].forEach(t =>
+  document.addEventListener(t, () => {
+    stopHold();
+    /* клик после отпускания приходит в той же задаче; если палец ушёл с кнопки, клика не будет - флаг не должен остаться */
+    setTimeout(() => (holdUsed = false));
+  })
+);
+/* долгое нажатие на телефоне не должно открывать меню */
+document.addEventListener("contextmenu", e => {
+  if (e.target.closest && e.target.closest("[data-step]")) e.preventDefault();
+});
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-step]");
+  if (!b) return;
+  if (holdUsed) {
+    holdUsed = false;
+    return;
+  }
+  stepInput(b, 1);
+});
+/* ползунок уровня под полем: двигает то же значение */
+$("levelRange").addEventListener("input", () => {
+  $("level").value = $("levelRange").value;
   saveState();
   calc();
 });
@@ -2019,7 +925,7 @@ $("resetAll").onclick = () =>
     state.items.clear();
     state.arena = 0;
     state.talents = {};
-    lastTalentChange = null;
+    if (talentsUI.now()) talentsUI.now().forgetChange();
     $("level").value = 1;
     if ($("arenaPoints")) $("arenaPoints").value = 0;
     if ($("gearInfoModal") && $("gearInfoModal").classList.contains("show")) renderEquipment();
@@ -2027,40 +933,100 @@ $("resetAll").onclick = () =>
     render();
   });
 
-["tokenCount", "tokenTarget"].forEach(id =>
-  $(id).addEventListener("input", () => {
-    saveTokens();
-    renderTokens();
-  })
-);
-/* поле количества в «Моём арсенале»: число без пробелов-разрядов */
-document.addEventListener("input", e => {
-  const k = e.target.dataset && e.target.dataset.ars;
-  if (k) setArsenal(k, Number(String(e.target.value).replace(/\D/g, "")));
-});
-/* стрелки влево/вправо переключают вкладки окна, как в обычных вкладках */
-document.addEventListener("keydown", e => {
-  if (!e.target.dataset || !e.target.dataset.tokTab || (e.key !== "ArrowLeft" && e.key !== "ArrowRight")) return;
-  setTokTab(tokTab === "tokens" ? "arsenal" : "tokens");
-  saveArsenal();
-  document.querySelector('[data-tok-tab="' + tokTab + '"]').focus();
-});
 renderCards();
 loadState();
-loadTokens();
-loadArsenal();
-$("cmpInput").addEventListener("keydown", e => {
-  if (e.key === "Enter") loadCmpFromInput();
-});
-/* билд из ссылки идёт в сравнение, свой сохранённый не трогаем */
+/* билд из ссылки идёт в сравнение (src/calc-compare.js), свой сохранённый не трогаем */
 const linked = parseBuild(location.hash);
-if (linked) {
-  cmpBuild = linked;
-  saveCompare();
-  history.replaceState(null, "", location.pathname.replace(/\/build$/, "/calculator") + location.search);
-} else loadCompare();
+if (linked) history.replaceState(null, "", location.pathname.replace(/\/build$/, "/calculator") + location.search);
+
+/* окна талантов, жетонов и сравнения - отдельные куски сборки (build.js, папка calc/): их код не нужен для первого
+   расчёта, поэтому грузится при первом открытии окна или заранее, когда страница простаивает. Всё общее куски
+   получают через ctx. Пока кусок грузится, действия с ним встают в очередь и выполняются по порядку */
+const ctx = {
+  state,
+  $,
+  TALENTS,
+  ALL_ITEMS,
+  ITEM_BY_CODE,
+  MAX_TALENT_POINTS,
+  CMP_KEY,
+  linked,
+  talentRank,
+  talentDef,
+  spentTalentPoints,
+  fmt,
+  fmtD,
+  fmtDelta,
+  isZero,
+  plural,
+  results,
+  resultsFor,
+  currentBuild,
+  parseBuild,
+  buildHashOf,
+  saveState,
+  render,
+  askConfirm,
+  showToast
+};
+function lazyPart(load) {
+  let api = null,
+    wait = null;
+  const get = () => {
+    if (!wait)
+      wait = load().then(
+        m => (api = m.setup(ctx)),
+        err => {
+          wait = null;
+          throw err;
+        }
+      );
+    return wait;
+  };
+  return {
+    now: () => api,
+    preload: () => get().catch(() => {}),
+    run: fn =>
+      api
+        ? fn(api)
+        : get().then(fn, () => showToast("Окно не загрузилось. Проверьте интернет и обновите страницу", "err"))
+  };
+}
+const talentsUI = lazyPart(() => import("./src/calc-talents.js")),
+  tokensUI = lazyPart(() => import("./src/calc-tokens.js")),
+  compareUI = lazyPart(() => import("./src/calc-compare.js"));
+
 render();
-if (linked) openCompare();
+if (linked) compareUI.run(t => t.open());
+
+/* сводка урона для телефона (#calcDock): на телефоне настройки идут перед результатами, и при правке уровня или арены
+   итог не виден. Сводка показывается, пока конец настроек (.side-actions) ниже экрана, и прячется, как только он
+   появился над нижним меню, - тогда и результаты рядом. Нажатие - прокрутка к результатам */
+{
+  const dock = $("calcDock"),
+    mark = document.querySelector(".sidebar .side-actions"),
+    phone = matchMedia("(max-width: 760px)");
+  if (dock && mark && window.IntersectionObserver) {
+    let below = false;
+    const sync = () => (dock.hidden = !(phone.matches && below));
+    new IntersectionObserver(
+      ([en]) => {
+        below = !en.isIntersecting && en.boundingClientRect.top > 0;
+        sync();
+      },
+      { rootMargin: "0px 0px -70px 0px" }
+    ).observe(mark);
+    phone.addEventListener("change", sync);
+    dock.addEventListener("click", () => {
+      const to = document.querySelector(".content .result-panel");
+      if (to)
+        to.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    });
+  }
+}
+const preload = () => [talentsUI, tokensUI, compareUI].forEach(p => p.preload());
+if (window.requestIdleCallback) requestIdleCallback(preload, { timeout: 4000 });
+else setTimeout(preload, 2000);
 
 /* загрузить билд (строка из ссылки на билд) как свой: для слотов сохранённых билдов (src/calc-slots.js) */
 function applyBuild(raw) {
@@ -2071,31 +1037,12 @@ function applyBuild(raw) {
   state.talents = b.talents;
   $("level").value = b.level;
   if ($("arenaPoints")) $("arenaPoints").value = b.arena;
-  lastTalentChange = null;
+  if (talentsUI.now()) talentsUI.now().forgetChange();
   if ($("gearInfoModal") && $("gearInfoModal").classList.contains("show")) renderEquipment();
   saveState();
   render();
   return true;
 }
 
-/* то, чем пользуются polish.js и src/calc-slots.js */
-export {
-  buildHash,
-  applyBuild,
-  onBuildSaved,
-  parseBuild,
-  showToast,
-  askConfirm,
-  copyText,
-  SETS,
-  ITEMS,
-  keys,
-  fmt,
-  plural,
-  GEAR_BONUS_LABELS,
-  GEAR_BONUS_PCT,
-  GEAR_EXTRA,
-  gearBonusTags,
-  gearTotalItem,
-  setGearInfoRenderer
-};
+/* то, чем пользуется src/calc-slots.js */
+export { buildHash, applyBuild, onBuildSaved, parseBuild, showToast, askConfirm, copyText };

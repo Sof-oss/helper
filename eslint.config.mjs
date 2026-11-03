@@ -27,7 +27,7 @@ export default [
   },
   /* ES-модули: калькулятор, 3D главной, тесты */
   {
-    files: ["app.js", "polish.js", "talents.js", "src/**/*.js", "**/*.mjs"],
+    files: ["app.js", "talents.js", "src/**/*.js", "**/*.mjs"],
     languageOptions: { sourceType: "module" }
   },
   /* обычные скрипты страниц делят имена через window: данные info-data.js, функции top100.js */

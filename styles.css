@@ -194,7 +194,6 @@ body::before {
 :where(h1, h2, h3) {
   text-wrap: balance;
 }
-
 /* Шапка */
 .header-inner {
   height: 100%;
@@ -315,9 +314,7 @@ body::before {
   content: "";
   position: absolute;
 }
-
 /* баннер в шапке, прижат вправо */
-
 /* Раскладка */
 /* body - flex-колонка, а у блока с auto-отступами нет растяжения, поэтому width:100% обязательна */
 .page {
@@ -340,113 +337,6 @@ body::before {
 .content {
   padding: 15px 13px 20px 0;
   min-width: 0;
-}
-
-/* Боковая панель */
-.sidebar {
-  border: 1px solid #132838;
-  border-radius: 10px;
-  background: linear-gradient(180deg, rgba(7, 18, 27, 0.98), rgba(5, 14, 22, 0.98));
-  box-shadow: 0 12px 30px #0008;
-  overflow: hidden;
-}
-.side-section {
-  padding: 10px 14px 12px;
-  border-bottom: 1px solid #142735;
-}
-.side-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: var(--fs-md);
-  color: #cbd9e5;
-  margin-bottom: 8px;
-}
-.side-title span {
-  font-size: var(--fs-xl);
-  color: #dbe9f6;
-  width: 18px;
-  text-align: center;
-}
-.side-title .person-icon {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
-  fill: currentColor;
-  color: #dbe9f6;
-}
-.side-title .clothes-icon {
-  font-size: var(--fs-lg);
-  line-height: 18px;
-  width: 18px;
-  height: 18px;
-  display: inline-block;
-}
-
-.level-row {
-  display: grid;
-  grid-template-columns: 34px 1fr 34px;
-  gap: 6px;
-}
-.level-row button,
-.level-row input {
-  height: 34px;
-  border: 0;
-  background: #091521;
-  color: #9db2c4;
-  text-align: center;
-  font-size: 18px;
-}
-.level-row button {
-  background: #102234;
-  cursor: pointer;
-}
-.level-row button:hover {
-  background: #162d41;
-}
-.level-row button:first-child {
-  border-right-color: #102234;
-}
-.level-row input {
-  color: #e7f0f8;
-  font-variant-numeric: tabular-nums;
-  -moz-appearance: textfield;
-}
-
-.talent-open {
-  width: 100%;
-  height: 42px;
-  border: 1px solid #21445c;
-  background: linear-gradient(180deg, #0d2231, #091722);
-  display: grid;
-  grid-template-columns: 25px 1fr auto;
-  align-items: center;
-  gap: 8px;
-  padding: 0 10px;
-  cursor: pointer;
-  text-align: left;
-}
-.talent-open:hover {
-  background: #10293a;
-}
-.talent-open > span:first-child {
-  font-size: 18px;
-  color: #54bfff;
-  text-align: center;
-}
-.talent-open b {
-  font-size: var(--fs-xs);
-  color: #73c8ff;
-  font-weight: 600;
-}
-
-/* на телефоне лимит высоты снимается, список скроллится вместе со страницей */
-.equipment-section {
-  padding-bottom: 9px;
-  max-height: 500px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: #31566f #08131d;
 }
 .items-divider {
   display: flex;
@@ -522,12 +412,6 @@ body::before {
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
   transform: translateY(-1px);
 }
-
-.side-actions {
-  padding: 10px 14px 14px;
-  display: grid;
-  gap: 10px;
-}
 .select-all {
   display: flex;
   align-items: center;
@@ -541,7 +425,6 @@ body::before {
   accent-color: #54bfff;
   cursor: pointer;
 }
-
 /* кнопки-«клавиши», при нажатии проседают */
 .side-btn {
   height: 42px;
@@ -571,7 +454,6 @@ body::before {
   border-bottom-width: 0;
   box-shadow: inset 0 2px 6px #000a;
 }
-
 /* Результаты */
 .result-title {
   display: flex;
@@ -617,129 +499,6 @@ svg.target-icon {
   font-size: var(--fs-xs);
   line-height: 1.4;
 }
-
-.damage-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-.damage-card {
-  min-height: 145px;
-  border: 1px solid #1a3346;
-  border-radius: 9px;
-  background: linear-gradient(135deg, #0b1925, #09141e);
-  position: relative;
-  padding: 18px 19px;
-  display: grid;
-  grid-template-columns: 64px 1fr;
-  align-content: space-between;
-  row-gap: 14px;
-}
-.weapon-icon {
-  width: 64px;
-  height: 64px;
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: center;
-}
-.weapon-rifle {
-  background-image: url("assets/rifle-DNSRr11w.webp");
-}
-.weapon-pistol {
-  background-image: url("assets/pistol-Cy7zO65D.webp");
-}
-.weapon-knife {
-  background-image: url("assets/knife-Dh_ibA91.webp");
-}
-.weapon-gauss {
-  background-image: url("assets/gauss-IaBtaAzR.webp");
-}
-.weapon-ubgl {
-  background-image: url("assets/ubgl-9PMpxB6a.webp");
-}
-.weapon-grenade {
-  background-image: url("assets/grenade-IrR3fcAU.webp");
-}
-.dmg-main {
-  padding-left: 10px;
-}
-.damage-card h3 {
-  margin: 1px 0 9px;
-  font-size: var(--fs-lg);
-  color: #dce7f0;
-}
-.damage-card strong {
-  font-size: 29px;
-  line-height: 1;
-  color: #f1f6fb;
-  font-variant-numeric: tabular-nums;
-}
-
-/* разбивка урона, 4 ячейки одной ширины */
-.breakdown {
-  grid-column: 1/-1;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
-  gap: 8px;
-}
-.bd-cell {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  text-align: center;
-}
-.bd-cell small {
-  font-size: var(--fs-xs);
-  color: #7f95a8;
-}
-.bd-cell em {
-  font-style: normal;
-  font-size: var(--fs-lg);
-  font-weight: 600;
-  color: #a9bed0;
-  font-variant-numeric: tabular-nums;
-}
-.bd-level em {
-  color: #f0ae58;
-}
-.bd-gear em {
-  color: #54bfff;
-}
-.bd-talent em {
-  color: #27db88;
-}
-.crit-chip {
-  grid-column: 1/-1;
-  justify-self: start;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 11px;
-  border-radius: 20px;
-  background: rgba(255, 90, 95, 0.12);
-  border: 1px solid rgba(255, 90, 95, 0.35);
-  color: #ffb3b5;
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-.crit-chip em {
-  font-style: normal;
-}
-.crit-chip-label {
-  color: #ff5a5f;
-  text-transform: uppercase;
-  font-size: var(--fs-xs);
-  letter-spacing: 0.4px;
-  font-weight: 700;
-}
-.crit-chip-sep {
-  color: #ff5a5f;
-  opacity: 0.6;
-}
-
 /* дельта рядом со значением */
 .delta {
   position: absolute;
@@ -766,7 +525,6 @@ svg.target-icon {
 .delta.down {
   color: #ff6b6f;
 }
-
 /* таблицы (жетоны, «Информация») */
 .data-wrap {
   overflow-x: auto;
@@ -797,38 +555,6 @@ svg.target-icon {
   text-align: left;
   color: #cbd9e5;
 }
-
-/* доп. характеристики на всю ширину */
-.extra-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
-}
-.extra-grid > div {
-  position: relative;
-  min-height: 74px;
-  border: 1px solid #193246;
-  border-radius: 8px;
-  background: #091621;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  padding: 10px;
-  text-align: center;
-}
-.extra-grid small {
-  color: #8196a9;
-  font-size: var(--fs-xs);
-  line-height: 1.2;
-}
-.extra-grid strong {
-  font-size: var(--fs-xl);
-  color: #edf5fc;
-  font-variant-numeric: tabular-nums;
-}
-
 /* Стартовая страница */
 .home-content {
   max-width: 1040px;
@@ -938,7 +664,6 @@ svg.target-icon {
   width: 14px;
   height: 14px;
 }
-
 /* Вкладка «Информация» */
 .info-content {
   max-width: 1400px;
@@ -962,12 +687,10 @@ svg.target-icon {
 .info-groups > .info-group-talents {
   grid-column: 1 / -1;
 }
-
 /* вкладки «Информации» для телефона (#infoTabs). */
 #infoTabs {
   display: none;
 }
-
 /* базовая карточка блока, акцент у каждого свой (talents/pda/char/t21) */
 .info-group {
   border: 1px solid #1a3346;
@@ -1000,7 +723,6 @@ svg.target-icon {
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
-
 /* оттенки рамки, фона и тени под цвет индикатора (info-led) */
 .info-group-talents {
   border-color: #3a3320;
@@ -1022,7 +744,6 @@ svg.target-icon {
   background: linear-gradient(135deg, #130d1d, #0c0913), linear-gradient(135deg, #0b1925, #09141e);
   box-shadow: inset 0 0 26px rgba(199, 146, 234, 0.05);
 }
-
 /* таблицы «Информация»: пропорциональные цифры, контрастная зебра, разделители колонок */
 .info-table {
   font-family: "Segoe UI", Arial, sans-serif;
@@ -1076,7 +797,6 @@ svg.target-icon {
   margin-bottom: 2px;
   font-weight: 600;
 }
-
 /* Вкладка «Топ-100»: контейнер страницы и ряд вкладок (он же на «Информации»); оформление рейтинга - top100-sort.css */
 .top100-content {
   max-width: 1180px;
@@ -1112,86 +832,6 @@ svg.target-icon {
   border-color: var(--accent, #54bfff);
 }
 /* ушедшие из отряда - красным, как delta.down и crit-chip */
-
-/* Уведомление */
-.toast {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -45%) scale(0.96);
-  min-width: 320px;
-  padding: 26px 38px 28px;
-  border: 2px solid #566b76;
-  border-radius: 4px;
-  background: linear-gradient(180deg, #18252a 0%, #0a1114 100%);
-  color: #d9e1df;
-  text-align: center;
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  box-shadow:
-    0 0 0 1px #080c0e,
-    0 16px 55px #000c,
-    inset 0 0 35px #0008;
-  opacity: 0;
-  pointer-events: none;
-  transition:
-    opacity 0.18s ease,
-    transform 0.18s ease;
-  z-index: 3000;
-}
-.toast::before {
-  content: "☢";
-  display: block;
-  margin: 0 auto 12px;
-  font-size: 58px;
-  line-height: 1;
-  color: #c8d21f;
-  text-shadow:
-    0 0 8px #c8d21f66,
-    2px 2px 0 #151a0a;
-}
-.toast::after {
-  content: "";
-  position: absolute;
-  inset: 7px;
-  border: 1px solid #2c3b40;
-  pointer-events: none;
-}
-.toast.show {
-  opacity: 1;
-  transform: translate(-50%, -50%) scale(1);
-}
-.toast.ok::before,
-.toast.err::before {
-  content: "";
-  width: 84px;
-  height: 84px;
-  margin-bottom: 10px;
-  background: url("assets/toast-ok.svg") center/contain no-repeat;
-  filter: drop-shadow(0 0 10px #c8d21f55);
-}
-.toast.err::before {
-  background-image: url("assets/toast-err.svg");
-  filter: drop-shadow(0 0 10px #e8613c55);
-}
-
-/* Окна (таланты, снаряжение, жетоны) */
-.talent-modal {
-  position: fixed;
-  inset: 0;
-  display: none;
-  z-index: 2000;
-  overscroll-behavior: contain;
-}
-.talent-modal.show {
-  display: block;
-}
-.talent-dialog:focus,
-.talent-detail-modal:focus {
-  outline: none;
-}
 /* заголовок страницы с надзаголовком раздела сайта («Информация» над «Прогресс по уровням») */
 .result-title-text {
   display: flex;
@@ -1243,72 +883,6 @@ svg.target-icon {
   white-space: nowrap;
   border: 0;
 }
-.talent-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.68);
-  backdrop-filter: blur(2px);
-}
-.talent-dialog {
-  position: absolute;
-  inset: 2vh 2vw;
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  overflow: hidden;
-}
-.talent-game-window {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  border: 1px solid rgba(72, 78, 84, 0.72);
-  background: #0b0c0c;
-  box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.7),
-    0 18px 45px rgba(0, 0, 0, 0.7);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.talent-game-header {
-  height: 66px;
-  flex: 0 0 66px;
-  padding: 10px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(180deg, #17191a, #0e1011);
-  border-bottom: 1px solid #34383b;
-}
-.talent-game-header h2 {
-  margin: 0;
-  font:
-    700 28px/1.1 "Rubik",
-    "Segoe UI",
-    sans-serif;
-  color: #f0f0ec;
-}
-.talent-game-header p {
-  margin: 5px 0 0;
-  color: #858b8f;
-  font-size: var(--fs-xs);
-}
-.talent-game-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.talent-points {
-  padding: 7px 12px;
-  background: #151718;
-  border: 1px solid #3b3f41;
-  color: #aeb2b4;
-  font-size: var(--fs-sm);
-}
-.talent-points b {
-  color: #fff;
-}
 .talent-icon-button {
   width: 36px;
   height: 36px;
@@ -1318,161 +892,6 @@ svg.target-icon {
   font-size: 25px;
   line-height: 1;
   cursor: pointer;
-}
-.talent-game-body {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-  min-width: 0;
-  display: flex;
-  overflow: hidden;
-  background: #070908;
-}
-
-/* Боковая панель талантов */
-.talent-game-sidebar {
-  flex: 0 0 320px;
-  width: 320px;
-  height: 100%;
-  padding: 16px 14px;
-  z-index: 2;
-  background-color: rgba(11, 12, 13, 0.72);
-  border-right: 1px solid rgba(72, 78, 84, 0.5);
-  background-image:
-    linear-gradient(rgba(72, 78, 84, 0.12) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(72, 78, 84, 0.12) 1px, transparent 1px);
-  background-size: 12px 12px;
-  overflow: auto;
-}
-/* круговой индикатор очков талантов */
-.talent-gauge {
-  position: relative;
-  width: 118px;
-  height: 118px;
-  margin: 2px auto 16px;
-}
-.talent-gauge-ticks {
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  background: repeating-conic-gradient(rgba(222, 222, 216, 0.55) 0deg 1.4deg, transparent 1.4deg 15deg);
-  -webkit-mask-image: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px));
-  mask-image: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px));
-}
-.talent-gauge::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: conic-gradient(#f0ae58 calc(var(--pct) * 3.6deg), rgba(255, 255, 255, 0.08) 0);
-  box-shadow:
-    0 0 0 1px #383c3e,
-    inset 0 0 16px #000c,
-    0 0 14px rgba(240, 174, 88, 0.16);
-}
-.talent-gauge::after {
-  content: "";
-  position: absolute;
-  inset: 13px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #1a1c1d, #0c0d0d 72%);
-  border: 1px solid #35393b;
-  box-shadow: inset 0 0 12px #000a;
-}
-.talent-gauge-value {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.talent-gauge-value b {
-  font:
-    700 27px/1 "Rubik",
-    "Segoe UI",
-    sans-serif;
-  color: #f0ae58;
-  text-shadow: 0 0 10px rgba(240, 174, 88, 0.45);
-}
-.talent-gauge-value small {
-  margin-top: 4px;
-  color: #8d9295;
-  font-size: var(--fs-xs);
-  letter-spacing: 0.5px;
-}
-.talent-side-stats {
-  display: flex;
-  justify-content: center;
-  gap: 30px;
-  margin-bottom: 14px;
-}
-.talent-side-stats > div {
-  text-align: center;
-}
-.talent-side-stats > div + div {
-  border-left: 1px solid #45484a;
-  padding-left: 30px;
-}
-.talent-side-stats b {
-  display: block;
-  font-size: 25px;
-  line-height: 1;
-}
-.talent-side-stats small {
-  color: #777;
-  font-size: var(--fs-xs);
-}
-.talent-last {
-  border: 1px solid #34383a;
-  background: rgba(10, 11, 12, 0.72);
-  padding: 8px 10px;
-  margin-bottom: 14px;
-}
-.talent-last small {
-  display: block;
-  color: #777;
-  font-size: var(--fs-xs);
-  margin-bottom: 5px;
-}
-.talent-last-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 12px;
-  font-size: var(--fs-xs);
-  color: #aaa;
-}
-.talent-last-list b {
-  font-weight: 700;
-}
-.talent-last-list .up b {
-  color: #27db88;
-}
-.talent-last-list .down b {
-  color: #ff6b6f;
-}
-.talent-branch-tabs {
-  border: 1px solid #373a3d;
-  display: grid;
-}
-.talent-branch-tabs button {
-  height: 42px;
-  border: 0;
-  border-bottom: 1px solid #303335;
-  background: transparent;
-  color: #c5c8ca;
-  text-align: left;
-  padding: 0 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.talent-branch-tabs button:last-child {
-  border-bottom: 0;
-}
-.talent-branch-tabs button.active {
-  background: #deded8;
-  color: #171819;
 }
 .talent-branch-description {
   display: flex;
@@ -1486,511 +905,7 @@ svg.target-icon {
   font-size: 17px;
   color: #e1e1dd;
 }
-.talent-side-hint {
-  color: #777;
-  font-size: var(--fs-xs);
-  line-height: 1.5;
-  padding: 10px 2px 0;
-  border-top: 1px solid #34383a;
-  margin-top: 10px;
-}
-/* обёртка для кнопок, на телефоне липнет ко дну панели (@media 650px) */
-.talent-side-footer {
-  display: grid;
-  gap: 14px;
-  margin-top: 14px;
-}
-.talent-hide {
-  width: 100%;
-  margin-top: 14px;
-  height: 36px;
-  border: 1px solid #4a4e50;
-  border-bottom: 3px solid #232526;
-  border-radius: 4px;
-  background: linear-gradient(180deg, #26292a, #1b1d1e);
-  color: #bfc2c3;
-  cursor: pointer;
-  box-shadow: 0 3px 0 #0c0d0d;
-  transition:
-    transform 0.08s ease,
-    box-shadow 0.08s ease,
-    border-bottom-width 0.08s ease;
-}
-.talent-side-footer .talent-hide {
-  margin-top: 0;
-}
-.talent-hide:hover:not(:disabled) {
-  background: linear-gradient(180deg, #2e3132, #1f2122);
-}
-.talent-hide:active:not(:disabled) {
-  transform: translateY(3px);
-  border-bottom-width: 0;
-  box-shadow: inset 0 2px 5px #000a;
-}
-.talent-hide:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
 /* окно с описанием таланта */
-/* окно таланта: заголовок, ромбы рангов, блоки «Эффекты» и «Требования» */
-.talent-detail {
-  --td-orange: #f58a1f;
-  --td-green: #4cbf4c;
-  padding: 18px 20px 20px;
-  border: 1px solid #3a3d3f;
-  background: linear-gradient(180deg, #151717, #0c0d0d);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.5);
-}
-.td-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.td-head h3 {
-  margin: 0;
-  font:
-    400 30px/1.1 "Rubik",
-    "Segoe UI",
-    sans-serif;
-  color: #f2f2ee;
-}
-.td-close {
-  flex: 0 0 38px;
-  width: 38px;
-  height: 38px;
-  border: 1px solid #5a5d5f;
-  background: transparent;
-  color: #e2e2de;
-  font-size: 26px;
-  line-height: 1;
-  cursor: pointer;
-}
-.td-close:hover {
-  background: #1d1f20;
-}
-.td-rank {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-.td-pips {
-  display: flex;
-  gap: 8px;
-}
-.td-pip {
-  width: 11px;
-  height: 11px;
-  background: #3b3d3e;
-  transform: rotate(45deg);
-}
-.td-pip.on {
-  background: var(--td-orange);
-}
-.td-rank b {
-  font-size: 15px;
-  color: #f2f2ee;
-}
-.td-rank span {
-  padding-left: 12px;
-  border-left: 1px solid #46494b;
-  color: #8d9295;
-  font-size: var(--fs-sm);
-}
-.td-desc {
-  margin: 0 0 18px;
-  font-size: 15px;
-  line-height: 1.45;
-  color: #e4e5e1;
-}
-.td-sec {
-  margin: 0 0 8px;
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  letter-spacing: 1.4px;
-  text-transform: uppercase;
-  color: var(--td-orange);
-}
-.td-effect {
-  margin-bottom: 18px;
-  padding: 5px 0 5px 14px;
-  border-left: 2px solid var(--td-orange);
-  background: linear-gradient(90deg, rgba(245, 138, 31, 0.07), transparent);
-}
-.td-effect small {
-  display: block;
-  margin-bottom: 5px;
-  font-size: var(--fs-sm);
-  color: #a9adae;
-}
-.td-vals {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 6px;
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: #8d9295;
-  font-variant-numeric: tabular-nums;
-}
-.td-vals em {
-  font-style: normal;
-  color: #44484a;
-}
-.td-vals .td-cur {
-  color: var(--td-green);
-  font-weight: 700;
-}
-.td-req {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 6px;
-  padding: 12px 14px;
-  border-left: 2px solid #4a4d4f;
-  background: rgba(255, 255, 255, 0.03);
-}
-.td-req.ok {
-  border-left-color: var(--td-green);
-  background: linear-gradient(90deg, rgba(76, 191, 76, 0.08), transparent);
-}
-.td-req svg {
-  width: 24px;
-  height: 24px;
-  flex: 0 0 24px;
-  fill: none;
-  stroke: #6b6f71;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.td-req.ok svg {
-  stroke: var(--td-green);
-}
-.td-req b {
-  flex: 1;
-  font-size: var(--fs-md);
-  color: #f2f2ee;
-}
-.td-req span {
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  color: #8d9295;
-}
-.td-req.ok span {
-  color: var(--td-green);
-}
-.td-req.none {
-  color: #8d9295;
-  font-size: var(--fs-sm);
-}
-.td-actions {
-  display: flex;
-  gap: 6px;
-  margin-top: 18px;
-}
-.td-actions button {
-  height: 44px;
-  border: 1px solid #3a3d3f;
-  background: #242627;
-  color: #6f7476;
-  font: inherit;
-  font-size: var(--fs-md);
-  font-weight: 700;
-}
-.td-minus {
-  width: 46px;
-  color: #ddd !important;
-  font-size: var(--fs-xl) !important;
-  cursor: pointer;
-}
-.td-up {
-  flex: 1;
-  cursor: default;
-}
-.td-up:not(:disabled) {
-  background: linear-gradient(180deg, #d9822a, #a85f17) !important;
-  border-color: #f0a050 !important;
-  color: #fff !important;
-  cursor: pointer;
-}
-.talent-detail-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 2500;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.talent-detail-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.62);
-  backdrop-filter: blur(2px);
-}
-.talent-detail-modal {
-  position: relative;
-  z-index: 1;
-  width: min(440px, 100%);
-  max-height: 86vh;
-  overflow: auto;
-  animation: talentDetailIn 0.14s ease;
-}
-.talent-detail-modal .talent-detail {
-  box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.4),
-    0 24px 60px rgba(0, 0, 0, 0.65);
-}
-@keyframes talentDetailIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-/* дерево талантов: зум и drag */
-.talent-flow-wrap {
-  position: relative;
-  flex: 1 1 auto;
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-  background: rgba(7, 9, 8, 0.24);
-  touch-action: none;
-  cursor: grab;
-}
-.talent-flow {
-  position: relative;
-  min-width: 100%;
-  min-height: 100%;
-  width: max-content;
-  padding: 0 24px 24px;
-}
-.talent-flow-canvas {
-  position: relative;
-  margin: 10px auto 20px;
-  background: url("assets/talents-CjzNNTY-.webp") center/cover no-repeat;
-  transform-origin: 0 0;
-  will-change: transform;
-}
-.talent-edge-layer {
-  position: absolute;
-  inset: 0;
-  overflow: visible;
-  pointer-events: none;
-}
-.talent-node-game {
-  position: absolute;
-  width: 100px;
-  height: 100px;
-  padding: 0;
-  border: 1px solid rgba(176, 176, 170, 0.36);
-  background: #0b0c0ce6;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.36);
-  cursor: pointer;
-  transition: 0.12s;
-  overflow: hidden;
-}
-.talent-node-game:hover {
-  border-color: #dadad4;
-  transform: translateY(-1px);
-}
-.talent-node-game:focus-visible {
-  outline-color: #f2f2ec;
-}
-.talent-node-game.locked {
-  opacity: 0.65;
-  filter: grayscale(0.55);
-}
-.talent-node-game.open {
-  border-color: rgba(176, 176, 170, 0.46);
-}
-.talent-node-game.ready {
-  border-color: rgba(247, 174, 86, 0.68);
-  box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.36),
-    0 0 12px rgba(247, 174, 86, 0.12);
-}
-.talent-node-game.maxed {
-  background: #101010f0;
-  border-color: rgba(121, 196, 103, 0.72);
-  box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.36),
-    0 0 14px rgba(121, 196, 103, 0.14);
-}
-.talent-node-game.selected {
-  border-color: #f2f2ec;
-  box-shadow:
-    inset 0 0 0 1px #000,
-    0 0 16px rgba(232, 232, 226, 0.14);
-}
-.talent-node-game.on-path {
-  border-color: #54bfff;
-}
-.talent-node-game.on-path:not(.selected) {
-  box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.36),
-    0 0 14px rgba(84, 191, 255, 0.4);
-}
-.talent-node-art {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-size: var(--fs-3xl);
-  color: #ddd;
-  background: #111;
-  overflow: hidden;
-}
-.talent-node-art img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.talent-node-rank {
-  position: absolute;
-  right: 5px;
-  bottom: 3px;
-  color: #fff;
-  text-shadow:
-    0 1px 0 #000,
-    1px 0 #000,
-    -1px 0 #000;
-  font:
-    600 13px/1 "Segoe UI",
-    Arial,
-    sans-serif;
-  z-index: 1;
-}
-
-/* бонусы снаряжения, жетоны */
-
-.gear-info-body {
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
-  padding: 16px 20px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  background: #070908;
-}
-.gear-info-group-title {
-  font-size: var(--fs-xs);
-  color: #7c93a6;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  margin: 10px 0 2px;
-  padding-top: 8px;
-  border-top: 1px solid #193246;
-}
-.gear-info-group-title:first-child {
-  margin-top: 0;
-  padding-top: 0;
-  border-top: 0;
-}
-.gear-info-card {
-  border: 1px solid #1a3346;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #0b1925, #09141e);
-  padding: 10px 12px;
-}
-.gear-info-card b {
-  display: block;
-  color: #dce7f0;
-  font-size: var(--fs-sm);
-  margin-bottom: 7px;
-}
-.gear-info-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.gear-info-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 9px;
-  border-radius: 20px;
-  background: #0d1d2a;
-  border: 1px solid #234157;
-  color: #a9bed0;
-  font-size: var(--fs-xs);
-  white-space: nowrap;
-}
-.gear-info-tag b {
-  display: inline;
-  margin: 0;
-  color: #54bfff;
-  font-weight: 700;
-}
-.gear-info-total-wrap {
-  position: sticky;
-  bottom: 0;
-  margin: 6px -20px -20px;
-  padding: 10px 20px 16px;
-  background: linear-gradient(180deg, rgba(7, 9, 8, 0), #070908 28%);
-  z-index: 1;
-}
-.gear-info-total {
-  border-color: #2e6384;
-  background: linear-gradient(135deg, #0d2231, #0a1a27);
-  box-shadow: 0 0 14px rgba(84, 191, 255, 0.12);
-}
-.gear-info-total > b {
-  color: #73c8ff;
-}
-
-.tokens-btn {
-  margin-left: auto;
-  height: 32px;
-  padding: 0 16px;
-  border: 1px solid #6cc8ff;
-  border-radius: 20px;
-  background: linear-gradient(180deg, #2196f3, #0d5aa7);
-  color: #f2f9ff;
-  font: inherit;
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  cursor: pointer;
-  white-space: nowrap;
-  box-shadow:
-    0 0 14px rgba(84, 191, 255, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
-  transition:
-    transform 0.12s ease,
-    box-shadow 0.12s ease,
-    background 0.12s ease;
-}
-.tokens-btn:hover {
-  background: linear-gradient(180deg, #2ea3ff, #116ac2);
-  box-shadow:
-    0 0 20px rgba(84, 191, 255, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
-  transform: translateY(-1px);
-}
-.tokens-btn:active {
-  transform: translateY(0);
-  box-shadow:
-    0 0 10px rgba(84, 191, 255, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-}
-.tok-note {
-  color: #71889b;
-  font-size: var(--fs-xs);
-  line-height: 1.5;
-}
-
 /* Подпись автора шрифт Caveat как в экспортируемой картинке, цвет - голубой акцент сайта */
 .site-footer {
   padding: 8px 0 12px;
@@ -2005,7 +920,6 @@ svg.target-icon {
   transform: skewX(-8deg);
   text-shadow: none;
 }
-
 /* Средние экраны */
 @media (max-width: 1050px) {
   .page {
@@ -2018,20 +932,6 @@ svg.target-icon {
     grid-template-columns: 1fr 1fr;
   }
 }
-@media (max-width: 850px) {
-  .talent-dialog {
-    inset: 0;
-  }
-
-  .talent-game-header {
-    height: 58px;
-    flex-basis: 58px;
-  }
-  .talent-game-header p {
-    display: none;
-  }
-}
-
 /* Планшеты и телефоны */
 @media (max-width: 760px) {
   .logo {
@@ -2052,32 +952,13 @@ svg.target-icon {
   .page {
     display: block;
   }
-  .sidebar {
-    margin-bottom: 8px;
-  }
-  /* .page теперь блок, сайдбар не зажат колонкой, поэтому снаряжение скроллится вместе со страницей */
-  .equipment-section {
-    max-height: none;
-    overflow-y: visible;
-  }
+}
+@media (max-width: 760px) {
   .content {
     padding: 8px;
   }
-
-  .toast {
-    min-width: 0;
-    width: calc(100% - 40px);
-    padding: 22px 24px 25px;
-    font-size: var(--fs-xl);
-  }
-  .toast::before {
-    font-size: 50px;
-  }
-  .toast.ok::before,
-  .toast.err::before {
-    width: 72px;
-    height: 72px;
-  }
+}
+@media (max-width: 760px) {
   .info-content {
     padding: 10px;
   }
@@ -2109,34 +990,6 @@ svg.target-icon {
   }
 }
 @media (max-width: 650px) {
-  .talent-game-body {
-    display: block;
-    overflow: auto;
-  }
-
-  /* кнопки талантов липнут ко дну панели, иначе на телефоне уезжают за прокрутку списка статов */
-  .talent-side-footer {
-    position: sticky;
-    bottom: 0;
-    margin-top: 10px;
-    padding-top: 12px;
-    background: linear-gradient(180deg, rgba(11, 12, 13, 0) 0%, #0b0c0c 40%);
-  }
-  .talent-flow-wrap {
-    height: 52%;
-  }
-
-  .talent-detail-modal {
-    max-height: 82vh;
-  }
-
-  .gear-info-body {
-    padding: 14px;
-  }
-  .gear-info-total-wrap {
-    margin: 6px -14px -14px;
-    padding: 10px 14px 14px;
-  }
   .data-table {
     font-size: var(--fs-xs);
   }
@@ -2144,11 +997,8 @@ svg.target-icon {
   .data-table td {
     padding: 6px 4px;
   }
-  .tokens-btn {
-    font-size: var(--fs-xs);
-    padding: 0 12px;
-    height: 30px;
-  }
+}
+@media (max-width: 650px) {
   .info-subcols {
     grid-template-columns: 1fr;
   }
@@ -2163,30 +1013,8 @@ svg.target-icon {
   .target-icon {
     font-size: 27px;
   }
-  .damage-card {
-    padding: 13px 14px;
-    min-height: auto;
-    grid-template-columns: 50px 1fr;
-  }
-  .weapon-icon {
-    width: 50px;
-    height: 50px;
-  }
-  .damage-card h3 {
-    font-size: var(--fs-sm);
-    margin-bottom: 5px;
-  }
-  .damage-card strong {
-    font-size: 22px;
-  }
-  .bd-cell em {
-    font-size: var(--fs-md);
-  }
-  .crit-chip {
-    font-size: var(--fs-xs);
-    padding: 3px 9px;
-  }
-
+}
+@media (max-width: 430px) {
   .option {
     min-height: 36px;
   }
@@ -2194,43 +1022,8 @@ svg.target-icon {
     width: 18px;
     height: 18px;
   }
-  .talent-open {
-    height: 46px;
-  }
-  .talent-game-header {
-    padding: 8px 12px;
-  }
-  .talent-game-header h2 {
-    font-size: 19px;
-  }
-
-  .talent-node-game {
-    width: 82px;
-    height: 82px;
-  }
-  .talent-node-art {
-    font-size: 32px;
-  }
-  .talent-side-stats {
-    gap: 18px;
-    margin-bottom: 10px;
-  }
-  .talent-side-stats b {
-    font-size: 18px;
-  }
-  .talent-gauge {
-    width: 96px;
-    height: 96px;
-    margin-bottom: 12px;
-  }
-  .talent-gauge-value b {
-    font-size: 22px;
-  }
-  .talent-branch-tabs button {
-    height: 34px;
-    font-size: var(--fs-xs);
-    padding: 0 10px;
-  }
+}
+@media (max-width: 430px) {
   .talent-branch-description {
     padding: 8px 2px 10px;
   }
@@ -2238,172 +1031,9 @@ svg.target-icon {
     font-size: var(--fs-md);
   }
 }
-
-/* сравнение билдов: синий - вы, янтарный - сравниваемый */
-.cmp-body {
-  --cmp-bg: #0c1a27;
-  background: var(--cmp-bg);
-}
-.cmp-tools {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-.cmp-tools input {
-  flex: 1;
-  min-width: 0;
-  height: 36px;
-  padding: 0 10px;
-  border: 1px solid #2a4a63;
-  border-radius: 6px;
-  background: #081420;
-  color: #e7f0f8;
-  font: inherit;
-  font-size: var(--fs-sm);
-}
-.cmp-tools input::placeholder {
-  color: #7f95a8;
-}
-.cmp-btn {
-  height: 36px;
-  padding: 0 14px;
-  border: 1px solid #2d5578;
-  border-radius: 6px;
-  background: linear-gradient(180deg, #123049, #0a1c2b);
-  color: #c3d4e2;
-  font: inherit;
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.cmp-btn:hover:not(:disabled) {
-  background: linear-gradient(180deg, #173a5c, #0d2536);
-}
-
-.cmp-note {
-  color: #71889b;
-  font-size: var(--fs-xs);
-  line-height: 1.5;
-  margin: 8px 0 0;
-}
-.cmp-table {
-  table-layout: fixed;
-}
-.cmp-table .cmp-c0 {
-  width: 40%;
-}
-.cmp-table th {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: var(--cmp-bg);
-  padding: 8px;
-}
-.cmp-table td:first-child {
-  white-space: normal;
-}
-.cmp-table th:not(:first-child),
-.cmp-table td:not(:first-child) {
-  text-align: center;
-}
-.data-table td.cmp-up {
-  color: #27db88;
-  font-weight: 700;
-}
-.data-table td.cmp-down {
-  color: #ff6b6f;
-  font-weight: 700;
-}
-.cmp-v {
-  position: relative;
-  display: inline-block;
-}
-.cmp-arr {
-  position: absolute;
-  left: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  margin-left: 5px;
-  font-style: normal;
-  font-size: var(--fs-xs);
-  line-height: 1;
-  white-space: nowrap;
-}
-.cmp-table tbody tr:hover td {
-  background: #12293d;
-}
-.cmp-table th.cmp-h-a {
-  color: #54bfff;
-}
-.cmp-table th.cmp-h-b {
-  color: #f0ae58;
-}
-.data-table tr.cmp-group td {
-  padding-top: 16px;
-  color: #7c93a6;
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  border-top: 1px solid #193246;
-}
-.data-table tr.cmp-group:hover td {
-  background: none;
-}
-.data-table tr.cmp-eq td {
-  color: #7f95a8;
-}
-.cmp-diff {
-  margin-top: 14px;
-  border: 1px solid #1a3346;
-  border-radius: 8px;
-  background: #10263a;
-  padding: 10px 12px;
-  font-size: var(--fs-xs);
-  color: #a9bed0;
-}
-.cmp-diff summary {
-  cursor: pointer;
-  color: #cbd9e5;
-  font-weight: 600;
-}
-.cmp-diff p {
-  margin: 8px 0 0;
-}
-.cmp-diff-row {
-  margin-top: 10px;
-}
-.cmp-diff-row small {
-  display: block;
-  margin-bottom: 5px;
-  color: #7c93a6;
-  font-size: var(--fs-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.cmp-tag {
-  white-space: normal;
-}
-.cmp-tag.a {
-  border-color: #2b6a94;
-  color: #9fd6f7;
-}
-.cmp-tag.b {
-  border-color: #8a6a2e;
-  color: #f0c98a;
-}
 @media (max-width: 650px) {
   /* на узком экране «на сколько» уходит под число */
-  .cmp-arr {
-    position: static;
-    display: block;
-    transform: none;
-    margin: 3px 0 0;
-    font-size: var(--fs-xs);
-  }
 }
-
 /* снаряжение на телефоне сворачивается под кнопку, чтобы результаты были ближе к началу страницы */
 .gear-toggle {
   display: none;
@@ -2428,9 +1058,7 @@ svg.target-icon {
     display: none;
   }
 }
-
 /* бывший polish.css */
-
 /* иконки (спрайт в начале body) */
 .ic {
   width: 1em;
@@ -2443,73 +1071,33 @@ svg.target-icon {
   stroke-linejoin: round;
   vertical-align: -0.14em;
 }
-.side-title > span .ic {
-  width: 18px;
-  height: 18px;
-}
 .section-heading > span .ic {
   width: 20px;
   height: 20px;
-}
-.talent-open > span:first-child .ic {
-  width: 18px;
-  height: 18px;
-}
-.extra-grid .ic {
-  width: 20px;
-  height: 20px;
-  color: #54bfff;
 }
 .gear-info-btn .ic {
   width: 14px;
   height: 14px;
   stroke-width: 2.2;
 }
-
 /* читаемость: мельче 12px текста почти нет, цвет светлее */
-.damage-footnote,
-.tok-note,
-.cmp-note {
+.damage-footnote {
   font-size: var(--fs-xs);
   color: #9db2c4;
 }
-.talent-side-hint,
-.talent-last small,
-.talent-side-stats small,
-.talent-gauge-value small,
 .talent-branch-description {
   font-size: var(--fs-xs);
   color: #9db2c4;
-}
-.talent-game-header p {
-  color: #9db2c4;
-}
-.bd-cell small {
-  font-size: var(--fs-xs);
-  color: #9db2c4;
-}
-.extra-grid small {
-  font-size: var(--fs-sm);
-  color: #a9bed0;
 }
 .data-table th {
   font-size: var(--fs-xs);
   color: #9db2c4;
 }
-.gear-info-group-title {
-  font-size: var(--fs-xs);
-  color: #9db2c4;
-}
-.gear-info-tag {
-  font-size: var(--fs-xs);
-}
 .info-lead {
   font-size: var(--fs-sm);
   color: #a9bbc9;
 }
-
 /* кнопки сайдбара: компактные, без CAPS */
-
 .side-btn {
   height: 38px;
   display: flex;
@@ -2526,32 +1114,6 @@ svg.target-icon {
     0 2px 0 #05121c,
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
-.side-btn .ic {
-  width: 16px;
-  height: 16px;
-}
-.side-btn.ghost {
-  grid-column: 1/-1;
-  height: 32px;
-  box-shadow: none;
-  color: #93a8ba;
-  font-weight: 500;
-}
-.side-btn.ghost:hover {
-  background: #0e2334;
-  color: #c3d4e2;
-}
-.talent-hide {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-}
-.talent-hide .ic {
-  width: 15px;
-  height: 15px;
-}
-
 /* снаряжение плитками (разметку дополняет polish.js) */
 #sets,
 #items {
@@ -2634,685 +1196,15 @@ svg.target-icon {
   color: #9db2c4;
   font-variant-numeric: tabular-nums;
 }
-
-/* полоса состава урона под числом */
-.dmg-bar {
-  grid-column: 1/-1;
-  display: flex;
-  height: 6px;
-  border-radius: 3px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.06);
-}
-.dmg-bar i {
-  display: block;
-  height: 100%;
-  width: 0;
-  transition: width 0.35s ease;
-}
-.dmg-bar .s0 {
-  background: #a9bed0;
-}
-.dmg-bar .s1 {
-  background: #f0ae58;
-}
-.dmg-bar .s2 {
-  background: #54bfff;
-}
-.dmg-bar .s3 {
-  background: #27db88;
-}
-.dmg-bar .s-arena {
-  background: var(--accent, #5f8ac9);
-}
-.bd-cell {
-  padding-top: 5px;
-  border-top: 2px solid #a9bed0;
-}
-.bd-cell.bd-level {
-  border-top-color: #f0ae58;
-}
-.bd-cell.bd-gear {
-  border-top-color: #54bfff;
-}
-.bd-cell.bd-talent {
-  border-top-color: #27db88;
-}
-@media (prefers-reduced-motion: reduce) {
-  .dmg-bar i {
-    transition: none;
-  }
-}
-
-/* урон первого бесплатного удара рядом с основным значением */
-.first-hit {
-  margin-left: 8px;
-  font-size: 18px;
-  font-weight: 700;
-  color: #27db88;
-  white-space: nowrap;
-}
-@media (max-width: 430px) {
-  .first-hit {
-    font-size: 15px;
-    margin-left: 6px;
-  }
-}
-.talent-game-header h2,
-.talent-gauge-value b,
-.td-head h3 {
-  font-family: "Rubik", "Segoe UI", Arial, sans-serif;
-}
-.talent-game-header h2 {
-  font-size: 24px;
-  font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: 0.1px;
-}
-.talent-gauge-value b {
-  font-weight: 600;
-}
-.td-head h3 {
-  font-size: 24px;
-  font-weight: 500;
-  line-height: 1.2;
-}
-@media (max-width: 430px) {
-  .talent-game-header h2 {
-    font-size: 18px;
-  }
-  .td-head h3 {
-    font-size: var(--fs-xl);
-  }
-}
-
 /* заголовки страницы и блоков: 700 → 600, только на странице калькулятора (там обёртка .page) */
 .page .result-title h1 {
   font-weight: 600;
   letter-spacing: -0.3px;
 }
 .page .section-heading b,
-.page .side-title b,
 .page .items-divider b {
   font-weight: 600;
 }
-.page .damage-card h3 {
-  font-weight: 600;
-}
-.page .damage-card strong {
-  font-weight: 600;
-}
-.cmp-head {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 12px;
-  align-items: stretch;
-  margin: 2px 0 16px;
-}
-.cmp-card {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  padding: 12px 14px;
-  border: 1px solid #1d3446;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #0a1a27, #081420);
-  min-width: 0;
-}
-.cmp-card.a {
-  border-left: 3px solid #54bfff;
-  box-shadow: inset 1px 0 0 rgba(84, 191, 255, 0.25);
-}
-.cmp-card.b {
-  border-left: 3px solid #f0ae58;
-  box-shadow: inset 1px 0 0 rgba(240, 174, 88, 0.25);
-}
-.cmp-card small {
-  color: #8fb3cc;
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.cmp-card b {
-  color: #eaf6ff;
-  font-size: var(--fs-lg);
-  font-weight: 600;
-}
-.cmp-card span {
-  color: #a9bccc;
-  font-size: var(--fs-xs);
-  line-height: 1.35;
-}
-.cmp-vs {
-  align-self: center;
-  color: #6f8496;
-  font-size: var(--fs-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  white-space: nowrap;
-}
-
-.cmp-table .cmp-dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  margin-right: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  box-shadow: 0 0 6px currentColor;
-}
-.cmp-table tbody th[scope="row"] {
-  text-align: left;
-  white-space: normal;
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  color: #cbd9e5;
-}
-.cmp-table .cmp-cell {
-  position: relative;
-  padding: 8px 10px 17px !important;
-  vertical-align: top;
-}
-.cmp-table .cmp-v {
-  display: block;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-.cmp-table .cmp-arr {
-  position: static;
-  display: block;
-  left: auto;
-  top: auto;
-  transform: none;
-  margin: 2px 0 0;
-  font-style: normal;
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  white-space: nowrap;
-}
-.cmp-table .cmp-bar {
-  position: absolute;
-  left: 14%;
-  right: 14%;
-  bottom: 7px;
-  height: 4px;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-}
-.cmp-table .cmp-bar i {
-  display: block;
-  height: 100%;
-  border-radius: 3px;
-  background: currentColor;
-  opacity: 0.9;
-}
-.cmp-table .cmp-eq .cmp-cell {
-  color: #8ea3b5;
-}
-.cmp-table tr.cmp-group td {
-  padding-top: 14px;
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  color: #8fb3cc;
-}
-.cmp-table tbody tr:not(.cmp-group):hover th {
-  color: #fff;
-}
-
-@media (max-width: 760px) {
-  .cmp-head {
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .cmp-vs {
-    display: none;
-  }
-  .cmp-card {
-    padding: 10px 11px;
-  }
-  .cmp-card b {
-    font-size: var(--fs-md);
-  }
-  .cmp-card span {
-    font-size: var(--fs-xs);
-  }
-  .cmp-table .cmp-cell {
-    padding: 7px 6px 16px !important;
-  }
-  .cmp-table .cmp-bar {
-    left: 8%;
-    right: 8%;
-  }
-}
-
-/* панель ввода по центру окна */
-.tok-inputs {
-  display: flex;
-  width: max-content;
-  max-width: 100%;
-  margin: 16px auto 0;
-  align-items: center;
-  border: 1px solid #1d3a4f;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #0a1a26, #081420);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-.tok-inp {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 14px;
-}
-.tok-inp-ic {
-  width: 19px;
-  height: 19px;
-  flex: 0 0 19px;
-  color: #54bfff;
-  display: grid;
-  place-items: center;
-}
-.tok-inp-ic .ic {
-  width: 19px;
-  height: 19px;
-  stroke-width: 1.6;
-}
-.tok-inp-lbl {
-  font-size: var(--fs-xs);
-  color: #9fb3c4;
-  white-space: nowrap;
-}
-.tok-inp input {
-  width: 8.5ch;
-  height: 34px;
-  padding: 0 11px;
-  box-sizing: border-box;
-  border: 1px solid #22475f;
-  border-radius: 8px;
-  background: #06121b;
-  color: #eaf6ff;
-  font:
-    700 17px/1 "ZoneMono",
-    ui-monospace,
-    "Cascadia Mono",
-    Consolas,
-    monospace;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-  -moz-appearance: textfield;
-}
-.tok-inp input::-webkit-outer-spin-button,
-.tok-inp input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.tok-inp input:hover {
-  border-color: #3a7096;
-}
-.tok-inp input:focus {
-  outline: none;
-  border-color: #54bfff;
-  box-shadow: 0 0 0 3px rgba(84, 191, 255, 0.2);
-}
-.tok-inp:last-of-type input {
-  width: 10.5ch;
-}
-.tok-inp-sep {
-  width: 1px;
-  align-self: stretch;
-  background: #1a3244;
-  margin: 6px 0;
-}
-.tok-hint {
-  margin: 10px 0 0;
-  font-size: var(--fs-xs);
-  color: #6f8496;
-  text-align: center;
-}
-
-.tok-cards {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 16px;
-}
-.tok-card {
-  position: relative;
-  border: 1px solid #17364b;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #0a1a27, #081420);
-  padding: 14px 16px 15px;
-  min-width: 0;
-}
-.tok-card.best {
-  border-color: rgba(39, 219, 136, 0.55);
-  box-shadow: 0 0 22px rgba(39, 219, 136, 0.13);
-}
-.tok-best {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  padding: 3px 7px;
-  border: 1px solid rgba(39, 219, 136, 0.55);
-  border-radius: 3px;
-  background: rgba(39, 219, 136, 0.14);
-  color: #8ff5bb;
-  font:
-    700 10px/1 "ZoneMono",
-    ui-monospace,
-    monospace;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-.tok-card-head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.tok-wicon {
-  width: 44px;
-  height: 44px;
-  flex: 0 0 44px;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-}
-.tok-card-head b {
-  display: block;
-  font-size: 15px;
-  color: #e7f1f9;
-}
-.tok-card-head small {
-  display: block;
-  margin-top: 2px;
-  font-size: var(--fs-xs);
-  color: #8ea3b5;
-}
-.tok-card-big {
-  font:
-    700 30px/1 "ZoneMono",
-    ui-monospace,
-    "Cascadia Mono",
-    Consolas,
-    monospace;
-  color: #eaf6ff;
-  font-variant-numeric: tabular-nums;
-}
-.tok-card-unit {
-  font-size: var(--fs-xs);
-  color: #8ea3b5;
-  margin: 4px 0 10px;
-}
-.tok-card-bar {
-  height: 9px;
-  border-radius: 6px;
-  background: #0d2130;
-  border: 1px solid #14293a;
-  overflow: hidden;
-}
-.tok-card-bar i {
-  display: block;
-  height: 100%;
-  border-radius: 6px;
-  background: linear-gradient(90deg, rgba(84, 191, 255, 0.55), #54bfff);
-}
-.tok-card.best .tok-card-bar i {
-  background: linear-gradient(90deg, #1f9d63, #27db88);
-}
-.tok-card-rows {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-.tok-card-rows div {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: var(--fs-xs);
-  color: #a9bccc;
-}
-.tok-card-rows div b {
-  color: #e7f1f9;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-}
-.tok-card-rows div.acc b {
-  color: #a8e0ff;
-}
-
-/* пояснение внизу */
-.tokens-window .tok-note {
-  margin: 16px 0 0;
-  padding: 12px 14px;
-  border-left: 3px solid #2e6384;
-  border-radius: 0 8px 8px 0;
-  background: rgba(84, 191, 255, 0.05);
-  color: #9db2c4;
-  font-size: var(--fs-xs);
-  line-height: 1.6;
-}
-
-@media (max-width: 650px) {
-  .tok-inputs {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    width: 100%;
-    margin-top: 12px;
-  }
-  .tok-inp {
-    justify-content: space-between;
-  }
-  .tok-inp input,
-  .tok-inp:last-of-type input {
-    width: 11ch;
-  }
-}
-
-/* Древо талантов: состояния, ранги, легенда, зум, подсказка */
-.talent-node-game {
-  overflow: hidden;
-}
-.talent-node-game.locked {
-  opacity: 0.55;
-  filter: grayscale(0.6);
-}
-/* замок у закрытого узла: рисуем сами, эмодзи выглядят по-разному в системах */
-.talent-node-game.locked::before {
-  content: "";
-  position: absolute;
-  left: 10px;
-  top: 2px;
-  width: 9px;
-  height: 8px;
-  border: 2px solid #9fb3c4;
-  border-bottom: 0;
-  border-radius: 5px 5px 0 0;
-  opacity: 0.85;
-  z-index: 2;
-}
-.talent-node-game.locked::after {
-  content: "";
-  position: absolute;
-  left: 7px;
-  top: 8px;
-  width: 15px;
-  height: 12px;
-  border: 2px solid #9fb3c4;
-  border-radius: 2px;
-  opacity: 0.85;
-  z-index: 2;
-}
-.talent-node-game.maxed {
-  border-color: rgba(121, 196, 103, 0.85);
-  box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.4),
-    0 0 16px rgba(121, 196, 103, 0.3);
-}
-.talent-node-game.ready {
-  border-color: var(--accent);
-  box-shadow:
-    inset 0 0 0 1px rgba(0, 0, 0, 0.4),
-    0 0 18px color-mix(in srgb, var(--accent) 45%, transparent);
-  animation: talent-ready 2.6s ease-in-out infinite;
-}
-@keyframes talent-ready {
-  50% {
-    box-shadow:
-      inset 0 0 0 1px rgba(0, 0, 0, 0.4),
-      0 0 26px color-mix(in srgb, var(--accent) 62%, transparent);
-  }
-}
-.talent-node-rank {
-  right: -1px;
-  bottom: 10px;
-  min-width: 32px;
-  height: 19px;
-  padding: 0 6px;
-  border-radius: 9px 0 0 9px;
-  background: rgba(8, 12, 15, 0.92);
-  border: 1px solid rgba(176, 176, 170, 0.35);
-  border-right: 0;
-  font:
-    700 11px/17px "ZoneMono",
-    ui-monospace,
-    "Cascadia Mono",
-    Consolas,
-    monospace;
-  text-align: center;
-  color: #dfe9f1;
-}
-.talent-node-game.maxed .talent-node-rank {
-  background: rgba(18, 48, 26, 0.92);
-  border-color: #3f9a4a;
-  color: #bff0c4;
-}
-.talent-node-game.ready .talent-node-rank {
-  background: rgba(12, 39, 53, 0.92);
-  border-color: color-mix(in srgb, var(--accent) 55%, #2f3a42);
-  color: #dff2ff;
-}
-.talent-node-bar {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 5px;
-  background: rgba(8, 12, 15, 0.9);
-  z-index: 1;
-}
-.talent-node-bar i {
-  display: block;
-  height: 100%;
-  background: #5b6a75;
-  transition: width 0.18s ease;
-}
-.talent-node-game.maxed .talent-node-bar i {
-  background: #79c463;
-}
-.talent-node-game.ready .talent-node-bar i {
-  background: var(--accent);
-}
-.talent-node-game.locked .talent-node-bar {
-  opacity: 0.5;
-}
-.talent-flow-wrap {
-  background:
-    linear-gradient(rgba(7, 9, 8, 0.3), rgba(7, 9, 8, 0.3)),
-    url("assets/talents-CjzNNTY-.webp") center/cover no-repeat;
-  cursor: default;
-  touch-action: auto;
-}
-.talent-flow-canvas {
-  background: none;
-}
-
-/* легенда - блок в панели слева, чтобы не закрывать узлы дерева */
-.talent-legend {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin: 14px 0 0;
-  padding: 10px 12px;
-  border: 1px solid #1d3446;
-  border-radius: 10px;
-  background: rgba(8, 14, 20, 0.5);
-}
-.talent-legend span {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--fs-xs);
-  color: #a9bccc;
-}
-.talent-legend i {
-  flex: 0 0 9px;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  display: inline-block;
-  border: 0;
-  background: #3a4046;
-}
-.talent-legend .lg-maxed {
-  background: #79c463;
-}
-.talent-legend .lg-ready {
-  background: var(--accent);
-}
-.talent-legend .lg-open {
-  background: #55595c;
-}
-.talent-legend .lg-locked {
-  border: 1.5px dashed rgba(176, 176, 170, 0.5);
-  background: transparent;
-}
-
-.talent-tip {
-  position: absolute;
-  z-index: 4;
-  width: 260px;
-  padding: 12px 13px;
-  border: 1px solid color-mix(in srgb, var(--accent) 45%, #1d3446);
-  border-radius: 11px;
-  background: linear-gradient(180deg, #0d1d29, #0a1620);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
-  pointer-events: none;
-}
-.talent-tip b {
-  display: block;
-  font-size: var(--fs-md);
-  color: #eaf6ff;
-  margin-bottom: 5px;
-}
-.talent-tip p {
-  margin: 0 0 8px;
-  font-size: var(--fs-xs);
-  color: #a9bccc;
-  line-height: 1.45;
-}
-.talent-tip-eff {
-  font-size: var(--fs-xs);
-  line-height: 1.45;
-  color: #9fb3c4;
-}
-.talent-tip-eff b {
-  display: inline;
-  font-size: var(--fs-xs);
-  color: #bff0c4;
-}
-.talent-tip-rank {
-  margin-top: 7px;
-  font-size: var(--fs-xs);
-  color: #7e93a5;
-}
-
 .talent-branches {
   display: flex;
   flex-direction: column;
@@ -3336,278 +1228,12 @@ svg.target-icon {
     monospace;
   color: #e1e1dd;
 }
-.talent-branch-bar {
-  display: block;
-  height: 7px;
-  border-radius: 5px;
-  background: #202426;
-  overflow: hidden;
-}
-.talent-branch-bar i {
-  display: block;
-  height: 100%;
-  background: linear-gradient(90deg, #8a6a2e, #f0ae58);
-}
-.talent-hide-reset {
-  border-color: #7a2b2b !important;
-  color: #ff9c9c !important;
-}
-.talent-hide-reset:disabled {
-  border-color: #373a3d !important;
-  color: #6f7476 !important;
-}
-
-/* Мелкий текст и тач-цели */
-.crit-chip-label {
-  font-size: var(--fs-xs);
-}
-
-#gearInfoBody {
-  padding: 0;
-  gap: 0;
-  overflow: hidden;
-}
-.gi-scroll {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 18px 20px 22px;
-  scrollbar-width: thin;
-  scrollbar-color: #31566f #08131d;
-}
-.gi-tools {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px 16px;
-}
-.gi-filters {
-  display: inline-flex;
-  border: 1px solid #17364b;
-  border-radius: 999px;
-  overflow: hidden;
-}
-.gi-filter {
-  border: 0;
-  background: transparent;
-  color: #9fb3c4;
-  font: inherit;
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  padding: 7px 14px;
-  cursor: pointer;
-  transition:
-    background 0.15s,
-    color 0.15s;
-}
-.gi-filter:hover {
-  color: #e7f1f9;
-}
-.gi-filter.active {
-  background: rgba(84, 191, 255, 0.18);
-  color: #eaf6ff;
-}
-.gi-note {
-  margin: 0;
-  font-size: var(--fs-xs);
-  color: #6f8496;
-}
-.gi-section {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin: 18px 0 10px;
-  color: #cbd9e5;
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-}
-.gi-section .ic {
-  width: 17px;
-  height: 17px;
-  flex: 0 0 17px;
-  color: #8fb3cc;
-}
-.gi-section b {
-  color: #e8f0f7;
-  font-size: var(--fs-sm);
-}
-.gi-section small {
-  text-transform: none;
-  letter-spacing: 0;
-  font-weight: 400;
-  color: #6f8496;
-  font-size: var(--fs-xs);
-}
-.gi-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-.gi-card {
-  position: relative;
-  padding: 11px 13px 12px 17px;
-  border: 1px solid #1a3346;
-  border-radius: 9px;
-  background: linear-gradient(135deg, #0b1925, #09141e);
-  overflow: hidden;
-  transition:
-    border-color 0.15s,
-    background 0.15s;
-}
-.gi-card::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--ac);
-  box-shadow: 0 0 10px var(--ac);
-}
-.gi-card:hover {
-  border-color: color-mix(in srgb, var(--ac) 55%, #1a3346);
-  background: linear-gradient(135deg, #0d1e2d, #0a1620);
-}
-.gi-card.free {
-  --ac: #f0ae58;
-}
-.gi-card.paid {
-  --ac: #54bfff;
-}
-.gi-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 9px;
-}
-.gi-head .ic {
-  width: 16px;
-  height: 16px;
-  color: var(--ac);
-}
-.gi-head b {
-  min-width: 0;
-  color: #e8f0f7;
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  line-height: 1.25;
-}
-.gi-bar {
-  height: 7px;
-  border-radius: 5px;
-  background: #0d2130;
-  overflow: hidden;
-}
-.gi-bar i {
-  display: block;
-  height: 100%;
-  border-radius: 5px;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--ac) 45%, #0d2130), var(--ac));
-}
-.gi-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 9px;
-}
-.gi-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 9px;
-  border: 1px solid #22475f;
-  border-radius: 14px;
-  background: #0a1a26;
-  color: #a9bccc;
-  font-size: var(--fs-xs);
-  white-space: nowrap;
-}
-.gi-chip b {
-  color: #e7f1f9;
-  font-weight: 700;
-}
-
-/* сумма: обычный блок в конце списка (не прилипает к окну), значения - плотными плитками */
-.gi-total {
-  margin-top: 18px;
-  padding: 14px 16px;
-  border: 1px solid rgba(84, 191, 255, 0.35);
-  border-radius: 12px;
-  background: linear-gradient(120deg, rgba(84, 191, 255, 0.09), rgba(8, 18, 28, 0.92));
-}
-.gi-total-title {
-  margin-bottom: 10px;
-  color: #73c8ff;
-  font-size: var(--fs-sm);
-  font-weight: 700;
-}
-.gi-total-row {
-  display: grid;
-  grid-template-columns: 150px minmax(0, 1fr);
-  gap: 12px;
-  align-items: start;
-  padding: 7px 0;
-  border-top: 1px solid #16303f;
-}
-.gi-total-row:first-of-type {
-  border-top: 0;
-}
-.gi-total-row > small {
-  padding-top: 5px;
-  color: #8fb3cc;
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-.gi-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.gi-pill {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6px;
-  padding: 4px 10px;
-  border: 1px solid #1d3a4f;
-  border-radius: 999px;
-  background: #0a1a26;
-  color: #a9bccc;
-  font-size: var(--fs-xs);
-}
-.gi-pill b {
-  color: #eaf6ff;
-  font:
-    700 12.5px/1 "ZoneMono",
-    ui-monospace,
-    "Cascadia Mono",
-    Consolas,
-    monospace;
-}
-
-@media (max-width: 760px) {
-  .gi-grid {
-    grid-template-columns: 1fr;
+@media (max-width: 650px) {
+  .talent-branch-description {
+    display: none;
   }
 }
 @media (max-width: 650px) {
-  .talent-game-body {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  .talent-gauge,
-  .talent-side-stats,
-  .talent-side-hint,
-  .talent-branch-description,
-  .talent-last {
-    display: none;
-  }
   .talent-branches {
     flex-direction: row;
     gap: 8px;
@@ -3621,257 +1247,7 @@ svg.target-icon {
     font-size: var(--fs-xs);
     margin-bottom: 4px;
   }
-  .talent-branch-bar {
-    height: 6px;
-  }
-  .talent-branch-tabs {
-    display: flex;
-    gap: 6px;
-    border: 0;
-    margin: 0 0 10px;
-  }
-  .talent-branch-tabs button {
-    flex: 1 1 0;
-    height: 38px;
-    padding: 0 8px;
-    text-align: center;
-    border: 1px solid #373a3d;
-    border-radius: 8px;
-    font-size: var(--fs-xs);
-  }
-  .talent-branch-tabs button.active {
-    background: #deded8;
-    color: #171819;
-    border-color: #deded8;
-  }
-  .talent-side-footer {
-    display: flex;
-    gap: 8px;
-    margin: 0;
-    padding-top: 0;
-    position: static;
-    background: none;
-  }
-  .talent-side-footer .talent-hide {
-    flex: 1 1 0;
-    height: 42px;
-    margin-top: 0;
-  }
-  .talent-flow-wrap {
-    flex: 1 1 auto;
-    height: auto;
-    min-height: 0;
-  }
-  /* легенда - компактной строкой, чтобы не удлинять панель */
-  .talent-legend {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 4px 12px;
-    margin-top: 10px;
-    padding: 8px 10px;
-  }
-  .talent-legend span {
-    font-size: var(--fs-xs);
-    gap: 6px;
-  }
-  .talent-legend i {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-  }
-  .talent-tip {
-    width: min(260px, calc(100% - 16px));
-  }
-  /* карточка таланта - шторка снизу */
-
-  .talent-detail-modal {
-    width: 100%;
-    max-width: 100%;
-    max-height: 64vh;
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 -18px 50px rgba(0, 0, 0, 0.6);
-  }
-  .talent-detail {
-    border-radius: 16px 16px 0 0;
-    padding: 16px 16px 20px;
-  }
-
-  .gi-scroll {
-    padding: 12px 14px 16px;
-  }
-  .gi-total {
-    margin-top: 14px;
-    padding: 12px 13px;
-  }
-  .gi-total-row {
-    grid-template-columns: 1fr;
-    gap: 5px;
-  }
-  .gi-total-row > small {
-    padding-top: 0;
-  }
 }
-
-/* окно подтверждения сброса (вместо стандартного confirm): поверх остальных окон, компактное */
-.confirm-modal {
-  z-index: 2100;
-}
-
-.confirm-text {
-  margin: 0;
-  color: #c3d4e2;
-  font-size: var(--fs-md);
-  line-height: 1.5;
-}
-.confirm-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.confirm-actions .cmp-btn.confirm-danger {
-  border-color: #7a2f35;
-  background: linear-gradient(180deg, #4a171c, #2a0d10);
-  color: #ffd9dc;
-}
-.confirm-actions .cmp-btn.confirm-danger:hover:not(:disabled) {
-  background: linear-gradient(180deg, #5c1d23, #341013);
-  border-color: #c2444e;
-}
-.gi-section {
-  margin: 20px 0 4px;
-  font-size: var(--fs-md);
-  letter-spacing: 0.08em;
-}
-.gi-section .ic {
-  width: 19px;
-  height: 19px;
-  flex: 0 0 19px;
-}
-.gi-sub {
-  --ac: #f0ae58;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 12px 0 9px;
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--ac) 70%, #fff);
-}
-.gi-sub.paid {
-  --ac: #54bfff;
-}
-.gi-sub i {
-  width: 8px;
-  height: 8px;
-  flex: 0 0 8px;
-  border-radius: 50%;
-  background: var(--ac);
-  box-shadow: 0 0 8px var(--ac);
-}
-.gi-sub b {
-  color: #fff;
-}
-.gi-sub::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--ac) 40%, transparent), transparent);
-}
-.gi-grid {
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 10px;
-  align-items: start;
-}
-.gi-card {
-  display: flex;
-  flex-direction: column;
-  padding: 12px 13px 12px 16px;
-  background: linear-gradient(160deg, color-mix(in srgb, var(--ac) 10%, #0b1219), #080d12 72%) !important;
-  border-color: color-mix(in srgb, var(--ac) 22%, #14222d);
-}
-.gi-card:hover {
-  border-color: color-mix(in srgb, var(--ac) 60%, #14222d);
-  box-shadow: 0 0 18px color-mix(in srgb, var(--ac) 18%, transparent);
-}
-.gi-head {
-  margin-bottom: 9px;
-}
-.gi-head b {
-  flex: 1;
-}
-.gi-power {
-  flex: 0 0 auto;
-  padding: 3px 6px;
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--ac) 15%, transparent);
-  color: color-mix(in srgb, var(--ac) 70%, #fff);
-  font:
-    700 11px/1 "ZoneMono",
-    ui-monospace,
-    "Cascadia Mono",
-    Consolas,
-    monospace;
-}
-.gi-power-bar {
-  display: block;
-  height: 4px;
-  margin-bottom: 10px;
-}
-.gi-stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
-}
-.gi-stat {
-  min-width: 0;
-  padding: 6px 6px 7px;
-  border-radius: 5px;
-  background: rgba(0, 0, 0, 0.28);
-  border: 1px solid color-mix(in srgb, var(--ac) 14%, transparent);
-  text-align: center;
-}
-.gi-stat small {
-  display: block;
-  margin-bottom: 4px;
-  font-size: var(--fs-xs);
-  color: #8ea3b5;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.gi-stat b {
-  display: block;
-  color: #fff;
-  font:
-    700 14px/1.1 "ZoneMono",
-    ui-monospace,
-    "Cascadia Mono",
-    Consolas,
-    monospace;
-  font-variant-numeric: tabular-nums;
-}
-.gi-chips {
-  margin-top: auto;
-  padding-top: 9px;
-}
-.gi-chip {
-  font-size: var(--fs-xs);
-  padding: 3px 8px;
-  border-color: color-mix(in srgb, var(--ac) 30%, #1a3346);
-  background: color-mix(in srgb, var(--ac) 7%, #0a1218);
-}
-.gi-total {
-  margin-top: 22px;
-}
-.gi-total-title {
-  font-size: var(--fs-md);
-  letter-spacing: 0.04em;
-}
-
 /* бывший visual.css */
 :root {
   color-scheme: dark;
@@ -4073,16 +1449,10 @@ body::after {
   pointer-events: none;
 }
 .result-panel,
-.damage-card,
 .info-group,
 .gear-toggle,
 .option,
-.gi-card,
-.tok-card,
-.cmp-card,
-.home-card,
-.cmp-table th,
-.talent-game-window {
+.home-card {
   border-color: color-mix(in srgb, var(--accent) 22%, var(--panel-line));
   background-color: var(--panel);
   background-image: linear-gradient(180deg, color-mix(in srgb, var(--accent) 9%, var(--panel)), var(--panel-2));
@@ -4103,8 +1473,6 @@ body::after {
   );
 }
 .side-btn,
-.tokens-btn,
-.cmp-btn,
 .gear-info-btn {
   color: #f2f8fd;
   border-color: color-mix(in srgb, var(--accent) 50%, #1d3a4f);
@@ -4150,9 +1518,7 @@ body::after {
 }
 input[type="text"],
 input[type="search"],
-input[type="number"],
-.cmp-tools input,
-.tok-inp input {
+input[type="number"] {
   border-color: color-mix(in srgb, var(--accent) 28%, #22475f);
 }
 input[type="text"]:focus,
@@ -4182,7 +1548,6 @@ input[type="number"]:focus {
   background: var(--accent);
   box-shadow: 0 0 8px var(--accent);
 }
-
 /* 3. Шапка: чистое стекло */
 .site-header {
   position: sticky;
@@ -4209,7 +1574,6 @@ input[type="number"]:focus {
 :where(button, input, a, summary):focus-visible {
   outline-color: var(--accent);
 }
-
 /* 4. Переключатель группировок */
 .theme-pick {
   position: relative;
@@ -4726,34 +2090,10 @@ input[type="number"]:focus {
     transition: none;
   }
 }
-
 /* раскрывающийся список тем */
 /* выбранная тема просто подсвечивается - без галочек */
-
-/* 5. Цифры-герои */
-.page .damage-card strong,
-.dmg-main strong {
-  font-family: "ZoneMono", ui-monospace, "Cascadia Mono", "SF Mono", Consolas, monospace;
-  font-size: clamp(27px, 2.4vw + 8px, 36px);
-  font-weight: 700;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 20px color-mix(in srgb, var(--accent) 40%, transparent);
-}
-.first-hit {
-  font-variant-numeric: tabular-nums;
-  opacity: 0.9;
-}
-.dmg-main {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
 /* 6. Глубина интерфейса */
-.result-panel,
-.sidebar {
+.result-panel {
   border-radius: var(--r-lg);
   box-shadow: var(--sh-2);
 }
@@ -4761,18 +2101,13 @@ input[type="number"]:focus {
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
 }
 .side-btn,
-.tokens-btn,
-.cmp-btn,
-.talent-open,
 .gear-toggle {
   transition:
     transform 0.12s ease,
     box-shadow 0.18s ease,
     border-color 0.18s ease;
 }
-.side-btn:hover,
-.tokens-btn:hover,
-.cmp-btn:hover {
+.side-btn:hover {
   transform: translateY(-1px);
 }
 .tabbar,
@@ -4941,7 +2276,6 @@ input[type="number"]:focus {
     grid-area: desc;
   }
 }
-
 /* 8б. Акцент темы в мелких деталях */
 .home-eyebrow i {
   background: var(--accent-3);
@@ -4999,16 +2333,15 @@ html.vt-same #infoGroups {
 ::view-transition-group(infogroups) {
   animation-duration: 0.22s;
 }
-
 /* 10. Уважение к настройкам системы */
 @media (prefers-reduced-motion: reduce) {
   .home-card,
   .side-btn,
-  .tokens-btn,
-  .cmp-btn,
   .theme-pick * {
     transition: none;
   }
+}
+@media (prefers-reduced-motion: reduce) {
   ::view-transition-old(leaderboard),
   ::view-transition-new(leaderboard),
   ::view-transition-old(infogroups),
@@ -5020,9 +2353,7 @@ html.vt-same #infoGroups {
     animation: none;
   }
 }
-
 /* Визуальные доработки (бывший improve.css) */
-
 /* 1. Шрифт: системный стек вместо Segoe UI → Arial на Mac/Android/Linux */
 html,
 body,
@@ -5036,14 +2367,11 @@ body,
     Arial,
     sans-serif;
 }
-
 /* 2. Заголовки страниц читаются на светлом небе фона */
 .result-title svg {
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.8));
 }
-
 /* 3. Подпись в футере была почти невидимой */
-
 /* 4. Доступность: видимый фокус при навигации с клавиатуры */
 a:focus-visible,
 button:focus-visible,
@@ -5053,7 +2381,6 @@ select:focus-visible {
   outline-offset: 2px;
   border-radius: 6px;
 }
-
 /* 5. Главная: описание карточек контрастнее */
 @media (min-width: 1000px) {
   .home-content {
@@ -5062,25 +2389,6 @@ select:focus-visible {
     justify-content: center;
   }
 }
-
-/* 6. Калькулятор: список снаряжения обрезался без признаков прокрутки */
-@media (min-width: 1000px) {
-  .equipment-section {
-    max-height: none;
-  }
-}
-.damage-footnote .first-hit {
-  font-size: inherit;
-  margin-left: 2px;
-}
-
-/* 8. Гайды: заглушка шире и заметнее */
-.placeholder-panel {
-  max-width: 640px;
-  margin-inline: auto;
-  text-align: center;
-}
-
 /* 9. Информация: панель не «прыгает» по ширине при переключении вкладок */
 .info-content {
   width: 100%;
@@ -5089,7 +2397,6 @@ select:focus-visible {
 .info-content:has(.placeholder-panel) {
   max-width: 680px;
 }
-
 html,
 body {
   font-family:
@@ -5109,7 +2416,6 @@ body {
   background: color-mix(in srgb, var(--accent) 45%, transparent);
   color: #fff;
 }
-
 /* R2. Фон: фото группировки + затемнение + зерно + виньетка */
 body::before {
   background-image:
@@ -5460,7 +2766,6 @@ body::after {
     color: #ff6a50;
   }
 }
-
 /* Кардиограмма - как на кардиомониторе: раз в такт светящаяся точка быстро (за 1.5 с) пишет линию слева направо,
    перед ней небольшой просвет стирает прошлую запись. Пик R - между словами: точка проходит его ровно в момент удара
    сердца. У правого края точка гаснет, а записанная линия остаётся до следующего удара.
@@ -5711,7 +3016,6 @@ body::after {
   border-radius: 3px;
   z-index: -1;
 }
-
 /* R5. Заголовки страниц */
 .result-title {
   gap: 16px;
@@ -5751,11 +3055,8 @@ body::after {
   background: linear-gradient(90deg, var(--accent), var(--accent-3));
   box-shadow: 0 0 10px var(--accent);
 }
-
 /* R6. Панели */
-.result-panel,
-.sidebar,
-.placeholder-panel {
+.result-panel {
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
   background: var(--brackets), var(--panel-fill);
@@ -5767,15 +3068,8 @@ body::after {
   padding: 18px 20px;
   margin-bottom: 16px;
 }
-.sidebar {
-  background:
-    var(--brackets),
-    linear-gradient(180deg, color-mix(in srgb, var(--accent) 6%, rgba(12, 15, 19, 0.95)), rgba(7, 9, 12, 0.96));
-}
-
 /* заголовки секций: трафарет, засечка и пунктир */
-.section-heading,
-.side-title {
+.section-heading {
   font-family: var(--f-display);
   font-weight: 500;
   font-size: 15.5px;
@@ -5787,14 +3081,11 @@ body::after {
   border-bottom: 1px dashed color-mix(in srgb, var(--accent) 28%, rgba(255, 255, 255, 0.08));
 }
 .section-heading b,
-.side-title b,
-.page .section-heading b,
-.page .side-title b {
+.page .section-heading b {
   font-weight: 500;
   color: #fff;
 }
-.section-heading > span,
-.side-title > span {
+.section-heading > span {
   display: grid;
   place-items: center;
   width: 26px;
@@ -5803,54 +3094,15 @@ body::after {
   background: color-mix(in srgb, var(--accent) 14%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
 }
-.section-heading > span .ic,
-.side-title > span .ic {
+.section-heading > span .ic {
   width: 15px;
   height: 15px;
   color: var(--accent);
 }
-
 /* R7. Карточки, поля, кнопки */
-.damage-card,
-.info-group,
-.gi-card,
-.tok-card,
-.cmp-card {
+.info-group {
   border-radius: var(--r-md);
   border-color: color-mix(in srgb, var(--accent) 18%, rgba(255, 255, 255, 0.06));
-}
-.damage-card {
-  background-image: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--accent) 10%, rgba(14, 18, 22, 0.95)),
-    rgba(8, 10, 13, 0.96)
-  );
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  transition:
-    border-color 0.2s,
-    transform 0.2s;
-}
-.damage-card:hover {
-  border-color: color-mix(in srgb, var(--accent) 50%, transparent);
-}
-.damage-card h3,
-.page .damage-card h3 {
-  font-family: var(--f-display);
-  font-weight: 500;
-  font-size: 17px;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--ink);
-}
-.damage-card strong,
-.page .damage-card strong,
-.dmg-main strong {
-  font-family: var(--f-display);
-  font-weight: 600;
-  font-size: var(--fs-3xl);
-  letter-spacing: 0.01em;
-  color: #fff;
-  text-shadow: 0 0 18px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 .option {
   border-radius: var(--r-sm);
@@ -5861,8 +3113,6 @@ body::after {
     0 0 14px color-mix(in srgb, var(--accent) 25%, transparent);
 }
 .side-btn,
-.tokens-btn,
-.cmp-btn,
 .gear-info-btn {
   border-radius: var(--r-sm);
   font-family: var(--f-display);
@@ -5874,25 +3124,15 @@ body::after {
     box-shadow 0.2s,
     transform 0.15s;
 }
-.side-btn:hover,
-.tokens-btn:hover,
-.cmp-btn:hover {
+.side-btn:hover {
   border-color: var(--accent);
   box-shadow:
     0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent),
     0 0 16px color-mix(in srgb, var(--accent) 25%, transparent);
 }
-.side-btn:active,
-.tokens-btn:active,
-.cmp-btn:active {
+.side-btn:active {
   transform: translateY(1px);
 }
-
-.level-row button,
-.level-row input {
-  border-radius: var(--r-sm);
-}
-
 /* вкладки (Информация, Топ-100) */
 .info-sections button,
 .top100-tab {
@@ -5909,7 +3149,6 @@ body::after {
   border-radius: var(--r-sm);
   font-size: var(--fs-sm);
 }
-
 /* R8. Таблицы */
 .data-table thead th {
   font-family: var(--f-display);
@@ -5936,36 +3175,6 @@ body::after {
     color-mix(in srgb, var(--accent-3) 6%, transparent)
   ) !important;
 }
-
-/* поля, счётчик уровня, кнопка древа, разделители - в тон группировки */
-
-.level-row button {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--accent) 22%, #0d1115),
-    color-mix(in srgb, var(--accent) 8%, #080a0d)
-  );
-  color: #fff;
-  border: 1px solid var(--line-strong);
-}
-.level-row button:first-child {
-  border: 1px solid var(--line-strong);
-}
-.level-row button:hover {
-  background: color-mix(in srgb, var(--accent) 34%, #0d1115);
-}
-.level-row input {
-  background: rgba(5, 7, 9, 0.75);
-  border: 1px solid var(--line);
-  font-family: var(--f-display);
-  font-size: var(--fs-xl);
-  font-weight: 500;
-}
-
-.side-btn.ghost {
-  border-color: var(--line);
-  background: rgba(6, 8, 10, 0.5);
-}
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]) {
   background-color: rgba(5, 7, 9, 0.72);
   border-color: var(--line);
@@ -5976,12 +3185,10 @@ input:not([type="checkbox"]):not([type="radio"]):focus {
 input[type="checkbox"] {
   accent-color: var(--accent);
 }
-.select-all input,
-.cmp-tools input[type="checkbox"] {
+.select-all input {
   border-color: var(--line-strong);
   background-color: #07090b;
 }
-
 .data-table td,
 .data-table th {
   border-color: color-mix(in srgb, var(--accent) 14%, rgba(255, 255, 255, 0.05));
@@ -5989,7 +3196,6 @@ input[type="checkbox"] {
 .data-table thead th {
   background-color: color-mix(in srgb, var(--accent) 10%, #090b0e);
 }
-
 /* R9. Главная */
 .home-hero {
   margin-bottom: 44px;
@@ -6108,31 +3314,6 @@ input[type="checkbox"] {
 .home-card:hover .home-card-cta svg {
   transform: translateX(4px);
 }
-
-/* R10. Гайды, футер, нижнее меню */
-.placeholder-panel {
-  padding: 40px 28px;
-  font-size: 15px;
-  color: var(--ink-2);
-}
-.placeholder-panel::before {
-  content: "";
-  display: block;
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 16px;
-  border-radius: 50%;
-  border: 2px dashed color-mix(in srgb, var(--accent) 60%, transparent);
-  background:
-    radial-gradient(circle, var(--accent) 0 5px, transparent 6px),
-    conic-gradient(from 0deg, color-mix(in srgb, var(--accent) 35%, transparent), transparent 30%);
-  animation: radarSpin 3.2s linear infinite;
-}
-@keyframes radarSpin {
-  to {
-    transform: rotate(360deg);
-  }
-}
 .site-footer > span {
   font-size: var(--fs-md);
   opacity: 0.9;
@@ -6162,7 +3343,6 @@ input[type="checkbox"] {
     border-radius: 0;
   }
 }
-
 /* R11. Адаптив */
 @media (max-width: 1200px) {
   .main-nav a {
@@ -6215,19 +3395,13 @@ input[type="checkbox"] {
   .home-card::after {
     font-size: var(--fs-2xl);
   }
-  .damage-card strong,
-  .page .damage-card strong,
-  .dmg-main strong {
-    font-size: 30px;
-  }
+}
+@media (max-width: 760px) {
   :root {
     --brk-s: 9px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .placeholder-panel::before {
-    animation: none;
-  }
   .ti-thumb,
   .rad-logo,
   .home-card,
@@ -6254,20 +3428,12 @@ input[type="checkbox"] {
   }
 }
 @media (max-width: 760px) {
-  .section-heading,
-  .side-title {
+  .section-heading {
     font-size: 14.5px;
     letter-spacing: 0.06em;
   }
 }
-.talent-game-header h2 {
-  font-family: var(--f-display);
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
 /* значок «Комплекты» окрашен в цвет темы, как остальные заголовки */
-
 /* без синей вспышки системной подсветки касания на телефонах; отклик - лёгкое затемнение пункта */
 .tabbar a,
 .tabbar-more-btn,
@@ -6279,7 +3445,6 @@ input[type="checkbox"] {
 .tabbar-more-btn:active {
   background: rgba(255, 255, 255, 0.04);
 }
-
 /* подвал на узком телефоне */
 @media (max-width: 430px) {
   .site-footer > span {
@@ -6300,7 +3465,6 @@ input[type="checkbox"] {
 .ic-x {
   stroke-dasharray: 10;
 }
-
 :is(
   .main-nav a:hover,
   .main-nav a:focus-visible,
@@ -6382,7 +3546,6 @@ input[type="checkbox"] {
 .tabbar a.active .ic-screen {
   animation-fill-mode: none;
 }
-
 @keyframes ic-ant {
   0%,
   100% {
@@ -6560,7 +3723,6 @@ input[type="checkbox"] {
     transform: none;
   }
 }
-
 @media (prefers-reduced-motion: reduce) {
   .nav-icon *,
   .home-card-icon svg * {
@@ -6666,7 +3828,6 @@ input[type="checkbox"] {
     margin-top: auto;
   }
 }
-
 /* узкие планшеты: шесть пунктов меню не влезают с обычными отступами - сжимаем отступы, разрядку и логотип */
 @media (min-width: 761px) and (max-width: 900px) {
   html body .main-nav a {
@@ -6677,7 +3838,6 @@ input[type="checkbox"] {
     font-size: 19px;
   }
 }
-
 /* 15. Планшеты (761–1100px, iPad в портрете) */
 @media (min-width: 761px) and (max-width: 1100px) {
   /* шапка: логотип в одну строку, меню без иконок, чтобы влез переключатель группировок */
@@ -6710,39 +3870,6 @@ input[type="checkbox"] {
     display: none;
   }
   /* калькулятор: компактнее карточки урона, разбивка 2×2 */
-
-  .damage-card {
-    padding: 14px;
-    grid-template-columns: 48px minmax(0, 1fr);
-    column-gap: 10px;
-  }
-  .weapon-icon {
-    width: 48px;
-    height: 48px;
-  }
-  .damage-card h3,
-  .page .damage-card h3 {
-    font-size: 15px;
-    letter-spacing: 0.04em;
-    overflow-wrap: anywhere;
-  }
-  .damage-card strong,
-  .page .damage-card strong,
-  .dmg-main strong {
-    font-size: 32px;
-  }
-  .breakdown {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-/* узкий планшет: карточки урона в столбик, разбивка в строку */
-@media (min-width: 761px) and (max-width: 900px) {
-  .damage-card {
-    min-height: auto;
-  }
-  .breakdown {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
 }
 .theme-pick-toggle::after {
   content: "";
@@ -6887,7 +4014,6 @@ input[type="checkbox"] {
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
-
 .info-table tbody tr.info-done td {
   background: color-mix(in srgb, var(--grp) 9%, transparent) !important;
   color: color-mix(in srgb, #eef4fa 55%, transparent) !important;
@@ -6920,7 +4046,6 @@ input[type="checkbox"] {
   font-size: var(--fs-xs);
   opacity: 1;
 }
-
 /* Главная: «Что нового?» (changelog.js) */
 .home-news {
   position: relative;
@@ -7162,7 +4287,6 @@ input[type="checkbox"] {
     margin-left: 22px;
   }
 }
-
 /* Информация: «Прогресс по уровням» - оформление таблиц */
 .info-groups {
   gap: 14px;
@@ -7201,7 +4325,6 @@ input[type="checkbox"] {
   background: rgba(0, 0, 0, 0.18);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--grp) 10%, transparent);
 }
-
 .info-table thead th {
   background: color-mix(in srgb, var(--grp) 14%, #080a0d) !important;
   color: color-mix(in srgb, var(--grp) 55%, #e6eef5) !important;
@@ -7219,7 +4342,6 @@ input[type="checkbox"] {
 .info-table tbody tr:hover td {
   background: color-mix(in srgb, var(--grp) 10%, transparent) !important;
 }
-
 /* номер уровня - плашкой */
 .info-lv {
   display: inline-block;
@@ -7229,7 +4351,6 @@ input[type="checkbox"] {
   font-variant-numeric: tabular-nums;
   color: color-mix(in srgb, var(--grp) 70%, #fff);
 }
-
 /* каждый 10-й уровень: ровная полоса на всю строку, а не градиент в каждой ячейке */
 .info-table tbody tr.info-milestone td {
   background: color-mix(in srgb, var(--grp) 13%, transparent) !important;
@@ -7243,7 +4364,6 @@ input[type="checkbox"] {
   color: #0b0d10;
   font-weight: 800;
 }
-
 /* полученные уровни: приглушены, галочка слева от номера */
 .info-table tbody tr.info-done td {
   color: color-mix(in srgb, #eef4fa 50%, transparent) !important;
@@ -7276,7 +4396,6 @@ input[type="checkbox"] {
   font-weight: 800;
   box-shadow: 0 0 10px color-mix(in srgb, var(--grp) 60%, transparent);
 }
-
 /* карточка прогресса над таблицей */
 .info-progress-line {
   display: block;
@@ -7355,21 +4474,7 @@ input[type="checkbox"] {
     font-size: var(--fs-xs);
   }
 }
-
 /* кнопка «Бонусы» у раздела «Комплекты» и кнопка снаряжения на телефоне: заметнее */
-
-@keyframes gi-ping {
-  0% {
-    opacity: 0.7;
-    transform: scale(1);
-  }
-  70%,
-  100% {
-    opacity: 0;
-    transform: scale(1.18);
-  }
-}
-
 @media (max-width: 760px) {
   .gear-toggle {
     position: relative;
@@ -7407,85 +4512,14 @@ input[type="checkbox"] {
     margin-top: -1px;
   }
 }
-
 /* правки по аудиту */
-/* древо талантов: активная ветка - в цвете темы, а не светло-серой плашкой */
-.talent-branch-tabs button.active {
-  background: color-mix(in srgb, var(--accent, #54bfff) 18%, #14181c);
-  color: #f1f5f8;
-  border-color: color-mix(in srgb, var(--accent, #54bfff) 55%, transparent);
-  box-shadow: inset 3px 0 0 var(--accent, #54bfff);
-}
-@media (max-width: 760px) {
-  .talent-branch-tabs button.active {
-    box-shadow: inset 0 -2px 0 var(--accent, #54bfff);
-  }
-}
-.talent-side-footer .talent-hide-reset {
-  flex: 1 1 100%;
-}
 /* две стандартные ширины: широкая (калькулятор, «Информация» - 1400) и обычная (главная, Топ-100, гайды, 404 - 1180) */
 main.content.home-content,
 main.content.page-narrow {
   max-width: 1180px;
 }
-/* всплывашка «Ссылка скопирована» и т. п.: компактная плашка в углу, а не окно по центру поверх результатов */
-.toast {
-  left: auto;
-  right: 24px;
-  top: auto;
-  bottom: 24px;
-  transform: translateY(12px);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  max-width: min(420px, calc(100% - 32px));
-  padding: 12px 18px 12px 14px;
-  border-width: 1px;
-  border-color: color-mix(in srgb, var(--accent, #54bfff) 45%, #2c3b40);
-  font-family: var(--f-display, "Oswald", "Arial Narrow", sans-serif);
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.8px;
-  text-align: left;
-  /* текст всегда светлый на непрозрачном фоне: контраст выше 10:1 в любой теме */
-  color: #f4f7f6;
-  background: #0d171b;
-}
-.toast::after {
-  inset: 3px;
-}
-.toast.show {
-  transform: none;
-}
-.toast::before,
-.toast.ok::before,
-.toast.err::before {
-  flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
-  margin: 0;
-  font-size: 26px;
-}
 @media (max-width: 760px) {
   /* на телефоне - над нижним меню */
-  .toast {
-    left: 16px;
-    right: 16px;
-    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
-    width: auto;
-    max-width: none;
-    padding: 11px 14px;
-    font-size: var(--fs-md);
-  }
-  .toast::before,
-  .toast.ok::before,
-  .toast.err::before {
-    width: 26px;
-    height: 26px;
-    font-size: 22px;
-  }
 }
 /* подвал: на узком экране «Правовая информация» уходит на новую строку - разделитель перед ней не нужен */
 @media (max-width: 520px) {
@@ -7521,16 +4555,7 @@ main.content.page-narrow {
   line-height: 15px;
   color: #c7d6e2;
 }
-/* окно «Бонусы снаряжения»: карточки в ряду одной высоты, без «дыр» под короткими */
-.gi-grid {
-  align-items: stretch;
-}
-/* «Ссылка на билд» и «Сравнить» помещаются в одну строку */
 @media (min-width: 761px) and (max-width: 1100px) {
-  .equipment-section {
-    max-height: none;
-    overflow-y: visible;
-  }
   .result-panel > .section-heading:has(.tokens-btn) {
     flex-wrap: wrap;
     row-gap: 10px;
@@ -7539,21 +4564,6 @@ main.content.page-narrow {
     white-space: nowrap;
   }
 }
-
-/* поля «Жетоны» и «Нужный урон» с пробелами между разрядами: ширина под 8–9 цифр плюс отступы */
-.tok-inp input {
-  width: calc(9ch + 24px);
-}
-.tok-inp:last-of-type input {
-  width: calc(11ch + 24px);
-}
-@media (max-width: 760px) {
-  .tok-inp input,
-  .tok-inp:last-of-type input {
-    width: calc(11ch + 24px);
-  }
-}
-
 /* Информация: вид «График» (info.js) График «всего с начала», ключевые цифры и расчёт «с уровня - до уровня». */
 .info-viewbar {
   display: flex;
@@ -7610,7 +4620,6 @@ main.content.page-narrow {
 .info-groups[data-view="chart"][data-active="t21"] [data-info-group="t21"] {
   display: block;
 }
-
 .info-groups[data-view="chart"] .info-group {
   --ich: var(--grp, #54bfff);
 }
@@ -8130,7 +5139,6 @@ html.tour-seen .tour-help {
 .hw-toggle:focus-visible svg {
   transform: rotate(-8deg) scale(1.06);
 }
-
 .hw-menu {
   position: absolute;
   right: 0;

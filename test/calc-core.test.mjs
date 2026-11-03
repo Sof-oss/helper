@@ -15,7 +15,11 @@ import {
   buildHashOf,
   parseBuild,
   sanitizeTalents,
-  BASE_CRIT_DAMAGE
+  BASE_CRIT_DAMAGE,
+  DAMAGE_KEYS,
+  buildTotals,
+  buildResults,
+  firstFreeHitDamage
 } from "../src/calc-core.js";
 
 test("уровень: целое 1–100", () => {
@@ -138,4 +142,131 @@ test("toBits", () => {
 
 test("базовый критический урон жетонного оружия", () => {
   assert.deepEqual(BASE_CRIT_DAMAGE, { grenade: 20, gl: 40, gauss: 100 });
+});
+
+/* эталон - цифры, которые показывал калькулятор до выноса формул в src/calc-core.js */
+const MID_BUILD = {
+  level: 45,
+  gear: [
+    "HEAD_001",
+    "JACKET_001",
+    "PANTS_001",
+    "HEAD_002",
+    "JACKET_002",
+    "PANTS_002",
+    "JACKET_004",
+    "PANTS_003",
+    "HEAD_005"
+  ].concat([
+    "PANTS_004",
+    "JACKET_005",
+    "HEAD_003",
+    "JACKET_007",
+    "PANTS_005",
+    "HEAD_004",
+    "JACKET_006",
+    "HEAD_006",
+    "JACKET_010"
+  ]),
+  arena: 180,
+  talents: Object.fromEntries(
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(n => ["TALENT_" + String(n).padStart(4, "0"), 5])
+  )
+};
+const GOLDEN = [
+  [
+    "пустой билд, 1 уровень",
+    { level: 1, gear: [], arena: 0, talents: {} },
+    { knife: 47, pistol: 49, auto: 55, grenade: 56, gl: 115, gauss: 367 },
+    { first: [47, 49, 55], crit: [0, 0, 0], critDmg: [20, 40, 100], noCooldown: 0, cooldown: 0, firstFreeHit: 0 },
+    [
+      [46, 1, 0, 0, 0],
+      [48, 1, 0, 0, 0],
+      [54, 1, 0, 0, 0],
+      [55, 1, 0, 0, 0],
+      [113, 2, 0, 0, 0],
+      [360, 7, 0, 0, 0]
+    ]
+  ],
+  [
+    "45 уровень, 18 вещей, арена 180, 60 очков талантов",
+    MID_BUILD,
+    { knife: 171, pistol: 212, auto: 291, grenade: 243, gl: 475, gauss: 1522 },
+    { first: [205, 254, 349], crit: [0, 0, 1], critDmg: [20, 40, 200], noCooldown: 5, cooldown: 7, firstFreeHit: 20 },
+    [
+      [46, 66, 28, 4, 27],
+      [48, 69, 28, 4, 63],
+      [54, 78, 32, 4, 123],
+      [55, 79, 95, 4, 10],
+      [113, 162, 190, 10, 0],
+      [360, 518, 612, 32, 0]
+    ]
+  ],
+  [
+    "100 уровень, всё снаряжение, арена 1000, все таланты",
+    {
+      level: 100,
+      gear: ALL_ITEMS.map(i => i.code),
+      arena: 1000,
+      talents: Object.fromEntries(TALENTS.map(t => [t[0], 5]))
+    },
+    { knife: 441, pistol: 495, auto: 609, grenade: 704, gl: 1445, gauss: 4565 },
+    {
+      first: [529, 594, 731],
+      crit: [12, 11, 12],
+      critDmg: [300, 325, 725],
+      noCooldown: 6,
+      cooldown: 10,
+      firstFreeHit: 20
+    },
+    [
+      [46, 287, 58, 23, 27],
+      [48, 300, 60, 24, 63],
+      [54, 337, 68, 27, 123],
+      [55, 343, 249, 27, 30],
+      [113, 706, 510, 56, 60],
+      [360, 2248, 1627, 180, 150]
+    ]
+  ]
+];
+for (const [name, build, damage, extra, parts] of GOLDEN)
+  test("расчёт билда: " + name, () => {
+    const T = buildTotals(build),
+      r = buildResults(build.level, T),
+      base0 = baseDamageByLevel(0),
+      base = baseDamageByLevel(build.level);
+    assert.deepEqual(Object.fromEntries(DAMAGE_KEYS.map(k => [k, Math.round(r[k])])), damage);
+    /* разбивка под числом: база 0 уровня, прибавка уровня, снаряжение, арена, таланты - в сумме итог */
+    DAMAGE_KEYS.forEach((k, i) => {
+      assert.deepEqual([base0[k], base[k] - base0[k], T.gearTotal[k], T.arena[k], T.talentTotal[k]], parts[i], k);
+      assert.equal(
+        parts[i].reduce((a, b) => a + b, 0),
+        r[k],
+        k
+      );
+    });
+    assert.deepEqual(
+      ["knife", "pistol", "auto"].map(k => Math.round(firstFreeHitDamage(r[k], r.firstFreeHit))),
+      extra.first
+    );
+    assert.deepEqual(
+      ["Grenade", "Gl", "Gauss"].map(K => Math.round(r["crit" + K] * 100)),
+      extra.crit
+    );
+    assert.deepEqual(
+      ["Grenade", "Gl", "Gauss"].map(K => r["critDmg" + K]),
+      extra.critDmg
+    );
+    assert.equal(Math.round(r.noCooldown * 100), extra.noCooldown);
+    assert.equal(Math.round(r.cooldown * 100), extra.cooldown);
+    assert.equal(Math.round(r.firstFreeHit * 100), extra.firstFreeHit);
+  });
+
+test("расчёт билда: неизвестные вещи и пустой билд не ломают сумму", () => {
+  const T = buildTotals({ gear: ["NOPE"], arena: -5, talents: { NOPE: 5 } });
+  assert.deepEqual(T.total, { knife: 0, pistol: 0, auto: 0, grenade: 0, gl: 0, gauss: 0 });
+  assert.deepEqual(buildTotals(null).total, T.total);
+  /* уровень за пределами 1–100 считается как ближайший допустимый */
+  assert.equal(buildResults(0, T).knife, buildResults(1, T).knife);
+  assert.equal(buildResults(250, T).gauss, buildResults(100, T).gauss);
 });

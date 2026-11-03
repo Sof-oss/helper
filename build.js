@@ -26,10 +26,12 @@ const MODULES = {
     "src/calculator.js",
     "src/calc-core.js",
     "src/calc-slots.js",
+    "src/calc-talents.js",
+    "src/calc-tokens.js",
+    "src/calc-compare.js",
     "src/gear-data.js",
     "src/arena-data.js",
     "app.js",
-    "polish.js",
     "talents.js"
   ]
 };
@@ -262,20 +264,36 @@ function guidesListMarkup() {
   console.log("3D главной: " + parts.join(", "));
 }
 
-/* калькулятор app.js, polish.js и talents.js - ES-модули с явными import/export (без общих глобальных имён). */
+/* калькулятор app.js и talents.js - ES-модули с явными import/export (без общих глобальных имён).
+   Окна талантов, жетонов и сравнения (src/calc-talents.js, calc-tokens.js, calc-compare.js) app.js подключает через
+   import(): они уходят в отдельные файлы calc/*-<хэш>.js и грузятся, когда нужны. Общих import у них нет, поэтому
+   третьего «общего куска» не бывает - если он появился, сборка предупредит. */
 {
   const r = esbuild.buildSync({
     entryPoints: [path.join(ROOT, "src", "calculator.js")],
-    outfile: path.join(OUT, "calculator.js"),
+    outdir: OUT,
+    entryNames: "[name]",
+    chunkNames: "calc/[name]-[hash]",
     bundle: true,
-    format: "iife",
+    splitting: true,
+    format: "esm",
     minify: true,
     target: "es2020",
     legalComments: "none",
     charset: "utf8",
     metafile: true
   });
-  console.log("Калькулятор: calculator.js " + (Object.values(r.metafile.outputs)[0].bytes / 1024).toFixed(0) + " КБ");
+  const outs = Object.entries(r.metafile.outputs);
+  if (outs.some(([f]) => /(^|\/)chunk-[\w-]+\.js$/.test(f)))
+    console.warn("Предупреждение: у окон калькулятора появился общий кусок calc/chunk-*.js - проверьте их import");
+  console.log(
+    "Калькулятор: " +
+      outs
+        .map(
+          ([f, o]) => path.basename(f).replace(/-[A-Z0-9]{8}\.js$/, ".js") + " " + (o.bytes / 1024).toFixed(0) + " КБ"
+        )
+        .join(", ")
+  );
 }
 
 const INCLUDE = /<!--\s*@include\s+([\w-]+)(?:\s+active="([^"]*)")?\s*-->\n?/g;
@@ -563,7 +581,8 @@ const LOCAL_CSS = /<link rel="stylesheet" href="(\/?)([^":]+\.css)">\n?/g;
 const LAZY_JS = {
   "my-place.js": ["top100-data.js"],
   "season.js": ["halloween.js"],
-  "home-3d.js": ["src/zone-bg.js", "src/zone-theme.js"]
+  "home-3d.js": ["src/zone-bg.js", "src/zone-theme.js"],
+  "calculator.js": ["src/calc-talents.js", "src/calc-tokens.js", "src/calc-compare.js"]
 };
 const EVERY_PAGE_JS = ["season.js", "intro.js", "sw-register.js"];
 function pageWords(name, html) {
@@ -843,6 +862,30 @@ if (fs.existsSync(path.join(OUT, "season.js"))) {
   fs.writeFileSync(seasonFile, fs.readFileSync(seasonFile, "utf8").replace("__HW_V__", hh.digest("hex").slice(0, 10)));
 }
 
+/* Тур (tour.js, ~28 КБ) нужен редко, поэтому вместо <script src="tour.js"> на странице - маленький загрузчик. Он грузит
+   тур сразу, только если тур надо продолжить (шаг в sessionStorage) или открыта ссылка #tour; иначе - по нажатию
+   кнопки тура на главной (#tourStart) или «?» в шапке, а потом повторяет это нажатие уже для tour.js.
+   Подпись «?» ставит сам tour.js, но он теперь грузится позже - поэтому она сразу в HTML. */
+const tourLoader = url =>
+  "<script>/* загрузчик тура (build.js) */(function(){var d=document,u=" +
+  JSON.stringify(url) +
+  ',st=0,q=[];function load(cb){if(cb)q.push(cb);if(st)return;st=1;var s=d.createElement("script");s.src=u;' +
+  "s.onload=function(){st=2;while(q.length)q.shift()()};s.onerror=function(){st=0;q=[];s.remove()};d.body.appendChild(s)}" +
+  'try{if(sessionStorage.getItem("zoneTourStep")!==null||location.hash==="#tour")load()}catch(e){}' +
+  'd.addEventListener("click",function(e){if(st===2)return;var b=e.target.closest&&e.target.closest(".tour-help:not([data-no-tour]),#tourStart");' +
+  "if(!b)return;e.stopPropagation();load(function(){b.click()})},true)})();</script>";
+const TOUR_HELP_LABEL =
+  '<button type="button" class="tour-help" aria-label="Подсказки по этой странице" title="Подсказки по этой странице"';
+function lazyTour(html, name) {
+  const m = /<script src="(\/?tour\.js\?v=[0-9a-f]+)" defer><\/script>/.exec(html);
+  if (!m) return html;
+  const label = name === "index.html" ? "Короткий тур по сайту" : "Подробный тур по странице";
+  return html
+    .replace(m[0], tourLoader(m[1].startsWith("/") ? m[1] : "/" + m[1]))
+    .split(TOUR_HELP_LABEL)
+    .join('<button type="button" class="tour-help" aria-label="' + label + '" title="' + label + '"');
+}
+
 /* html */
 let pages = 0;
 for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
@@ -870,6 +913,7 @@ for (const name of fs.readdirSync(OUT).filter(f => f.endsWith(".html"))) {
       });
       return a + out.join(", ") + b;
     });
+  html = lazyTour(html, name);
   fs.writeFileSync(path.join(OUT, name), html);
   pages++;
   console.log(name.padEnd(16), (before / 1024).toFixed(1) + " КБ -> " + (html.length / 1024).toFixed(1) + " КБ");
@@ -1201,6 +1245,8 @@ function addCsp(file) {
       if (/^\/top100-(?:data\.js|players\.json)(?:\?|$)/.test(u)) continue;
       urls.add(u);
     }
+    /* тур грузит загрузчик (lazyTour) - адреса нет в <script src>, но офлайн тур тоже должен открываться */
+    for (const m of html.matchAll(/,u="(\/tour\.js\?v=[0-9a-f]+)"/g)) urls.add(m[1]);
   }
   /* картинки и шрифты из стилей оболочки (иконки оружия, woff2), кроме фонов тем, их карт глубины и запасных ttf/woff */
   for (const u of [...urls].filter(x => /\.css\?/.test(x))) {
@@ -1215,6 +1261,13 @@ function addCsp(file) {
       .readFileSync(path.join(OUT, name), "utf8")
       .matchAll(/\s(?:src|poster)="\/?(assets\/[^"?#]+\.(?:webp|png|jpe?g|svg))"/g))
       if (fs.existsSync(path.join(OUT, m[1]))) urls.add("/" + m[1]);
+  /* куски калькулятора (окна талантов, жетонов, сравнения): без них окна не откроются офлайн */
+  if (fs.existsSync(path.join(OUT, "calc")))
+    for (const f of fs
+      .readdirSync(path.join(OUT, "calc"))
+      .filter(f => f.endsWith(".js"))
+      .sort())
+      urls.add("/calc/" + f);
   for (const f of fs
     .readdirSync(path.join(OUT, "assets", "bosses"))
     .filter(f => /\.webp$/.test(f))

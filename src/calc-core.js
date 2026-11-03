@@ -110,3 +110,100 @@ export function parseBuild(raw) {
     talents: sanitizeTalents(Object.fromEntries(TALENTS.map((t, i) => [t[0], parseInt(ts[i], 10) || 0])))
   };
 }
+
+/* оружие калькулятора: бесплатные удары и оружие за жетоны */
+export const DAMAGE_KEYS = ["knife", "pistol", "auto", "grenade", "gl", "gauss"];
+const zeroDamage = () => Object.fromEntries(DAMAGE_KEYS.map(k => [k, 0]));
+
+/* бонусы талантов по рангам: урон каждого оружия, крит, откат и первый бесплатный удар */
+export function talentTotals(ranks) {
+  const total = zeroDamage(),
+    critDamageByWeapon = { grenade: 0, gl: 0, gauss: 0 };
+  let critChance = 0,
+    noCooldown = 0,
+    cooldown = 0,
+    firstFreeHit = 0;
+  TALENTS.forEach(t => {
+    const rank = (ranks && ranks[t[0]]) || 0;
+    if (!rank) return;
+    const stat = t[7],
+      target = Array.isArray(t[8]) ? t[8][0] : t[8],
+      value = t[6][rank - 1];
+    if (stat === "free_boss_damage_flat") ["knife", "pistol", "auto"].forEach(k => (total[k] += value));
+    if (stat === "free_hit_damage_flat") total[target === "rifle" ? "auto" : target] += value;
+    if (stat === "paid_hit_damage_flat") total[target === "ubgl" ? "gl" : target] += value;
+    if (stat === "paid_hit_crit_damage_flat") critDamageByWeapon[target === "ubgl" ? "gl" : target] += value;
+    if (stat === "paid_hit_crit_chance_pct") critChance += value / 100;
+    if (stat === "first_free_hit_damage_bonus_pct") firstFreeHit += value / 100;
+    if (stat === "free_hit_cooldown_reduction_pct") cooldown += value / 100;
+    if (stat === "free_hit_cooldown_dodge_chance_pct") noCooldown += value / 100;
+  });
+  return { total, critChance, critDamageByWeapon, noCooldown, cooldown, firstFreeHit };
+}
+
+/* суммарные бонусы билда { gear, arena, talents }: снаряжение, арена и таланты по отдельности и вместе */
+export function buildTotals(b) {
+  const total = zeroDamage(),
+    gearTotal = zeroDamage();
+  const ex = {
+    critChance: 0,
+    critDamage: 0,
+    critGaussChance: 0,
+    critGrenadeChance: 0,
+    critGaussDamage: 0,
+    critGrenadeDamage: 0,
+    freeNoCooldown: 0,
+    cooldown: 0
+  };
+  for (const code of (b && b.gear) || []) {
+    const x = ITEM_BY_CODE[code];
+    if (!x) continue;
+    DAMAGE_KEYS.forEach(k => {
+      const v = x.bonuses[k] || 0;
+      gearTotal[k] += v;
+      total[k] += v;
+    });
+    const e = x.extras || {};
+    for (const k in ex) ex[k] += e[k] || 0;
+  }
+  const arena = arenaBonus(b && b.arena);
+  DAMAGE_KEYS.forEach(k => (total[k] += arena[k]));
+  const t = talentTotals(b && b.talents);
+  DAMAGE_KEYS.forEach(k => (total[k] += t.total[k]));
+  return {
+    total,
+    gearTotal,
+    arena,
+    critChance: ex.critChance + t.critChance,
+    critDamage: ex.critDamage,
+    critGaussChance: ex.critGaussChance,
+    critGrenadeChance: ex.critGrenadeChance,
+    critGaussDamage: ex.critGaussDamage + t.critDamageByWeapon.gauss,
+    critGrenadeDamage: ex.critGrenadeDamage + t.critDamageByWeapon.grenade,
+    critGlDamageTal: t.critDamageByWeapon.gl,
+    noCooldown: ex.freeNoCooldown + t.noCooldown,
+    cooldown: ex.cooldown + t.cooldown,
+    firstFreeHit: t.firstFreeHit,
+    talentTotal: t.total
+  };
+}
+
+/* урон за удар, шанс и урон крита, откат на уровне level; T - buildTotals() */
+export function buildResults(level, T) {
+  const base = baseDamageByLevel(clampLevel(level)),
+    r = {};
+  DAMAGE_KEYS.forEach(k => (r[k] = base[k] + T.total[k]));
+  r.critGrenade = T.critChance + T.critGrenadeChance;
+  r.critGl = T.critChance;
+  r.critGauss = T.critChance + T.critGaussChance;
+  /* урон крита = базовая прибавка оружия + снаряжение + таланты */
+  r.critDmgGrenade = BASE_CRIT_DAMAGE.grenade + T.critDamage + T.critGrenadeDamage;
+  r.critDmgGl = BASE_CRIT_DAMAGE.gl + T.critDamage + T.critGlDamageTal;
+  r.critDmgGauss = BASE_CRIT_DAMAGE.gauss + T.critDamage + T.critGaussDamage;
+  r.noCooldown = T.noCooldown;
+  r.cooldown = T.cooldown;
+  r.firstFreeHit = T.firstFreeHit;
+  return r;
+}
+/* первый бесплатный удар: итоговый урон плюс процентный бонус таланта */
+export const firstFreeHitDamage = (damage, bonus) => damage * (1 + bonus);

@@ -55,6 +55,25 @@ test("build.js: страницы, CSP, sitemap и статическая обо�
       precache.some(u => /^\/ui\.js\?v=/.test(u)),
       "общие js входят в оболочку"
     );
+    /* окна калькулятора - отдельные куски calc/*.js: они в оболочке, иначе офлайн окна не откроются */
+    const calcChunks = fs.readdirSync(path.join(out, "calc")).filter(f => f.endsWith(".js"));
+    assert.deepEqual(
+      calcChunks.map(f => f.replace(/-\w+\.js$/, "")).sort(),
+      ["calc-compare", "calc-talents", "calc-tokens"],
+      "куски окон калькулятора без общего chunk-*.js"
+    );
+    assert.ok(
+      calcChunks.every(f => precache.includes("/calc/" + f)),
+      "куски калькулятора входят в оболочку"
+    );
+    assert.match(read("calculator.html"), /<script type="module" src="calculator\.js\?v=/);
+    /* тур - через загрузчик: tour.js не в <script src>, но в оболочке SW */
+    assert.doesNotMatch(index, /<script[^>]*src="[^"]*tour\.js/);
+    assert.match(index, /загрузчик тура/);
+    assert.ok(
+      precache.some(u => /^\/tour\.js\?v=/.test(u)),
+      "tour.js входит в оболочку"
+    );
     assert.ok(!precache.includes("/"), "страницы не входят в статическую оболочку");
     assert.ok(!precache.includes("/top100"), "страница Топ-100 не входит в оболочку");
     assert.ok(!precache.some(u => /^\/top100-data\.js/.test(u)), "данные Топ-100 не входят в оболочку");

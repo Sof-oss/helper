@@ -152,7 +152,7 @@ self.addEventListener("fetch", e => {
     e.respondWith(networkFirst(req, DATA));
     return;
   }
-  if (url.searchParams.has("v") || /^\/(?:3d|assets\/fonts)\//.test(url.pathname)) {
+  if (url.searchParams.has("v") || /^\/(?:3d|calc|assets\/fonts)\//.test(url.pathname)) {
     e.respondWith(cacheFirst(req));
     return;
   }
