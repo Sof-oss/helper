@@ -70,7 +70,7 @@
       img: "friday",
       items: ["Хоккейная маска", "Потёртая куртка", "Старые джинсы"]
     },
-    dates: "с 23 октября по 6 ноября",
+    dates: "с 23 октября по 5 ноября",
     rewards: [
       { place: "1", exp: 750, tokens: 10, pda: 5, key: "orange", keyCount: 3, extra: "gauss", extraCount: 5, set: 100 },
       { place: "2", exp: 600, tokens: 8, pda: 4, key: "orange", keyCount: 1, extra: "gauss", extraCount: 4, set: 75 },
@@ -333,7 +333,7 @@
     );
   }
 
-  /* обратный отсчёт до появления ивентового босса: 05:00 и 18:00 МСК, событие с 23 октября по 6 ноября 2026 */
+  /* обратный отсчёт до появления ивентового босса: 05:00 и 18:00 МСК, событие с 23 октября по 5 ноября 2026 */
   function startEventCountdown() {
     const box = root.querySelector("[data-event-countdown]");
     if (!box) return;
@@ -345,8 +345,8 @@
       const base = Date.UTC(2026, 9, 23 + day, 2, 0, 0);
       times.push(base, base + 13 * 3600 * 1000);
     }
-    const last = Date.UTC(2026, 10, 6, 15, 0, 0),
-      end = Date.UTC(2026, 10, 6, 21, 0, 0);
+    const last = Date.UTC(2026, 10, 5, 15, 0, 0),
+      end = Date.UTC(2026, 10, 5, 21, 0, 0);
     const spawns = times.filter(t => t <= last);
     const pad = n => String(n).padStart(2, "0");
     function tick() {
