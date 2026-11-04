@@ -1,11 +1,11 @@
 {
-  "updated": "2026-11-04T12:03:29+03:00",
+  "updated": "2026-11-05T02:59:17+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
       "name": "Last Way 2",
       "level": 1,
-      "members": 10,
+      "members": 9,
       "leader": {
         "id": 5197,
         "name": "|LW| ЭнДоРфИнКа"
@@ -14,7 +14,7 @@
     {
       "name": "Last Way",
       "level": 1,
-      "members": 19,
+      "members": 20,
       "leader": {
         "id": 3954,
         "name": "|LW| РуSSкая"
@@ -158,7 +158,7 @@
     {
       "name": "Вольные сталкеры",
       "level": 3,
-      "members": 25,
+      "members": 24,
       "leader": {
         "id": 1141,
         "name": "[Вольный сталкер] Фунт"
