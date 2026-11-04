@@ -2,18 +2,18 @@
 # Нужен секрет репозитория ZONE_TOKEN (Settings → Secrets and variables → Actions):
 # токен API игры (значение заголовка authorization без слова Bearer).
 #
-# Токен живёт около суток, поэтому его надо обновлять каждый день до 02:55 МСК: скопировать в расширении
+# Запуск - каждый день в 02:55 МСК с cron-job.org: POST https://api.github.com/repos/Sof-oss/helper/actions/workflows/top100.yml/dispatches
+# с телом {"ref":"main"} и fine-grained токеном GitHub (только этот репозиторий, Actions: Read and write).
+# schedule GitHub не используем: он запускал с опозданием на 4-5 часов.
+#
+# Токен игры живёт около суток, поэтому его надо обновлять каждый день до 02:55 МСК: скопировать в расширении
 # HotZ Helper (Настройки → Данные → Токен игры → «Копировать») и вставить в секрет ZONE_TOKEN (Update secret).
 # Токен должен действовать хотя бы до 04:00 МСК - выгрузка идёт 10-20 минут.
 # Если токен истёк, запуск падает (GitHub пришлёт письмо), а сайт остаётся с прошлыми данными.
 name: Обновление Топ-100
 
 on:
-  schedule:
-    # каждый день в 02:55 МСК (в cron время UTC: 23:55 предыдущего дня). GitHub запускает по расписанию
-    # с опозданием, обычно на 5-30 минут, поэтому выгрузка начинается около 03:00 МСК
-    - cron: "55 23 * * *"
-  workflow_dispatch: # кнопка Run workflow на вкладке Actions (нужен действующий ZONE_TOKEN)
+  workflow_dispatch: # cron-job.org в 02:55 МСК или кнопка Run workflow на вкладке Actions (нужен действующий ZONE_TOKEN)
 
 permissions:
   contents: write # коммит обновлённых данных
