@@ -263,6 +263,21 @@
   border: 1px solid var(--panel-line);
   border-radius: 6px;
 }
+/* картинка открывается крупно по нажатию (lightbox.js), как скриншоты в новостях */
+.guide-body figure img {
+  cursor: zoom-in;
+  transition:
+    filter 0.15s,
+    border-color 0.15s;
+}
+.guide-body figure img:hover {
+  border-color: rgba(217, 164, 65, 0.6);
+  filter: brightness(1.08);
+}
+.guide-body figure img:focus-visible {
+  outline: 2px solid #d9a441;
+  outline-offset: 2px;
+}
 .guide-body figcaption {
   margin-top: 6px;
   color: #8ea3b5;

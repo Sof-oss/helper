@@ -9,13 +9,6 @@ window.ZONE_NEWS = [
       "Хэллоуинское оформление останется в игре до следующего обновления",
       "Администрация благодарит всех, кто участвовал в событии и сражался с ивентовым боссом"
     ],
-    shots: [
-      {
-        src: "/assets/news/2026-11-04-event-end.webp",
-        thumb: "/assets/news/2026-11-04-event-end-480.webp",
-        alt: "Хэллоуинский ивент завершён"
-      }
-    ],
     url: "https://vk.ru/wall-239092289_312",
     event: "halloween-end"
   },
@@ -279,53 +272,19 @@ window.ZONE_NEWS = [
     });
 
   if (!root.addEventListener || !document.createElement) return;
-  let box = null,
-    group = [],
-    at = 0;
-  const show = k => {
-    at = (k + group.length) % group.length;
-    const b = group[at];
-    const img = box.querySelector("img");
-    img.src = b.src;
-    img.alt = b.alt;
-    box.querySelector(".zn-lb-cap").textContent =
-      b.alt + (group.length > 1 ? "  ·  " + (at + 1) + " / " + group.length : "");
-    box.classList.toggle("zn-lb-single", group.length < 2);
-  };
-  const make = () => {
-    box = document.createElement("dialog");
-    box.className = "zn-lightbox";
-    box.setAttribute("aria-label", "Скриншот");
-    box.innerHTML =
-      '<div class="zn-lb-shell"><figure><img alt=""><figcaption class="zn-lb-cap"></figcaption></figure>' +
-      '<button type="button" class="zn-lb-btn zn-lb-close" aria-label="Закрыть"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>' +
-      '<button type="button" class="zn-lb-btn zn-lb-prev" aria-label="Предыдущий скриншот"><svg viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></button>' +
-      '<button type="button" class="zn-lb-btn zn-lb-next" aria-label="Следующий скриншот"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button></div>';
-    document.body.appendChild(box);
-    box.addEventListener("click", e => {
-      if (e.target.closest(".zn-lb-prev")) show(at - 1);
-      else if (e.target.closest(".zn-lb-next")) show(at + 1);
-      else if (e.target.closest(".zn-lb-close") || !e.target.closest("img")) box.close();
-    });
-    box.addEventListener("keydown", e => {
-      if (e.key === "ArrowLeft") show(at - 1);
-      if (e.key === "ArrowRight") show(at + 1);
-    });
-  };
-  /* у баннера берём самую крупную картинку из srcset */
-  const big = img => (img.srcset ? img.srcset.split(",").pop().trim().split(" ")[0] : img.src);
+  /* окно просмотра - lightbox.js; у баннера берём самую крупную картинку из srcset */
   const open = el => {
-    const news = el.closest(".zn-item");
-    const items = [...news.querySelectorAll(".zn-event[role=button], .zn-shot")];
-    group = items.map(x =>
-      x.classList.contains("zn-shot")
-        ? { src: x.dataset.src, alt: x.dataset.alt }
-        : { src: big(x.querySelector("img")), alt: x.dataset.alt }
+    const lb = window.ZoneLightbox;
+    if (!lb) return;
+    const items = [...el.closest(".zn-item").querySelectorAll(".zn-event[role=button], .zn-shot")];
+    lb.open(
+      items.map(x =>
+        x.classList.contains("zn-shot")
+          ? { src: x.dataset.src, alt: x.dataset.alt }
+          : { src: lb.big(x.querySelector("img")), alt: x.dataset.alt }
+      ),
+      items.indexOf(el)
     );
-    if (!box) make();
-    show(items.indexOf(el));
-    if (box.showModal) box.showModal();
-    else box.setAttribute("open", "");
   };
   const target = e => e.target.closest && e.target.closest(".zn-shot, .zn-event[role=button]");
   root.addEventListener("click", e => {
