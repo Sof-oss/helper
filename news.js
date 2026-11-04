@@ -16,7 +16,8 @@ window.ZONE_NEWS = [
         alt: "Хэллоуинский ивент завершён"
       }
     ],
-    url: "https://vk.ru/wall-239092289_312"
+    url: "https://vk.ru/wall-239092289_312",
+    event: "halloween-end"
   },
   {
     date: "2026-11-01",
@@ -176,6 +177,9 @@ window.ZONE_NEWS = [
     /* слухи об обновлении к Хэллоуину: ивентовый босс в болотной деревне, метка «Слухи» */
     "update-halloween":
       '<div class="zn-event zn-ev-update" aria-hidden="true"><img src="/assets/event-update-halloween-600.webp" srcset="/assets/event-update-halloween-600.webp 600w, /assets/event-update-halloween-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>Слухи</span></div>',
+    /* Хэллоуин закончился: рассвет в болотной деревне, поверженный босс, тыквенная метка «Завершён» */
+    "halloween-end":
+      '<div class="zn-event zn-ev-ended" aria-hidden="true"><img src="/assets/event-halloween-end-600.webp" srcset="/assets/event-halloween-end-600.webp 600w, /assets/event-halloween-end-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>Завершён</span></div>',
     /* розыгрыш: сталкеры у костра и кейс с жетонами, золотая метка «Розыгрыш» */
     giveaway:
       '<div class="zn-event zn-ev-giveaway" aria-hidden="true"><img src="/assets/event-giveaway-600.webp" srcset="/assets/event-giveaway-600.webp 600w, /assets/event-giveaway-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>Розыгрыш</span></div>'

@@ -1307,6 +1307,13 @@ html.tour-seen .home-hero .tour-start {
 .zn-ev-giveaway img {
   filter: brightness(1.15) contrast(1.05);
 }
+/* «Завершён» (event: "halloween-end"): тыквенная метка, точка не мигает - событие уже прошло */
+.zn-ev-ended {
+  --ev: #f0a050;
+}
+.zn-ev-ended img {
+  filter: brightness(1.05) contrast(1.05);
+}
 .zn-ev-dot {
   display: inline-block;
   width: 6px;
@@ -1320,5 +1327,8 @@ html.tour-seen .home-hero .tour-start {
 @media (prefers-reduced-motion: no-preference) {
   .zn-ev-dot {
     animation: hc-blink 1.6s ease-in-out infinite;
+  }
+  .zn-ev-ended .zn-ev-dot {
+    animation: none;
   }
 }
