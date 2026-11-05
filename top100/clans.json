@@ -1,11 +1,11 @@
 {
-  "updated": "2026-11-05T02:59:17+03:00",
+  "updated": "2026-11-06T02:59:28+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
       "name": "Last Way 2",
       "level": 1,
-      "members": 9,
+      "members": 12,
       "leader": {
         "id": 5197,
         "name": "|LW| ЭнДоРфИнКа"
@@ -113,7 +113,7 @@
     {
       "name": "Чистое небо",
       "level": 1,
-      "members": 17,
+      "members": 16,
       "leader": {
         "id": 1220,
         "name": "Петя кок"
@@ -131,7 +131,7 @@
     {
       "name": "Учёные",
       "level": 2,
-      "members": 25,
+      "members": 24,
       "leader": {
         "id": 1223,
         "name": "\"Учёные\"  СаХаРоК"
@@ -140,7 +140,7 @@
     {
       "name": "Рассвет",
       "level": 1,
-      "members": 19,
+      "members": 20,
       "leader": {
         "id": 62,
         "name": "Меченый"
@@ -158,7 +158,7 @@
     {
       "name": "Вольные сталкеры",
       "level": 3,
-      "members": 24,
+      "members": 25,
       "leader": {
         "id": 1141,
         "name": "[Вольный сталкер] Фунт"
