@@ -1178,19 +1178,17 @@
   margin-top: 14px;
 }
 
-/* ивентовый босс: широкая карточка на всю строку, праздничная рамка и таблица наград по местам */
+/* ивентовый босс: внизу списка, компактнее обычных карточек после завершения события */
 .boss-event {
   grid-column: 1/-1;
-  border-color: color-mix(in srgb, #ff9a2e 55%, #3b1e4a);
-  background: linear-gradient(155deg, #1a1020, #0b1925 48%, #09141e);
-  box-shadow:
-    0 0 0 1px #a565e82e,
-    0 18px 40px #0005;
+  border-color: #4c3547;
+  background: linear-gradient(155deg, #17131d, #0b1925 48%, #09141e);
+  box-shadow: 0 0 0 1px #a565e81c;
 }
 .boss-event-art {
   aspect-ratio: auto;
-  height: clamp(210px, 23vw, 320px);
-  border-bottom-color: #ff9a2e99;
+  height: clamp(150px, 14vw, 190px);
+  border-bottom-color: #6a4c58;
 }
 .boss-event-art video {
   object-position: right top;
@@ -1202,9 +1200,9 @@
 .boss-event-art .boss-name {
   left: 18px;
   right: 18px;
-  bottom: 14px;
-  font-size: clamp(22px, 2.4vw, 34px);
-  color: #ffd1a1;
+  bottom: 12px;
+  font-size: clamp(20px, 2vw, 28px);
+  color: #e8c8b1;
 }
 .boss-event-badge {
   position: absolute;
@@ -1227,6 +1225,37 @@
   text-transform: uppercase;
   box-shadow: 0 2px 10px #0007;
 }
+.boss-event-status {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 2;
+  max-width: calc(100% - 28px);
+  padding: 7px 11px;
+  border: 1px solid #e56458b8;
+  border-radius: 6px;
+  background: #3a1720e8;
+  color: #ffb0a6;
+  font:
+    700 10px/1.2 "ZoneMono",
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.08em;
+  text-align: right;
+  text-transform: uppercase;
+  box-shadow: 0 2px 10px #0007;
+}
+.boss-event.is-ended .boss-event-art::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: #070d1866;
+  pointer-events: none;
+}
+.boss-event.is-ended .boss-event-art video {
+  filter: saturate(0.55);
+}
 .boss-event-badge img {
   width: 16px;
   height: 20px;
@@ -1235,7 +1264,7 @@
 }
 .boss-event-body {
   display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.45fr) minmax(0, 0.9fr);
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.3fr) minmax(0, 0.8fr);
   align-items: stretch;
 }
 .boss-event-main {
@@ -1248,7 +1277,7 @@
 }
 .boss-event-body > .boss-block {
   border-top: 0;
-  padding: 12px 15px;
+  padding: 10px 12px;
   min-width: 0;
 }
 .boss-event-count {
@@ -1256,8 +1285,8 @@
   align-items: baseline;
   flex-wrap: wrap;
   gap: 4px 10px;
-  margin: 0 0 8px;
-  padding: 8px 10px;
+  margin: 0 0 6px;
+  padding: 6px 8px;
   border: 1px solid #ff9a2e59;
   border-radius: 6px;
   background: linear-gradient(180deg, #ff9a2e14, #0000001f);
@@ -1275,7 +1304,7 @@
 .boss-event-count b {
   color: #fff;
   font:
-    700 24px/1 "ZoneMono",
+    700 20px/1 "ZoneMono",
     ui-monospace,
     monospace;
   font-variant-numeric: tabular-nums;
@@ -1520,8 +1549,8 @@
   text-align: left;
 }
 .boss-event-set .boss-items img {
-  width: 72px;
-  flex: 0 0 72px;
+  width: 60px;
+  flex: 0 0 60px;
 }
 .boss-event-set .boss-items figcaption {
   margin: 0;
@@ -1585,7 +1614,7 @@
     grid-template-columns: repeat(2, 1fr);
   }
   .boss-event-art {
-    height: clamp(200px, 30vw, 300px);
+    height: clamp(145px, 22vw, 200px);
   }
   .boss-event-body {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
@@ -1611,7 +1640,7 @@
   .boss-event-art .boss-name {
     left: 12px;
     right: 12px;
-    bottom: 10px;
+    bottom: 9px;
   }
   .boss-event-badge {
     top: 10px;
@@ -1647,7 +1676,7 @@
   }
   /* кадр целиком по высоте, плашка компактнее - голова босса не закрыта */
   .boss-event-art {
-    height: 200px;
+    height: 160px;
   }
   .boss-event-art video {
     object-position: 20% top;
@@ -1657,6 +1686,12 @@
     padding: 4px 8px;
     font-size: 9px;
     letter-spacing: 0.05em;
+  }
+  .boss-event-status {
+    top: 48px;
+    right: 10px;
+    padding: 6px 8px;
+    font-size: 8px;
   }
   .boss-event-badge img {
     width: 12px;

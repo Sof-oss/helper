@@ -79,6 +79,7 @@
       { place: "11+", exp: 150, tokens: 3, key: "green", keyCount: 3, extra: "grenade", extraCount: 15, set: 30 }
     ]
   };
+  const EVENT_END = Date.UTC(2026, 10, 5, 21, 0, 0);
   /* ресурсы награды: подписи и иконки те же, что во вкладке «Задания» */
   const RES = {
     exp: {
@@ -313,14 +314,19 @@
   }
   function eventCard() {
     const e = EVENT;
+    const ended = Date.now() >= EVENT_END;
     return (
-      '<article class="boss-card boss-event" data-boss="' +
+      '<article class="boss-card boss-event' +
+      (ended ? " is-ended" : "") +
+      '" data-boss="' +
       e.key +
       '"><div class="boss-art boss-event-art"><video class="boss-video" muted loop playsinline disablepictureinpicture preload="none" width="1856" height="800" poster="assets/bosses/' +
       e.key +
       '.webp" aria-hidden="true"><source src="assets/bosses/' +
       e.key +
-      '.webm" type="video/webm"></video><span class="boss-event-badge"><img src="assets/halloween/pumpkin-artifact.webp" alt="" width="16" height="20" loading="lazy" decoding="async">Хэллоуин · временный</span><h2 class="boss-name">' +
+      '.webm" type="video/webm"></video><span class="boss-event-badge"><img src="assets/halloween/pumpkin-artifact.webp" alt="" width="16" height="20" loading="lazy" decoding="async">Хэллоуин · временный</span>' +
+      (ended ? '<span class="boss-event-status" role="status">Событие завершено · босс недоступен</span>' : "") +
+      '<h2 class="boss-name">' +
       e.name +
       '</h2></div><div class="boss-event-body"><div class="boss-event-main"><div class="boss-hp"><span>Здоровье</span><b>' +
       n0(e.hp) +
@@ -388,8 +394,8 @@
   if (root)
     root.innerHTML =
       '<div class="bosses-grid">' +
-      eventCard() +
       BOSSES.map(bossCard).join("") +
+      eventCard() +
       '</div><p class="damage-footnote">Боссы идут по цепочке: с каждого падает ключ, а три таких ключа открывают бой со следующим. Ивентовый босс не входит в цепочку - он появляется по расписанию Хэллоуинского события. Значок бронежилета в награде в игре - вещи комплекта, которые могут выпасть с босса.</p>';
   if (root) startEventCountdown();
   /* анимация из игры играет, только пока карточка на экране; при «уменьшить движение» остаётся кадр-заставка */
