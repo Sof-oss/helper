@@ -60,7 +60,37 @@
       set: { name: "Жестянка", img: "tin", items: ["Консервная банка", "Бронекуртка", "Штаны"] }
     }
   ];
-  /* ивентовый босс: не входит в цепочку ключей, доступен только в дни Хэллоуина. */
+  /* ивентовый босс: не входит в цепочку ключей, был доступен только в дни Хэллоуина.
+     Все даты события - из трёх констант ниже: подписи в карточке и обратный отсчёт считаются одними и теми же числами. */
+  const MSK = 3; // игровое время - МСК = UTC+3
+  const EVENT_FROM = Date.UTC(2026, 9, 23); // начало события
+  const EVENT_END = Date.UTC(2026, 10, 5, 24 - MSK); // 6 ноября 00:00 МСК, последний день - 5 ноября
+  const EVENT_SPAWNS_MSK = [5, 18]; // босс выходил дважды в день
+  const MONTH_GEN = [
+    "января",
+    "февраля",
+    "марта",
+    "апреля",
+    "мая",
+    "июня",
+    "июля",
+    "августа",
+    "сентября",
+    "октября",
+    "ноября",
+    "декабря"
+  ];
+  const asMsk = ts => new Date(ts + MSK * 3600000);
+  const pad2 = n => String(n).padStart(2, "0");
+  const ruDay = ts => asMsk(ts).getUTCDate() + " " + MONTH_GEN[asMsk(ts).getUTCMonth()];
+  const ruTime = ts => pad2(asMsk(ts).getUTCHours()) + ":" + pad2(asMsk(ts).getUTCMinutes());
+  const EVENT_ENDED = Date.now() >= EVENT_END;
+  /* расписание строим по тем же датам: выходы с EVENT_FROM до EVENT_END, отфильтрованные по времени появления */
+  const EVENT_SPAWNS = [];
+  for (let t = EVENT_FROM; t < EVENT_END; t += 3600000)
+    if (EVENT_SPAWNS_MSK.includes(asMsk(t).getUTCHours()) && asMsk(t).getUTCMinutes() === 0) EVENT_SPAWNS.push(t);
+  const EVENT_TIME = EVENT_SPAWNS_MSK.map(h => pad2(h) + ":00").join(" · ") + " МСК";
+  const EVENT_RANGE = "с " + ruDay(EVENT_FROM) + " по " + ruDay(EVENT_END - 1);
   const EVENT = {
     key: "experiment",
     name: "Эксперимент №31",
@@ -70,7 +100,6 @@
       img: "friday",
       items: ["Хоккейная маска", "Потёртая куртка", "Старые джинсы"]
     },
-    dates: "с 23 октября по 5 ноября",
     rewards: [
       { place: "1", exp: 750, tokens: 10, pda: 5, key: "orange", keyCount: 3, extra: "gauss", extraCount: 5, set: 100 },
       { place: "2", exp: 600, tokens: 8, pda: 4, key: "orange", keyCount: 1, extra: "gauss", extraCount: 4, set: 75 },
@@ -79,7 +108,6 @@
       { place: "11+", exp: 150, tokens: 3, key: "green", keyCount: 3, extra: "grenade", extraCount: 15, set: 30 }
     ]
   };
-  const EVENT_END = Date.UTC(2026, 10, 5, 21, 0, 0);
   /* ресурсы награды: подписи и иконки те же, что во вкладке «Задания» */
   const RES = {
     exp: {
@@ -312,52 +340,88 @@
       '</tbody></table></div><p class="boss-reward-note">Ключ - карточка босса указанного цвета, Доп. - граната, выстрел Гаусса или гранатомёта. Сет - шанс получить вещь комплекта «Пятничный вечер».</p></div>'
     );
   }
-  function eventCard() {
-    const e = EVENT;
-    const ended = Date.now() >= EVENT_END;
+  const sRow = (k, v, cls) =>
+    '<div class="boss-event-schedule-row"><span>' +
+    k +
+    "</span><b" +
+    (cls ? ' class="' + cls + '"' : "") +
+    ">" +
+    v +
+    "</b></div>";
+  function eventBody(ended) {
+    const e = EVENT,
+      last = EVENT_SPAWNS[EVENT_SPAWNS.length - 1];
     return (
-      '<article class="boss-card boss-event' +
-      (ended ? " is-ended" : "") +
-      '" data-boss="' +
-      e.key +
-      '"><div class="boss-art boss-event-art"><video class="boss-video" muted loop playsinline disablepictureinpicture preload="none" width="1856" height="800" poster="assets/bosses/' +
-      e.key +
-      '.webp" aria-hidden="true"><source src="assets/bosses/' +
-      e.key +
-      '.webm" type="video/webm"></video><span class="boss-event-badge"><img src="assets/halloween/pumpkin-artifact.webp" alt="" width="16" height="20" loading="lazy" decoding="async">Хэллоуин · временный</span>' +
-      (ended ? '<span class="boss-event-status" role="status">Событие завершено · босс недоступен</span>' : "") +
-      '<h2 class="boss-name">' +
-      e.name +
-      '</h2></div><div class="boss-event-body"><div class="boss-event-main"><div class="boss-hp"><span>Здоровье</span><b>' +
+      '<div class="boss-event-body"><div class="boss-event-main"><div class="boss-hp"><span>Здоровье</span><b>' +
       n0(e.hp) +
-      ' <small>HP</small></b></div><div class="boss-block boss-event-when"><h3>Когда появляется</h3><div class="boss-event-count" data-event-countdown aria-hidden="true"><span class="boss-event-count-label">До появления</span><b data-event-countdown-val>--:--:--</b></div><div class="boss-event-schedule"><div class="boss-event-schedule-row"><span>Появление</span><b>2 раза в день</b></div><div class="boss-event-schedule-row"><span>Время</span><b class="boss-event-time">05:00 · 18:00 МСК</b></div><div class="boss-event-schedule-row"><span>Доступен</span><b class="boss-event-date">' +
-      e.dates +
-      '</b></div></div></div><div class="boss-block"><h3>Как проходит бой</h3><ul class="boss-event-rules"><li>Здоровье общее: урон всех игроков идёт в один счётчик</li><li>Место - по личному урону</li><li>Награда - после победы; побег лишает награды</li></ul></div><div class="boss-block"><h3>Требования</h3><div class="boss-req boss-req-none">Бой доступен во время события</div></div></div>' +
+      ' <small>HP</small></b></div><div class="boss-block boss-event-when"><h3>' +
+      (ended ? "Когда был" : "Когда появляется") +
+      "</h3>" +
+      (ended
+        ? ""
+        : '<div class="boss-event-count" data-event-countdown aria-hidden="true"><span class="boss-event-count-label">До появления</span><b data-event-countdown-val>--:--:--</b></div>') +
+      '<div class="boss-event-schedule">' +
+      sRow("Появление", "2 раза в день") +
+      sRow("Время", EVENT_TIME, "boss-event-time") +
+      sRow("Доступен", EVENT_RANGE, "boss-event-date") +
+      (ended ? sRow("Завершилось", ruDay(last) + " в " + ruTime(last)) : "") +
+      '</div></div><div class="boss-block"><h3>' +
+      (ended ? "Как проходил бой" : "Как проходит бой") +
+      '</h3><ul class="boss-event-rules"><li>Здоровье общее: урон всех игроков идёт в один счётчик</li><li>Место - по личному урону</li><li>Награда - после победы; побег лишает награды</li></ul></div><div class="boss-block"><h3>Требования</h3><div class="boss-req boss-req-none">' +
+      (ended ? "Бой был доступен только в дни события" : "Бой доступен во время события") +
+      "</div></div></div>" +
       rewardTable(e.rewards) +
       setBlock(e.set, "boss-event-set") +
-      "</div></article>"
+      "</div>"
+    );
+  }
+  function eventCard() {
+    const e = EVENT;
+    if (!EVENT_ENDED)
+      return (
+        '<article class="boss-card boss-event" data-boss="' +
+        e.key +
+        '"><div class="boss-art boss-event-art"><video class="boss-video" muted loop playsinline disablepictureinpicture preload="none" width="1856" height="800" poster="assets/bosses/' +
+        e.key +
+        '.webp" aria-hidden="true"><source src="assets/bosses/' +
+        e.key +
+        '.webm" type="video/webm"></video><span class="boss-event-badge"><img src="assets/halloween/pumpkin-artifact.webp" alt="" width="16" height="20" loading="lazy" decoding="async">Хэллоуин · временный</span>' +
+        '<h2 class="boss-name">' +
+        e.name +
+        "</h2></div>" +
+        eventBody(false) +
+        "</article>"
+      );
+    /* событие закончилось: карточка - одна строка, подробности под спойлером, видео не грузим */
+    const more =
+      '<span class="boss-event-sum-more"><span class="boss-event-sum-more-text">Подробности</span>' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>';
+    return (
+      '<details class="boss-card boss-event is-ended" data-boss="' +
+      e.key +
+      '"><summary class="boss-event-sum"><img class="boss-event-sum-art" src="assets/bosses/' +
+      e.key +
+      '.webp" alt="" width="96" height="60" loading="lazy" decoding="async"><h2 class="boss-event-sum-name">' +
+      e.name +
+      '</h2><span class="boss-event-sum-state">событие завершено · босс недоступен</span>' +
+      more +
+      "</summary>" +
+      eventBody(true) +
+      "</details>"
     );
   }
 
-  /* обратный отсчёт до появления ивентового босса: 05:00 и 18:00 МСК, событие с 23 октября по 5 ноября 2026 */
+  /* обратный отсчёт до ближайшего появления: расписание то же, что в подписях карточки (EVENT_SPAWNS) */
   function startEventCountdown() {
     const box = root.querySelector("[data-event-countdown]");
     if (!box) return;
     const label = box.querySelector(".boss-event-count-label"),
       val = box.querySelector("[data-event-countdown-val]");
-    /* время МСК = UTC+3: 05:00 -> 02:00Z, 18:00 -> 15:00Z */
-    const times = [];
-    for (let day = 0; day < 15; day++) {
-      const base = Date.UTC(2026, 9, 23 + day, 2, 0, 0);
-      times.push(base, base + 13 * 3600 * 1000);
-    }
-    const last = Date.UTC(2026, 10, 5, 15, 0, 0),
-      end = Date.UTC(2026, 10, 5, 21, 0, 0);
-    const spawns = times.filter(t => t <= last);
+    const spawns = EVENT_SPAWNS;
     const pad = n => String(n).padStart(2, "0");
     function tick() {
       const now = Date.now();
-      if (now > end) {
+      if (now >= EVENT_END) {
         label.textContent = "Событие завершилось";
         val.textContent = "—";
         if (box.classList && box.classList.remove) box.classList.remove("is-now");
@@ -396,7 +460,11 @@
       '<div class="bosses-grid">' +
       BOSSES.map(bossCard).join("") +
       eventCard() +
-      '</div><p class="damage-footnote">Боссы идут по цепочке: с каждого падает ключ, а три таких ключа открывают бой со следующим. Ивентовый босс не входит в цепочку - он появляется по расписанию Хэллоуинского события. Значок бронежилета в награде в игре - вещи комплекта, которые могут выпасть с босса.</p>';
+      '</div><p class="damage-footnote">Боссы идут по цепочке: с каждого падает ключ, а три таких ключа открывают бой со следующим. Ивентовый босс не входит в цепочку - он ' +
+      (EVENT_ENDED ? "выходил" : "появляется") +
+      " по расписанию Хэллоуинского события (" +
+      EVENT_RANGE +
+      "). Значок бронежилета в награде в игре - вещи комплекта, которые могут выпасть с босса.</p>";
   if (root) startEventCountdown();
   /* анимация из игры играет, только пока карточка на экране; при «уменьшить движение» остаётся кадр-заставка */
   const still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;

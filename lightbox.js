@@ -84,9 +84,20 @@
     e.preventDefault();
     openGuide(img);
   });
-  document.querySelectorAll(GUIDE_IMG).forEach(img => {
-    img.tabIndex = 0;
-    img.setAttribute("role", "button");
-    img.setAttribute("aria-label", "Открыть крупно" + (img.alt ? ": " + img.alt : ""));
-  });
+  const enhance = scope => {
+    scope.querySelectorAll(GUIDE_IMG).forEach(img => {
+      img.tabIndex = 0;
+      img.setAttribute("role", "button");
+      img.setAttribute("aria-label", "Открыть крупно" + (img.alt ? ": " + img.alt : ""));
+    });
+  };
+  enhance(document);
+  /* предпросмотр в форме «Отправить гайд» перерисовывается на каждый ввод, поэтому разметку обновляем по факту */
+  if (typeof MutationObserver === "function")
+    new MutationObserver(mrs => {
+      mrs.forEach(m => {
+        const body = m.target.closest && m.target.closest(".guide-body");
+        if (body) enhance(body);
+      });
+    }).observe(document.body, { childList: true, subtree: true });
 })();

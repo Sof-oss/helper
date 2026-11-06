@@ -187,7 +187,7 @@ body::before {
 :where(button, input, a, select, summary) {
   touch-action: manipulation;
 }
-:where(button, input, a):focus-visible {
+:where(button, input, a, summary):focus-visible {
   outline: 2px solid #54bfff;
   outline-offset: 2px;
 }
@@ -2850,6 +2850,10 @@ body::after {
 /* толщина линии - в пикселях, она не растягивается вместе с рамкой */
 .logo-ecg path {
   vector-effect: non-scaling-stroke;
+}
+/* вкладка в фоне - кардиограмма стоит (ui.js навешивает класс на visibilitychange) */
+.ecg-paused .logo-ecg * {
+  animation-play-state: paused;
 }
 .ecg-new svg,
 .ecg-old svg {

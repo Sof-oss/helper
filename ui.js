@@ -287,6 +287,14 @@ window.__roll = function (el, text) {
     onScroll();
   }
 
+  /* кардиограмма в логотипе пишется только на видимой вкладке: вернувшись на фоновую страницу, браузер «догоняет»
+     часы анимации, а с паузой она просто стоит столько, сколько страница была скрыта */
+  var pauseEcg = function () {
+    d.documentElement.classList.toggle("ecg-paused", !!d.hidden);
+  };
+  addEventListener("visibilitychange", pauseEcg);
+  pauseEcg();
+
   /* нижнее меню на телефоне: повторяет верхнее */
   var SHORT = { "Калькулятор урона": "Урон", Информация: "Инфо" };
   var nav = d.querySelector(".main-nav");

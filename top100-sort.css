@@ -486,12 +486,21 @@
   font-size: var(--fs-xs);
 }
 .t100-off {
+  display: inline-flex;
+  align-items: center;
   margin-left: 6px;
-  font-size: var(--fs-sm);
-  filter: grayscale(0.4);
+  color: #8ba0b3;
+}
+.t100-off svg {
+  width: 13px;
+  height: 13px;
 }
 .top100-legend .t100-off {
   margin: 0;
+}
+.top100-legend svg {
+  width: 14px;
+  height: 14px;
 }
 
 /* Таблица: шапка и строки - отдельные капсулы. Сетка колонок общая у шапки и строк */

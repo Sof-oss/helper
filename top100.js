@@ -173,6 +173,8 @@ function metricDeltaMarkup(nick, tabKey) {
 
 /* «давно не заходил»: fetch-players.js ставит отметку, если игрок не заходил дольше OFFLINE_DAYS (5) дней */
 const INACTIVE_TITLE = "не заходил в игру больше 5 дней";
+const INACTIVE_ICON =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>';
 /* строка - отдельная стеклянная капсула (display: grid в top100-sort.css), поэтому роли таблицы прописаны явно.
    rank - реальное место. plain - без медалей и подсветки (при сортировке по уровню или приросту места вразброс) */
 function top100RowMarkup(row, rank, plain, tabKey, hasDelta) {
@@ -197,7 +199,11 @@ function top100RowMarkup(row, rank, plain, tabKey, hasDelta) {
     esc(nick) +
     "</button>" +
     (inactive
-      ? '<span class="t100-off" aria-hidden="true">💤</span><span class="sr-only">, ' + INACTIVE_TITLE + "</span>"
+      ? '<span class="t100-off" aria-hidden="true">' +
+        INACTIVE_ICON +
+        '</span><span class="sr-only">, ' +
+        INACTIVE_TITLE +
+        "</span>"
       : "") +
     '</td><td role="cell" class="t100-fac">' +
     (f
@@ -519,11 +525,14 @@ function renderStats() {
   const lead = rows[0],
     last = rows[rows.length - 1],
     lastRank = last[4] || rows.length;
-  /* лучший прирост за выбранный период в этом рейтинге */
+  /* лучший прирост за выбранный период - среди строк, которые сейчас видны (поиск и отряд) */
   const pd = periodChanges().delta,
     dm = (pd && pd[tab.key]) || {};
   let best = null;
-  for (const nick in dm) if (dm[nick] > 0 && (!best || dm[nick] > dm[best])) best = nick;
+  top100Entries(tab).forEach(e => {
+    const nick = e.row[0];
+    if (dm[nick] > 0 && (!best || dm[nick] > dm[best])) best = nick;
+  });
   const p = currentPeriod(),
     growLabel = p ? "Рост " + p.label.charAt(0).toLowerCase() + p.label.slice(1) : "Рост";
   const upd = String(window.TOP100_UPDATED || ""),

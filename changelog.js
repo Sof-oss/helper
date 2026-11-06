@@ -1,6 +1,16 @@
 /* «Новости сайта». Данные подставляет build-changelog.js из site-news.json. */
 window.CHANGELOG=[
   {
+    "date": "2026-11-02",
+    "title": "Новый гайд",
+    "items": [
+      [
+        "new",
+        "Добавлен гайд <a href=\"/guide/vylazki\">«Вылазки»</a>. Автор - Sof"
+      ]
+    ]
+  },
+  {
     "date": "2026-11-01",
     "title": "Мастерство в картах «21»",
     "items": [

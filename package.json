@@ -3,7 +3,7 @@
   "private": true,
   "description": "Сайт-помощник для игры «Сердце Зоны». Сборка: npm install, затем npm run build",
   "scripts": {
-    "build": "node build-guide-images.js && node build.js && node build-previews.js",
+    "build": "node build-changelog.js && node build-guide-images.js && node build.js && node build-previews.js",
     "test": "node --no-warnings --test test/*.test.mjs",
     "lint": "eslint .",
     "format": "prettier --write .",

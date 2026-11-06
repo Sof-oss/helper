@@ -1225,42 +1225,86 @@
   text-transform: uppercase;
   box-shadow: 0 2px 10px #0007;
 }
-.boss-event-status {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 2;
-  max-width: calc(100% - 28px);
-  padding: 7px 11px;
-  border: 1px solid #e56458b8;
-  border-radius: 6px;
-  background: #3a1720e8;
-  color: #ffb0a6;
-  font:
-    700 10px/1.2 "ZoneMono",
-    ui-monospace,
-    monospace;
-  letter-spacing: 0.08em;
-  text-align: right;
-  text-transform: uppercase;
-  box-shadow: 0 2px 10px #0007;
-}
-.boss-event.is-ended .boss-event-art::before {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  background: #070d1866;
-  pointer-events: none;
-}
-.boss-event.is-ended .boss-event-art video {
-  filter: saturate(0.55);
-}
 .boss-event-badge img {
   width: 16px;
   height: 20px;
   object-fit: contain;
   filter: drop-shadow(0 0 4px #ff9a2e88);
+}
+/* событие завершилось: карточка схлопнута в одну строку, подробности открываются по нажатию */
+.boss-event-sum {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  list-style: none;
+}
+.boss-event-sum::-webkit-details-marker {
+  display: none;
+}
+.boss-event-sum:hover {
+  background: #ffffff0a;
+}
+.boss-event-sum:focus-visible {
+  outline-offset: -3px;
+}
+.boss-event-sum-art {
+  width: 64px;
+  height: 40px;
+  border: 1px solid #6a4c58;
+  border-radius: 6px;
+  object-fit: cover;
+  object-position: right top;
+  filter: saturate(0.7);
+}
+.boss-event-sum-name {
+  margin: 0;
+  font:
+    600 17px/1.2 "Oswald",
+    sans-serif;
+  color: #e8c8b1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.boss-event-sum-state {
+  color: #a9bbc9;
+  font-size: var(--fs-sm);
+}
+.boss-event-sum-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 5px 10px;
+  border: 1px solid #ff9a2e59;
+  border-radius: 999px;
+  color: #ffcf8a;
+  font:
+    700 10px/1 "ZoneMono",
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.boss-event-sum-more svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.15s;
+}
+.boss-event.is-ended[open] .boss-event-sum-more svg {
+  transform: rotate(180deg);
+}
+.boss-event.is-ended .boss-event-body {
+  border-top: 1px solid #1d2c3d;
 }
 .boss-event-body {
   display: grid;
@@ -1687,15 +1731,28 @@
     font-size: 9px;
     letter-spacing: 0.05em;
   }
-  .boss-event-status {
-    top: 48px;
-    right: 10px;
-    padding: 6px 8px;
-    font-size: 8px;
+  /* свёрнутая карточка: картинка и название в первой строке, пояснение - второй */
+  .boss-event-sum {
+    padding: 9px 12px;
+    gap: 6px 10px;
   }
-  .boss-event-badge img {
-    width: 12px;
-    height: 15px;
+  .boss-event-sum-art {
+    width: 52px;
+    height: 34px;
+  }
+  .boss-event-sum-state {
+    order: 3;
+    flex: 1 0 100%;
+    font-size: var(--fs-xs);
+  }
+  .boss-event-sum-more {
+    order: 2;
+    gap: 0;
+    padding: 6px;
+  }
+  /* на телефоне в одну строку остаётся только стрелка - слово «Подробности» съело бы место */
+  .boss-event-sum-more-text {
+    display: none;
   }
 }
 [data-section-panel] > .section-heading {
