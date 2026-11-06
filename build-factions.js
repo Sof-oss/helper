@@ -428,6 +428,10 @@ function factionsMarkup(ROOT) {
   const BOSSES = data.metrics.indexOf("bosses");
   const noGroup = g => (!g || g === "-" ? "" : g);
   const events = new Map(list.map(f => [f.c.name, []]));
+  /* уход «без группировки», после которого в течение недели игрок вступил в другую группировку,
+     связываем в один переход: «ушёл в X» / «из A» вместо «покинул» + «принят»
+     (в gh у build-players.js между ними стоит пустая запись, которая разрывает соседние пары) */
+  const dayGap = (a, b) => (Date.parse(b) - Date.parse(a)) / 864e5;
   for (const [id, p] of Object.entries(data.players)) {
     const gh = p.gh || [];
     for (let i = 1; i < gh.length; i++) {
@@ -435,6 +439,23 @@ function factionsMarkup(ROOT) {
         next = noGroup(gh[i][1]),
         d = histDates[gh[i][0]];
       if (!d || prev === next) continue;
+      let linked = false;
+      if (prev && !next) {
+        for (let k = i + 1; k < gh.length; k++) {
+          const cd = histDates[gh[k][0]];
+          if (!cd) break;
+          const cand = noGroup(gh[k][1]);
+          if (!cand) continue;
+          if (cand !== prev && dayGap(d, cd) <= 7 && events.has(cand) && events.has(prev)) {
+            events.get(prev).push({ d, t: "left", id, n: p.n, x: cand });
+            events.get(cand).push({ d: cd, t: "join", id, n: p.n, x: prev });
+            i = k; /* пара «пусто → группировка» уже учтена в связке */
+            linked = true;
+          }
+          break; /* смотрим только ближайшую смену группировки */
+        }
+      }
+      if (linked) continue;
       if (events.has(next)) events.get(next).push({ d, t: "join", id, n: p.n, x: prev });
       if (events.has(prev)) events.get(prev).push({ d, t: "left", id, n: p.n, x: next });
     }
