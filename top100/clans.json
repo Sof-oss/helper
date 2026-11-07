@@ -1,11 +1,11 @@
 {
-  "updated": "2026-11-06T02:59:28+03:00",
+  "updated": "2026-11-07T02:59:27+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
       "name": "Last Way 2",
       "level": 1,
-      "members": 12,
+      "members": 13,
       "leader": {
         "id": 5197,
         "name": "|LW| ЭнДоРфИнКа"
@@ -113,7 +113,7 @@
     {
       "name": "Чистое небо",
       "level": 1,
-      "members": 16,
+      "members": 17,
       "leader": {
         "id": 1220,
         "name": "Петя кок"
