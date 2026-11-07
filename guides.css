@@ -173,7 +173,7 @@
   padding: 26px 30px 30px;
 }
 .guide-article h1,
-.gf-preview h1 {
+.gf-preview > h2:first-child {
   margin: 0 0 8px;
   color: #fff;
   font-size: 30px;
@@ -665,7 +665,7 @@
     padding: 18px 16px 20px;
   }
   .guide-article h1,
-  .gf-preview h1 {
+  .gf-preview > h2:first-child {
     font-size: 24px;
   }
   .guide-body {
@@ -785,7 +785,7 @@
 }
 .gf-todo::before {
   content: "Для отправки:";
-  color: #6d8091;
+  color: #75899a;
 }
 
 /* телефон: у карточки-приглашения нет обложки - вместо пустой «картинки» на 200 px узкая полоса со значком */

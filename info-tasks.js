@@ -224,7 +224,7 @@
       '<div class="tl-cards">' +
         L.map((_, i) => locCard(i)).join("") +
         "</div>" +
-        '<div class="tl-detail" id="tlDetail" role="region" aria-live="polite"' +
+        '<div class="tl-detail" id="tlDetail" role="region"' +
         (openLoc === null ? " hidden" : ' aria-label="' + L[openLoc] + '"') +
         ">" +
         (openLoc === null ? "" : locDetail(openLoc)) +

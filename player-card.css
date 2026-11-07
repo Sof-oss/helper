@@ -479,7 +479,7 @@ html.pc-lock body {
     monospace;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #6d7a85;
+  color: #8195a6;
 }
 .pc-dossier dd {
   margin: 3px 0 0;
@@ -663,7 +663,7 @@ a.pc-faction:focus-visible {
     "Cascadia Mono",
     Consolas,
     monospace;
-  color: #6d7a85;
+  color: #8195a6;
 }
 
 /* плитки показателей: блоки ПДА со скошенным углом */
@@ -791,7 +791,7 @@ a.pc-faction:focus-visible {
 }
 .pc-delta.same,
 .pc-delta.new {
-  color: #56636e;
+  color: #8195a6;
   font-weight: 600;
 }
 .pc-spark {
@@ -830,7 +830,7 @@ a.pc-faction:focus-visible {
   color: #fff;
 }
 .pc-sec-pre {
-  color: #6d7a85;
+  color: #8195a6;
   font-weight: 500;
 }
 .pc-sub,
@@ -899,7 +899,7 @@ a.pc-faction:focus-visible {
   stroke-width: 2;
 }
 .pc-chart text {
-  fill: #6d7a85;
+  fill: #8195a6;
   font-size: var(--fs-xs);
   font-family: "ZoneMono", ui-monospace, "Cascadia Mono", Consolas, monospace;
 }
@@ -924,7 +924,7 @@ a.pc-faction:focus-visible {
     "Cascadia Mono",
     Consolas,
     monospace;
-  color: #6d7a85;
+  color: #8195a6;
 }
 
 .pc-cols {
@@ -952,7 +952,7 @@ a.pc-faction:focus-visible {
   color: #c9d2d9;
 }
 .pc-bars li.zero {
-  color: #56636e;
+  color: #8195a6;
 }
 .pc-bars li span {
   overflow: hidden;
@@ -1025,7 +1025,7 @@ a.pc-faction:focus-visible {
   font-size: var(--fs-md);
 }
 .pc-tl-item small {
-  color: #6d7a85;
+  color: #8195a6;
   font:
     11.5px/1.5 "ZoneMono",
     ui-monospace,
@@ -1039,7 +1039,7 @@ a.pc-faction:focus-visible {
   color: #a3afb9;
 }
 .pc-nicks small {
-  color: #6d7a85;
+  color: #8195a6;
 }
 .pc-foot {
   display: flex;
@@ -1055,7 +1055,7 @@ a.pc-faction:focus-visible {
     monospace;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #4f5c66;
+  color: #8195a6;
 }
 
 @media (prefers-reduced-motion: reduce) {

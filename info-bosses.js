@@ -466,18 +466,35 @@
       EVENT_RANGE +
       "). Значок бронежилета в награде в игре - вещи комплекта, которые могут выпасть с босса.</p>";
   if (root) startEventCountdown();
-  /* анимация из игры играет, только пока карточка на экране; при «уменьшить движение» остаётся кадр-заставка */
+  /* анимация из игры играет, только пока карточка на экране; при «уменьшить движение» остаётся кадр-заставка.
+     Играет ровно одно видео - самое видимое: иначе браузер тянет mp4/webm всех карточек сразу (~1 МБ). */
   const still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (root && !still && typeof IntersectionObserver === "function") {
-    const io = new IntersectionObserver(entries =>
-      entries.forEach(e => {
-        const v = e.target;
-        if (e.isIntersecting) {
+    const vids = [...root.querySelectorAll(".boss-video")],
+      ratio = new Map();
+    const sync = () => {
+      let best = null,
+        bv = 0;
+      ratio.forEach((r, v) => {
+        if (r > bv) {
+          bv = r;
+          best = v;
+        }
+      });
+      vids.forEach(v => {
+        if (v === best) {
           const p = v.play();
           if (p && p.catch) p.catch(() => {});
         } else v.pause();
-      })
+      });
+    };
+    const io = new IntersectionObserver(
+      es => {
+        es.forEach(e => ratio.set(e.target, e.isIntersecting ? e.intersectionRatio : 0));
+        sync();
+      },
+      { threshold: [0, 0.25, 0.5, 0.75] }
     );
-    root.querySelectorAll(".boss-video").forEach(v => io.observe(v));
+    vids.forEach(v => io.observe(v));
   }
 })();

@@ -61,9 +61,13 @@ async function page(req, url) {
       .match(key, { ignoreSearch: true })
       .then(r => r || caches.match(key + "/", { ignoreSearch: true }))
       .then(r => r || null);
-  const net = fetch(req).then(res => {
-    if (res.ok) put(PAGES, key, res.clone()).then(() => trim(PAGES, 60));
-    return res;
+  const net = fetch(req).then(async res => {
+    if (res.ok) {
+      put(PAGES, key, res.clone()).then(() => trim(PAGES, 60));
+      return res;
+    }
+    /* сеть ответила ошибкой (404/500) - сохранённая копия лучше пустой страницы */
+    return (await cached()) || res;
   });
   net.catch(() => {});
   try {

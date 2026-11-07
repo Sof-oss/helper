@@ -235,9 +235,9 @@
           siteHost: "heart-of-the-zone.ru"
         });
         preview.innerHTML =
-          "<h1>" +
+          "<h2>" +
           esc(title.value.trim() || "Без заголовка") +
-          '</h1><p class="guide-meta">Автор: <b>' +
+          '</h2><p class="guide-meta">Автор: <b>' +
           esc(author.value.trim() || "ваш ник") +
           "</b></p>" +
           (body || '<p class="gf-muted">Здесь появится текст гайда.</p>');

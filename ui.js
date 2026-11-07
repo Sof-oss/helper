@@ -51,6 +51,30 @@ window.__roll = function (el, text) {
   el.__rollRaf = requestAnimationFrame(step);
 };
 
+/* Удержание Tab внутри открытого окна (карточка игрока/группировки): фон не inert, поэтому цикл замыкаем сами. */
+window.__trapTab = function (box, e) {
+  if (!box || e.key !== "Tab") return;
+  var list = [].filter.call(
+    box.querySelectorAll(
+      "button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])"
+    ),
+    function (el) {
+      return el.getClientRects().length > 0;
+    }
+  );
+  if (!list.length) return;
+  var first = list[0],
+    last = list[list.length - 1],
+    a = document.activeElement;
+  if (e.shiftKey && (a === first || !box.contains(a))) {
+    e.preventDefault();
+    last.focus();
+  } else if (!e.shiftKey && (a === last || !box.contains(a))) {
+    e.preventDefault();
+    first.focus();
+  }
+};
+
 /* Дальше - только настоящий браузер */
 (function () {
   var d = document;

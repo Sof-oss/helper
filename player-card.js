@@ -920,7 +920,9 @@
     open(a.dataset.pcOpen);
   });
   document.addEventListener("keydown", e => {
-    if (e.key === "Escape" && root && !root.hidden) close();
+    if (!root || root.hidden) return;
+    if (e.key === "Escape") close();
+    else if (window.__trapTab) window.__trapTab(root, e);
   });
   /* кнопка «Найти игрока» рядом с поиском рейтинга */
   const tools = document.querySelector(".t100-tools");

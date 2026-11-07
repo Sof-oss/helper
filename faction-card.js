@@ -362,10 +362,14 @@
   document.addEventListener(
     "keydown",
     e => {
-      if (e.key !== "Escape" || !root || root.hidden) return;
+      if (!root || root.hidden) return;
       const pc = document.getElementById("pcOverlay");
       if (pc && !pc.hidden) return;
-      close();
+      if (e.key === "Escape") {
+        close();
+        return;
+      }
+      if (window.__trapTab) window.__trapTab(root, e);
     },
     true
   );

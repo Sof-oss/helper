@@ -2923,7 +2923,7 @@ input:focus-visible {
   font-weight: 600;
 }
 .ars-step input::placeholder {
-  color: #4d6475;
+  color: #75899a;
 }
 .ars-step input:focus-visible {
   outline: 2px solid var(--c, #54bfff);
@@ -3718,7 +3718,7 @@ input:focus-visible {
   border-top-color: #2a3b4b;
 }
 .damage-card .breakdown .bd-cell.is-zero em {
-  color: #4f6375;
+  color: #75899a;
 }
 .damage-card .breakdown .bd-cell.is-zero small {
   color: #6f8396;

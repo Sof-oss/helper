@@ -1002,6 +1002,9 @@ const onlySection = (html, key) =>
     )
     .replace(/(<meta property="og:image:height" content=")[^"]*/, "$1630")
     .replace(/(<meta property="og:url" content=")[^"]*/, "$1" + SITE + "/build")
+    /* своя пара title/description, чтобы /build не дублировал калькулятор в выдаче и превью */
+    .replace(/<title>[^<]*<\/title>/, "<title>" + esc(BUILD_OG.title) + "</title>")
+    .replace(/(<meta name="description" content=")[^"]*/, "$1" + esc(BUILD_OG.desc))
     .replace(/(<meta name="viewport"[^>]*>\n)/, '$1<meta name="robots" content="noindex, follow">\n');
   if (!html.includes(BUILD_OG.title) || !html.includes("noindex"))
     throw new Error("build.html: не удалось подставить превью");

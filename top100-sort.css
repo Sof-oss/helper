@@ -534,6 +534,9 @@
   grid-template-columns: var(--t100-cols);
   align-items: center;
   column-gap: 12px;
+  /* сотня строк не обязана рисоваться целиком: вне экрана браузер пропускает раскладку */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 64px;
 }
 .top100-table th,
 .top100-table td {
@@ -577,6 +580,12 @@
 }
 .t100-sort-btn:hover {
   color: #fff;
+}
+/* all:unset сбрасывает и рамку фокуса - возвращаем её явно */
+.t100-sort-btn:focus-visible {
+  outline: 2px solid #54bfff;
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 .t100-sort-btn i {
   font-size: 9px;
@@ -765,7 +774,7 @@
   text-overflow: ellipsis;
 }
 .t100-fac-none {
-  color: #6f8292;
+  color: #75899a;
 }
 .t100-lvl {
   text-align: center;
@@ -810,7 +819,7 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
-  color: #6f8292;
+  color: #75899a;
   font:
     600 12px/1 "ZoneMono",
     ui-monospace,

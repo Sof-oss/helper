@@ -636,7 +636,7 @@ function closeModal(id) {
 }
 const openedModals = new Map();
 function setPageInert(on) {
-  document.querySelectorAll(".site-header,.page,.site-footer,.calc-dock").forEach(el => {
+  document.querySelectorAll(".site-header,.page,.site-footer,.calc-dock,.tabbar,.tabbar-more").forEach(el => {
     el.inert = on;
   });
 }
