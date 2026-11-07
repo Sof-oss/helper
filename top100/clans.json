@@ -1,11 +1,11 @@
 {
-  "updated": "2026-11-07T02:59:27+03:00",
+  "updated": "2026-11-08T02:59:39+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
       "name": "Last Way 2",
       "level": 1,
-      "members": 13,
+      "members": 16,
       "leader": {
         "id": 5197,
         "name": "|LW| ЭнДоРфИнКа"
@@ -131,7 +131,7 @@
     {
       "name": "Учёные",
       "level": 2,
-      "members": 24,
+      "members": 25,
       "leader": {
         "id": 1223,
         "name": "\"Учёные\"  СаХаРоК"
