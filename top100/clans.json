@@ -1,11 +1,11 @@
 {
-  "updated": "2026-11-08T02:59:39+03:00",
+  "updated": "2026-11-09T02:59:42+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
       "name": "Last Way 2",
       "level": 1,
-      "members": 16,
+      "members": 17,
       "leader": {
         "id": 5197,
         "name": "|LW| ЭнДоРфИнКа"
@@ -32,7 +32,7 @@
     {
       "name": "Призраки Зоны",
       "level": 1,
-      "members": 1,
+      "members": 2,
       "leader": {
         "id": 3349,
         "name": "Alex Brain"
@@ -41,7 +41,7 @@
     {
       "name": "Военные",
       "level": 1,
-      "members": 4,
+      "members": 5,
       "leader": {
         "id": 4438,
         "name": "\"Военные\" Дымка"
@@ -50,7 +50,7 @@
     {
       "name": "Бандиты",
       "level": 1,
-      "members": 9,
+      "members": 11,
       "leader": {
         "id": 3178,
         "name": "«Братва» Изверг"
