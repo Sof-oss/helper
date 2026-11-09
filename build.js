@@ -41,6 +41,7 @@ const SKIP = new Set([
   ".git",
   ".github",
   ".claude",
+  ".qoder",
   "CLAUDE.md",
   "AGENTS.md",
   ".gitignore",
