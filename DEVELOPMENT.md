@@ -139,6 +139,7 @@ npx serve dist       # сайт откроется на http://localhost:3000
   push.
 - Капча формы гайдов - Yandex SmartCaptcha или Cloudflare Turnstile (`guides-config.js`, см. `yandex/README.md`).
 - **Скиллы для ИИ-агентов** - `.claude/skills/<имя>/SKILL.md`, список - в `AGENTS.md` (`CLAUDE.md` ссылается на него).
+  Для Qoder IDE, которая не всегда читает `AGENTS.md`, есть правило `.qoder/rules/skills.md` (применяется всегда).
   На сайт не попадают (`SKIP` в `build.js`).
 
 by Sof
