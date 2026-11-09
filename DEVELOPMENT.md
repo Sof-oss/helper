@@ -138,5 +138,7 @@ npx serve dist       # сайт откроется на http://localhost:3000
   «Обновление Топ-100» → Run workflow; вручную с компьютера, как раньше - `git pull`, `update-top100.bat`, коммит и
   push.
 - Капча формы гайдов - Yandex SmartCaptcha или Cloudflare Turnstile (`guides-config.js`, см. `yandex/README.md`).
+- **Скиллы для ИИ-агентов** - `.claude/skills/<имя>/SKILL.md`, список - в `AGENTS.md` (`CLAUDE.md` ссылается на него).
+  На сайт не попадают (`SKIP` в `build.js`).
 
 by Sof
