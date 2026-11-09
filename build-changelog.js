@@ -1,4 +1,5 @@
-/* «Новости сайта»: импорт новых коммитов в site-news.json и подготовка changelog.js для страницы. */
+/* «Новости сайта»: записи пишутся руками в site-news.json, сообщения коммитов в новости не попадают.
+   Скрипт дописывает только пункты «Добавлен гайд» для новых гайдов и готовит changelog.js для страницы. */
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
@@ -36,67 +37,14 @@ function validate(data) {
 }
 validate(news);
 const imported = new Set(news.importedSources);
-/* коммиты, которые не попадают в «Что нового?» */
-const SKIP = [
-  "4f0c2d1" // «Задания» - тот же пункт вошёл в «Раздел «Информация»» (3033095)
-];
 /* гайды (адрес папки), которые не попадают в «Что нового?» */
 const SKIP_GUIDES = [];
-/* исправления опечаток в сообщениях коммитов: [что искать, на что заменить] */
-const TYPOS = [
-  [/хэллуин/g, "хэллоуин"],
-  [/Хэллуин/g, "Хэллоуин"]
-];
-const TAG = /^\s*(new|upd|update|up|fix)\s*:\s*(.+?)\s*$/i;
-/* upd: и update: - то же, что up: (частая опечатка) */
-const KIND = { new: "new", up: "up", upd: "up", update: "up", fix: "fix" };
 /* "прямые кавычки" вне HTML-тегов - в «ёлочки», как на сайте */
 const quotes = s =>
   s
     .split(/(<[^>]*>)/)
     .map(part => (part.startsWith("<") ? part : part.replace(/"([^"<>]*)"/g, "«$1»")))
     .join("");
-/* первая буква - заглавная, даже если в коммите написали с маленькой (ссылка <a …> в начале не мешает) */
-const capital = s =>
-  s.replace(/\u2014/g, "-").replace(/^((?:<[^>]*>)*)(\p{Ll})/u, (m, tags, ch) => tags + ch.toUpperCase());
-
-let log = "";
-try {
-  log = execSync("git log --no-merges --date=format-local:%Y-%m-%d --format=%H%x1f%ad%x1f%B%x1e", {
-    cwd: __dirname,
-    encoding: "utf8",
-    env: { ...process.env, TZ: "Europe/Moscow" },
-    maxBuffer: 64 * 1024 * 1024
-  });
-} catch (e) {
-  console.log("build-changelog: нет истории git, пропускаю");
-}
-
-/* коммиты -> записи {date, title, items} (git log идёт от новых к старым) */
-const groups = new Map();
-for (const raw of log.split("\x1e")) {
-  const [hash = "", date, rawBody = ""] = raw.replace(/^\s+/, "").split("\x1f");
-  /* опечатки в уже запушенных коммитах (история не переписывается) */
-  const body = TYPOS.reduce((s, [from, to]) => s.replace(from, to), rawBody);
-  if (imported.has(hash) || SKIP.some(h => h && hash.startsWith(h))) continue;
-  if (!/^\d{4}-\d\d-\d\d$/.test(date || "")) continue;
-  const lines = body
-    .split(/\r?\n/)
-    .map(s => s.trim())
-    .filter(Boolean);
-  if (/\[skip news\]/i.test(body)) continue;
-  const items = lines
-    .map(l => TAG.exec(l))
-    .filter(Boolean)
-    .map(m => [KIND[m[1].toLowerCase()], quotes(capital(m[2])).replace(/(?<!\.)\.$/, "")]);
-  if (!items.length) continue;
-  const title = lines[0] && !TAG.test(lines[0]) ? quotes(capital(lines[0])) : "Обновление";
-  const key = date + "\n" + title;
-  if (!groups.has(key)) groups.set(key, { date, title, items: [], sources: [] });
-  /* внутри записи - в порядке коммитов: старые пункты выше */
-  groups.get(key).items.unshift(...items);
-  groups.get(key).sources.push(hash);
-}
 
 let src = fs.readFileSync(FILE, "utf8");
 const DATA_RE = /window\.CHANGELOG\s*=\s*\[[\s\S]*?\];(?=\s*\(function)/;
@@ -106,8 +54,7 @@ if (!DATA_RE.test(src)) throw new Error("build-changelog: нет массива 
 const GuideMD = require("./guide-md.js");
 const GUIDES_DIR = path.join(__dirname, "guides");
 const guideDays = new Map();
-const mentioned =
-  JSON.stringify(news.entries) + [...groups.values()].map(g => g.items.map(i => i[1]).join("\n")).join("\n");
+const mentioned = JSON.stringify(news.entries);
 for (const slug of fs.existsSync(GUIDES_DIR) ? fs.readdirSync(GUIDES_DIR).sort() : []) {
   const md = path.join(GUIDES_DIR, slug, "index.md");
   if (imported.has("guide:" + slug) || SKIP_GUIDES.includes(slug) || !fs.existsSync(md)) continue;
@@ -128,7 +75,7 @@ for (const slug of fs.existsSync(GUIDES_DIR) ? fs.readdirSync(GUIDES_DIR).sort()
   } catch (e) {}
   if (!/^\d{4}-\d\d-\d\d$/.test(date)) date = /^\d{4}-\d\d-\d\d$/.test(meta.date || "") ? meta.date : "";
   if (!date) continue;
-  /* гайд уже упомянут в коммите или в changelog.js руками - второй раз не пишем */
+  /* гайд уже упомянут в записи, написанной руками, - второй раз не пишем */
   const name = meta.title.replace(/^[«"]|[»"]$/g, "");
   if (mentioned.includes("/guide/" + slug) || mentioned.includes("«" + quotes(name) + "»")) {
     imported.add("guide:" + slug);
@@ -146,26 +93,13 @@ for (const slug of fs.existsSync(GUIDES_DIR) ? fs.readdirSync(GUIDES_DIR).sort()
   guideDays.get(date).items.push(["new", text]);
   guideDays.get(date).sources.push("guide:" + slug);
 }
-for (const [date, g] of guideDays) {
-  const title = g.items.length > 1 ? "Новые гайды" : "Новый гайд";
-  const key = date + "\n" + title;
-  if (groups.has(key)) {
-    groups.get(key).items.push(...g.items);
-    groups.get(key).sources.push(...g.sources);
-  } else groups.set(key, { date, title, items: g.items, sources: g.sources });
-}
-
-/* Первый импорт связывает прежние ручные записи с историей. */
-const manual = new Set(news.entries.map(e => e.date + "\n" + e.title));
 const added = [];
-for (const g of groups.values()) {
+for (const [date, g] of guideDays) {
   g.sources.forEach(s => imported.add(s));
-  if (!news.migrated && manual.has(g.date + "\n" + g.title)) continue;
-  added.push({ date: g.date, title: g.title, items: g.items });
+  added.push({ date, title: g.items.length > 1 ? "Новые гайды" : "Новый гайд", items: g.items });
 }
 news.entries.unshift(...added.sort((a, b) => b.date.localeCompare(a.date)));
 news.importedSources = [...imported].sort();
-news.migrated = true;
 validate(news);
 /* Сортируется только выдача сайта. */
 const visible = news.entries

@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write # сохранить автоматически импортированные новости в site-news.json
+  contents: write # сохранить в site-news.json автоматические пункты «Добавлен гайд»
   pages: write
   id-token: write
 
@@ -42,7 +42,7 @@ jobs:
         run: npm test && npm run lint && npm run format:check
 
       - name: Build
-        run: node build-changelog.js && node build-guide-images.js && node build.js && node build-previews.js # build-changelog.js импортирует новости в site-news.json и готовит блок «Новости сайта», build-guide-images.js - копии картинок гайдов для телефонов
+        run: node build-changelog.js && node build-guide-images.js && node build.js && node build-previews.js # build-changelog.js дописывает в site-news.json пункты о новых гайдах и готовит блок «Новости сайта» (сообщения коммитов в новости не попадают), build-guide-images.js - копии картинок гайдов для телефонов
 
       # Сохраняем только редактируемые новости, а не сгенерированные файлы сайта.
       # [skip ci] не даёт запускать ещё одну сборку на служебный коммит.
