@@ -1,3 +1,9 @@
+<script>
+  /* такт логотипа и кардиограммы не начинается заново на каждой странице: фаза считается от общего эпоха */ (function () {
+    var e = Date.now() - Date.UTC(2026, 0, 1);
+    document.documentElement.style.setProperty("--logo-elapsed", e + "ms");
+  })();
+</script>
 <a class="skip-link" href="#main">К содержимому</a>
 <header class="site-header">
   <div class="header-inner">
