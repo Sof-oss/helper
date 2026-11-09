@@ -40,6 +40,9 @@ const MODULES = {
 const SKIP = new Set([
   ".git",
   ".github",
+  ".claude",
+  "CLAUDE.md",
+  "AGENTS.md",
   ".gitignore",
   "dist",
   "node_modules",
