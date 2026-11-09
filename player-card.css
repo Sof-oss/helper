@@ -1226,7 +1226,7 @@ a.pc-faction:focus-visible {
   border-radius: 28px;
   background:
     radial-gradient(80% 45% at 12% 0, color-mix(in srgb, var(--g) 34%, transparent), transparent 70%),
-    linear-gradient(180deg, rgba(5, 8, 12, 0.55) 0, rgba(5, 8, 12, 0.78) 40%, rgba(5, 8, 12, 0.9) 100%),
+    linear-gradient(180deg, rgba(5, 8, 12, 0.4) 0, rgba(5, 8, 12, 0.55) 45%, rgba(5, 8, 12, 0.75) 100%),
     var(--bg, none) center 30% / cover no-repeat,
     #070a0e;
   box-shadow:
