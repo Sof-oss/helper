@@ -83,7 +83,7 @@ description: Сезонное праздничное оформление сай
 5. `partials/header.html`: `<div class="ny-switch"><button id="nyToggle" class="ny-toggle" …>` в `.header-tools` перед `#themeSwitch`; во встроенный скрипт шапки - проверка `__NY_SEASON__` и `classList.add("ny-season")`, `aria-pressed`/`title` по своему ключу. Скрипт остаётся одной строкой; CSP-хэш пересчитается сам.
 6. `styles.css`: `.ny-switch { display: none }`, `html.ny-season .ny-switch { display: block }`, отступ к `.theme-pick` (как `.hw-switch + .theme-pick`), кнопка и меню для мобильной шапки.
 7. CSP и `sw.js` не трогай - всё с `'self'` и `?v=`. Нужен внешний ресурс - тогда `cspFor()` (**site-dev**).
-8. Документация: строка про сезонные украшения в `README.md`, абзац про кнопки шапки в `DEVELOPMENT.md`. Запись для игроков - коммит с тегом `new:` (**site-news**).
+8. Документация: строка про сезонные украшения в `README.md`, абзац про кнопки шапки в `DEVELOPMENT.md`. Запись для игроков - в `site-news.json` (**site-news**).
 
 ### Убрать сезон полностью
 Обычно хватает `mode: "off"`. Если удалять код:

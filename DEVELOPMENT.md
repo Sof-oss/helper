@@ -6,7 +6,7 @@
 
 ```sh
 npm ci
-npm run build        # build-guide-images.js + build.js + build-previews.js -> dist/ (в деплое перед ними ещё build-changelog.js)
+npm run build        # build-changelog.js + build-guide-images.js + build.js + build-previews.js -> dist/
 npm test             # тесты (test/*.test.mjs): расчёт урона (src/calc-core.js), разметка гайдов (guide-md.js), изменения Топ-100 (build-top100.js), сборка (build.js), группировки (build-factions.js)
 npm run lint         # ESLint
 npm run format       # Prettier
@@ -138,6 +138,10 @@ npx serve dist       # сайт откроется на http://localhost:3000
   «Обновление Топ-100» → Run workflow; вручную с компьютера, как раньше - `git pull`, `update-top100.bat`, коммит и
   push.
 - Капча формы гайдов - Yandex SmartCaptcha или Cloudflare Turnstile (`guides-config.js`, см. `yandex/README.md`).
+- **Новости сайта** пишутся руками в `site-news.json` (запись `{date, title, items: [[new|up|fix, текст]]}`, можно
+  `hidden: true`). Сообщения коммитов в новости не попадают. `build-changelog.js` проверяет файл, дописывает пункты
+  «Добавлен гайд» для новых гайдов (исключения - `SKIP_GUIDES`) и готовит `changelog.js`; в деплое новый пункт о
+  гайде сохраняется в main коммитом бота, поэтому перед push - `git pull`.
 - **Скиллы для ИИ-агентов** - `.claude/skills/<имя>/SKILL.md`, список - в `AGENTS.md` (`CLAUDE.md` ссылается на него).
   Для Qoder IDE, которая не всегда читает `AGENTS.md`, есть правило `.qoder/rules/skills.md` (применяется всегда).
   На сайт не попадают (`SKIP` в `build.js`).
