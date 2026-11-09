@@ -302,6 +302,17 @@
     else prompt("Ссылка на карточку:", url);
   }
 
+  /* цвет и фото базы группировки - фон всего окна (за стеклом), а не только шапки */
+  function skin(color, bg) {
+    const dlg = root && root.querySelector(".pc-dialog");
+    if (!dlg) return;
+    if (color) dlg.style.setProperty("--f", color);
+    else dlg.style.removeProperty("--f");
+    if (bg) dlg.style.setProperty("--bg", bg);
+    else dlg.style.removeProperty("--bg");
+    dlg.classList.toggle("no-bg", !bg);
+  }
+
   /* открыть: id игрока, либо null - только поиск */
   function open(id, opts) {
     show();
@@ -317,6 +328,7 @@
         cur = id;
         document.getElementById("pcShare").hidden = !id;
         if (!id) {
+          skin(null, "");
           body.innerHTML =
             '<div class="pc-empty"><b>Карточки игроков</b><p>Найдите любого игрока по нику: показатели, места во всех рейтингах, прирост и история группировок.</p></div>';
           const inp = document.getElementById("pcSearch");
@@ -650,7 +662,7 @@
     const chart =
       '<section class="pc-section pc-chart-box" style="--c:' +
       t.accent +
-      '"><div class="pc-sec-head"><h3><span class="pc-sec-pre">Динамика //</span> ' +
+      '"><div class="pc-sec-head"><h3><span class="pc-sec-pre">Динамика ·</span> ' +
       esc(t.label) +
       '</h3><div class="pc-chart-meta">' +
       (mi < 0
@@ -826,6 +838,7 @@
       ? ' style="--f:' + escAttr(color) + ";--bg:url(/assets/bg-" + emb.key + '-1280.webp)"'
       : ' style="--f:' + escAttr(color) + '"';
     const row = (k, v) => "<div><dt>" + k + "</dt><dd>" + v + "</dd></div>";
+    skin(color, emb ? "url(/assets/bg-" + emb.key + "-1280.webp)" : "");
 
     document.getElementById("pcBody").innerHTML =
       '<header class="pc-head' +
