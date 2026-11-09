@@ -1,6 +1,17 @@
 /* «Новости Зоны» на главной: короткие новости игры со ссылкой на пост в группе ВК. */
 window.ZONE_NEWS = [
   {
+    date: "2026-11-08",
+    title: "Рейд на боссов от Наёмников, Долга и Свободы",
+    text: "Совместный рейд пройдёт 15 ноября в 18:00 МСК. Присоединиться может любой сталкер Зоны.",
+    note: {
+      title: "Для новичков",
+      text: "с 18:00 по боссам будет вноситься много урона. Заранее добавьте как можно больше друзей, а когда рейд начнётся - ловите урон, переставляйте боссов и сами вносите посильный урон. Это хороший шанс выбить шмот и получить игровые ресурсы."
+    },
+    when: "2026-11-15T18:00:00+03:00",
+    event: "raid"
+  },
+  {
     date: "2026-11-04",
     title: "Хэллоуинский ивент завершён",
     text: "5 ноября - последний день ивентового босса «Эксперимент №31»; хэллоуинское оформление останется до следующего обновления",
@@ -83,7 +94,7 @@ window.ZONE_NEWS = [
   {
     date: "2026-10-20",
     title: "Слухи: обновление к Хэллоуину",
-    text: "Наш шпион под кодовым именем «Птичка-1» раскопал для вас порцию информации о грядущих обновлениях: ивентовый босс, хэллоуинский сет вещей и пачка исправлений. Ожидаемый релиз - к выходным, если разработчики успеют",
+    text: "Наш шпион под кодовым именем «Птичка-1» раскопал для вас порцию информации о грядущих обновлениях: ивентовый б��сс, хэллоуинский сет вещей и пачка исправлений. Ожидаемый релиз - к выходным, если разработчики успеют",
     points: [
       "Хэллоуинский босс - раз в сутки на протяжении 14 дней, с повышенным шансом выпадения хэллоуинского сета",
       "Арена: чем больше прокачано характеристик, тем больше награда за победу (по слухам, разница с теми, кто характеристики не качает вовсе, будет ещё ощутимее); абуз со 100% победами без характеристик исправят",
@@ -146,7 +157,8 @@ window.ZONE_NEWS = [
   if (!root || !list.length) return;
   const FULL = 1,
     SHOW = 3,
-    FRESH_DAYS = 3;
+    FRESH_DAYS = 3,
+    EVENT_HOURS = 3;
   const MONTHS = ["янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const fmt = d => {
@@ -157,6 +169,26 @@ window.ZONE_NEWS = [
   const fresh = d => {
     const t = Date.parse(d);
     return t && now - t < FRESH_DAYS * 864e5 && t <= now + 864e5;
+  };
+  /* метка на баннере по времени события when (дни считаются по МСК):
+     «Через 7 дней» -> «Зав��ра в 18:00» -> «Сегодня в 18:00» -> «Идёт сейчас» (EVENT_HOURS часов) -> «Завершён» */
+  const MSK = 3 * 36e5;
+  const plural = (k, one, few, many) => {
+    const a = k % 10,
+      b = k % 100;
+    return a === 1 && b !== 11 ? one : a >= 2 && a <= 4 && (b < 12 || b > 14) ? few : many;
+  };
+  const eventState = n => {
+    const t = Date.parse(n.when || "");
+    if (!t) return null;
+    if (now >= t + EVENT_HOURS * 36e5) return { label: "Завершён", past: true };
+    if (now >= t) return { label: "Идёт сейчас" };
+    const day = x => Math.floor((x + MSK) / 864e5);
+    const days = day(t) - day(now);
+    const hm = new Date(t + MSK).toISOString().slice(11, 16);
+    if (days <= 0) return { label: "Сегодня в " + hm };
+    if (days === 1) return { label: "Завтра в " + hm };
+    return { label: "Через " + days + " " + plural(days, "день", "дня", "дней") };
   };
   const EVENTS = {
     halloween:
@@ -173,9 +205,11 @@ window.ZONE_NEWS = [
     /* Хэллоуин закончился: рассвет в болотной деревне, поверженный босс, тыквенная метка «Завершён» */
     "halloween-end":
       '<div class="zn-event zn-ev-ended" aria-hidden="true"><img src="/assets/event-halloween-end-600.webp" srcset="/assets/event-halloween-end-600.webp 600w, /assets/event-halloween-end-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>Завершён</span></div>',
-    /* розыгрыш: сталкеры у костра и кейс с жетонами, золотая метка «Розыгрыш» */
+    /* розыгрыш: сталкеры у костра и кейс с жетонами, з��лотая метка «Розыгрыш» */
     giveaway:
-      '<div class="zn-event zn-ev-giveaway" aria-hidden="true"><img src="/assets/event-giveaway-600.webp" srcset="/assets/event-giveaway-600.webp 600w, /assets/event-giveaway-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>Розыгрыш</span></div>'
+      '<div class="zn-event zn-ev-giveaway" aria-hidden="true"><img src="/assets/event-giveaway-600.webp" srcset="/assets/event-giveaway-600.webp 600w, /assets/event-giveaway-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>Розыгрыш</span></div>',
+    /* рейд на боссов: баннер события сверху карточки, как у остальных новостей; кадр 2:1 не режем и не глушим */
+    raid: '<div class="zn-event zn-ev-raid" aria-hidden="true"><img src="/assets/news/2026-11-08-raid-bosses.webp" srcset="/assets/news/2026-11-08-raid-bosses-480.webp 480w, /assets/news/2026-11-08-raid-bosses.webp 1774w" sizes="(max-width: 760px) 92vw, 460px" width="1774" height="887" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>15 ноября</span></div>'
   };
   /* промокод в тексте - ссылка, по которой он активируется в игре */
   const promo = n => {
@@ -221,11 +255,19 @@ window.ZONE_NEWS = [
     );
   };
   /* баннер новости: по клику (или Enter) открывается крупно в том же окне просмотра, что и скриншоты */
-  const banner = n =>
-    (EVENTS[n.event] || "").replace(
+  const banner = n => {
+    let html = EVENTS[n.event] || "";
+    /* у события с when метка считается по времени, а после окончания баннер получает вид «Завершён» */
+    const st = html && eventState(n);
+    if (st) {
+      html = html.replace(/(<span class="zn-ev-soon"><i class="zn-ev-dot"><\/i>)[^<]*/, "$1" + esc(st.label));
+      if (st.past) html = html.replace('class="zn-event', 'class="zn-event zn-ev-ended');
+    }
+    return html.replace(
       ' aria-hidden="true">',
       ' role="button" tabindex="0" data-alt="' + esc(n.title) + '" aria-label="Открыть баннер: ' + esc(n.title) + '">'
     );
+  };
   const item = (n, i) =>
     '<li class="zn-item' +
     (i >= SHOW ? " zn-more" : i >= FULL ? " zn-compact" : "") +
@@ -242,6 +284,13 @@ window.ZONE_NEWS = [
     esc(n.title) +
     "</b>" +
     (n.text ? '<p class="zn-text">' + promo(n) + "</p>" : "") +
+    /* второй абзац с выделенным началом: note: { title: "Для новичков", text: "с 18:00 ..." } -> «Для новичков: с 18:00 ...» */
+    (n.note && n.note.text
+      ? '<p class="zn-text zn-note">' +
+        (n.note.title ? "<b>" + esc(n.note.title) + ":</b> " : "") +
+        esc(n.note.text) +
+        "</p>"
+      : "") +
     (Array.isArray(n.points) && n.points.length
       ? '<ul class="zn-points">' + n.points.map(p => "<li>" + esc(p) + "</li>").join("") + "</ul>"
       : "") +

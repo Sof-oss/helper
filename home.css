@@ -620,6 +620,14 @@ html.tour-seen .home-hero .tour-start {
   line-height: 1.45;
   color: #b4bec7;
 }
+/* второй абзац новости с выделенным началом (news.js: note): «Для новичков: ...» */
+.zn-note {
+  margin-top: 6px;
+}
+.zn-note b {
+  font-weight: 600;
+  color: var(--zn);
+}
 /* подробности новости (news.js: points) - короткий список с жёлтыми маркерами */
 .zn-points {
   margin: 8px 0 0;
@@ -1185,6 +1193,28 @@ html.tour-seen .home-hero .tour-start {
 }
 .zn-ev-ended img {
   filter: brightness(1.05) contrast(1.05);
+}
+/* «Рейд на боссов» (event: "raid"): кадр 2:1 во всю ширину карточки, без затемнения - на баннере текст события;
+   кликабельный, как скриншоты: открывает баннер крупно */
+.zn-ev-raid {
+  --ev: #ff8a3c;
+  aspect-ratio: 2 / 1;
+  opacity: 1;
+  pointer-events: auto;
+  cursor: zoom-in;
+}
+.zn-ev-raid img {
+  filter: none;
+}
+.zn-ev-raid::after {
+  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 3px);
+}
+/* рейд прошёл (метка «Завершён» по времени when в news.js): кадр приглушён, метка серая, точка не мигает */
+.zn-ev-raid.zn-ev-ended {
+  --ev: #b9b2a6;
+}
+.zn-ev-raid.zn-ev-ended img {
+  filter: grayscale(0.7) brightness(0.75);
 }
 .zn-ev-dot {
   display: inline-block;
