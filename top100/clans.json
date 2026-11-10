@@ -1,7 +1,16 @@
 {
-  "updated": "2026-11-09T02:59:42+03:00",
+  "updated": "2026-11-10T03:00:14+03:00",
   "source": "API игры: /clans/search",
   "clans": [
+    {
+      "name": "ИИГ",
+      "level": 1,
+      "members": 1,
+      "leader": {
+        "id": 4857,
+        "name": "Квад"
+      }
+    },
     {
       "name": "Last Way 2",
       "level": 1,
@@ -14,7 +23,7 @@
     {
       "name": "Last Way",
       "level": 1,
-      "members": 20,
+      "members": 19,
       "leader": {
         "id": 3954,
         "name": "|LW| РуSSкая"
