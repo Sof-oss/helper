@@ -1,11 +1,11 @@
 {
-  "updated": "2026-11-10T03:00:14+03:00",
+  "updated": "2026-11-11T02:59:59+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
       "name": "ИИГ",
       "level": 1,
-      "members": 1,
+      "members": 2,
       "leader": {
         "id": 4857,
         "name": "Квад"
@@ -16,8 +16,8 @@
       "level": 1,
       "members": 17,
       "leader": {
-        "id": 5197,
-        "name": "|LW| ЭнДоРфИнКа"
+        "id": 5118,
+        "name": "|LW| Артём"
       }
     },
     {
