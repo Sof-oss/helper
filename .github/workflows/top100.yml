@@ -62,9 +62,23 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      # коммит от GITHUB_TOKEN сам деплой не запускает (защита GitHub от циклов) - запускаем его явно
+      # коммит от GITHUB_TOKEN сам деплой не запускает (защита GitHub от циклов) - запускаем его явно.
+      # Dispatch сразу после push иногда резолвит ветку в предыдущий SHA, и деплой собирает старые данные
+      # (так 12.11 уехали данные за 11.11). Поэтому ждём, пока GitHub отдаст свежий SHA, и иначе падаем:
+      # красный запуск с письмом лучше тихого деплоя вчерашних данных.
       - name: Деплой
         if: steps.commit.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh workflow run pages.yml --ref main
+        run: |
+          sha=$(git rev-parse HEAD)
+          for i in $(seq 1 30); do
+            if [ "$(git ls-remote origin refs/heads/main | cut -f1)" = "$sha" ]; then break; fi
+            sleep 5
+          done
+          remote=$(git ls-remote origin refs/heads/main | cut -f1)
+          if [ "$remote" != "$sha" ]; then
+            echo "Ветка main на GitHub всё ещё на $remote, свежий коммит $sha - деплой не запускаю" >&2
+            exit 1
+          fi
+          gh workflow run pages.yml --ref main
