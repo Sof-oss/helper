@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-13T03:00:34+03:00",
+  "updated": "2026-11-14T02:59:36+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
@@ -14,7 +14,7 @@
     {
       "name": "Last Way 2",
       "level": 1,
-      "members": 20,
+      "members": 19,
       "leader": {
         "id": 5118,
         "name": "|LW| Артём"
@@ -59,7 +59,7 @@
     {
       "name": "Бандиты",
       "level": 1,
-      "members": 12,
+      "members": 13,
       "leader": {
         "id": 3178,
         "name": "«Братва» Изверг"
@@ -194,7 +194,7 @@
     {
       "name": "Наёмники",
       "level": 4,
-      "members": 25,
+      "members": 24,
       "leader": {
         "id": 133,
         "name": "\"Наёмник\" Ымгыр"
