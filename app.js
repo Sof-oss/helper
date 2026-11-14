@@ -244,7 +244,17 @@ function renderCards() {
 const escEq = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const ITEM_SET = new Map();
 SETS.forEach(s => s.items.forEach(i => ITEM_SET.set(i.code, s.code)));
-ITEMS.forEach(i => ITEM_SET.set(i.code, "standalone"));
+/* оружие лежит в ITEMS (порядок битов ссылки), но в окне показано своей карточкой */
+const WEAPON_ITEMS = ITEMS.filter(i => i.slot === "weapon");
+const LOOSE_ITEMS = ITEMS.filter(i => i.slot !== "weapon");
+ITEMS.forEach(i => ITEM_SET.set(i.code, i.slot === "weapon" ? "weapons" : "standalone"));
+const eqGroupItems = key =>
+  key === "standalone"
+    ? LOOSE_ITEMS
+    : key === "weapons"
+      ? WEAPON_ITEMS
+      : (SETS.find(s => s.code === key) || { items: [] }).items;
+const eqLooseGroup = key => key === "standalone" || key === "weapons";
 const gearSets = () => [SETS.find(s => s.isNew), ...SETS.filter(s => !s.isNew)].filter(Boolean);
 const gearLabel = (k, v) => EQ_BONUS_LABELS[k] + " +" + (GEAR_BONUS_PCT.has(k) ? Math.round(v * 100) + "%" : fmt(v));
 function equipmentChips(item) {
@@ -325,7 +335,7 @@ function equipmentCard(key, name, items, isNew) {
   const selected = items.filter(i => state.items.has(i.code)).length;
   const pct = Math.round((selected / items.length) * 100);
   const all = selected === items.length;
-  const standalone = key === "standalone";
+  const standalone = eqLooseGroup(key);
   return (
     '<article class="eq-card' +
     (isNew ? " is-new" : "") +
@@ -365,10 +375,11 @@ function renderEquipment() {
     ALL_ITEMS.length +
     '</span><span class="eq-toolbar-btns"><button type="button" id="eqSelectAll">Выбрать всё</button><button type="button" id="eqClear">Снять всё</button></span></div>' +
     '<div class="eq-scroll"><div class="eq-grid">' +
+    (WEAPON_ITEMS.length ? equipmentCard("weapons", "Оружие", WEAPON_ITEMS, true) : "") +
     gearSets()
       .map(s => equipmentCard(s.code, s.name, s.items, s.isNew))
       .join("") +
-    equipmentCard("standalone", "Без комплекта", ITEMS, false) +
+    equipmentCard("standalone", "Без комплекта", LOOSE_ITEMS, false) +
     '</div></div><div class="eq-totals" id="eqTotals">' +
     equipmentSummaryHTML() +
     "</div>";
@@ -404,7 +415,7 @@ function updateEquipmentSummary() {
 function updateEquipmentCard(key) {
   const card = document.querySelector('[data-eq-card="' + key + '"]');
   if (!card) return;
-  const items = key === "standalone" ? ITEMS : (SETS.find(s => s.code === key) || { items: [] }).items;
+  const items = eqGroupItems(key);
   const selected = items.filter(i => state.items.has(i.code)).length;
   const ring = card.querySelector("[data-eq-ring]");
   if (ring) {
@@ -415,7 +426,7 @@ function updateEquipmentCard(key) {
   const setBtn = card.querySelector("[data-eq-set]");
   if (setBtn) {
     setBtn.setAttribute("aria-pressed", selected === items.length);
-    const standalone = key === "standalone";
+    const standalone = eqLooseGroup(key);
     setBtn.textContent = standalone
       ? selected === items.length
         ? "снять всё"
@@ -442,7 +453,7 @@ function toggleEquipmentItem(code) {
   calc();
 }
 function toggleEquipmentSet(key) {
-  const items = key === "standalone" ? ITEMS : (SETS.find(s => s.code === key) || { items: [] }).items;
+  const items = eqGroupItems(key);
   const all = items.every(i => state.items.has(i.code));
   items.forEach(i => (all ? state.items.delete(i.code) : state.items.add(i.code)));
   saveState();

@@ -44,8 +44,8 @@ description: Калькулятор урона /calculator и страница /
 ```
 - Комплект: `code` (`SET_NNN`, уникален), `name` (с «Комплект «…»»), `isNew` (необязательно), `bonuses` = сумма `bonuses` вещей, `extras` = сумма `extras` вещей, `items` (1-3 вещи; карточка рисует пустые клетки до 3).
 - Вещь (обязательны все поля, `extras: {}` даже пустой - код читает `item.extras[k]` без проверки):
-  - `code` - код игры `HEAD_NNN` / `JACKET_NNN` / `PANTS_NNN`, уникален во всех `SETS` и `ITEMS`;
-  - `slot`: `"head" | "jacket" | "pants"`; `rarity`: `"common" | "uncommon" | "rare"` (на вид сейчас не влияет);
+  - `code` - код игры `HEAD_NNN` / `JACKET_NNN` / `PANTS_NNN` / `WEAPON_NNN`, уникален во всех `SETS` и `ITEMS`;
+  - `slot`: `"head" | "jacket" | "pants" | "weapon"` (оружие - в конце `ITEMS`, в окне своей карточкой «Оружие» через `WEAPON_ITEMS` в `app.js`); `rarity`: `"common" | "uncommon" | "rare"` (на вид сейчас не влияет);
   - `icon`: `"/assets/equipment/<code>.webp"`, файл webp 128×128 (рисуется 64×64);
   - `bonuses`: только ключи `knife, pistol, auto, grenade, gl, gauss` - целые плоские прибавки;
   - `extras`: только `critChance, critDamage, critGaussChance, critGrenadeChance, critGaussDamage, critGrenadeDamage, freeNoCooldown, cooldown`. Проценты - долей (`0.01` = 1%), урон крита - целым. Новый ключ сам не посчитается: нужно добавить его в `ex` в `buildTotals` и `buildResults`, в `GEAR_BONUS_LABELS`, `EQ_BONUS_LABELS`, `GEAR_EXTRA`, `gearExtras()` (+ `GEAR_BONUS_PCT` для процента) в `app.js`.

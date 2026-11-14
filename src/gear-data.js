@@ -1,4 +1,5 @@
-/* Снаряжение из ответа API игры (25.10.2026): 12 комплектов и одиночные вещи. */
+/* Снаряжение из ответа API игры (14.11.2026): 12 комплектов, одиночные вещи и оружие (slot: "weapon").
+   Новые вещи - только в конец ITEMS: порядок ALL_ITEMS = биты маски g в ссылке на билд. */
 export const SETS = [
   {
     code: "SET_001",
@@ -422,5 +423,32 @@ export const ITEMS = [
     icon: "/assets/equipment/JACKET_011.webp",
     bonuses: { knife: 12, pistol: 12, auto: 14 },
     extras: { cooldown: 0.03, freeNoCooldown: 0.01 }
+  },
+  {
+    code: "WEAPON_001",
+    name: "Пистолет Макарова",
+    slot: "weapon",
+    rarity: "common",
+    icon: "/assets/equipment/WEAPON_001.webp",
+    bonuses: { knife: 5, pistol: 5, auto: 5 },
+    extras: {}
+  },
+  {
+    code: "WEAPON_002",
+    name: "МП-5 с глушителем",
+    slot: "weapon",
+    rarity: "rare",
+    icon: "/assets/equipment/WEAPON_002.webp",
+    bonuses: { knife: 23, pistol: 24, auto: 27, grenade: 28, gl: 56, gauss: 180 },
+    extras: {}
+  },
+  {
+    code: "WEAPON_003",
+    name: "ТОЗ-34",
+    slot: "weapon",
+    rarity: "rare",
+    icon: "/assets/equipment/WEAPON_003.webp",
+    bonuses: { grenade: 16, gl: 34, gauss: 108 },
+    extras: {}
   }
 ];

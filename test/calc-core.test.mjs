@@ -115,8 +115,16 @@ test("новый ивентовый комплект и разбивка по в
     set.items.map(i => i.name),
     ["Хоккейная маска", "Потёртая куртка", "Старые джинсы"]
   );
-  assert.equal(ALL_ITEMS.length, 36);
+  assert.equal(ALL_ITEMS.length, 39);
   assert.ok(ITEMS.every(i => !set.items.some(x => x.code === i.code)));
+});
+
+test("оружие: в конце ITEMS, старые биты маски не сдвинулись", () => {
+  const codes = ALL_ITEMS.map(i => i.code);
+  /* до оружия последней была JACKET_011 (бит 35) - старые ссылки g и слоты читаются как раньше */
+  assert.equal(codes.indexOf("JACKET_011"), 35);
+  assert.deepEqual(codes.slice(36), ["WEAPON_001", "WEAPON_002", "WEAPON_003"]);
+  assert.ok(ITEMS.filter(i => i.slot === "weapon").every(i => i.extras && i.icon.endsWith(i.code + ".webp")));
 });
 
 test("таланты без выполненных требований отбрасываются", () => {
@@ -210,9 +218,9 @@ const GOLDEN = [
       arena: 1000,
       talents: Object.fromEntries(TALENTS.map(t => [t[0], 5]))
     },
-    { knife: 441, pistol: 495, auto: 609, grenade: 704, gl: 1445, gauss: 4565 },
+    { knife: 469, pistol: 524, auto: 641, grenade: 748, gl: 1535, gauss: 4853 },
     {
-      first: [529, 594, 731],
+      first: [563, 629, 769],
       crit: [12, 11, 12],
       critDmg: [300, 325, 725],
       noCooldown: 6,
@@ -220,12 +228,12 @@ const GOLDEN = [
       firstFreeHit: 20
     },
     [
-      [46, 287, 58, 23, 27],
-      [48, 300, 60, 24, 63],
-      [54, 337, 68, 27, 123],
-      [55, 343, 249, 27, 30],
-      [113, 706, 510, 56, 60],
-      [360, 2248, 1627, 180, 150]
+      [46, 287, 86, 23, 27],
+      [48, 300, 89, 24, 63],
+      [54, 337, 100, 27, 123],
+      [55, 343, 293, 27, 30],
+      [113, 706, 600, 56, 60],
+      [360, 2248, 1915, 180, 150]
     ]
   ]
 ];
