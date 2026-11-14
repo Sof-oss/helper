@@ -3966,6 +3966,11 @@ input:focus-visible {
 .eq-card[data-eq-card="standalone"] .eq-slots {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
+/* оружие длинное - иконка 2:1, чтобы стволы были такими же заметными, как пистолет */
+.eq-card[data-eq-card="weapons"] .eq-slot img {
+  width: 116px;
+  height: 58px;
+}
 .eq-total-title {
   margin-bottom: 4px;
   color: #d9a441;
@@ -4061,6 +4066,13 @@ input:focus-visible {
   .eq-slot img {
     grid-area: img;
     width: 42px;
+    height: 42px;
+  }
+  .eq-card[data-eq-card="weapons"] .eq-slot {
+    grid-template-columns: 84px minmax(0, 1fr);
+  }
+  .eq-card[data-eq-card="weapons"] .eq-slot img {
+    width: 84px;
     height: 42px;
   }
   .eq-slot b {

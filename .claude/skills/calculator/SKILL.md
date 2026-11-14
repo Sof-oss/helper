@@ -46,7 +46,7 @@ description: Калькулятор урона /calculator и страница /
 - Вещь (обязательны все поля, `extras: {}` даже пустой - код читает `item.extras[k]` без проверки):
   - `code` - код игры `HEAD_NNN` / `JACKET_NNN` / `PANTS_NNN` / `WEAPON_NNN`, уникален во всех `SETS` и `ITEMS`;
   - `slot`: `"head" | "jacket" | "pants" | "weapon"` (оружие - в конце `ITEMS`, в окне своей карточкой «Оружие» через `WEAPON_ITEMS` в `app.js`); `rarity`: `"common" | "uncommon" | "rare"` (на вид сейчас не влияет);
-  - `icon`: `"/assets/equipment/<code>.webp"`, файл webp 128×128 (рисуется 64×64);
+  - `icon`: `"/assets/equipment/<code>.webp"`, файл webp 128×128 (рисуется 58×58); у оружия - 256×128, обрезанный по рисунку (рисуется 116×58, правило `.eq-card[data-eq-card="weapons"]` в `calculator.css`);
   - `bonuses`: только ключи `knife, pistol, auto, grenade, gl, gauss` - целые плоские прибавки;
   - `extras`: только `critChance, critDamage, critGaussChance, critGrenadeChance, critGaussDamage, critGrenadeDamage, freeNoCooldown, cooldown`. Проценты - долей (`0.01` = 1%), урон крита - целым. Новый ключ сам не посчитается: нужно добавить его в `ex` в `buildTotals` и `buildResults`, в `GEAR_BONUS_LABELS`, `EQ_BONUS_LABELS`, `GEAR_EXTRA`, `gearExtras()` (+ `GEAR_BONUS_PCT` для процента) в `app.js`.
 - Названия вещей пишутся как в игре (внутри - прямые кавычки `'Шлем "Рубеж-М"'`, так в данных).
