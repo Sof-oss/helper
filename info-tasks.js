@@ -268,12 +268,12 @@
   const DRINK_IMG =
     '<img src="assets/energy-drink.webp" alt="Энергетик" width="103" height="180" loading="lazy" decoding="async">';
   const CALC_KEY = "gameHelperEnergyCalc";
-  const calcState = { loc: 0, energy: 1000, own: 0 };
+  const calcState = { loc: 0, energy: 1000 };
   try {
     const c = JSON.parse(localStorage.getItem(CALC_KEY) || "null");
     if (c) {
       if (Number.isInteger(c.loc) && c.loc >= 0 && c.loc < L.length) calcState.loc = c.loc;
-      ["energy", "own"].forEach(k => {
+      ["energy"].forEach(k => {
         if (Number.isFinite(c[k]) && c[k] >= 0) calcState[k] = Math.floor(c[k]);
       });
     }
@@ -309,8 +309,7 @@
     const i = calcState.loc,
       e = calcState.energy,
       y = energyYield(i, e);
-    const buy = Math.max(0, e - calcState.own),
-      drinks = Math.ceil(buy / DRINK_ENERGY),
+    const drinks = Math.ceil(e / DRINK_ENERGY),
       spent = drinks * DRINK_PRICE,
       net = y.tokens - spent;
     const res = (k, v) =>
@@ -358,9 +357,9 @@
       DRINK_IMG +
       (drinks ? '<b class="ec-drink-n">×' + n0(drinks) + "</b>" : "") +
       '</i><div class="ec-buy-text">' +
-      (buy
+      (e
         ? "<span>Купить энергии: <b>" +
-          n0(buy) +
+          n0(e) +
           "</b> → энергетиков: <b>" +
           n0(drinks) +
           "</b></span>" +
@@ -378,8 +377,8 @@
               n0(Math.abs(net)) +
               "</b> жетонов<small>стоимость энергетиков минус жетоны, полученные за прохождения</small></span>"
             : "") +
-          (drinks * DRINK_ENERGY > buy
-            ? '<span class="ec-left">Останется ' + n0(drinks * DRINK_ENERGY - buy) + " энергии</span>"
+          (drinks * DRINK_ENERGY > e
+            ? '<span class="ec-left">Останется ' + n0(drinks * DRINK_ENERGY - e) + " энергии</span>"
             : "")
         : "<span>Энергии хватает - покупать энергетики не нужно</span>") +
       "</div></div>"
@@ -404,9 +403,6 @@
         l +
         "</span></button>"
     ).join("");
-    const presets = [100, 500, 1000, 5000]
-      .map(v => '<button type="button" class="ec-preset" data-ec-preset="' + v + '">' + n0(v) + "</button>")
-      .join("");
     return card(
       "#ff6b6f",
       "Калькулятор энергии",
@@ -418,14 +414,7 @@
         ICON.energy +
         '</i>Сколько энергии потратить</span><input type="text" inputmode="numeric" autocomplete="off" maxlength="10" data-group-digits id="ecEnergy" value="' +
         grp(calcState.energy) +
-        '"><span class="ec-presets">' +
-        presets +
-        "</span></label>" +
-        '<label class="ec-field"><span><i class="res-ico res-en">' +
-        ICON.energy +
-        '</i>Запас энергии</span><input type="text" inputmode="numeric" autocomplete="off" maxlength="10" data-group-digits id="ecOwn" value="' +
-        grp(calcState.own) +
-        '"><small>Уже есть - покупать не нужно</small></label>' +
+        '"></label>' +
         '</div><div id="ecResult">' +
         calcResultMarkup() +
         "</div>" +
@@ -445,9 +434,8 @@
     return Number.isFinite(n) && n >= 0 ? Math.min(n, 10000000) : 0;
   };
   document.addEventListener("input", e => {
-    if (e.target.id === "ecEnergy") calcState.energy = num(e.target.value);
-    else if (e.target.id === "ecOwn") calcState.own = num(e.target.value);
-    else return;
+    if (e.target.id !== "ecEnergy") return;
+    calcState.energy = num(e.target.value);
     saveCalc();
     updateCalc();
   });
@@ -474,14 +462,6 @@
       });
       updateCalc();
       return;
-    }
-    const p = e.target.closest("[data-ec-preset]");
-    if (p) {
-      calcState.energy = Number(p.dataset.ecPreset);
-      const inp = document.getElementById("ecEnergy");
-      if (inp) inp.value = grp(calcState.energy);
-      saveCalc();
-      updateCalc();
     }
   });
 

@@ -165,7 +165,7 @@
 }
 .ec-inputs {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
+  grid-template-columns: minmax(0, 420px);
   gap: 12px;
   margin-bottom: 14px;
 }
@@ -209,32 +209,6 @@
   outline: none;
   border-color: #ff6b6f;
   box-shadow: 0 0 0 3px rgba(255, 107, 111, 0.18);
-}
-.ec-field small {
-  font-size: var(--fs-xs);
-  color: #71889b;
-}
-.ec-presets {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.ec-preset {
-  height: 26px;
-  padding: 0 10px;
-  border: 1px solid #2d4a60;
-  border-radius: 4px;
-  background: transparent;
-  color: #a9bbc9;
-  font: inherit;
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  cursor: pointer;
-}
-.ec-preset:hover,
-.ec-preset:focus-visible {
-  border-color: #ff6b6f;
-  color: #fff;
 }
 .ec-results {
   display: grid;
