@@ -287,7 +287,7 @@
   function energyYield(i, e) {
     const cost = combined.energy[i],
       runs = Math.floor(e / cost),
-      out = { runs: runs, left: e - runs * cost, stage: 0, done: 0, tasks: 0 };
+      out = { runs: runs, left: e - runs * cost, tasks: 0 };
     ["exp", "bullets", "rep"].forEach(k => (out[k] = runs * combined[k][i]));
     out.tokens = runs * combined.tokens[i];
     for (let j = 0; j < D.stages.length; j++) {
@@ -296,11 +296,7 @@
       ["exp", "bullets", "rep"].forEach(r => (out[r] += k * s[r][i]));
       out.left -= k * s.energy[i];
       out.tasks += k;
-      if (k < s.reps[i]) {
-        out.stage = j + 1;
-        out.done = k;
-        break;
-      }
+      if (k < s.reps[i]) break;
     }
     return out;
   }
@@ -322,28 +318,15 @@
       "</b><small>" +
       R[k].full +
       "</small></span></div>";
-    /* где остановитесь после полных прохождений: этап и сколько его заданий выполнено */
-    const st = y.stage ? D.stages[y.stage - 1] : null;
-    const where = st
-      ? "остановитесь на этапе " +
-        y.stage +
-        " (выполнено " +
-        y.done +
-        " из " +
-        st.reps[i] +
-        ")" +
-        (y.left ? ", останется " + n0(y.left) + " энергии" : "")
-      : "";
     const runsTxt = !e
       ? "Укажите, сколько энергии потратить"
       : y.runs
-        ? "Полных прохождений: <b>" + n0(y.runs) + "</b>" + (st && (y.tasks || y.left) ? ", затем " + where : "")
+        ? "Полных прохождений: <b>" + n0(y.runs) + "</b>"
         : "На полное прохождение нужно " +
           n0(combined.energy[i]) +
           " энергии. Заданий выполнено: <b>" +
           n0(y.tasks) +
-          "</b>, " +
-          where;
+          "</b>";
     return (
       '<div class="ec-results">' +
       res("exp", n0(y.exp)) +
