@@ -35,7 +35,10 @@ test("build.js: страницы, CSP, sitemap и статическая обо�
     assert.match(index, /src="top100-common\.js\?v=/);
     assert.match(index, /src="awards\.js\?v=/);
     assert.match(index, /src="player-card\.js\?v=/);
-    assert.match(index, /2026-11-16-raid-results-480\.webp\?v=/);
+    assert.match(index, /event-raid-results-600\.webp\?v=/);
+    assert.match(index, /event-raid-results-1200\.webp\?v=/);
+    assert.doesNotMatch(index, /2026-11-16-raid-results/);
+    assert.doesNotMatch(index, /zn-raid-art/);
     const homeCss = read(/href="\/?(bundle-[\w-]+\.css)\?v=/.exec(index)[1]);
     assert.match(homeCss, /\.zn-raid-summary/);
     assert.match(homeCss, /\.zn-raid-ranking\[open\]/);

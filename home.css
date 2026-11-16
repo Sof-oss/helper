@@ -809,27 +809,24 @@ html.tour-seen .home-hero .tour-start {
   color: #e5edf3;
 }
 .zn-raid-summary {
-  display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
-  gap: 16px;
-  align-items: center;
-  padding: 12px;
+  padding: 14px 16px;
   border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
   border-radius: 6px;
   background: linear-gradient(120deg, color-mix(in srgb, var(--accent) 14%, #0a121b), #0a121b);
 }
-.zn-raid-art {
-  aspect-ratio: 1;
-  border-radius: 4px;
-}
-.zn-raid-art:focus-visible {
-  outline: 2px solid var(--raid-accent);
-  outline-offset: 3px;
-}
 .zn-raid-totals {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "kicker kicker"
+    "total count"
+    "label count";
+  align-items: end;
+  gap: 0 12px;
   min-width: 0;
 }
 .zn-raid-kicker {
+  grid-area: kicker;
   display: block;
   margin-bottom: 8px;
   color: var(--raid-accent);
@@ -838,6 +835,7 @@ html.tour-seen .home-hero .tour-start {
   text-transform: uppercase;
 }
 .zn-raid-total {
+  grid-area: total;
   display: block;
   color: #f5f8fb;
   font: 700 30px/1.2 var(--mono);
@@ -845,16 +843,19 @@ html.tour-seen .home-hero .tour-start {
   white-space: nowrap;
 }
 .zn-raid-label {
+  grid-area: label;
   display: block;
   margin-top: 3px;
   color: #bccad7;
   font-size: 13px;
 }
 .zn-raid-count {
-  display: block;
-  margin-top: 10px;
+  grid-area: count;
+  align-self: center;
+  margin: 0;
   color: #cbd7e1;
   font-size: 14px;
+  text-align: right;
 }
 .zn-raid-count b {
   color: var(--raid-accent);
@@ -1000,9 +1001,19 @@ html.tour-seen .home-hero .tour-start {
   transform: rotate(180deg);
 }
 @media (max-width: 1100px) and (min-width: 960px), (max-width: 600px) {
-  .zn-raid-summary {
-    grid-template-columns: 80px minmax(0, 1fr);
-    gap: 12px;
+  .zn-raid-totals {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "kicker"
+      "total"
+      "label"
+      "count";
+    gap: 0;
+  }
+  .zn-raid-count {
+    align-self: start;
+    margin-top: 10px;
+    text-align: left;
   }
   .zn-raid-total {
     font-size: 24px;
@@ -1022,13 +1033,6 @@ html.tour-seen .home-hero .tour-start {
   }
 }
 @media (max-width: 380px) {
-  .zn-raid-summary {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .zn-raid-art {
-    width: 100%;
-    max-width: 140px;
-  }
   .zn-raid-bosses li {
     flex-direction: column;
     align-items: center;

@@ -8,8 +8,6 @@ window.ZONE_NEWS = [
     raid: {
       date: "15 ноября 2026",
       damage: 22131140,
-      image: "/assets/news/2026-11-16-raid-results.webp",
-      thumb: "/assets/news/2026-11-16-raid-results-480.webp",
       bosses: [
         { name: "Крыса", count: 1562, image: "/assets/bosses/rat-cut.webp" },
         { name: "Альфа-пёс", count: 933, image: "/assets/bosses/alpha-cut.webp" },
@@ -394,14 +392,7 @@ window.ZONE_NEWS = [
       num(p.damage) +
       "</b></a></li>";
     return (
-      '<div class="zn-raid-report"><div class="zn-raid-summary">' +
-      '<button type="button" class="zn-shot zn-raid-art" data-src="' +
-      esc(r.image) +
-      '" data-alt="Иллюстрация к итогам рейда из официального сообщества игры" aria-label="Открыть иллюстрацию рейда">' +
-      '<img src="' +
-      esc(r.thumb) +
-      '" alt="Сталкер отдыхает у дерева после рейда" width="480" height="480" loading="lazy" decoding="async"></button>' +
-      '<div class="zn-raid-totals"><span class="zn-raid-kicker">Боевой отчёт · ' +
+      '<div class="zn-raid-report"><div class="zn-raid-summary"><div class="zn-raid-totals"><span class="zn-raid-kicker">Боевой отчёт · ' +
       esc(r.date) +
       '</span><strong class="zn-raid-total">' +
       num(r.damage) +
