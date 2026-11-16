@@ -236,30 +236,76 @@
     const join = f.post
       ? '<a class="fc-join" href="' + esc(f.post) + '" target="_blank" rel="noopener">Пост о наборе</a>'
       : "";
-    const rows = f.r
-      .map(
-        (p, i) =>
-          '<tr class="' +
-          (i >= SHOW_ROSTER ? "fc-extra" : "") +
-          (p[5] ? " fc-off" : "") +
-          '"><td class="fc-mono">' +
-          (i + 1) +
-          "</td><td>" +
-          (p[0] === leadId ? '<span class="fc-leader">' + CROWN + "</span> " : "") +
-          who(p[0], p[1]) +
-          '</td><td><span class="fc-lvl">' +
-          p[2] +
-          '</span></td><td class="fc-mono">' +
-          num(p[3]) +
-          '</td><td class="fc-mono fc-col-b">' +
-          num(p[4]) +
-          "</td></tr>"
-      )
-      .join("");
+    const actCell = p => {
+      const v = p[6];
+      if (v == null) return '<span class="fc-zero">—</span>';
+      let tip = "Активность за неделю";
+      const g = p[7],
+        names = {
+          talents: "Таланты",
+          defense: "Защита лагеря",
+          expeditions: "Вылазки",
+          collections: "Коллекции",
+          stashes: "Тайники",
+          reputation: "Репутация",
+          bosses: "Боссы"
+        };
+      if (Array.isArray(g) && Array.isArray(data.actAnchors)) {
+        const parts = data.actAnchors
+          .map((a, mi) =>
+            g[mi] > 0 && a > 0
+              ? names[data.actMetrics[mi]] + " +" + num(g[mi]) + " (" + Math.min(100, Math.round((g[mi] / a) * 100)) + ")"
+              : null
+          )
+          .filter(Boolean);
+        if (parts.length) tip += ": " + parts.join(" · ");
+      }
+      return (
+        '<span class="fc-act" title="' +
+        esc(tip) +
+        '"><i><b style="width:' +
+        v +
+        '%"></b></i><b>' +
+        v +
+        "</b></span>"
+      );
+    };
+    const rowHtml = (p, i) =>
+      '<tr class="' +
+      (i >= SHOW_ROSTER ? "fc-extra" : "") +
+      (p[5] ? " fc-off" : "") +
+      '"><td class="fc-mono">' +
+      (i + 1) +
+      "</td><td>" +
+      (p[0] === leadId ? '<span class="fc-leader">' + CROWN + "</span> " : "") +
+      who(p[0], p[1]) +
+      '</td><td><span class="fc-lvl">' +
+      p[2] +
+      '</span></td><td class="fc-mono">' +
+      num(p[3]) +
+      '</td><td class="fc-mono fc-col-b">' +
+      num(p[4]) +
+      '</td><td class="fc-col-a">' +
+      actCell(p) +
+      "</td></tr>";
+    const rows = f.r.map(rowHtml).join("");
+    const actHelp =
+      '<div class="fc-act-help" id="fcActHelp" hidden><b>Как считается активность</b>' +
+      "<p>Активность - это прирост за последние 7 дней, а не накопленный итог: ветеран, который не заходил месяц, и новичок, который гриндит каждый день, видны сразу.</p>" +
+      "<p>По каждому из семи показателей (таланты, защита лагеря, вылазки, коллекции, тайники, репутация, боссы):</p>" +
+      "<ol><li>прирост за неделю считается у всех игроков Зоны;</li>" +
+      "<li>сотня самых больших приростов выстраивается по убыванию;</li>" +
+      "<li>медиана (середина) этой сотни становится порогом показателя.</li></ol>" +
+      "<p>Набрал порог или больше - 100 очков по показателю; меньше - пропорционально. Порог 4 босса за неделю: +3 → 75 очков, +2 → 50, +1 → 25. Рекордсмен недели порог не задирает: он лишь один из сотни, а середина остаётся на месте.</p>" +
+      "<p>Общий балл - сумма очков всех семи показателей, делённая на 7. Везде по 100: 700/7 = 100. Везде по 25: 175/7 = 25. Один максимум и нули в остальных: 100/7 ≈ 14 - поэтому бар поощряет движение по нескольким фронтам сразу.</p>" +
+      "<p>Особые случаи: показатель, который за неделю не тронул никто в Зоне, исключается из среднего; прирост выше порога всё равно даёт 100; у новичка окно считается от его первой выгрузки.</p>" +
+      "<p>Личный расклад бойца - в подсказке при наведении на его полоску: «Репутация +812 (45) · Боссы +3 (75)…».</p></div>";
     const roster = f.r.length
-      ? '<div class="fc-table" id="fcRoster"><table><thead><tr><th>#</th><th>Боец</th><th>Ур.</th><th>Репутация</th><th class="fc-col-b">Боссы</th></tr></thead><tbody>' +
+      ? '<div class="fc-table" id="fcRoster"><table><thead><tr><th>#</th><th>Боец</th><th>Ур.</th><th>Репутация</th><th class="fc-col-b">Боссы</th><th class="fc-col-a"><span class="fc-th-wrap"><button type="button" class="fc-sort" data-fc-sort aria-pressed="false">Активность</button><button type="button" class="fc-q" id="fcActHelpBtn" data-fc-act-help aria-expanded="false" aria-label="Как считается активность" title="Как считается активность">?</button></span></th></tr></thead><tbody>' +
         rows +
         "</tbody></table></div>" +
+        actHelp +
+        '<p class="fc-note">Активность - недельный прирост по всем показателям; наведите на полоску - личный расклад бойца.</p>' +
         (f.r.length > SHOW_ROSTER
           ? '<button type="button" class="fc-more" data-fc-more="#fcRoster">Показать всех ' + f.r.length + "</button>"
           : "") +
@@ -316,6 +362,29 @@
       '</section></div><section class="fc-glass fc-pad fc-hist"><h3>История</h3>' +
       events +
       "</section></div>";
+    const sortBtn = document.querySelector("#fcRoster [data-fc-sort]");
+    if (sortBtn) {
+      const tbody = document.querySelector("#fcRoster tbody"),
+        sortTh = sortBtn.closest("th");
+      let byAct = false;
+      sortBtn.addEventListener("click", () => {
+        byAct = !byAct;
+        sortBtn.setAttribute("aria-pressed", String(byAct));
+        sortTh.classList.toggle("fc-sorted", byAct);
+        const list = byAct ? f.r.slice().sort((a, b) => (b[6] || 0) - (a[6] || 0)) : f.r;
+        tbody.innerHTML = list.map(rowHtml).join("");
+      });
+    }
+    const helpBtn = document.getElementById("fcActHelpBtn");
+    if (helpBtn) {
+      helpBtn.addEventListener("click", () => {
+        const help = document.getElementById("fcActHelp");
+        const open = help.hidden;
+        help.hidden = !open;
+        helpBtn.setAttribute("aria-expanded", String(open));
+        helpBtn.classList.toggle("fc-q-open", open);
+      });
+    }
     dialog.scrollTop = 0;
   }
 

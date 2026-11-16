@@ -551,6 +551,131 @@ html body .fc-overlay .fc-dialog:focus-visible {
   font-family: "ZoneMono", monospace;
   white-space: nowrap;
 }
+/* колонка «Активность»: бар + балл (100 = темп топового сталкера Зоны за неделю, см. build-factions.js) */
+.fc-col-a {
+  white-space: nowrap;
+}
+.fc-sort {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.fc-sort:hover,
+.fc-sort:focus-visible {
+  color: #fff;
+  outline: none;
+}
+th.fc-sorted {
+  color: #fff;
+}
+th.fc-sorted .fc-sort::after {
+  content: " ↓";
+  color: var(--c);
+}
+.fc-act {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  vertical-align: middle;
+}
+.fc-act i {
+  display: block;
+  width: 76px;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+.fc-act i b {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--c) 55%, #fff), var(--c));
+}
+.fc-act > b {
+  min-width: 24px;
+  text-align: right;
+  font-family: "ZoneMono", monospace;
+  font-size: 12px;
+  color: #e3eef7;
+}
+.fc-zero {
+  color: #7f8b95;
+}
+/* знак вопроса: подробности расчёта активности */
+.fc-th-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.fc-q {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #c8d6e2;
+  font: 700 10px/1 "ZoneMono", monospace;
+  cursor: pointer;
+}
+.fc-q:hover,
+.fc-q:focus-visible {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  outline: none;
+}
+.fc-q-open {
+  background: color-mix(in srgb, var(--c) 35%, transparent);
+  border-color: var(--c);
+  color: #fff;
+}
+.fc-act-help {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #a9bccc;
+  font-size: 12px;
+  line-height: 1.55;
+}
+.fc-act-help[hidden] {
+  display: none;
+}
+.fc-act-help b {
+  display: block;
+  margin-bottom: 6px;
+  color: #e3eef7;
+  font: 600 12px/1.4 "Oswald", sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.fc-act-help p {
+  margin: 0 0 7px;
+}
+.fc-act-help p:last-child {
+  margin-bottom: 0;
+}
+.fc-act-help ol {
+  margin: 0 0 7px;
+  padding-left: 18px;
+}
+@media (max-width: 420px) {
+  .fc-act i {
+    width: 46px;
+  }
+}
 .fc-more {
   display: block;
   margin: 10px auto 0;

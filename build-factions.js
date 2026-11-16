@@ -460,6 +460,55 @@ function factionsMarkup(ROOT) {
       if (events.has(prev)) events.get(prev).push({ d, t: "left", id, n: p.n, x: next });
     }
   }
+  /* активность бойцов для состава штаба (faction-card.js): прирост каждого показателя за неделю,
+     очки компоненты = прирост / якорь × 100 (кап 100), якорь - медиана топ-100 наибольших недельных
+     приростов по показателю среди всех игроков выгрузки (один на все группировки, устойчив к рекордсменам).
+     Балл бойца = среднее компонент; показатели, которые за неделю не трогал никто (якорь 0), исключаются.
+     Без привязки к времени в группировке: считаем активность игрока, а не вклад в группировку. */
+  const actMetricsN = data.metrics.length;
+  const actLastIdx = histRaw.length - 1;
+  const actScores = {};
+  const actGainsById = {}; /* приросты бойца по показателям - для разбивки в штабе */
+  const actAnchors = new Array(actMetricsN).fill(0);
+  if (actLastIdx > 0) {
+    const actWinMs = histRaw[actLastIdx] - 7 * 864e5;
+    let actWinIdx = 0;
+    for (let i = actLastIdx; i >= 0; i--) {
+      if (histRaw[i] <= actWinMs) {
+        actWinIdx = i;
+        break;
+      }
+    }
+    const actBaseOf = p => Math.max(actWinIdx, p.s[0][0]); /* у новичка окно - от первой точки серии */
+    const actGains = Array.from({ length: actMetricsN }, () => []);
+    for (const [id, p] of Object.entries(data.players)) {
+      if (!Array.isArray(p.s) || !p.s.length) continue;
+      const base = actBaseOf(p);
+      const row = [];
+      for (let mi = 0; mi < actMetricsN; mi++) {
+        const g = valueAt(p, mi, actLastIdx) - valueAt(p, mi, base);
+        row.push(g);
+        if (g > 0) actGains[mi].push(g);
+      }
+      actGainsById[id] = row;
+    }
+    actGains.forEach((list, mi) => {
+      if (!list.length) return;
+      const top = list.slice().sort((a, b) => b - a).slice(0, 100);
+      const mid = top.length >> 1;
+      actAnchors[mi] = top.length % 2 ? top[mid] : (top[mid - 1] + top[mid]) / 2;
+    });
+    for (const [id, row] of Object.entries(actGainsById)) {
+      let sum = 0,
+        n = 0;
+      for (let mi = 0; mi < actMetricsN; mi++) {
+        if (!(actAnchors[mi] > 0)) continue;
+        sum += Math.min(100, (row[mi] / actAnchors[mi]) * 100);
+        n++;
+      }
+      actScores[id] = n ? Math.round(sum / n) : 0;
+    }
+  }
   const nameOf = id => (id != null && data.players[String(id)] ? data.players[String(id)].n : "");
   const cardsData = list.map(f => {
     const c = f.c,
@@ -524,7 +573,16 @@ function factionsMarkup(ROOT) {
         .filter(p => p.n),
       t: { reputation: f.totals.reputation || 0, bosses: f.totals.bosses || 0, expeditions: f.totals.expeditions || 0 },
       rank: ranked.indexOf(f) + 1,
-      r: f.people.map(p => [p.id, p.n, p.l, p.rep, BOSSES >= 0 ? (p.v || [])[BOSSES] || 0 : 0, p.off ? 1 : 0]),
+      r: f.people.map(p => [
+        p.id,
+        p.n,
+        p.l,
+        p.rep,
+        BOSSES >= 0 ? (p.v || [])[BOSSES] || 0 : 0,
+        p.off ? 1 : 0,
+        p.id != null ? actScores[String(p.id)] ?? null : null,
+        p.id != null ? actGainsById[String(p.id)] ?? null : null
+      ]),
       ev: ev.slice(0, 300)
     };
   });
@@ -618,7 +676,7 @@ function factionsMarkup(ROOT) {
     stats,
     rank,
     list: cards.join("\n"),
-    cards: { updated, total: list.length, factions: cardsData },
+    cards: { updated, total: list.length, actAnchors, actMetrics: data.metrics, factions: cardsData },
     history,
     count: list.length,
     hiring: hiringCount

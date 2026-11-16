@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мокапы: активность бойцов в штабе</title>
+<link rel="stylesheet" href="file:///C:/Games/Проекты/game-helper/dist/bundle-e519337e.css">
+<style>
+  /* мокап-обвязка */
+  body { padding: 26px 18px 60px; }
+  .mk-head { max-width: 1240px; margin: 0 auto 26px; color: #c8d6e2; font-size: 14px; line-height: 1.5; }
+  .mk-head b { color: #fff; }
+  .mk-variant { max-width: 1240px; margin: 34px auto 10px; display: flex; align-items: center; gap: 12px; }
+  .mk-variant .mk-num {
+    display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 10px;
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+    font: 700 16px/1 "ZoneMono", monospace; color: #fff;
+  }
+  .mk-variant b { font: 600 17px/1.3 "Oswald", sans-serif; letter-spacing: .04em; text-transform: uppercase; color: #fff; }
+  .mk-variant small { color: #a9bccc; font-size: 12.5px; }
+  .mk-dialog { margin: 0 auto 8px; }
+  .mk-dialog .fc-body { padding: 18px !important; }
+  /* колонка с баром */
+  .mk-bar { display: inline-flex; align-items: center; gap: 7px; vertical-align: middle; }
+  .mk-bar i { width: 84px; height: 8px; border-radius: 4px; background: rgba(255,255,255,.12); overflow: hidden; display: block; }
+  .mk-bar i b { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 55%, #fff), var(--c)); }
+  .mk-bar b.n { min-width: 30px; text-align: right; font: 700 12px/1 "ZoneMono", monospace; color: #e3eef7; }
+  th.mk-sorted { color: #fff; } th.mk-sorted::after { content: " ↓"; color: var(--c); }
+  /* пульс */
+  .mk-pulse { display: inline-flex; gap: 3px; margin-left: 8px; vertical-align: 1px; }
+  .mk-pulse i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.16); }
+  .mk-pulse i.on { background: var(--c); box-shadow: 0 0 6px color-mix(in srgb, var(--c) 70%, transparent); }
+  .mk-sort { display: inline-flex; gap: 6px; align-items: center; float: right; font-size: 12px; color: #a9bccc; }
+  .mk-sort button { border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06); color: #d4e1ec; border-radius: 999px; padding: 4px 12px; font: inherit; font-size: 12px; cursor: pointer; }
+  .mk-sort button.on { background: color-mix(in srgb, var(--c) 26%, transparent); border-color: var(--c); color: #fff; }
+  /* бейдж прироста */
+  .mk-gain { display: inline-block; padding: 2px 8px; border-radius: 7px; background: rgba(47,174,90,.14); border: 1px solid rgba(47,174,90,.4); color: #7fe0a0; font: 700 12px/1.5 "ZoneMono", monospace; white-space: nowrap; }
+  .mk-zero { color: #7f8b95; }
+  /* гриндят/спят */
+  .mk-duo { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; margin: 0 0 14px; }
+  .mk-duo h4 { margin: 0 0 8px; font: 600 11px/1.3 "Oswald", sans-serif; letter-spacing: .1em; text-transform: uppercase; color: color-mix(in srgb, var(--c) 60%, #fff); }
+  .mk-duo .mk-top { display: grid; gap: 6px; }
+  .mk-duo .mk-row { display: grid; grid-template-columns: 110px 1fr 30px; gap: 8px; align-items: center; font-size: 13px; }
+  .mk-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .mk-chips span { padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(217,72,63,.35); background: rgba(217,72,63,.1); color: #ffb3ab; font-size: 12px; }
+  /* вкладка активности */
+  .mk-tabs { display: inline-flex; gap: 4px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; padding: 3px; }
+  .mk-tabs button { border: 0; background: none; color: #a9bccc; border-radius: 999px; padding: 6px 16px; font: 600 12px/1 "Oswald", sans-serif; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; }
+  .mk-tabs button.on { background: color-mix(in srgb, var(--c) 30%, transparent); color: #fff; }
+  .mk-periods { float: right; display: inline-flex; gap: 4px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; padding: 3px; }
+  .mk-periods button { border: 0; background: none; color: #a9bccc; border-radius: 999px; padding: 6px 12px; font: 600 11px/1 "Oswald", sans-serif; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; }
+  .mk-periods button.on { background: rgba(255,255,255,.14); color: #fff; }
+  .mk-act { display: grid; gap: 10px; }
+  .mk-act .mk-a { display: grid; grid-template-columns: 22px 150px 1fr; gap: 10px; align-items: start; padding: 8px 0; border-top: 1px solid rgba(255,255,255,.07); }
+  .mk-act .mk-a:first-child { border-top: 0; }
+  .mk-act .mk-a > b { font: 700 13px/1.4 "ZoneMono", monospace; color: #a9bccc; }
+  .mk-act .mk-a .mk-nick { font-size: 13.5px; }
+  .mk-act .mk-bar2 { height: 10px; border-radius: 5px; background: rgba(255,255,255,.1); overflow: hidden; margin: 4px 0 5px; display: block; }
+  .mk-act .mk-bar2 b { display: block; height: 100%; background: linear-gradient(90deg, color-mix(in srgb, var(--c) 55%, #fff), var(--c)); border-radius: 5px; }
+  .mk-act small { display: block; color: #a9bccc; font-size: 11.5px; }
+  @media (max-width: 900px) { .mk-duo { grid-template-columns: 1fr; } .mk-act .mk-a { grid-template-columns: 22px 110px 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="mk-head">
+  <b>Мокапы: игровая активность бойцов в штабе группировки</b> · балл 0–100 = прирост за неделю по семи показателям,
+  нормирован как в «Рейтинге активности» группировок (лучший боец по каждому показателю = 100) · окно обрезается временем
+  в группировке · данные в примерах условные · группировка для примера — «Рассвет».
+</div>
+
+<!-- ═══════════ ВАРИАНТ 1 ═══════════ -->
+<div class="mk-variant"><span class="mk-num">1</span><b>Колонка «Активность»</b><small>бар + балл в таблице состава, сортировка кликом по заголовку</small></div>
+<div class="fc-dialog fc-nobg mk-dialog" style="--c:#3d7bf0"><div class="fc-body">
+  <div style="display:grid;gap:14px">
+    <div class="fc-stats">
+      <div class="fc-glass fc-st"><small>Бойцов</small><b>20 / 20</b></div>
+      <div class="fc-glass fc-st"><small>Репутация</small><b>596 512</b></div>
+      <div class="fc-glass fc-st"><small>Рейтинг активности</small><b>#6</b></div>
+    </div>
+    <section class="fc-glass fc-pad">
+      <h3>Состав · 8</h3>
+      <div class="fc-table"><table>
+        <thead><tr><th>#</th><th>Боец</th><th>Ур.</th><th>Репутация</th><th class="fc-col-b">Боссы</th><th class="mk-sorted">Активность</th></tr></thead>
+        <tbody>
+          <tr><td class="fc-mono">1</td><td><span class="fc-leader"><svg class="fc-crown" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 8l4.5 3.5L12 5l4.5 6.5L21 8l-2 11H5z"/></svg></span> Меченый</td><td><span class="fc-lvl">25</span></td><td class="fc-mono">167 615</td><td class="fc-mono fc-col-b">1 583</td><td><span class="mk-bar"><i><b style="width:100%"></b></i><b class="n">100</b></span></td></tr>
+          <tr><td class="fc-mono">2</td><td>100 рентген</td><td><span class="fc-lvl">24</span></td><td class="fc-mono">142 830</td><td class="fc-mono fc-col-b">1 512</td><td><span class="mk-bar"><i><b style="width:64%"></b></i><b class="n">64</b></span></td></tr>
+          <tr><td class="fc-mono">3</td><td>Емеля</td><td><span class="fc-lvl">14</span></td><td class="fc-mono">33 898</td><td class="fc-mono fc-col-b">363</td><td><span class="mk-bar"><i><b style="width:78%"></b></i><b class="n">78</b></span></td></tr>
+          <tr><td class="fc-mono">4</td><td>100 рентген-2</td><td><span class="fc-lvl">23</span></td><td class="fc-mono">132 410</td><td class="fc-mono fc-col-b">1 431</td><td><span class="mk-bar"><i><b style="width:52%"></b></i><b class="n">52</b></span></td></tr>
+          <tr><td class="fc-mono">5</td><td>Alexsey Yurevich</td><td><span class="fc-lvl">16</span></td><td class="fc-mono">18 807</td><td class="fc-mono fc-col-b">170</td><td><span class="mk-bar"><i><b style="width:55%"></b></i><b class="n">55</b></span></td></tr>
+          <tr><td class="fc-mono">6</td><td>алексус</td><td><span class="fc-lvl">17</span></td><td class="fc-mono">44 475</td><td class="fc-mono fc-col-b">477</td><td><span class="mk-bar"><i><b style="width:41%"></b></i><b class="n">41</b></span></td></tr>
+          <tr><td class="fc-mono">7</td><td>Бизон</td><td><span class="fc-lvl">12</span></td><td class="fc-mono">20 027</td><td class="fc-mono fc-col-b">36</td><td><span class="mk-bar"><i><b style="width:12%"></b></i><b class="n">12</b></span></td></tr>
+          <tr class="fc-off"><td class="fc-mono">8</td><td>Холод</td><td><span class="fc-lvl">15</span></td><td class="fc-mono">35 883</td><td class="fc-mono fc-col-b">442</td><td><span class="mk-bar"><i><b style="width:0%"></b></i><b class="n mk-zero">0</b></span></td></tr>
+        </tbody>
+      </table></div>
+      <p class="fc-note">Наведите на бар: «реп +812 · боссы +3 · тайники +2 · вылазки +1». Клик по «Активность» — сортировка по ней.</p>
+    </section>
+  </div>
+</div></div>
+
+<!-- ═══════════ ВАРИАНТ 2 ═══════════ -->
+<div class="mk-variant"><span class="mk-num">2</span><b>«Пульс» у ника</b><small>без новой колонки — индикатор рядом с ником, сортировка переключателем</small></div>
+<div class="fc-dialog fc-nobg mk-dialog" style="--c:#3d7bf0"><div class="fc-body">
+  <div style="display:grid;gap:14px">
+    <div class="fc-stats">
+      <div class="fc-glass fc-st"><small>Бойцов</small><b>20 / 20</b></div>
+      <div class="fc-glass fc-st"><small>Репутация</small><b>596 512</b></div>
+      <div class="fc-glass fc-st"><small>Рейтинг активности</small><b>#6</b></div>
+    </div>
+    <section class="fc-glass fc-pad">
+      <h3>Состав · 8 <span class="mk-sort">Сортировка: <button class="on">по активности</button><button>по репутации</button></span></h3>
+      <div class="fc-table"><table>
+        <thead><tr><th>#</th><th>Боец</th><th>Ур.</th><th>Репутация</th><th class="fc-col-b">Боссы</th></tr></thead>
+        <tbody>
+          <tr><td class="fc-mono">1</td><td><span class="fc-leader"><svg class="fc-crown" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 8l4.5 3.5L12 5l4.5 6.5L21 8l-2 11H5z"/></svg></span> Меченый<span class="mk-pulse" title="Активность 100"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></td><td><span class="fc-lvl">25</span></td><td class="fc-mono">167 615</td><td class="fc-mono fc-col-b">1 583</td></tr>
+          <tr><td class="fc-mono">2</td><td>Емеля<span class="mk-pulse" title="Активность 78"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></td><td><span class="fc-lvl">14</span></td><td class="fc-mono">33 898</td><td class="fc-mono fc-col-b">363</td></tr>
+          <tr><td class="fc-mono">3</td><td>100 рентген<span class="mk-pulse" title="Активность 64"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span></td><td><span class="fc-lvl">24</span></td><td class="fc-mono">142 830</td><td class="fc-mono fc-col-b">1 512</td></tr>
+          <tr><td class="fc-mono">4</td><td>Alexsey Yurevich<span class="mk-pulse" title="Активность 55"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></td><td><span class="fc-lvl">16</span></td><td class="fc-mono">18 807</td><td class="fc-mono fc-col-b">170</td></tr>
+          <tr><td class="fc-mono">5</td><td>алексус<span class="mk-pulse" title="Активность 41"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span></td><td><span class="fc-lvl">17</span></td><td class="fc-mono">44 475</td><td class="fc-mono fc-col-b">477</td></tr>
+          <tr><td class="fc-mono">6</td><td>Бизон<span class="mk-pulse" title="Активность 12"><i class="on"></i><i></i><i></i><i></i><i></i></span></td><td><span class="fc-lvl">12</span></td><td class="fc-mono">20 027</td><td class="fc-mono fc-col-b">36</td></tr>
+          <tr class="fc-off"><td class="fc-mono">7</td><td>Холод<span class="mk-pulse" title="Активность 0"><i></i><i></i><i></i><i></i><i></i></span></td><td><span class="fc-lvl">15</span></td><td class="fc-mono">35 883</td><td class="fc-mono fc-col-b">442</td></tr>
+          <tr class="fc-off"><td class="fc-mono">8</td><td>Новиков<span class="mk-pulse" title="Активность 0"><i></i><i></i><i></i><i></i><i></i></span></td><td><span class="fc-lvl">12</span></td><td class="fc-mono">18 500</td><td class="fc-mono fc-col-b">252</td></tr>
+        </tbody>
+      </table></div>
+      <p class="fc-note">Пульс светится цветом группировки; серые точки — ноль за неделю.</p>
+    </section>
+  </div>
+</div></div>
+
+<!-- ═══════════ ВАРИАНТ 3 ═══════════ -->
+<div class="mk-variant"><span class="mk-num">3</span><b>Бейдж прироста</b><small>колонка «За неделю» с зелёными бейджами, как «прирост» в Топ-100</small></div>
+<div class="fc-dialog fc-nobg mk-dialog" style="--c:#3d7bf0"><div class="fc-body">
+  <div style="display:grid;gap:14px">
+    <div class="fc-stats">
+      <div class="fc-glass fc-st"><small>Бойцов</small><b>20 / 20</b></div>
+      <div class="fc-glass fc-st"><small>Репутация</small><b>596 512</b></div>
+      <div class="fc-glass fc-st"><small>Рейтинг активности</small><b>#6</b></div>
+    </div>
+    <section class="fc-glass fc-pad">
+      <h3>Состав · 8</h3>
+      <div class="fc-table"><table>
+        <thead><tr><th>#</th><th>Боец</th><th>Ур.</th><th>Репутация</th><th class="fc-col-b">Боссы</th><th class="mk-sorted">За неделю</th></tr></thead>
+        <tbody>
+          <tr><td class="fc-mono">1</td><td><span class="fc-leader"><svg class="fc-crown" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 8l4.5 3.5L12 5l4.5 6.5L21 8l-2 11H5z"/></svg></span> Меченый</td><td><span class="fc-lvl">25</span></td><td class="fc-mono">167 615</td><td class="fc-mono fc-col-b">1 583</td><td><span class="mk-gain">+1 697</span></td></tr>
+          <tr><td class="fc-mono">2</td><td>Емеля</td><td><span class="fc-lvl">14</span></td><td class="fc-mono">33 898</td><td class="fc-mono fc-col-b">363</td><td><span class="mk-gain">+1 124</span></td></tr>
+          <tr><td class="fc-mono">3</td><td>100 рентген</td><td><span class="fc-lvl">24</span></td><td class="fc-mono">142 830</td><td class="fc-mono fc-col-b">1 512</td><td><span class="mk-gain">+943</span></td></tr>
+          <tr><td class="fc-mono">4</td><td>Alexsey Yurevich</td><td><span class="fc-lvl">16</span></td><td class="fc-mono">18 807</td><td class="fc-mono fc-col-b">170</td><td><span class="mk-gain">+640</span></td></tr>
+          <tr><td class="fc-mono">5</td><td>алексус</td><td><span class="fc-lvl">17</span></td><td class="fc-mono">44 475</td><td class="fc-mono fc-col-b">477</td><td><span class="mk-gain">+412</span></td></tr>
+          <tr><td class="fc-mono">6</td><td>Бизон</td><td><span class="fc-lvl">12</span></td><td class="fc-mono">20 027</td><td class="fc-mono fc-col-b">36</td><td><span class="mk-gain">+87</span></td></tr>
+          <tr class="fc-off"><td class="fc-mono">7</td><td>Холод</td><td><span class="fc-lvl">15</span></td><td class="fc-mono">35 883</td><td class="fc-mono fc-col-b">442</td><td><span class="mk-zero">—</span></td></tr>
+          <tr class="fc-off"><td class="fc-mono">8</td><td>Новиков</td><td><span class="fc-lvl">12</span></td><td class="fc-mono">18 500</td><td class="fc-mono fc-col-b">252</td><td><span class="mk-zero">—</span></td></tr>
+        </tbody>
+      </table></div>
+      <p class="fc-note">Очки прироста по семи показателям вместе; «—» — ноль за неделю.</p>
+    </section>
+  </div>
+</div></div>
+
+<!-- ═══════════ ВАРИАНТ 4 ═══════════ -->
+<div class="mk-variant"><span class="mk-num">4</span><b>«Гриндят / Спят»</b><small>два блока над составом, таблица не меняется</small></div>
+<div class="fc-dialog fc-nobg mk-dialog" style="--c:#3d7bf0"><div class="fc-body">
+  <div style="display:grid;gap:14px">
+    <section class="fc-glass fc-pad">
+      <h3>Актив состава · за неделю</h3>
+      <div class="mk-duo">
+        <div class="mk-top">
+          <h4>Гриндят</h4>
+          <div class="mk-row"><span>Меченый ☼</span><span class="mk-bar"><i><b style="width:100%"></b></i></span><b class="n fc-mono" style="text-align:right">100</b></div>
+          <div class="mk-row"><span>Емеля</span><span class="mk-bar"><i><b style="width:78%"></b></i></span><b class="n fc-mono" style="text-align:right">78</b></div>
+          <div class="mk-row"><span>100 рентген</span><span class="mk-bar"><i><b style="width:64%"></b></i></span><b class="n fc-mono" style="text-align:right">64</b></div>
+          <button type="button" class="fc-more">Показать всех 8</button>
+        </div>
+        <div>
+          <h4>Спят · 2</h4>
+          <div class="mk-chips"><span>Холод</span><span>Новиков</span></div>
+        </div>
+      </div>
+    </section>
+    <section class="fc-glass fc-pad">
+      <h3>Состав · 8</h3>
+      <div class="fc-table"><table>
+        <thead><tr><th>#</th><th>Боец</th><th>Ур.</th><th>Репутация</th><th class="fc-col-b">Боссы</th></tr></thead>
+        <tbody>
+          <tr><td class="fc-mono">1</td><td><span class="fc-leader"><svg class="fc-crown" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 8l4.5 3.5L12 5l4.5 6.5L21 8l-2 11H5z"/></svg></span> Меченый</td><td><span class="fc-lvl">25</span></td><td class="fc-mono">167 615</td><td class="fc-mono fc-col-b">1 583</td></tr>
+          <tr><td class="fc-mono">2</td><td>100 рентген</td><td><span class="fc-lvl">24</span></td><td class="fc-mono">142 830</td><td class="fc-mono fc-col-b">1 512</td></tr>
+          <tr><td class="fc-mono">3</td><td>алексус</td><td><span class="fc-lvl">17</span></td><td class="fc-mono">44 475</td><td class="fc-mono fc-col-b">477</td></tr>
+          <tr class="fc-off"><td class="fc-mono">4</td><td>Холод</td><td><span class="fc-lvl">15</span></td><td class="fc-mono">35 883</td><td class="fc-mono fc-col-b">442</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+  </div>
+</div></div>
+
+<!-- ═══════════ ВАРИАНТ 5 ═══════════ -->
+<div class="mk-variant"><span class="mk-num">5</span><b>Вкладка «Активность»</b><small>внутри состава: все бойцы с барами, разбивкой и периодами</small></div>
+<div class="fc-dialog fc-nobg mk-dialog" style="--c:#3d7bf0"><div class="fc-body">
+  <div style="display:grid;gap:14px">
+    <section class="fc-glass fc-pad">
+      <div>
+        <span class="mk-tabs"><button>Состав</button><button class="on">Активность</button></span>
+        <span class="mk-periods"><button class="on">Неделя</button><button>Месяц</button><button>Всё время</button></span>
+      </div>
+      <div class="mk-act">
+        <div class="mk-a"><b>1</b><span class="mk-nick">☼ Меченый</span><span><span class="mk-bar2"><b style="width:100%"></b></span><small>реп +812 · боссы +3 · тайники +2 · вылазки +1</small></span></div>
+        <div class="mk-a"><b>2</b><span class="mk-nick">Емеля</span><span><span class="mk-bar2"><b style="width:78%"></b></span><small>реп +968 · коллекции +2</small></span></div>
+        <div class="mk-a"><b>3</b><span class="mk-nick">100 рентген</span><span><span class="mk-bar2"><b style="width:64%"></b></span><small>реп +531 · вылазки +1</small></span></div>
+        <div class="mk-a"><b>4</b><span class="mk-nick">Alexsey Yurevich</span><span><span class="mk-bar2"><b style="width:55%"></b></span><small>реп +640</small></span></div>
+        <div class="mk-a"><b>5</b><span class="mk-nick">алексус</span><span><span class="mk-bar2"><b style="width:41%"></b></span><small>реп +412</small></span></div>
+        <div class="mk-a"><b>6</b><span class="mk-nick">Бизон</span><span><span class="mk-bar2"><b style="width:12%"></b></span><small>реп +87</small></span></div>
+        <div class="mk-a"><b>7</b><span class="mk-nick">Холод</span><span><span class="mk-bar2"><b style="width:0%"></b></span><small class="mk-zero">нет прироста за неделю</small></span></div>
+        <div class="mk-a"><b>8</b><span class="mk-nick">Новиков</span><span><span class="mk-bar2"><b style="width:0%"></b></span><small class="mk-zero">нет прироста за неделю</small></span></div>
+      </div>
+    </section>
+  </div>
+</div></div>
+
+</body>
+</html>
