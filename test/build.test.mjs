@@ -25,6 +25,21 @@ test("build.js: страницы, CSP, sitemap и статическая обо�
     assert.match(index, /bundle-[\w-]+\.css\?v=/);
     assert.doesNotMatch(index, /<!--\s*@include/);
     assert.doesNotMatch(index, /\u2014/, "длинное тире сборка должна заменять на дефис");
+    assert.match(index, /class="zn-raid-report"/);
+    assert.match(index, /22\s131\s140/);
+    assert.match(index, /4\s567/);
+    assert.equal([...index.matchAll(/class="zn-raid-player"/g)].length, 30);
+    assert.match(index, /<details class="zn-raid-ranking"><summary>/);
+    assert.match(index, /href="\/p\/523" data-pc-open="523"/);
+    assert.match(index, /href="\/p\/431" data-pc-open="431"/);
+    assert.match(index, /src="top100-common\.js\?v=/);
+    assert.match(index, /src="awards\.js\?v=/);
+    assert.match(index, /src="player-card\.js\?v=/);
+    assert.match(index, /2026-11-16-raid-results-480\.webp\?v=/);
+    const homeCss = read(/href="\/?(bundle-[\w-]+\.css)\?v=/.exec(index)[1]);
+    assert.match(homeCss, /\.zn-raid-summary/);
+    assert.match(homeCss, /\.zn-raid-ranking\[open\]/);
+    assert.match(homeCss, /\.pc-dialog/);
 
     const top100 = read("top100.html");
     assert.match(top100, /id="top100Results" role="status"/);

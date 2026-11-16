@@ -1,6 +1,58 @@
 /* «Новости Зоны» на главной: короткие новости игры со ссылкой на пост в группе ВК. */
 window.ZONE_NEWS = [
   {
+    date: "2026-11-16",
+    title: "Итоги рейда: 4 567 боссов повержены",
+    text: "Администрация подвела итоги рейда 15 ноября: за день сталкеры нанесли более 22 млн урона по боссам. Рейтинг по урону возглавил «Наёмник» Neutral.",
+    raid: {
+      date: "15 ноября 2026",
+      damage: 22131140,
+      image: "/assets/news/2026-11-16-raid-results.webp",
+      thumb: "/assets/news/2026-11-16-raid-results-480.webp",
+      bosses: [
+        { name: "Крыса", count: 1562, image: "/assets/bosses/rat.webp" },
+        { name: "Альфа-пёс", count: 933, image: "/assets/bosses/alpha.webp" },
+        { name: "Боров", count: 701, image: "/assets/bosses/boar.webp" },
+        { name: "Болотная тварь", count: 528, image: "/assets/bosses/swamp.webp" },
+        { name: "Упырь", count: 531, image: "/assets/bosses/ghoul.webp" },
+        { name: "Излом", count: 312, image: "/assets/bosses/izlom.webp" }
+      ],
+      leaders: [
+        { id: 523, name: "«Наёмник» Neutral", damage: 1047737 },
+        { id: 2985, name: "«Наемник» Серый", damage: 921608 },
+        { id: 133, name: "«Наёмник» Ымгыр", damage: 844036 },
+        { id: 3132, name: "«Свобода» hikari", damage: 790969 },
+        { id: 986, name: "«Наемник» Трифоныч", damage: 731001 },
+        { id: 3112, name: "«Свобода» Псих", damage: 700075 },
+        { id: 3085, name: "«Наёмник» Шпала", damage: 667195 },
+        { id: 1253, name: "Д.О.Л.Г Акер", damage: 649385 },
+        { id: 2911, name: "«Наёмник» Салага", damage: 633360 },
+        { id: 43, name: "Д.О.Л.Г Изгой", damage: 572037 },
+        { id: 1115, name: "[ВС] Илья Тришкин", damage: 568885 },
+        { id: 1246, name: "«Наёмник»Сергей Копылов", damage: 462312 },
+        { id: 713, name: "Д.О.Л.ГНичегоСвятого", damage: 414356 },
+        { id: 2629, name: "Д.О.Л.Г. Рысь", damage: 404802 },
+        { id: 412, name: "«Наёмник» Игорь Иванов", damage: 360219 },
+        { id: 3935, name: "(ВС) Ника", damage: 337287 },
+        { id: 931, name: "«Учёные» Ежик", damage: 317144 },
+        { id: 19, name: "«Наёмник» SA", damage: 310785 },
+        { id: 14, name: "Свобода. Бандерос", damage: 304937 },
+        { id: 388, name: "«Cвобода» Чехов", damage: 294627 },
+        { id: 285, name: "Д.О.Л.Г. Белый", damage: 285869 },
+        { id: 1040, name: "«Свобода» Локи", damage: 284245 },
+        { id: 1342, name: "«Наёмник» Леший", damage: 274168 },
+        { id: 244, name: "«Свобода» Dark Angel", damage: 269998 },
+        { id: 1096, name: "«Свобода» Andromeda", damage: 266896 },
+        { id: 61, name: "(Свобода)Алексей Ефремкин", damage: 258937 },
+        { id: 115, name: "Д.О.Л.Г Sokolik174", damage: 250960 },
+        { id: 276, name: "«Наёмник»Шрам", damage: 247357 },
+        { id: 62, name: "Меченый", damage: 237303 },
+        { id: 431, name: "«Свобода»Far_Easterner", damage: 228751 }
+      ]
+    },
+    url: "https://vk.ru/wall-239092289_331"
+  },
+  {
     date: "2026-11-14",
     title: "Вышло обновление: чат, почта и обмен у коллекционера",
     text: "Общий чат и чат группировки, почта между игроками, обмен фрагментов коллекций, новое оружие, энергия больше не сгорает при покупке и промокод GVVRWN",
@@ -320,6 +372,64 @@ window.ZONE_NEWS = [
       ' role="button" tabindex="0" data-alt="' + esc(n.title) + '" aria-label="Открыть баннер: ' + esc(n.title) + '">'
     );
   };
+  const raidReport = n => {
+    const r = n.raid;
+    if (!r) return "";
+    const num = v => esc(String(v).replace(/\B(?=(\d{3})+(?!\d))/g, "\u00a0"));
+    const total = r.bosses.reduce((sum, b) => sum + b.count, 0);
+    const leader = (p, i) =>
+      '<li><a class="zn-raid-player" href="/p/' +
+      esc(p.id) +
+      '" data-pc-open="' +
+      esc(p.id) +
+      '" aria-haspopup="dialog"><span class="zn-raid-place">' +
+      (i + 1) +
+      '</span><span class="zn-raid-name">' +
+      esc(p.name) +
+      '</span><b class="zn-raid-damage">' +
+      num(p.damage) +
+      "</b></a></li>";
+    return (
+      '<div class="zn-raid-report"><div class="zn-raid-summary">' +
+      '<button type="button" class="zn-shot zn-raid-art" data-src="' +
+      esc(r.image) +
+      '" data-alt="Иллюстрация к итогам рейда из официального сообщества игры" aria-label="Открыть иллюстрацию рейда">' +
+      '<img src="' +
+      esc(r.thumb) +
+      '" alt="Сталкер отдыхает у дерева после рейда" width="480" height="480" loading="lazy" decoding="async"></button>' +
+      '<div class="zn-raid-totals"><span class="zn-raid-kicker">Боевой отчёт · ' +
+      esc(r.date) +
+      '</span><strong class="zn-raid-total">' +
+      num(r.damage) +
+      '</strong><span class="zn-raid-label">суммарный урон за день</span><span class="zn-raid-count"><b>' +
+      num(total) +
+      "</b> боссов повержены</span></div></div>" +
+      '<h3 class="zn-raid-heading">Победы над боссами</h3><ul class="zn-raid-bosses">' +
+      r.bosses
+        .map(
+          b =>
+            '<li><img src="' +
+            esc(b.image) +
+            '" alt="" width="48" height="48" loading="lazy" decoding="async"><span>' +
+            esc(b.name) +
+            "<b>" +
+            num(b.count) +
+            "</b></span></li>"
+        )
+        .join("") +
+      '</ul><h3 class="zn-raid-heading">Лидеры по урону</h3><ol class="zn-raid-leaders" aria-label="Первая тройка по урону">' +
+      r.leaders.slice(0, 3).map(leader).join("") +
+      '</ol><details class="zn-raid-ranking"><summary><span class="zn-raid-expand">Полный Топ-' +
+      r.leaders.length +
+      '</span><span class="zn-raid-collapse">Свернуть рейтинг</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>' +
+      '<ol class="zn-raid-leaders" start="4" aria-label="Остальные места по урону">' +
+      r.leaders
+        .slice(3)
+        .map((p, i) => leader(p, i + 3))
+        .join("") +
+      "</ol></details></div>"
+    );
+  };
   const item = (n, i) =>
     '<li class="zn-item' +
     (i >= SHOW ? " zn-more" : i >= FULL ? " zn-compact" : "") +
@@ -346,6 +456,7 @@ window.ZONE_NEWS = [
     (Array.isArray(n.points) && n.points.length
       ? '<ul class="zn-points">' + n.points.map(p => "<li>" + esc(p) + "</li>").join("") + "</ul>"
       : "") +
+    raidReport(n) +
     shots(n) +
     (n.url
       ? '<a class="zn-link" href="' +
