@@ -251,23 +251,16 @@
           bosses: "Боссы"
         };
       if (Array.isArray(g) && Array.isArray(data.actAnchors)) {
-        const parts = data.actAnchors
-          .map((a, mi) =>
-            g[mi] > 0 && a > 0
-              ? names[data.actMetrics[mi]] + " +" + num(g[mi]) + " (" + Math.min(100, Math.round((g[mi] / a) * 100)) + ")"
-              : null
-          )
-          .filter(Boolean);
+        const parts = [];
+        data.actAnchors.forEach((a, mi) => {
+          if (!(g[mi] > 0 && a > 0)) return;
+          const pts = Math.min(100, Math.round((g[mi] / a) * 100));
+          parts.push(names[data.actMetrics[mi]] + " +" + num(g[mi]) + " (" + pts + ")");
+        });
         if (parts.length) tip += ": " + parts.join(" · ");
       }
       return (
-        '<span class="fc-act" title="' +
-        esc(tip) +
-        '"><i><b style="width:' +
-        v +
-        '%"></b></i><b>' +
-        v +
-        "</b></span>"
+        '<span class="fc-act" title="' + esc(tip) + '"><i><b style="width:' + v + '%"></b></i><b>' + v + "</b></span>"
       );
     };
     const rowHtml = (p, i) =>

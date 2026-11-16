@@ -494,7 +494,10 @@ function factionsMarkup(ROOT) {
     }
     actGains.forEach((list, mi) => {
       if (!list.length) return;
-      const top = list.slice().sort((a, b) => b - a).slice(0, 100);
+      const top = list
+        .slice()
+        .sort((a, b) => b - a)
+        .slice(0, 100);
       const mid = top.length >> 1;
       actAnchors[mi] = top.length % 2 ? top[mid] : (top[mid - 1] + top[mid]) / 2;
     });
@@ -580,8 +583,8 @@ function factionsMarkup(ROOT) {
         p.rep,
         BOSSES >= 0 ? (p.v || [])[BOSSES] || 0 : 0,
         p.off ? 1 : 0,
-        p.id != null ? actScores[String(p.id)] ?? null : null,
-        p.id != null ? actGainsById[String(p.id)] ?? null : null
+        p.id != null ? (actScores[String(p.id)] ?? null) : null,
+        p.id != null ? (actGainsById[String(p.id)] ?? null) : null
       ]),
       ev: ev.slice(0, 300)
     };

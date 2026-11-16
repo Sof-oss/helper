@@ -626,7 +626,9 @@ th.fc-sorted .fc-sort::after {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.08);
   color: #c8d6e2;
-  font: 700 10px/1 "ZoneMono", monospace;
+  font:
+    700 10px/1 "ZoneMono",
+    monospace;
   cursor: pointer;
 }
 .fc-q:hover,
@@ -657,7 +659,9 @@ th.fc-sorted .fc-sort::after {
   display: block;
   margin-bottom: 6px;
   color: #e3eef7;
-  font: 600 12px/1.4 "Oswald", sans-serif;
+  font:
+    600 12px/1.4 "Oswald",
+    sans-serif;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
