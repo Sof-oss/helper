@@ -480,13 +480,27 @@ function factionsMarkup(ROOT) {
       }
     }
     const actBaseOf = p => Math.max(actWinIdx, p.s[0][0]); /* у новичка окно - от первой точки серии */
+    /* усилие талантов: меряем не штуками, а суммой цен шагов - таблица та же, что в «Информации»
+       (info-data.js, window.TALENT_LEVELS = [n, цена шага, итого]): шаг №96 стоит 149 500,
+       поэтому 3 таланта на топ-уровне весят как 10 дешёвых на середине */
+    let actTalRows = null;
+    try {
+      const talFile = fs.readFileSync(path.join(ROOT, "info-data.js"), "utf8");
+      const tal = /window\.TALENT_LEVELS=(\[\[.*?\]\]);/.exec(talFile);
+      if (tal) actTalRows = JSON.parse(tal[1]);
+    } catch (e) {}
+    const actTalCum = n => (actTalRows && n > 0 ? actTalRows[Math.min(n, actTalRows.length) - 1][2] : 0);
+    const actTalMi = data.metrics.indexOf("talents");
     const actGains = Array.from({ length: actMetricsN }, () => []);
     for (const [id, p] of Object.entries(data.players)) {
       if (!Array.isArray(p.s) || !p.s.length) continue;
       const base = actBaseOf(p);
       const row = [];
       for (let mi = 0; mi < actMetricsN; mi++) {
-        const g = valueAt(p, mi, actLastIdx) - valueAt(p, mi, base);
+        const before = valueAt(p, mi, base),
+          now = valueAt(p, mi, actLastIdx);
+        let g = now - before;
+        if (mi === actTalMi && actTalRows) g = actTalCum(now) - actTalCum(before); /* усилие вместо штук */
         row.push(g);
         if (g > 0) actGains[mi].push(g);
       }
