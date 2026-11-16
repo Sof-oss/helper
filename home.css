@@ -884,9 +884,9 @@ html.tour-seen .home-hero .tour-start {
   background: rgba(7, 16, 24, 0.65);
 }
 .zn-raid-bosses img {
-  flex: 0 0 40px;
-  width: 40px;
-  height: 48px;
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
 }
 .zn-raid-bosses span {
@@ -1453,6 +1453,21 @@ html.tour-seen .home-hero .tour-start {
 }
 .zn-ev-raid.zn-ev-ended img {
   filter: grayscale(0.7) brightness(0.75);
+}
+/* «Итоги рейда» (event: "raid-results"): кадр 3:1 во всю ширину карточки, без затемнения - арт светлый и детальный;
+   кликабельный, как скриншоты: открывает баннер крупно */
+.zn-ev-raid-results {
+  --ev: #ffb454;
+  aspect-ratio: 3 / 1;
+  opacity: 1;
+  pointer-events: auto;
+  cursor: zoom-in;
+}
+.zn-ev-raid-results img {
+  filter: none;
+}
+.zn-ev-raid-results::after {
+  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 3px);
 }
 .zn-ev-dot {
   display: inline-block;

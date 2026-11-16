@@ -4,18 +4,19 @@ window.ZONE_NEWS = [
     date: "2026-11-16",
     title: "Итоги рейда: 4 567 боссов повержены",
     text: "Администрация подвела итоги рейда 15 ноября: за день сталкеры нанесли более 22 млн урона по боссам. Рейтинг по урону возглавил «Наёмник» Neutral.",
+    event: "raid-results",
     raid: {
       date: "15 ноября 2026",
       damage: 22131140,
       image: "/assets/news/2026-11-16-raid-results.webp",
       thumb: "/assets/news/2026-11-16-raid-results-480.webp",
       bosses: [
-        { name: "Крыса", count: 1562, image: "/assets/bosses/rat.webp" },
-        { name: "Альфа-пёс", count: 933, image: "/assets/bosses/alpha.webp" },
-        { name: "Боров", count: 701, image: "/assets/bosses/boar.webp" },
-        { name: "Болотная тварь", count: 528, image: "/assets/bosses/swamp.webp" },
-        { name: "Упырь", count: 531, image: "/assets/bosses/ghoul.webp" },
-        { name: "Излом", count: 312, image: "/assets/bosses/izlom.webp" }
+        { name: "Крыса", count: 1562, image: "/assets/bosses/rat-cut.webp" },
+        { name: "Альфа-пёс", count: 933, image: "/assets/bosses/alpha-cut.webp" },
+        { name: "Боров", count: 701, image: "/assets/bosses/boar-cut.webp" },
+        { name: "Болотная тварь", count: 528, image: "/assets/bosses/swamp-cut.webp" },
+        { name: "Упырь", count: 531, image: "/assets/bosses/ghoul-cut.webp" },
+        { name: "Излом", count: 312, image: "/assets/bosses/izlom-cut.webp" }
       ],
       leaders: [
         { id: 523, name: "«Наёмник» Neutral", damage: 1047737 },
@@ -313,7 +314,10 @@ window.ZONE_NEWS = [
     giveaway:
       '<div class="zn-event zn-ev-giveaway" aria-hidden="true"><img src="/assets/event-giveaway-600.webp" srcset="/assets/event-giveaway-600.webp 600w, /assets/event-giveaway-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>Розыгрыш</span></div>',
     /* рейд на боссов: баннер события сверху карточки, как у остальных новостей; кадр 2:1 не режем и не глушим */
-    raid: '<div class="zn-event zn-ev-raid" aria-hidden="true"><img src="/assets/news/2026-11-08-raid-bosses.webp" srcset="/assets/news/2026-11-08-raid-bosses-480.webp 480w, /assets/news/2026-11-08-raid-bosses.webp 1774w" sizes="(max-width: 760px) 92vw, 460px" width="1774" height="887" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>15 ноября</span></div>'
+    raid: '<div class="zn-event zn-ev-raid" aria-hidden="true"><img src="/assets/news/2026-11-08-raid-bosses.webp" srcset="/assets/news/2026-11-08-raid-bosses-480.webp 480w, /assets/news/2026-11-08-raid-bosses.webp 1774w" sizes="(max-width: 760px) 92vw, 460px" width="1774" height="887" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>15 ноября</span></div>',
+    /* итоги рейда: сталкеры отдыхают у костра среди поверженных боссов; кадр 3:1, метка «Итоги рейда» */
+    "raid-results":
+      '<div class="zn-event zn-ev-raid-results" aria-hidden="true"><img src="/assets/event-raid-results-600.webp" srcset="/assets/event-raid-results-600.webp 600w, /assets/event-raid-results-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="400" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon">Итоги рейда</span></div>'
   };
   /* промокод в тексте - ссылка, по которой он активируется в игре */
   const promo = n => {
@@ -410,7 +414,7 @@ window.ZONE_NEWS = [
           b =>
             '<li><img src="' +
             esc(b.image) +
-            '" alt="" width="48" height="48" loading="lazy" decoding="async"><span>' +
+            '" alt="" width="96" height="96" loading="lazy" decoding="async"><span>' +
             esc(b.name) +
             "<b>" +
             num(b.count) +

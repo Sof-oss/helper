@@ -519,7 +519,9 @@
         (me.id
           ? '<a class="mp-btn ghost" href="/p/' +
             encodeURIComponent(me.id) +
-            '">' +
+            '" data-pc-open="' +
+            esc(me.id) +
+            '" aria-haspopup="dialog">' +
             ICON.card +
             'Личное дело</a><a class="mp-btn ghost" href="' +
             compareHref(me.id) +
