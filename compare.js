@@ -189,7 +189,9 @@
     SIDES.forEach(s => {
       if (ids[s] && !data.players[ids[s]]) ids[s] = null;
     });
-    const needShard = SIDES.filter(s => ids[s] && (!Array.isArray(data.players[ids[s]].s) || !Array.isArray(data.dates)));
+    const needShard = SIDES.filter(
+      s => ids[s] && (!Array.isArray(data.players[ids[s]].s) || !Array.isArray(data.dates))
+    );
     if (needShard.length && typeof ZP.loadPlayer === "function") {
       const g = ++drawGen;
       body.innerHTML = '<div class="vs-empty"><i class="vs-spin"></i>Загружаем данные выбранных сталкеров…</div>';

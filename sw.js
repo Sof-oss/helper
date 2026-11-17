@@ -152,7 +152,11 @@ self.addEventListener("fetch", e => {
     e.respondWith(page(req, url));
     return;
   }
-  if (/^\/(?:top100-(?:data\.js|players\.json|index\.json)|top100-shards\/\d+\.json|factions-cards\.json)$/.test(url.pathname)) {
+  if (
+    /^\/(?:top100-(?:data\.js|players\.json|index\.json)|top100-shards\/\d+\.json|factions-cards\.json)$/.test(
+      url.pathname
+    )
+  ) {
     e.respondWith(networkFirst(req, DATA));
     return;
   }
