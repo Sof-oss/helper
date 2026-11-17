@@ -389,6 +389,15 @@
 }
 
 /* группировки: цветные капсулы с числом бойцов в сотне */
+.t100-filters-toggle {
+  display: none;
+}
+.t100-filters-badge[hidden] {
+  display: none;
+}
+.t100-tools-drawer {
+  display: contents;
+}
 .t100-factions-toggle {
   order: 4;
   display: none;
@@ -400,6 +409,40 @@
   flex-wrap: wrap;
   gap: 6px;
   padding: 0 2px 2px;
+}
+@media (min-width: 761px) {
+  .t100-factions:not(.expanded) .t100-chip-extra {
+    display: none;
+  }
+}
+.t100-chips-more {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #b7c8d6;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+.t100-chips-more:hover {
+  border-color: color-mix(in srgb, var(--accent) 55%, rgba(255, 255, 255, 0.28));
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+}
+@media (max-width: 760px) {
+  .t100-chips-more {
+    display: none;
+  }
 }
 .t100-chip {
   display: inline-flex;
@@ -957,15 +1000,16 @@
     width: 100%;
   }
   .t100-hero {
-    gap: 14px;
-    padding: 16px 16px 16px;
-    border-radius: 18px;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 12px 14px;
+    border-radius: 16px;
   }
   .t100-hero-text {
     flex-basis: 100%;
   }
   .t100-hero .result-title h1 {
-    font-size: 26px;
+    font-size: 24px;
   }
   /* вводный текст на телефоне не показываем (как и раньше): рейтинг ближе к началу экрана */
   .t100-intro {
@@ -973,25 +1017,33 @@
   }
   .t100-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    gap: 6px;
   }
   .t100-stat {
-    padding: 10px 12px;
-    border-radius: 14px;
+    padding: 8px 10px;
+    border-radius: 12px;
+  }
+  .t100-stat small {
+    font-size: 9.5px;
   }
   .t100-stat b {
-    margin-top: 5px;
-    font-size: 19px;
+    margin-top: 3px;
+    font-size: 17px;
   }
   .t100-stat.lead b {
-    font-size: 16px;
+    font-size: 15px;
+    line-height: 20px;
+  }
+  .t100-stat span {
+    margin-top: 2px;
+    font-size: 11px;
   }
 
   /* вкладки одной строкой с прокруткой; края гаснут, если есть что листать (классы ставит top100.js) */
   .t100-mtabs {
     flex-wrap: nowrap;
     gap: 6px;
-    margin: 0 -10px 10px;
+    margin: 0 -10px 8px;
     padding: 2px 10px 4px;
     overflow-x: auto;
     scrollbar-width: none;
@@ -1013,10 +1065,10 @@
   }
   .t100-mtab {
     flex: 0 0 auto;
-    height: 40px;
-    padding: 0 14px;
-    border-radius: 14px;
-    font-size: 13px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 12px;
+    font-size: 12.5px;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     background-color: rgba(10, 16, 24, 0.5);
@@ -1024,18 +1076,81 @@
 
   .t100-tools {
     gap: 8px;
+    margin-bottom: 8px;
     padding: 8px;
-    border-radius: 18px;
+    border-radius: 16px;
   }
   .t100-search {
-    flex: 1 1 100%;
+    flex: 1 1 0;
     min-width: 0;
+  }
+  #top100Search {
+    height: 38px;
+  }
+  .t100-filters-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    height: 38px;
+    padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e4edf5;
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .t100-filters-toggle > svg:first-child {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+  }
+  .t100-filters-toggle .t100-chev {
+    margin-left: 0;
+  }
+  .t100-filters-toggle[aria-expanded="true"] {
+    border-color: color-mix(in srgb, var(--accent) 60%, rgba(255, 255, 255, 0.25));
+    background: color-mix(in srgb, var(--accent) 20%, rgba(255, 255, 255, 0.08));
+    color: #fff;
+  }
+  .t100-filters-toggle[aria-expanded="true"] .t100-chev {
+    transform: rotate(180deg);
+  }
+  .t100-filters-badge {
+    display: inline-grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--accent-ink, #061018);
+    font:
+      700 10px/1 "ZoneMono",
+      ui-monospace,
+      monospace;
+  }
+  .t100-tools-drawer {
+    display: none;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .t100-tools-drawer.open {
+    display: flex;
   }
   .t100-tools .t100-find,
   .t100-tools .t100-vs-link {
     flex: 1 1 0;
     justify-content: center;
-    height: 40px;
+    height: 38px;
     padding: 0 12px;
   }
   .t100-tools .t100-vs-link {
@@ -1062,7 +1177,7 @@
   .t100-factions-toggle {
     display: flex;
     flex: 1 1 100%;
-    height: 40px;
+    height: 38px;
     color: #cbd9e5;
   }
   .t100-factions-toggle b {
@@ -1090,10 +1205,14 @@
     display: flex;
   }
   .t100-chip {
-    height: 36px;
+    height: 34px;
   }
   .top100-panel .mp-bar {
-    border-radius: 16px;
+    margin-bottom: 8px;
+    border-radius: 14px;
+  }
+  .top100-legend {
+    margin-bottom: 6px;
   }
 
   /* строка в две линии: место | эмблема и ник | показатель, ниже - уровень, группировка и прирост */

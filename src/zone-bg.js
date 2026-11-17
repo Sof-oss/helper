@@ -246,7 +246,8 @@ export function startBackground() {
 
   let W = 1,
     H = 1;
-  const px = Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 1.5);
+  const maxPx = Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 1.5);
+  let px = maxPx;
   function resize() {
     W = window.innerWidth;
     H = canvas.clientHeight || window.innerHeight;
@@ -355,19 +356,37 @@ export function startBackground() {
     lastFrame = 0,
     lastActive = t0,
     pausedAt = 0,
+    slowFrames = 0,
     dead = false;
   function wake() {
     lastActive = performance.now();
-    if (raf || dead) return;
-    const d = lastActive - pausedAt; // время на паузе - сдвигаем часы, чтобы сцена не прыгнула
-    t0 += d;
-    nextAnom += d;
+    if (document.hidden || raf || dead) return;
+    if (pausedAt) {
+      const d = lastActive - pausedAt; // время на паузе - сдвигаем часы, чтобы сцена не прыгнула
+      t0 += d;
+      nextAnom += d;
+      pausedAt = 0;
+    }
     raf = requestAnimationFrame(frame);
   }
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      if (raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+        pausedAt = performance.now();
+      }
+    } else wake();
+  });
   ["pointermove", "pointerdown", "wheel", "scroll", "keydown", "touchstart"].forEach(ev =>
     window.addEventListener(ev, wake, { passive: true })
   );
   function frame() {
+    if (document.hidden) {
+      raf = 0;
+      pausedAt = performance.now();
+      return;
+    }
     const now = performance.now();
     /* пауза: только когда нет аномалии и смены фона, иначе они застынут на середине */
     if (now - lastActive > IDLE_STOP_MS && !anom && !fade) {
@@ -378,6 +397,7 @@ export function startBackground() {
     raf = requestAnimationFrame(frame);
     if (now - lastFrame < FRAME_MS - 2) return; // −2 мс: запас на неровный шаг кадров у монитора
     lastFrame = now;
+    const drawStart = performance.now();
     const time = ((now - t0) / 1000) % LOOP_S;
     /* без движения мыши сцена сама еле заметно «дышит» */
     const idle = now - lastInput > 4000;
@@ -415,8 +435,16 @@ export function startBackground() {
     gl.uniform1f(U.uFlash, flash);
     gl.uniform3f(U.uAnom, anom ? anom.x : 0, anom ? anom.y : 0, ak);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
+    /* если слабый GPU тратит на кадр слишком много времени, снижаем разрешение холста */
+    if (px > 0.75 && performance.now() - drawStart > 28) {
+      if (++slowFrames >= 8) {
+        px = Math.max(0.75, px - 0.25);
+        slowFrames = 0;
+        resize();
+      }
+    } else slowFrames = 0;
   }
-  raf = requestAnimationFrame(frame);
+  if (!document.hidden) raf = requestAnimationFrame(frame);
   /* смена темы, размера окна и загрузка фото тоже будят фон: иначе изменение не отрисуется */
   window.addEventListener("resize", wake);
   new MutationObserver(wake).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });

@@ -39,14 +39,27 @@
     if (e.key === ME_KEY) document.dispatchEvent(new CustomEvent("zone:me", { detail: getMe() }));
   });
 
-  /* карточки игроков: адрес с версией выгрузки, чтобы файл скачивался один раз */
+  /* лёгкий индекс игроков (~50 КБ вместо 1 МБ); полная история грузится шардами по требованию */
   let data = null,
     loading = null;
+  const shardCache = {};
+  function shardOf(id) {
+    const s = String(id || "");
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return h % 16;
+  }
+  function verQuery() {
+    const v = window.TOP100_HISTORY && window.TOP100_HISTORY.id;
+    return v ? "?v=" + encodeURIComponent(v) : "";
+  }
   function load() {
     if (data) return Promise.resolve(data);
     if (!loading) {
-      const v = window.TOP100_HISTORY && window.TOP100_HISTORY.id;
-      loading = fetch("/top100-players.json" + (v ? "?v=" + encodeURIComponent(v) : ""), v ? {} : { cache: "no-cache" })
+      const q = verQuery(),
+        opts = q ? {} : { cache: "no-cache" };
+      loading = fetch("/top100-index.json" + q, opts)
+        .then(r => (r.ok ? r : fetch("/top100-players.json" + q, opts)))
         .then(r => {
           if (!r.ok) throw new Error(r.status);
           return r.json();
@@ -69,6 +82,33 @@
         });
     }
     return loading;
+  }
+  function loadPlayer(id) {
+    if (!id) return Promise.resolve(null);
+    return load().then(d => {
+      const existing = d.players[id];
+      if (existing && Array.isArray(existing.s) && Array.isArray(d.dates)) return existing;
+      const sh = shardOf(id);
+      if (!shardCache[sh]) {
+        const q = verQuery(),
+          opts = q ? {} : { cache: "no-cache" };
+        shardCache[sh] = fetch("/top100-shards/" + sh + ".json" + q, opts)
+          .then(r => {
+            if (!r.ok) throw new Error(r.status);
+            return r.json();
+          })
+          .then(sd => {
+            if (sd.dates && !d.dates) d.dates = sd.dates;
+            if (sd.players) Object.assign(d.players, sd.players);
+            return sd;
+          })
+          .catch(err => {
+            delete shardCache[sh];
+            throw err;
+          });
+      }
+      return shardCache[sh].then(() => d.players[id] || null);
+    });
   }
   function factionColor(g) {
     if (!g) return "#8196a9";
@@ -236,6 +276,7 @@
     getMe,
     setMe,
     load,
+    loadPlayer,
     search,
     picker,
     factionColor,

@@ -313,11 +313,21 @@ function renderFactionSummary() {
       ? "Прочие " + (count[NO_FACTION] || 0)
       : "Все " + rows;
 }
+let factionsExpanded = false;
+function updateFiltersBadge() {
+  const b = $("top100FiltersBadge");
+  if (!b) return;
+  const defPeriod = periodList()[0] ? periodList()[0].key : "last";
+  const n = (top100Faction ? 1 : 0) + (top100Period && top100Period !== defPeriod ? 1 : 0);
+  b.hidden = !n;
+  b.textContent = n ? String(n) : "";
+}
 function renderFactions() {
   const { rows, count } = factionCounts();
-  const chip = (key, label, color, n) =>
+  const chip = (key, label, color, n, extra) =>
     '<button type="button" class="t100-chip' +
     (top100Faction === key ? " active" : "") +
+    (extra ? " t100-chip-extra" : "") +
     '" data-t100-faction="' +
     escAttr(key) +
     '" style="--f:' +
@@ -329,18 +339,36 @@ function renderFactions() {
     "<small>" +
     n +
     "</small></button>";
-  $("top100Factions").innerHTML =
-    chip("", "Все", "#54bfff", rows) +
-    FACTIONS.map((f, i) => ({ f: f, i: i, n: count[f.key] || 0 }))
-      /* пустые отряды не показываем (кроме выбранного, чтобы его можно было снять) */
-      .filter(x => x.n > 0 || top100Faction === x.f.key)
-      .sort((a, b) => b.n - a.n || a.i - b.i)
-      .map(x => chip(x.f.key, x.f.label, x.f.color, x.n))
-      .join("") +
+  const list = FACTIONS.map((f, i) => ({ f: f, i: i, n: count[f.key] || 0 }))
+    /* пустые отряды не показываем (кроме выбранного, чтобы его можно было снять) */
+    .filter(x => x.n > 0 || top100Faction === x.f.key)
+    .sort((a, b) => b.n - a.n || a.i - b.i);
+  const TOP_VISIBLE = 6;
+  let extraCount = 0;
+  const chipsHtml = list
+    .map((x, idx) => {
+      const extra = idx >= TOP_VISIBLE && top100Faction !== x.f.key;
+      if (extra) extraCount++;
+      return chip(x.f.key, x.f.label, x.f.color, x.n, extra);
+    })
+    .join("");
+  const box = $("top100Factions");
+  box.classList.toggle("expanded", factionsExpanded);
+  box.innerHTML =
+    chip("", "Все", "#54bfff", rows, false) +
+    chipsHtml +
     (count[NO_FACTION] || top100Faction === NO_FACTION
-      ? chip(NO_FACTION, "Прочие", "#8196a9", count[NO_FACTION] || 0)
+      ? chip(NO_FACTION, "Прочие", "#8196a9", count[NO_FACTION] || 0, false)
+      : "") +
+    (extraCount
+      ? '<button type="button" class="t100-chips-more" id="top100FactionsMore" aria-expanded="' +
+        (factionsExpanded ? "true" : "false") +
+        '">' +
+        (factionsExpanded ? "Скрыть ▴" : "Ещё " + extraCount + " ▾") +
+        "</button>"
       : "");
   renderFactionSummary();
+  updateFiltersBadge();
 }
 
 /* иконки вкладок (ключи как в TOP100_TABS) */
@@ -552,9 +580,11 @@ function renderStats() {
 
 const SHELL_HTML =
   '<div class="t100-tools"><label class="t100-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input id="top100Search" type="search" placeholder="Найти ник" autocomplete="off" aria-label="Поиск по нику"></label>' +
+  '<button type="button" class="t100-filters-toggle" id="top100FiltersToggle" aria-expanded="false" aria-controls="top100ToolsDrawer"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span>Фильтры</span><b class="t100-filters-badge" id="top100FiltersBadge" hidden></b><svg class="t100-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
+  '<div class="t100-tools-drawer" id="top100ToolsDrawer">' +
   '<div class="t100-period" id="top100Period" role="group" aria-label="За какой период показывать изменения" hidden><span class="t100-period-title">Изменения</span><p class="t100-period-range" id="top100PeriodRange" role="status" aria-live="polite"></p><div class="t100-period-btns" id="top100PeriodBtns"></div></div>' +
   '<button type="button" class="t100-factions-toggle" id="top100FactionsToggle" aria-expanded="false" aria-controls="top100Factions">Отряды: <b id="top100FactionSummary">Все</b><svg class="t100-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>' +
-  '<div class="t100-factions" id="top100Factions"></div></div>';
+  '<div class="t100-factions" id="top100Factions"></div></div></div>';
 let shellReady = false;
 function ensureShell() {
   if (shellReady) return;
@@ -619,7 +649,23 @@ document.addEventListener("click", e => {
     renderPeriod();
     renderStats();
     renderTop100Table();
+    updateFiltersBadge();
     const again = document.querySelector('[data-t100-period="' + top100Period + '"]');
+    if (again) again.focus();
+    return;
+  }
+  const filtersBtn = e.target.closest("#top100FiltersToggle");
+  if (filtersBtn) {
+    const drawer = $("top100ToolsDrawer"),
+      open = drawer && drawer.classList.toggle("open");
+    filtersBtn.setAttribute("aria-expanded", open ? "true" : "false");
+    return;
+  }
+  const moreBtn = e.target.closest("#top100FactionsMore");
+  if (moreBtn) {
+    factionsExpanded = !factionsExpanded;
+    renderFactions();
+    const again = $("top100FactionsMore");
     if (again) again.focus();
     return;
   }

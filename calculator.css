@@ -1486,75 +1486,6 @@
     transition: none;
   }
 }
-/* урон первого бесплатного удара (талант «Засада»): значок глаза и число в строку с уроном, только когда талант вкачан;
-   пояснение - при наведении, фокусе или нажатии */
-.first-hit {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  white-space: nowrap;
-  cursor: help;
-}
-.first-hit::before {
-  content: "";
-  position: absolute;
-  inset: -6px -4px;
-}
-.first-hit[hidden] {
-  display: none;
-}
-.first-hit .ic {
-  width: 14px;
-  height: 14px;
-  color: #3f9c74;
-}
-.first-hit b {
-  font-family: var(--f-display);
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--c-tal);
-  font-variant-numeric: tabular-nums;
-}
-.first-hit:hover .ic,
-.first-hit[aria-expanded="true"] .ic {
-  color: var(--c-tal);
-}
-.fh-tip {
-  display: none;
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 50%;
-  z-index: 30;
-  width: 230px;
-  padding: 8px 10px;
-  border: 1px solid #2c4660;
-  border-radius: 6px;
-  background: #0c1a27;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-  color: #c8d6e2;
-  font:
-    400 12px/1.45 system-ui,
-    -apple-system,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
-  letter-spacing: 0;
-  text-align: left;
-  text-transform: none;
-  white-space: normal;
-  transform: translateX(-50%);
-}
-.first-hit:hover .fh-tip,
-.first-hit:focus-visible .fh-tip,
-.first-hit[aria-expanded="true"] .fh-tip {
-  display: block;
-}
 .talent-game-header h2,
 .talent-gauge-value b,
 .td-head h3 {
@@ -2349,7 +2280,7 @@ input[type="text"]:focus {
   font-variant-numeric: tabular-nums;
   text-shadow: 0 0 20px color-mix(in srgb, var(--accent) 40%, transparent);
 }
-/* название сверху, ниже в одну строку - урон и (у бесплатных ударов) первый удар; не влезло - переносится */
+/* название сверху, ниже - итоговый урон */
 .dmg-main {
   display: flex;
   flex-wrap: wrap;
@@ -4495,27 +4426,117 @@ html body .talent-game-header {
 .calc-dock {
   display: none;
 }
+.free-chip:not(.is-zero) {
+  background: rgba(39, 219, 136, 0.08);
+  border-color: rgba(39, 219, 136, 0.36);
+  color: #9ff3c7;
+}
+.free-chip:not(.is-zero) .crit-chip-label,
+.free-chip:not(.is-zero) .crit-chip-unit {
+  color: #7ee3b0;
+}
+.free-chip:not(.is-zero) em {
+  color: #d7ffea;
+}
+.free-chip:not(.is-zero) .crit-chip-sep {
+  color: #4f9472;
+}
+@media (min-width: 761px) {
+  .sidebar .side-section {
+    padding: 8px 12px 9px;
+  }
+  .sidebar .side-title {
+    padding-bottom: 7px;
+    margin-bottom: 9px;
+    font-size: 14.5px;
+  }
+  .slots-section:empty {
+    min-height: 152px;
+  }
+  .sidebar .level-range {
+    margin-top: 6px;
+  }
+  .sidebar .equipment-open {
+    min-height: 38px;
+  }
+  .sidebar .arena-field {
+    margin-top: 8px;
+    padding: 8px;
+  }
+  .sidebar .arena-control {
+    margin: 5px 0 7px;
+  }
+  .sidebar .arena-stat {
+    padding: 3px 5px;
+  }
+  .sidebar .arena-stat .weapon-icon {
+    width: 22px;
+    height: 22px;
+    flex-basis: 22px;
+  }
+  .sidebar .talent-open {
+    height: 38px;
+  }
+  .sidebar .side-actions {
+    padding: 8px 12px 10px;
+    gap: 7px;
+  }
+  .sidebar .side-btn {
+    min-height: 34px;
+  }
+}
 @media (max-width: 760px) {
   .calc-dock:not([hidden]) {
     display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
     position: fixed;
-    left: 8px;
-    right: 8px;
-    bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 6px);
+    left: 10px;
+    right: 10px;
+    bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 8px);
     z-index: 59;
+    padding: 0;
+    border: 1px solid rgba(90, 160, 220, 0.45);
+    border-radius: 12px;
+    background: rgba(8, 17, 27, 0.96);
+    box-shadow:
+      0 -6px 24px rgba(0, 0, 0, 0.58),
+      0 6px 18px rgba(0, 0, 0, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    overflow: hidden;
+    animation: dock-in 0.2s ease-out;
+  }
+  .calc-dock-main {
+    display: grid;
     gap: 0;
-    padding: 6px 8px 7px;
-    border: 1px solid #2b4762;
-    border-radius: 8px;
-    background: rgba(8, 18, 28, 0.96);
-    box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.55);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
+    min-width: 0;
+    padding: 6px 8px 7px 10px;
+    border: 0;
+    background: transparent;
     font: inherit;
     color: inherit;
     text-align: center;
     cursor: pointer;
-    animation: dock-in 0.2s ease-out;
+  }
+  .calc-dock-close {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    padding: 0;
+    border: 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    color: #9bb1c4;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .calc-dock-close:hover,
+  .calc-dock-close:focus-visible {
+    background: rgba(255, 255, 255, 0.09);
+    color: #fff;
   }
   .dock-grid {
     display: grid;
@@ -4540,7 +4561,7 @@ html body .talent-game-header {
   .dock-row {
     display: flex;
     justify-content: space-between;
-    margin-top: 1px;
+    margin-top: 2px;
     padding-top: 4px;
     border-top: 1px solid #1d3347;
     font-size: 11px;

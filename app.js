@@ -208,16 +208,6 @@ function cardMarkup([k, name, icon], withCrit) {
     '</h3><strong id="result' +
     K +
     '">0</strong>' +
-    /* первый бесплатный удар: значок и число, пояснение - при наведении или нажатии (как у «?»), видно при вкачанной «Засаде» */
-    (withCrit
-      ? ""
-      : '<button type="button" class="first-hit" hidden aria-expanded="false" aria-describedby="fhTip' +
-        K +
-        '"><svg class="ic" aria-hidden="true"><use href="#i-eye"/></svg><span class="sr-only">Первый удар: </span><b id="first' +
-        K +
-        '">0</b><span class="fh-tip" id="fhTip' +
-        K +
-        '" role="tooltip"></span></button>') +
     '</div><i class="delta" id="delta' +
     K +
     '"></i><div class="dmg-bar" id="bar' +
@@ -231,7 +221,9 @@ function cardMarkup([k, name, icon], withCrit) {
         '">0%</em><span class="crit-chip-sep">·</span><em id="critDmg' +
         K +
         '">+0</em><span class="crit-chip-unit">к удару</span></span>'
-      : "") +
+      : '<span class="crit-chip free-chip is-zero" id="freeChip' +
+        K +
+        '"><span class="crit-chip-label">Первый удар</span><span class="crit-chip-sep">·</span><span class="crit-chip-unit">без жетонов</span></span>') +
     "</article>"
   );
 }
@@ -526,17 +518,21 @@ function calc() {
     set("result" + K, fmt(r[k]), true);
     set("dock" + K, fmt(r[k]));
   });
-  /* первый бесплатный удар: итоговый урон плюс процентный бонус таланта */
-  /* видно только при вкачанной «Засаде»: без неё первый удар равен обычному */
+  /* первый бесплатный удар с талантом «Засада» */
   ["knife", "pistol", "auto"].forEach(k => {
-    const el = $("first" + cap(k));
-    set("first" + cap(k), fmt(firstFreeHitDamage(r[k], r.firstFreeHit)));
-    if (!el) return;
-    el.parentElement.hidden = !r.firstFreeHit;
-    set(
-      "fhTip" + cap(k),
-      "Урон первого бесплатного удара с талантом «Засада» (+" + (r.firstFreeHit * 100).toFixed(0) + "%)"
-    );
+    const K = cap(k);
+    const firstDmg = firstFreeHitDamage(r[k], r.firstFreeHit);
+    const chip = $("freeChip" + K);
+    if (chip) {
+      chip.classList.toggle("is-zero", !r.firstFreeHit);
+      chip.innerHTML = r.firstFreeHit
+        ? '<span class="crit-chip-label">Засада</span><em>+' +
+          (r.firstFreeHit * 100).toFixed(0) +
+          '%</em><span class="crit-chip-sep">·</span><span class="crit-chip-unit">1-й удар</span><em>' +
+          fmt(firstDmg) +
+          "</em>"
+        : '<span class="crit-chip-label">Первый удар</span><span class="crit-chip-sep">·</span><span class="crit-chip-unit">без жетонов</span>';
+    }
   });
   ["Grenade", "Gl", "Gauss"].forEach(K => {
     set("crit" + K, (r["crit" + K] * 100).toFixed(0) + "%");
@@ -830,11 +826,11 @@ document.addEventListener("click", e => {
   }
   if (e.target.closest("[data-close-compare]")) closeModal("compareModal");
 });
-/* «?» у заголовков результатов и значок первого удара: пояснение вместо сноски. На компьютере видно при наведении и фокусе,
+/* «?» у заголовков результатов: пояснение вместо сноски. На компьютере видно при наведении и фокусе,
    на телефоне (там нет наведения, а кнопки в Safari не получают фокус) - по нажатию, закрывается нажатием мимо или Esc */
-const openTips = () => document.querySelectorAll('.sec-help[aria-expanded="true"],.first-hit[aria-expanded="true"]');
+const openTips = () => document.querySelectorAll('.sec-help[aria-expanded="true"]');
 document.addEventListener("click", e => {
-  const b = e.target.closest(".sec-help,.first-hit");
+  const b = e.target.closest(".sec-help");
   openTips().forEach(x => x !== b && x.setAttribute("aria-expanded", "false"));
   if (b) b.setAttribute("aria-expanded", String(b.getAttribute("aria-expanded") !== "true"));
 });
@@ -1015,11 +1011,14 @@ if (linked) compareUI.run(t => t.open());
    появился над нижним меню, - тогда и результаты рядом. Нажатие - прокрутка к результатам */
 {
   const dock = $("calcDock"),
+    go = $("calcDockGo"),
+    close = $("calcDockClose"),
     mark = document.querySelector(".sidebar .side-actions"),
     phone = matchMedia("(max-width: 760px)");
   if (dock && mark && window.IntersectionObserver) {
-    let below = false;
-    const sync = () => (dock.hidden = !(phone.matches && below));
+    let below = false,
+      dismissed = false;
+    const sync = () => (dock.hidden = !(phone.matches && below && !dismissed));
     new IntersectionObserver(
       ([en]) => {
         below = !en.isIntersecting && en.boundingClientRect.top > 0;
@@ -1028,11 +1027,19 @@ if (linked) compareUI.run(t => t.open());
       { rootMargin: "0px 0px -70px 0px" }
     ).observe(mark);
     phone.addEventListener("change", sync);
-    dock.addEventListener("click", () => {
-      const to = document.querySelector(".content .result-panel");
-      if (to)
-        to.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-    });
+    if (go) {
+      go.addEventListener("click", () => {
+        const to = document.querySelector(".content .result-panel");
+        if (to)
+          to.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      });
+    }
+    if (close) {
+      close.addEventListener("click", () => {
+        dismissed = true;
+        sync();
+      });
+    }
   }
 }
 const preload = () => [talentsUI, tokensUI, compareUI].forEach(p => p.preload());

@@ -9,7 +9,9 @@
   const main = document.getElementById("main");
   const ver =
     (window.TOP100_HISTORY && window.TOP100_HISTORY.id) || (main && main.dataset && main.dataset.history) || "";
-  const URL_DATA = "/top100-players.json" + (ver ? "?v=" + encodeURIComponent(ver) : "");
+  const VER_QS = ver ? "?v=" + encodeURIComponent(ver) : "";
+  const URL_INDEX = "/top100-index.json" + VER_QS;
+  const URL_FALLBACK = "/top100-players.json" + VER_QS;
   const DAY = 864e5;
   const PERIODS = [
     { key: "last", label: "С прошлого обновления" },
@@ -55,6 +57,13 @@
     loading = null,
     idByNick = null,
     searchList = null;
+  const shardCache = {};
+  function shardOf(id) {
+    const s = String(id || "");
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return h % 16;
+  }
   let cur = null,
     metric = null,
     period = null,
@@ -63,7 +72,8 @@
   function load() {
     if (data) return Promise.resolve(data);
     if (!loading)
-      loading = fetch(URL_DATA)
+      loading = fetch(URL_INDEX)
+        .then(r => (r.ok ? r : fetch(URL_FALLBACK)))
         .then(r => {
           if (!r.ok) throw new Error(r.status);
           return r.json();
@@ -85,6 +95,28 @@
           throw e;
         });
     return loading;
+  }
+  function loadShard(id) {
+    if (!id || !data) return Promise.resolve();
+    const p = data.players[id];
+    if (p && Array.isArray(p.s) && Array.isArray(data.dates)) return Promise.resolve();
+    const sh = shardOf(id);
+    if (!shardCache[sh]) {
+      shardCache[sh] = fetch("/top100-shards/" + sh + ".json" + VER_QS)
+        .then(r => {
+          if (!r.ok) throw new Error(r.status);
+          return r.json();
+        })
+        .then(sd => {
+          if (sd.dates && !data.dates) data.dates = sd.dates;
+          if (sd.players) Object.assign(data.players, sd.players);
+        })
+        .catch(e => {
+          delete shardCache[sh];
+          throw e;
+        });
+    }
+    return shardCache[sh];
   }
 
   /* цвет группировки: из выгрузки, иначе стабильный оттенок по названию */
@@ -313,13 +345,16 @@
     dlg.classList.toggle("no-bg", !bg);
   }
 
+  let openSeq = 0;
   /* открыть: id игрока, либо null - только поиск */
   function open(id, opts) {
+    const seq = ++openSeq;
     show();
     const body = document.getElementById("pcBody");
     if (!data) body.innerHTML = '<div class="pc-loading"><i></i>Устанавливаем связь с сетью сталкеров…</div>';
     load()
       .then(() => {
+        if (seq !== openSeq) return null;
         const sl = document.getElementById("pcSuggest");
         sl.hidden = true;
         if (id && !data.players[id]) {
@@ -333,7 +368,7 @@
             '<div class="pc-empty"><b>Карточки игроков</b><p>Найдите любого игрока по нику: показатели, места во всех рейтингах, прирост и история группировок.</p></div>';
           const inp = document.getElementById("pcSearch");
           inp.focus();
-          return;
+          return null;
         }
         document.getElementById("pcSearch").value = "";
         if (!metric) metric = (opts && opts.metric) || "reputation";
@@ -341,17 +376,26 @@
           const tp = typeof top100Period === "string" ? top100Period : "last";
           period = PERIODS.some(p => p.key === tp) ? tp : "last";
         }
+        const p = data.players[id];
+        if (!Array.isArray(p.s) || !Array.isArray(data.dates)) {
+          body.innerHTML = '<div class="pc-loading"><i></i>Загружаем личное дело сталкера…</div>';
+        }
+        return loadShard(id).then(() => id);
+      })
+      .then(loadedId => {
+        if (!loadedId || seq !== openSeq) return;
         renderCard();
 
         if (!/^\/p\//.test(location.pathname)) {
           basePath = location.pathname;
           baseSearch = location.search;
         }
-        history.replaceState(null, "", "/p/" + encodeURIComponent(id));
+        history.replaceState(null, "", "/p/" + encodeURIComponent(loadedId));
         root.querySelector(".pc-dialog").focus({ preventScroll: true });
         root.querySelector(".pc-dialog").scrollTop = 0;
       })
       .catch(() => {
+        if (seq !== openSeq) return;
         body.innerHTML =
           '<div class="pc-empty"><b>Не удалось загрузить карточки</b><p>Проверьте соединение и попробуйте ещё раз.</p></div>';
       });

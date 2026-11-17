@@ -57,6 +57,7 @@ const SKIP = new Set([
   "build.js",
   "build-top100.js",
   "build-players.js",
+  "build-shards.js",
   "build-top100.bat",
   "dev.js",
   "dev.bat",
@@ -89,6 +90,7 @@ for (const name of fs.readdirSync(ROOT)) {
   if (SKIP.has(name)) continue;
   fs.cpSync(path.join(ROOT, name), path.join(OUT, name), { recursive: true });
 }
+require("./build-shards.js").buildShards(ROOT, OUT);
 
 /* гайды guides/<адрес>/index.md + картинки рядом. */
 const GuideMD = require("./guide-md.js");
@@ -569,6 +571,14 @@ const PRERENDER = {
     /* сводка в шапке и спрайт эмблем для строк - тоже сразу, иначе эмблемы и плитки появляются с задержкой */
     html = fill(html, "top100Stats", els.top100Stats.innerHTML);
     return fill(html, "top100Emblems", els.top100Emblems.innerHTML);
+  },
+  "calculator.html": html => {
+    try {
+      const gearSrc = fs.readFileSync(path.join(ROOT, "src/gear-data.js"), "utf8");
+      const count = (gearSrc.match(/\bcode:\s*"(?!SET_)/g) || []).length;
+      if (count > 0) html = html.replace(/(id="equipmentCount">)\s*0\s*\/\s*\d+/, "$10 / " + count);
+    } catch (e) {}
+    return html;
   }
 };
 

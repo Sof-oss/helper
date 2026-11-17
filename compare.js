@@ -181,6 +181,7 @@
     );
   }
 
+  let drawGen = 0;
   function draw() {
     const body = document.getElementById("vsBody"),
       tools = document.getElementById("vsTools");
@@ -188,6 +189,21 @@
     SIDES.forEach(s => {
       if (ids[s] && !data.players[ids[s]]) ids[s] = null;
     });
+    const needShard = SIDES.filter(s => ids[s] && (!Array.isArray(data.players[ids[s]].s) || !Array.isArray(data.dates)));
+    if (needShard.length && typeof ZP.loadPlayer === "function") {
+      const g = ++drawGen;
+      body.innerHTML = '<div class="vs-empty"><i class="vs-spin"></i>Загружаем данные выбранных сталкеров…</div>';
+      Promise.all(needShard.map(s => ZP.loadPlayer(ids[s])))
+        .then(() => {
+          if (g === drawGen) draw();
+        })
+        .catch(() => {
+          if (g === drawGen)
+            body.innerHTML =
+              '<div class="vs-empty">Не удалось загрузить историю игроков. Проверьте соединение и обновите страницу.</div>';
+        });
+      return;
+    }
     const me = ZP.getMe();
     const P = { a: ids.a && data.players[ids.a], b: ids.b && data.players[ids.b] };
     document.title = P.a && P.b ? P.a.n + " vs " + P.b.n + " - Сердце Зоны" : "Сердце Зоны - Сравнение игроков";

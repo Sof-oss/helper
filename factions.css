@@ -827,8 +827,9 @@ body.fx-rank-lock {
 }
 .fx-rank-compact .fx-rank-card b {
   grid-area: name;
-  font-size: 15px;
-  -webkit-line-clamp: 1;
+  font-size: 14px;
+  line-height: 1.18;
+  -webkit-line-clamp: 2;
 }
 .fx-rank-compact .fx-rank-card small {
   grid-area: small;
@@ -1065,8 +1066,8 @@ body.fx-rank-lock {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, transparent 25%, rgba(10, 17, 26, 0.85)),
-    linear-gradient(90deg, color-mix(in srgb, var(--fx) 32%, transparent), transparent 60%);
+    linear-gradient(180deg, rgba(8, 14, 22, 0.38) 0%, transparent 42%, rgba(8, 14, 22, 0.9) 100%),
+    linear-gradient(90deg, color-mix(in srgb, var(--fx) 34%, transparent), transparent 62%);
 }
 .fx-emblem {
   position: absolute;

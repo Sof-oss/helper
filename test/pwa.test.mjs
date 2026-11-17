@@ -30,5 +30,6 @@ test("sw.js: метки версии и статической оболочки,
   assert.match(sw, /precacheRequest/);
   assert.match(sw, /cachePage/);
   assert.match(sw, /includeUncontrolled/);
-  assert.match(sw, /top100-\(\?:data\\\.js\|players\\\.json\)/);
+  assert.match(sw, /top100-\(\?:data\\\.js\|players\\\.json\|index\\\.json\)/);
+  assert.match(sw, /top100-shards/);
 });
