@@ -21,6 +21,7 @@ test("build.js: страницы, CSP, sitemap и статическая обо�
     const read = f => fs.readFileSync(path.join(out, f), "utf8");
 
     const index = read("index.html");
+    assert.equal(fs.existsSync(path.join(out, "check.bat")), false, "check.bat - служебный файл, в dist ему нельзя");
     assert.match(index, /<meta http-equiv="Content-Security-Policy"/);
     assert.match(index, /bundle-[\w-]+\.css\?v=/);
     assert.doesNotMatch(index, /<!--\s*@include/);
