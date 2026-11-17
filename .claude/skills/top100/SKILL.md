@@ -21,7 +21,8 @@ description: Топ-100 сайта «Сердце Зоны» - ежедневн�
 - `top100.html` + `top100.js` (вкладки, периоды, фильтр отрядов, сортировка, `TAB_ICONS`), `top100-sort.css`.
 - `top100-common.js` - `TOP100_TABS` и помощники `fmt`, `esc`, `escAttr`, `norm` (глобальные, см. `eslint.config.mjs`).
 - `player-card.js/.css` - «Личное дело» (окно на /top100 и /factions), нашивки из `window.ZONE_AWARDS`.
-- `zone-players.js/.css` - `window.ZonePlayers`: загрузка `top100-players.json`, поиск, подсказки, «я» (`getMe/setMe`), своя копия `TABS`.
+- `zone-players.js/.css` - `window.ZonePlayers`: лёгкий `top100-index.json` (поиск, подсказки, «я» (`getMe/setMe`), «Моё место», своя копия `TABS`), полная история игрока - шардом `top100-shards/<N>.json` по требованию (`loadPlayer`); если индекса нет - откат на `top100-players.json`.
+- `build-shards.js` - на сборке режет `top100-players.json` на `dist/top100-index.json` (без `dates`, `s`, `gh`, `nh`) и 16 шардов `dist/top100-shards/*.json`.
 - `my-place.js/.css` - «Моё место» на главной и на /top100, кнопки «Это я» / «Сравнить» в карточке.
 - `compare.html/.js/.css` - сравнение двух игроков.
 - `awards.js` + `assets/awards/*.svg` - нашивки; `404.html` - редирект `/p/<id>`.
@@ -46,13 +47,15 @@ description: Топ-100 сайта «Сердце Зоны» - ежедневн�
 
 В раздел попадают значения > 0, по убыванию, при равенстве - порядок CSV; первые `TOP_N` (100, переменная окружения `TOP_N`).
 
-**`top100-data.js`**: `TOP100_UPDATED="ДД.ММ.ГГГГ ЧЧ:ММ:СС"` (МСК); `TOP100_PERIODS=[{key, label, from, partial}]`, key из `last|d1|d7|d30` (`PERIODS`; период с той же базой, что у другого, выкидывается - обычно остаются d1, d7, d30); `TOP100_CHANGES={<период>:{delta:{<key>:{ник: прирост}}, rank:{<key>:{ник: число|null}}}}` (rank: + поднялся, - опустился, `null` - новичок; нули не пишутся); `TOP100_FACTIONS=[{name,color}]`; `TOP100_GROUPS={ник: группировка}`; `TOP100_HISTORY={id, from}` (id - версия для `?v=` у `top100-players.json`); `TOP100_<X>=[[ник, уровень, значение, давно_не_заходил 0|1], …]`, место = индекс + 1.
+**`top100-data.js`**: `TOP100_UPDATED="ДД.ММ.ГГГГ ЧЧ:ММ:СС"` (МСК); `TOP100_PERIODS=[{key, label, from, partial}]`, key из `last|d1|d7|d30` (`PERIODS`; период с той же базой, что у другого, выкидывается - обычно остаются d1, d7, d30); `TOP100_CHANGES={<период>:{delta:{<key>:{ник: прирост}}, rank:{<key>:{ник: число|null}}}}` (rank: + поднялся, - опустился, `null` - новичок; нули не пишутся); `TOP100_FACTIONS=[{name,color}]`; `TOP100_GROUPS={ник: группировка}`; `TOP100_HISTORY={id, from}` (id - версия для `?v=` у `top100-index.json`, шардов и `top100-players.json`); `TOP100_<X>=[[ник, уровень, значение, давно_не_заходил 0|1], …]`, место = индекс + 1.
 
 **`top100/history/ГГГГ-ММ-ДД_ЧЧ-ММ-СС.json`** (время МСК): `{"<key>": {"<ник>": [место, значение]}}` по 7 ключам; старые снимки - просто место числом, ещё старше - `ГГГГ-Wнн.json`. Если данные совпали с последним снимком - новый не пишется. Чистка: удаляются только снимки вне последних 50 (`KEEP_SNAPSHOTS`) и старше 40 дней (`KEEP_DAYS`); в git они остаются.
 
 **`top100/players/<снимок>.json`**: `{"cols":["level", 7 ключей в порядке SOURCES, "b:<босс>"…], "p":{"<id>":[ник, группировка, off 0|1, уровень, …значения по cols]}}`, строка на игрока. Не чистится (~190 КБ в день). Нужен для карточек и чтобы узнать игрока после смены ника.
 
 **`top100-players.json`**: `{updated, dates:[мс…], metrics:[ключи в порядке SOURCES], bosses:[имена], factions:{группировка: цвет}, players:{<id>:{n, g, z ("В Зоне"), off, l, v:[значения по metrics], b:[по bosses], r:[место среди ВСЕХ игроков или null], s:[[индекс_даты, уровень, …значения|null]], gh?:[[индекс_даты, группировка]], nh?:[[индекс_даты, старый_ник, новый_ник]]}}}`. Фронт ищет метрику через `metrics.indexOf(key)`.
+
+**`top100-index.json`** (генерирует `build-shards.js` в `dist/`): `{updated, metrics, bosses, factions, players:{<id>:{n, g, z, off, l, v, r}}}` - без `dates`/`s`/`gh`/`nh`. **`top100-shards/<N>.json`**: `{updated, dates, metrics, bosses, factions, players:{<id>:<полная карточка>}}`; номер шарда - `shardOf(id)` (одинаковый хеш в `build-shards.js`, `zone-players.js`, `player-card.js`). `player-card.js` и `compare.js` грузят шард через `ZonePlayers.loadPlayer`.
 
 **`top100/factions.json`**: `{"Группировка": "#rrggbb"}` - цвета, можно править руками; новым группировкам `pickColor` дописывает цвет сам.
 
@@ -116,7 +119,7 @@ window.ZONE_AWARDS = {
 - Текст: русский, «ёлочки», только дефис «-».
 
 ## 6. Проверка
-- `node --test test/build-top100.test.mjs` - безопасно (временные папки). Остальное (`npm test`, lint, format:check, сборка, скриншоты) - по **verify-and-ship**.
+- `node --test test/build-top100.test.mjs test/build-shards.test.mjs` - безопасно (временные папки). Остальное (`npm test`, lint, format:check, сборка, скриншоты) - по **verify-and-ship**.
 - Глазами (`node dev.js` или `npx serve dist`): `/top100` - вкладки, стрелки и `new`, кнопки периодов; `/p/746` (в dev через `404.html` -> `/top100#p=746`) - нашивка «Первый тестер»; `/compare?a=746&b=3085`; главная - «Моё место» после «Это я».
 - Выгрузка: `gh run list --workflow top100.yml`, после - `gh run list --workflow pages.yml`.
 
