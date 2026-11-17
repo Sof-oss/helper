@@ -469,6 +469,7 @@ function factionsMarkup(ROOT) {
   const actLastIdx = histRaw.length - 1;
   const actScores = {};
   const actGainsById = {}; /* приросты бойца по показателям - для разбивки в штабе */
+  const actPlayers = {}; /* баллы всех игроков выгрузки - для строки активности в «Личном деле» (player-card.js) */
   const actAnchors = new Array(actMetricsN).fill(0);
   if (actLastIdx > 0) {
     const actWinMs = histRaw[actLastIdx] - 7 * 864e5;
@@ -524,6 +525,11 @@ function factionsMarkup(ROOT) {
         n++;
       }
       actScores[id] = n ? Math.round(sum / n) : 0;
+    }
+    /* в «Личное дело» - все игроки выгрузки, не только бойцы группировок; приросты - только если был рост */
+    for (const [id, score] of Object.entries(actScores)) {
+      const row = actGainsById[id];
+      actPlayers[id] = row && row.some(g => g > 0) ? [score].concat(row) : [score];
     }
   }
   const nameOf = id => (id != null && data.players[String(id)] ? data.players[String(id)].n : "");
@@ -693,7 +699,14 @@ function factionsMarkup(ROOT) {
     stats,
     rank,
     list: cards.join("\n"),
-    cards: { updated, total: list.length, actAnchors, actMetrics: data.metrics, factions: cardsData },
+    cards: {
+      updated,
+      total: list.length,
+      actAnchors,
+      actMetrics: data.metrics,
+      players: actPlayers,
+      factions: cardsData
+    },
     history,
     count: list.length,
     hiring: hiringCount

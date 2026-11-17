@@ -20,7 +20,9 @@ description: Топ-100 сайта «Сердце Зоны» - ежедневн�
 Сайт:
 - `top100.html` + `top100.js` (вкладки, периоды, фильтр отрядов, сортировка, `TAB_ICONS`), `top100-sort.css`.
 - `top100-common.js` - `TOP100_TABS` и помощники `fmt`, `esc`, `escAttr`, `norm` (глобальные, см. `eslint.config.mjs`).
-- `player-card.js/.css` - «Личное дело» (окно на /top100 и /factions), нашивки из `window.ZONE_AWARDS`.
+- `player-card.js/.css` - «Личное дело» (окно на /top100 и /factions), нашивки из `window.ZONE_AWARDS`, капсула
+  «Активность» в досье - из `factions-cards.json` (карта `players`, та же активность, что в штабе группировки;
+  формат и расчёт - скилл factions).
 - `zone-players.js/.css` - `window.ZonePlayers`: лёгкий `top100-index.json` (поиск, подсказки, «я» (`getMe/setMe`), «Моё место», своя копия `TABS`), полная история игрока - шардом `top100-shards/<N>.json` по требованию (`loadPlayer`); если индекса нет - откат на `top100-players.json`.
 - `build-shards.js` - на сборке режет `top100-players.json` на `dist/top100-index.json` (без `dates`, `s`, `gh`, `nh`) и 16 шардов `dist/top100-shards/*.json`.
 - `my-place.js/.css` - «Моё место» на главной и на /top100, кнопки «Это я» / «Сравнить» в карточке.

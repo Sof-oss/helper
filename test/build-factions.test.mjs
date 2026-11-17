@@ -250,3 +250,58 @@ test("карточки группировок: вступления, уходы,
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 });
+
+test("активность: карта players для «Личного дела» - все игроки выгрузки, приросты только при росте", () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "hotz-factions-act-"));
+  const write = (file, data) => {
+    fs.mkdirSync(path.dirname(path.join(tmp, file)), { recursive: true });
+    fs.writeFileSync(path.join(tmp, file), typeof data === "string" ? data : JSON.stringify(data));
+  };
+  try {
+    write("ui.js", fs.readFileSync(path.join(ROOT, "ui.js"), "utf8"));
+    write("top100/factions.json", { Evil: "#ff0000" });
+    write("top100-data.js", 'window.TOP100_HISTORY={"id":"2026-10-22"};');
+    write("top100-players.json", {
+      updated: "2026-10-22 12:00",
+      dates: [0, 1, 2].map(d => Date.UTC(2026, 9, 20 + d, 9)),
+      metrics: ["reputation", "bosses"],
+      players: {
+        1: {
+          n: "Первый",
+          g: "Evil",
+          l: 5,
+          v: [30, 2],
+          s: [
+            [0, 5, 10, 0],
+            [2, 5, 30, 2]
+          ]
+        },
+        2: { n: "Второй", g: "Evil", l: 7, v: [50, 3], s: [[0, 7, 50, 3]] },
+        3: {
+          n: "Одиночка",
+          l: 4,
+          v: [12, 0],
+          s: [
+            [0, 4, 2, 0],
+            [2, 4, 12, 0]
+          ]
+        }
+      }
+    });
+    const res = factions(tmp);
+    const act = res.cards.players;
+    /* за окно активности (все даты внутри недели) Первый набрал +20 репутации и +2 босса;
+       пороги - медианы всех недельных приростов (15 и 2), очки 100 и 100, балл 100 */
+    assert.deepEqual(act["1"], [100, 20, 2]);
+    /* без роста - только балл, без разбивки */
+    assert.deepEqual(act["2"], [0]);
+    /* одиночка тоже в карте, хотя в составах группировок его нет: +10 репутации при пороге 15 = 67 очков */
+    assert.deepEqual(act["3"], [33, 10, 0]);
+    /* в составе штаба - как и раньше: балл и разбивка в строках бойцов, одиночки не попадают */
+    const evil = res.cards.factions.find(f => f.n === "Evil");
+    assert.deepEqual(evil.r.find(row => row[0] === "1").slice(6), [100, [20, 2]]);
+    assert.ok(!evil.r.some(row => row[0] === "3"));
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});

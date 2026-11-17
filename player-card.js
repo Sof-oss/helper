@@ -12,6 +12,7 @@
   const VER_QS = ver ? "?v=" + encodeURIComponent(ver) : "";
   const URL_INDEX = "/top100-index.json" + VER_QS;
   const URL_FALLBACK = "/top100-players.json" + VER_QS;
+  const URL_FACTIONS = "/factions-cards.json" + VER_QS;
   const DAY = 864e5;
   const PERIODS = [
     { key: "last", label: "С прошлого обновления" },
@@ -117,6 +118,30 @@
         });
     }
     return shardCache[sh];
+  }
+
+  /* активность за неделю - та же, что в штабе группировки: build-factions.js считает её для всех игроков
+     выгрузки и кладёт в factions-cards.json (players). Грузим лениво и без блокировки: карточка откроется,
+     строка дорисуется, когда файл дойдёт; не дошёл - карточка просто без строки. */
+  let actData = null,
+    actLoading = null;
+  function loadAct() {
+    if (actData) return Promise.resolve(actData);
+    if (!actLoading)
+      actLoading = fetch(URL_FACTIONS)
+        .then(r => {
+          if (!r.ok) throw new Error(r.status);
+          return r.json();
+        })
+        .then(d => {
+          actData = d;
+          return d;
+        })
+        .catch(e => {
+          actLoading = null;
+          throw e;
+        });
+    return actLoading;
   }
 
   /* цвет группировки: из выгрузки, иначе стабильный оттенок по названию */
@@ -385,6 +410,14 @@
       .then(loadedId => {
         if (!loadedId || seq !== openSeq) return;
         renderCard();
+
+        /* активность грузится следом за шардом: когда дойдёт, перерисовать открытую карточку с ней */
+        loadAct().then(
+          () => {
+            if (seq === openSeq && cur) renderCard();
+          },
+          () => {}
+        );
 
         if (!/^\/p\//.test(location.pathname)) {
           basePath = location.pathname;
@@ -884,6 +917,33 @@
     const row = (k, v) => "<div><dt>" + k + "</dt><dd>" + v + "</dd></div>";
     skin(color, emb ? "url(/assets/bg-" + emb.key + "-1280.webp)" : "");
 
+    /* активность за неделю - та же, что в штабе группировки (faction-card.js): build-factions.js считает
+       её для всех игроков выгрузки и кладёт в factions-cards.json (players). Капсула появляется, когда
+       данные дойдут (loadAct перерисовывает карточку); подсказка - личный расклад по показателям. */
+    const actRow = actData && actData.players ? actData.players[String(cur)] : null;
+    let actChip = "";
+    if (actRow) {
+      let tip = "Активность за неделю";
+      if (actRow.length > 1 && Array.isArray(actData.actAnchors)) {
+        const parts = [];
+        actData.actAnchors.forEach((anchor, mi) => {
+          const g = actRow[1 + mi];
+          if (!(g > 0 && anchor > 0)) return;
+          const t = TAB[actData.actMetrics[mi]];
+          parts.push(
+            (t ? t.label : actData.actMetrics[mi]) +
+              " +" +
+              fmt(g) +
+              " (" +
+              Math.min(100, Math.round((g / anchor) * 100)) +
+              ")"
+          );
+        });
+        if (parts.length) tip += ": " + parts.join(" · ");
+      }
+      actChip = row("Активность", '<b class="pc-act-num" title="' + escAttr(tip) + '">' + actRow[0] + "</b>");
+    }
+
     document.getElementById("pcBody").innerHTML =
       '<header class="pc-head' +
       (emb ? " has-bg" : "") +
@@ -918,6 +978,7 @@
       row("Звание", esc(titleOf(p.l))) +
       row("Уровень", "<b>" + p.l + "</b>") +
       (p.z ? row("В Зоне", esc(p.z)) : "") +
+      actChip +
       "</dl></div>" +
       (stampTxt ? '<div class="pc-stamp" aria-hidden="true">' + stampTxt + "</div>" : "") +
       "</div>" +

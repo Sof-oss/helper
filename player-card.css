@@ -666,6 +666,14 @@ a.pc-faction:focus-visible {
   color: #8195a6;
 }
 
+/* капсула «Активность» в досье: недельная активность из factions-cards.json (та же, что в штабе
+   группировки, faction-card.css .fc-act); число - в цвете группировки игрока (--f от skin()),
+   при наведении - подсказка с личным раскладом по показателям */
+.pc-dossier dd .pc-act-num {
+  color: var(--f, #8196a9);
+  cursor: help;
+}
+
 /* плитки показателей: блоки ПДА со скошенным углом */
 .pc-tiles {
   display: grid;
