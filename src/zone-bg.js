@@ -233,31 +233,52 @@ export function startBackground() {
       else fade = { t0: performance.now() };
     });
   }
+  /* тема или набор картинок сменились: другая группировка либо media query (поворот телефона -
+     в ландшафте свой --bg-img); новое фото проявляется поверх старого */
+  function syncTheme() {
+    const t = readTheme();
+    if (t.key === theme.key && t.bg === theme.bg && t.depth === theme.depth) return;
+    theme = t;
+    setTheme(t);
+    loadBg(t, false);
+  }
   loadBg(theme, true);
-  new MutationObserver(() =>
-    requestAnimationFrame(() => {
-      const t = readTheme();
-      if (t.key === theme.key) return;
-      theme = t;
-      setTheme(t);
-      loadBg(t, false);
-    })
-  ).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  new MutationObserver(() => requestAnimationFrame(syncTheme)).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"]
+  });
 
   let W = 1,
     H = 1;
   const maxPx = Math.min(window.devicePixelRatio || 1, lowPower ? 1 : 1.5);
   let px = maxPx;
   function resize() {
-    W = window.innerWidth;
-    H = canvas.clientHeight || window.innerHeight;
+    /* размер берём у самого холста: window.innerWidth на повороте отстаёт от раскладки,
+       а в паре с clientHeight это давало неверные пропорции */
+    const r = canvas.getBoundingClientRect();
+    W = Math.max(1, Math.round(r.width || window.innerWidth));
+    H = Math.max(1, Math.round(r.height || window.innerHeight));
     canvas.width = Math.max(1, Math.round(W * px));
     canvas.height = Math.max(1, Math.round(H * px));
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.uniform2f(U.uRes, canvas.width, canvas.height);
+    syncTheme(); // media query мог подменить фото - на телефоне в ландшафте он другой
   }
   resize();
   window.addEventListener("resize", resize);
+  /* iOS Safari на повороте отдаёт размеры до раскладки: пересчитываем ещё раз, когда всё уляжется */
+  const reflow = () => {
+    resize();
+    wake(); // новый размер холста очищает буфер - без кадра останется чёрный фон
+    setTimeout(resize, 350);
+  };
+  window.addEventListener("orientationchange", reflow);
+  if (screen.orientation && screen.orientation.addEventListener) screen.orientation.addEventListener("change", reflow);
+  if (window.ResizeObserver)
+    new ResizeObserver(() => {
+      resize();
+      wake();
+    }).observe(canvas);
 
   /* мышь и наклон телефона */
   const target = { x: 0, y: 0 },
@@ -279,7 +300,12 @@ export function startBackground() {
   /* наклон планшета/телефона. */
   let base = null;
   const cl = v => Math.max(-1, Math.min(1, v));
-  const angle = () => (screen.orientation && screen.orientation.angle) || window.orientation || 0;
+  /* 0 - валидный угол, поэтому нельзя полагаться на "||": устаревший window.orientation мог перебить его */
+  const angle = () => {
+    const so = screen.orientation;
+    if (so && typeof so.angle === "number") return so.angle;
+    return typeof window.orientation === "number" ? window.orientation : 0;
+  };
   function onTilt(e) {
     if (e.gamma == null || e.beta == null) return;
     const a = ((angle() % 360) + 360) % 360;
@@ -292,8 +318,14 @@ export function startBackground() {
   const resetBase = () => {
     base = null;
   };
-  window.addEventListener("orientationchange", resetBase);
-  if (screen.orientation) screen.orientation.addEventListener("change", resetBase);
+  /* на повороте угол экрана и датчики обновляются не одновременно: сбрасываем базу ещё раз, когда всё уляжется */
+  const resetBaseSoon = () => {
+    resetBase();
+    setTimeout(resetBase, 400);
+  };
+  window.addEventListener("orientationchange", resetBaseSoon);
+  if (screen.orientation && screen.orientation.addEventListener)
+    screen.orientation.addEventListener("change", resetBaseSoon);
   /* iOS/iPadOS (Safari 13+) не присылает наклон без разрешения, а спросить его можно только по нажатию. */
   const DOE = window.DeviceOrientationEvent;
   if (DOE && typeof DOE.requestPermission === "function") {
