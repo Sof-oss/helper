@@ -21,7 +21,7 @@ const OUT = process.env.BUILD_OUT ? path.resolve(process.env.BUILD_OUT) : path.j
 
 /* модули: файл в dist -> точка входа и все исходники (по ним же считается дата страницы в sitemap). */
 const MODULES = {
-  "home-3d.js": ["src/home-3d.js", "src/zone-bg.js", "src/zone-theme.js"],
+  "home-3d.js": ["src/home-3d.js", "src/zone-bg.js", "src/zone-scenes.js", "src/zone-theme.js"],
   "calculator.js": [
     "src/calculator.js",
     "src/calc-core.js",
@@ -607,7 +607,7 @@ const LOCAL_CSS = /<link rel="stylesheet" href="(\/?)([^":]+\.css)">\n?/g;
 const LAZY_JS = {
   "my-place.js": ["top100-data.js"],
   "season.js": ["halloween.js"],
-  "home-3d.js": ["src/zone-bg.js", "src/zone-theme.js"],
+  "home-3d.js": ["src/zone-bg.js", "src/zone-scenes.js", "src/zone-theme.js"],
   "calculator.js": ["src/calc-talents.js", "src/calc-tokens.js", "src/calc-compare.js"]
 };
 const EVERY_PAGE_JS = ["season.js", "intro.js", "sw-register.js"];
