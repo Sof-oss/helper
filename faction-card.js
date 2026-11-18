@@ -132,34 +132,48 @@
   const who = (id, n) =>
     id ? '<a href="/p/' + esc(id) + '" data-pc-open="' + esc(id) + '">' + esc(n) + "</a>" : esc(n);
 
-  function eventRow(e) {
+  function milestoneRow(e) {
     let title, sub;
     const arrow = s => esc(String(s || "").replace("→", "\u00a0→\u00a0"));
-    if (e.t === "join") {
-      title = who(e.id, e.n);
-      sub = e.x ? "из «" + esc(e.x) + "»" : "Принят";
-    } else if (e.t === "left") {
-      title = who(e.id, e.n);
-      sub = e.x ? "ушёл в «" + esc(e.x) + "»" : "Покинул";
-    } else if (e.t === "level") {
+    if (e.t === "level") {
       title = "Уровень группировки " + arrow(e.x);
-      sub = "Уровень";
+      sub = "Повышение уровня";
     } else if (e.t === "slots") {
       title = "Места расширены: " + arrow(e.x);
-      sub = "Места";
+      sub = "Расширение штата";
     } else {
       title = "Новый лидер: " + who(e.id, e.n || "?");
-      sub = "Лидер";
+      sub = "Смена лидера";
     }
     return (
-      '<li class="fc-ev"><span class="fc-ic fc-ic-' +
+      '<div class="fc-mile fc-ev-' +
       e.t +
-      '" aria-hidden="true">' +
+      '"><span class="fc-mile-ic" aria-hidden="true">' +
       ICON[e.t] +
-      "</span><div><b>" +
+      '</span><div class="fc-mile-txt"><b>' +
       title +
       "</b><small>" +
       sub +
+      '</small></div><time datetime="' +
+      esc(e.d) +
+      '">' +
+      fmtD(e.d) +
+      "</time></div>"
+    );
+  }
+
+  function feedRow(e) {
+    const badge = e.t === "join" ? "Пришёл" : "Ушёл";
+    const ctx = e.x ? (e.t === "join" ? " из «" + esc(e.x) + "»" : " в «" + esc(e.x) + "»") : "";
+    return (
+      '<li class="fc-ev fc-ev-' +
+      e.t +
+      '"><span class="fc-ev-bar" aria-hidden="true"></span><div><b>' +
+      who(e.id, e.n) +
+      "</b><small><em>" +
+      badge +
+      "</em>" +
+      ctx +
       '</small></div><time datetime="' +
       esc(e.d) +
       '">' +
@@ -309,15 +323,31 @@
             " пока без прогресса - их нет в ежедневной выгрузке</p>"
           : "")
       : '<p class="fc-note">Бойцов с прогрессом пока нет</p>';
-    const events = f.ev.length
-      ? '<ol class="fc-evs" id="fcEvents">' +
-        f.ev.map(eventRow).join("") +
+    const miles = f.ev.filter(e => e.t === "level" || e.t === "slots" || e.t === "leader").slice(0, 4);
+    const feed = f.ev.filter(e => e.t === "join" || e.t === "left");
+    const milesHtml = miles.length
+      ? '<div class="fc-hist-sub"><span>Ключевые вехи</span><span>' +
+        miles.length +
+        '</span></div><div class="fc-miles">' +
+        miles.map(milestoneRow).join("") +
+        "</div>"
+      : "";
+    const feedHtml = feed.length
+      ? (miles.length
+          ? '<div class="fc-hist-sub"><span>Движение состава</span><span>' + feed.length + "</span></div>"
+          : "") +
+        '<ol class="fc-evs" id="fcEvents">' +
+        feed.map(feedRow).join("") +
         "</ol>" +
-        (f.ev.length > SHOW_EVENTS
-          ? '<button type="button" class="fc-more" data-fc-more="#fcEvents">Вся история · ' +
-            f.ev.length +
+        (feed.length > SHOW_EVENTS
+          ? '<button type="button" class="fc-more" data-fc-more="#fcEvents">' +
+            (miles.length ? "Весь лог состава · " : "Вся история · ") +
+            feed.length +
             " →</button>"
           : "")
+      : "";
+    const events = f.ev.length
+      ? milesHtml + feedHtml
       : '<p class="fc-note">Событий пока нет: история копится по ежедневным выгрузкам</p>';
 
     const dialog = root.querySelector(".fc-dialog");
@@ -353,7 +383,9 @@
       f.r.length +
       "</h3>" +
       roster +
-      '</section></div><section class="fc-glass fc-pad fc-hist"><h3>История</h3>' +
+      '</section></div><section class="fc-glass fc-pad fc-hist"><h3>История' +
+      (f.ev.length ? " · " + f.ev.length : "") +
+      "</h3>" +
       events +
       "</section></div>";
     const sortBtn = document.querySelector("#fcRoster [data-fc-sort]");
