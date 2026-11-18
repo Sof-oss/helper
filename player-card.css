@@ -1831,7 +1831,7 @@ html body .pc-dialog .pc-periods .top100-tab.active {
   }
 }
 
-/* телефон: компактная шапка - эмблема и ник в строку, досье в одну строку капсул, места - лентой */
+/* телефон: компактная шапка - эмблема и ник в строку, капсулы досье с переносом по рядам, места - лентой */
 @media (max-width: 760px) {
   .pc-overlay .pc-dialog {
     border-radius: 24px 24px 0 0;
@@ -1870,10 +1870,14 @@ html body .pc-dialog .pc-periods .top100-tab.active {
       var(--bg) 65% 35% / cover no-repeat;
   }
   .pc-dialog .pc-head-strip {
+    flex-wrap: wrap;
+    gap: 6px;
     padding: 10px 10px 0;
     font-size: 12px;
   }
   .pc-dialog .pc-head-strip > span {
+    max-width: 100%;
+    box-sizing: border-box;
     padding: 6px 10px;
   }
   .pc-dialog .pc-head-main {
@@ -1919,22 +1923,33 @@ html body .pc-dialog .pc-periods .top100-tab.active {
     grid-column: 1 / -1;
     grid-row: 3;
     display: flex;
-    flex-wrap: nowrap;
-    gap: 5px;
+    flex-wrap: wrap;
+    gap: 6px;
   }
   .pc-dialog .pc-dossier > div {
-    flex: 1 1 auto;
+    flex: 1 0 auto;
     min-width: 0;
-    padding: 6px 7px 7px 8px;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 6px 10px 7px;
     border-radius: 12px;
   }
   .pc-dialog .pc-dossier dt {
     font-size: 11px;
-    white-space: nowrap;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
   .pc-dialog .pc-dossier dd {
     font-size: 13px;
     white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .pc-dialog .pc-faction {
+    max-width: 100%;
+    min-width: 0;
+  }
+  .pc-dialog .pc-faction i {
+    flex: none;
   }
   .pc-dialog .pc-awards {
     padding: 0 12px 8px;
