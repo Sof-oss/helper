@@ -36,7 +36,7 @@ const GLYPHS = Object.fromEntries(
   ].map(m => [m[1], m[2].replace(/href="\/assets\//g, 'href="../assets/')])
 );
 const FACTION_KEY = Object.fromEntries(
-  [...uiSrc.matchAll(/\{\s*key:\s*"(\w+)",\s*label:\s*"([^"]+)"/g)].map(m => [m[2], m[1]])
+  [...uiSrc.matchAll(/\{\s*key:\s*"(\w+)",\s*label:\s*"([^"]+)"/g)].map(m => [m[2].toLowerCase(), m[1]])
 );
 /* защита от тихой поломки: если формат исходников поменялся и разбор ничего не нашёл - сборка падает */
 if (!TABS.length || Object.keys(GLYPHS).length < 11 || Object.keys(FACTION_KEY).length < 11)
@@ -71,7 +71,11 @@ function shield(color, ch) {
 }
 function factionColor(data, g) {
   if (!g) return "#8196a9";
-  if (data.factions && data.factions[g]) return data.factions[g];
+  if (data.factions) {
+    if (data.factions[g]) return data.factions[g];
+    const low = String(g).trim().toLowerCase();
+    for (const k of Object.keys(data.factions)) if (k.trim().toLowerCase() === low) return data.factions[k];
+  }
   let h = 0;
   for (const c of g) h = (h * 31 + c.charCodeAt(0)) % 360;
   return "hsl(" + h + " 55% 62%)";
@@ -81,7 +85,7 @@ function factionColor(data, g) {
 function cardData(data, id) {
   const p = data.players[id],
     M = data.metrics,
-    key = FACTION_KEY[p.g];
+    key = FACTION_KEY[String(p.g || "").trim().toLowerCase()];
   const color = factionColor(data, p.g);
   const places = M.map((k, i) => ({ k, i, r: p.r[i] }))
     .filter(x => x.r && TABS.some(t => t.key === x.k))

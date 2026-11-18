@@ -153,9 +153,15 @@ function buildPlayers(o) {
   }
   /* цвета всех группировок, что встречаются у игроков (не только в топ-100) */
   const factions = {};
+  const colorsLow = factionColors
+    ? Object.fromEntries(Object.entries(factionColors).map(([k, v]) => [k.trim().toLowerCase(), v]))
+    : {};
   for (const id of Object.keys(out)) {
-    for (const g of [out[id].g].concat((out[id].gh || []).map(x => x[1])))
-      if (g && factionColors && factionColors[g]) factions[g] = factionColors[g];
+    for (const g of [out[id].g].concat((out[id].gh || []).map(x => x[1]))) {
+      if (!g) continue;
+      const c = (factionColors && factionColors[g]) || colorsLow[g.trim().toLowerCase()];
+      if (c) factions[g] = c;
+    }
   }
   const json = { updated, dates, metrics: METRICS, bosses: bossCols, factions, players: out };
   fs.writeFileSync(outputFile, JSON.stringify(json));

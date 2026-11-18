@@ -369,11 +369,17 @@ function factionEmblem(name) {
       [...part("var GLYPHS = {", "function emblem(").matchAll(/^\s*(\w+):\s*'(<.*)',?\s*$/gm)].map(m => [m[1], m[2]])
     );
     const keys = Object.fromEntries(
-      [...part("var THEMES = [", "];").matchAll(/\{\s*key:\s*"(\w+)",\s*label:\s*"([^"]+)"/g)].map(m => [m[2], m[1]])
+      [...part("var THEMES = [", "];").matchAll(/\{\s*key:\s*"(\w+)",\s*label:\s*"([^"]+)"/g)].map(m => [
+        m[2].toLowerCase(),
+        m[1]
+      ])
     );
     if (Object.keys(glyphs).length < 11 || Object.keys(keys).length < 11)
       throw new Error("build: не удалось прочитать эмблемы группировок из ui.js");
-    factionEmblemFn = n => (keys[n] && glyphs[keys[n]] ? { key: keys[n], svg: glyphs[keys[n]] } : null);
+    factionEmblemFn = n => {
+      const k = keys[String(n || "").trim().toLowerCase()];
+      return k && glyphs[k] ? { key: k, svg: glyphs[k] } : null;
+    };
   }
   return factionEmblemFn(name);
 }

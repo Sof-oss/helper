@@ -112,7 +112,11 @@
   }
   function factionColor(g) {
     if (!g) return "#8196a9";
-    if (data && data.factions && data.factions[g]) return data.factions[g];
+    if (data && data.factions) {
+      if (data.factions[g]) return data.factions[g];
+      const low = g.trim().toLowerCase();
+      for (const k of Object.keys(data.factions)) if (k.trim().toLowerCase() === low) return data.factions[k];
+    }
     let h = 0;
     for (const c of g) h = (h * 31 + c.charCodeAt(0)) % 360;
     return "hsl(" + h + " 55% 62%)";

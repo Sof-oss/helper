@@ -88,6 +88,10 @@ function factionsMarkup(ROOT) {
   const clansFile = readJson(path.join(ROOT, "top100", "clans.json"), { clans: [] });
   const data = readJson(path.join(ROOT, "top100-players.json"));
   const colors = readJson(path.join(ROOT, "top100", "factions.json"), {});
+  const colorsLow = Object.fromEntries(
+    Object.entries(colors).map(([k, v]) => [String(k).trim().toLowerCase(), v])
+  );
+  const colorOf = n => colors[n] || colorsLow[String(n || "").trim().toLowerCase()] || "#8fa3b4";
   const info = readJson(path.join(ROOT, "factions-info.json"), {});
   const uiSrc = fs.readFileSync(path.join(ROOT, "ui.js"), "utf8");
   const GLYPHS = Object.fromEntries(
@@ -98,8 +102,9 @@ function factionsMarkup(ROOT) {
     ].map(m => [m[1], m[2]])
   );
   const KEY = Object.fromEntries(
-    [...uiSrc.matchAll(/\{\s*key:\s*"(\w+)",\s*label:\s*"([^"]+)"/g)].map(m => [m[2], m[1]])
+    [...uiSrc.matchAll(/\{\s*key:\s*"(\w+)",\s*label:\s*"([^"]+)"/g)].map(m => [m[2].toLowerCase(), m[1]])
   );
+  const keyOf = n => KEY[String(n || "").trim().toLowerCase()];
   if (Object.keys(GLYPHS).length < 11 || Object.keys(KEY).length < 11)
     throw new Error("build-factions: не удалось прочитать эмблемы группировок из ui.js");
 
@@ -190,8 +195,8 @@ function factionsMarkup(ROOT) {
   ];
   const visuals = new Map(
     list.map(f => {
-      const key = KEY[f.c.name],
-        color = colors[f.c.name] || "#8fa3b4";
+      const key = keyOf(f.c.name),
+        color = colorOf(f.c.name);
       return [
         f.c.name,
         {
@@ -567,11 +572,12 @@ function factionsMarkup(ROOT) {
     const leaderId = f.leaderId && data.players[f.leaderId] ? f.leaderId : null;
     const post = safeUrl(add.post),
       vkUrl = add.vk && safeUrl(add.vk.url);
+    const key = keyOf(name);
     return {
       s: slugOf(name),
       n: name,
       c: v.color,
-      k: KEY[name] && GLYPHS[KEY[name]] ? KEY[name] : null,
+      k: key && GLYPHS[key] ? key : null,
       e: v.emblem,
       lv: c.level || 1,
       m: f.members,

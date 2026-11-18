@@ -300,10 +300,13 @@ players.forEach(pl => {
   if (pl.group && shown.has(pl.nick)) groupCount[pl.group] = (groupCount[pl.group] || 0) + 1;
 });
 const groupsNow = Object.keys(groupCount).sort((a, b) => groupCount[b] - groupCount[a] || a.localeCompare(b, "ru"));
+const colorByLow = Object.fromEntries(
+  Object.entries({ ...DEFAULT_FACTION_COLORS, ...factionColors }).map(([k, v]) => [k.trim().toLowerCase(), v])
+);
 const added = [];
 for (const g of groupsNow) {
   if (!factionColors[g]) {
-    factionColors[g] = pickColor(Object.values(factionColors));
+    factionColors[g] = colorByLow[g.trim().toLowerCase()] || pickColor(Object.values(factionColors));
     added.push(g);
   }
 }

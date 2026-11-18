@@ -121,8 +121,12 @@ window.__trapTab = function (box, e) {
   }
   /* эмблема и фото базы по названию группировки - для карточек игроков (player-card.js) */
   window.__factionEmblem = function (name) {
+    var low = String(name || "")
+      .trim()
+      .toLowerCase();
+    if (!low) return null;
     var t = THEMES.filter(function (x) {
-      return x.label === name;
+      return x.label.toLowerCase() === low;
     })[0];
     return t ? { key: t.key, svg: GLYPHS[t.key] } : null;
   };

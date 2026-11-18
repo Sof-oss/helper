@@ -305,3 +305,39 @@ test("активность: карта players для «Личного дела�
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 });
+
+test("МОНОЛИТ: наследует шеврон, фон и цвет старого Монолита без учёта регистра", () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "hotz-factions-monolith-"));
+  const write = (file, data) => {
+    fs.mkdirSync(path.dirname(path.join(tmp, file)), { recursive: true });
+    fs.writeFileSync(path.join(tmp, file), typeof data === "string" ? data : JSON.stringify(data));
+  };
+  try {
+    write("ui.js", fs.readFileSync(path.join(ROOT, "ui.js"), "utf8"));
+    write("assets/bg-monolith-card.webp", "stub");
+    write("top100/factions.json", { Монолит: "#d9a52c" });
+    write("top100/clans.json", {
+      clans: [{ name: "МОНОЛИТ", level: 1, members: 2, leader: { id: 4817, name: "ХАРОН" } }]
+    });
+    write("factions-info.json", {});
+    write("top100-data.js", 'window.TOP100_HISTORY={"id":"2026-11-18"};');
+    write("top100-players.json", {
+      metrics: ["reputation"],
+      players: {
+        4817: { n: "ХАРОН", g: "МОНОЛИТ", l: 11, v: [11018] }
+      }
+    });
+
+    const res = factions(tmp);
+    const mono = res.cards.factions.find(f => f.n === "МОНОЛИТ");
+    assert.ok(mono);
+    assert.equal(mono.k, "monolith");
+    assert.equal(mono.c, "#d9a52c");
+    assert.doesNotMatch(mono.e, /<text\b/);
+    assert.match(mono.e, /#2aa7a3/);
+    assert.match(res.list, /bg-monolith-card\.webp/);
+    assert.match(res.list, /--fx:#d9a52c/);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
