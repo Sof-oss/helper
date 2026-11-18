@@ -377,7 +377,12 @@ function factionEmblem(name) {
     if (Object.keys(glyphs).length < 11 || Object.keys(keys).length < 11)
       throw new Error("build: не удалось прочитать эмблемы группировок из ui.js");
     factionEmblemFn = n => {
-      const k = keys[String(n || "").trim().toLowerCase()];
+      const k =
+        keys[
+          String(n || "")
+            .trim()
+            .toLowerCase()
+        ];
       return k && glyphs[k] ? { key: k, svg: glyphs[k] } : null;
     };
   }

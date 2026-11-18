@@ -341,3 +341,37 @@ test("МОНОЛИТ: наследует шеврон, фон и цвет ста
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 });
+
+test("новичок в день появления: приход засчитывается, если игрок появился позже стартового среза", () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "hotz-factions-newcomer-"));
+  const write = (file, data) => {
+    fs.mkdirSync(path.dirname(path.join(tmp, file)), { recursive: true });
+    fs.writeFileSync(path.join(tmp, file), typeof data === "string" ? data : JSON.stringify(data));
+  };
+  try {
+    write("ui.js", fs.readFileSync(path.join(ROOT, "ui.js"), "utf8"));
+    write("top100/factions.json", { Монолит: "#d9a52c" });
+    write("top100/clans.json", {
+      clans: [{ name: "МОНОЛИТ", level: 1, members: 2, leader: { id: 1, name: "Лидер" } }]
+    });
+    write("factions-info.json", {});
+    write("top100-data.js", 'window.TOP100_HISTORY={"id":"2026-11-18"};');
+    write("top100-players.json", {
+      updated: "2026-11-18 03:01",
+      dates: [0, 1, 2].map(d => Date.UTC(2026, 10, 16 + d, 9)),
+      metrics: ["reputation"],
+      players: {
+        1: { n: "Старожил", g: "МОНОЛИТ", l: 11, v: [100], gh: [[0, "МОНОЛИТ"]] },
+        2: { n: "Новичок", g: "МОНОЛИТ", l: 1, v: [10], gh: [[2, "МОНОЛИТ"]] }
+      }
+    });
+    const res = factions(tmp);
+    const mono = res.cards.factions.find(f => f.n === "МОНОЛИТ");
+    assert.deepEqual(
+      mono.ev.map(e => e.d + " " + e.t + " " + e.n),
+      ["2026-11-18 join Новичок"]
+    );
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});

@@ -88,10 +88,15 @@ function factionsMarkup(ROOT) {
   const clansFile = readJson(path.join(ROOT, "top100", "clans.json"), { clans: [] });
   const data = readJson(path.join(ROOT, "top100-players.json"));
   const colors = readJson(path.join(ROOT, "top100", "factions.json"), {});
-  const colorsLow = Object.fromEntries(
-    Object.entries(colors).map(([k, v]) => [String(k).trim().toLowerCase(), v])
-  );
-  const colorOf = n => colors[n] || colorsLow[String(n || "").trim().toLowerCase()] || "#8fa3b4";
+  const colorsLow = Object.fromEntries(Object.entries(colors).map(([k, v]) => [String(k).trim().toLowerCase(), v]));
+  const colorOf = n =>
+    colors[n] ||
+    colorsLow[
+      String(n || "")
+        .trim()
+        .toLowerCase()
+    ] ||
+    "#8fa3b4";
   const info = readJson(path.join(ROOT, "factions-info.json"), {});
   const uiSrc = fs.readFileSync(path.join(ROOT, "ui.js"), "utf8");
   const GLYPHS = Object.fromEntries(
@@ -104,7 +109,12 @@ function factionsMarkup(ROOT) {
   const KEY = Object.fromEntries(
     [...uiSrc.matchAll(/\{\s*key:\s*"(\w+)",\s*label:\s*"([^"]+)"/g)].map(m => [m[2].toLowerCase(), m[1]])
   );
-  const keyOf = n => KEY[String(n || "").trim().toLowerCase()];
+  const keyOf = n =>
+    KEY[
+      String(n || "")
+        .trim()
+        .toLowerCase()
+    ];
   if (Object.keys(GLYPHS).length < 11 || Object.keys(KEY).length < 11)
     throw new Error("build-factions: не удалось прочитать эмблемы группировок из ui.js");
 
@@ -437,8 +447,20 @@ function factionsMarkup(ROOT) {
      связываем в один переход: «ушёл в X» / «из A» вместо «покинул» + «принят»
      (в gh у build-players.js между ними стоит пустая запись, которая разрывает соседние пары) */
   const dayGap = (a, b) => (Date.parse(b) - Date.parse(a)) / 864e5;
+  /* самый ранний индекс с данными о группировке (05.10.2026 в выгрузке, 0 в тестах):
+     у игроков на этом срезе стартовая группировка - не «приход», а у впервые появившихся позже - настоящий приход */
+  let firstGhIdx = Infinity;
+  for (const p of Object.values(data.players)) {
+    const gh = p.gh;
+    if (Array.isArray(gh) && gh.length && gh[0][0] < firstGhIdx) firstGhIdx = gh[0][0];
+  }
   for (const [id, p] of Object.entries(data.players)) {
     const gh = p.gh || [];
+    if (gh.length && gh[0][0] > firstGhIdx) {
+      const first = noGroup(gh[0][1]),
+        fd = histDates[gh[0][0]];
+      if (first && fd && events.has(first)) events.get(first).push({ d: fd, t: "join", id, n: p.n, x: "" });
+    }
     for (let i = 1; i < gh.length; i++) {
       const prev = noGroup(gh[i - 1][1]),
         next = noGroup(gh[i][1]),

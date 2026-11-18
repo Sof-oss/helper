@@ -85,7 +85,12 @@ function factionColor(data, g) {
 function cardData(data, id) {
   const p = data.players[id],
     M = data.metrics,
-    key = FACTION_KEY[String(p.g || "").trim().toLowerCase()];
+    key =
+      FACTION_KEY[
+        String(p.g || "")
+          .trim()
+          .toLowerCase()
+      ];
   const color = factionColor(data, p.g);
   const places = M.map((k, i) => ({ k, i, r: p.r[i] }))
     .filter(x => x.r && TABS.some(t => t.key === x.k))
