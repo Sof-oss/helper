@@ -60,6 +60,9 @@
 :root[data-theme="bandits"] {
   --depth-img: url("assets/depth-bandits.webp");
 }
+:root[data-theme="military"] {
+  --depth-img: url("assets/depth-military.webp");
+}
 @media (max-width: 760px) {
   :root {
     --depth-img: url("assets/depth-merc-m.webp");
@@ -96,5 +99,8 @@
   }
   :root[data-theme="bandits"] {
     --depth-img: url("assets/depth-bandits-m.webp");
+  }
+  :root[data-theme="military"] {
+    --depth-img: url("assets/depth-military-m.webp");
   }
 }

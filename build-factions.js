@@ -102,7 +102,7 @@ function factionsMarkup(ROOT) {
   const GLYPHS = Object.fromEntries(
     [
       ...uiSrc.matchAll(
-        /^\s*(merc|dolg|svoboda|science|monolith|rassvet|loners|traders|renegades|clearsky|bandits):\s*'(.*)',?\s*$/gm
+        /^\s*(merc|dolg|svoboda|science|monolith|rassvet|loners|traders|renegades|clearsky|bandits|military):\s*'(.*)',?\s*$/gm
       )
     ].map(m => [m[1], m[2]])
   );

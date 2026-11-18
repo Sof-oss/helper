@@ -16,7 +16,7 @@ from PIL import Image, ImageFilter
 ROOT = os.path.dirname(os.path.abspath(__file__))
 MODEL_URL = "https://huggingface.co/onnx-community/depth-anything-v2-small/resolve/main/onnx/model.onnx"
 MODEL = os.path.join(ROOT, ".cache", "depth-anything-v2-small.onnx")
-THEMES = ["merc", "dolg", "svoboda", "science", "monolith", "rassvet", "loners", "traders", "renegades", "clearsky", "bandits"]
+THEMES = ["merc", "dolg", "svoboda", "science", "monolith", "rassvet", "loners", "traders", "renegades", "clearsky", "bandits", "military"]
 # фото -> ширина карты: для экранов шире 760px одна карта на bg-<тема>.webp и bg-<тема>-1280.webp, для телефона - своя
 VARIANTS = [("", 960), ("-m", 480)]
 

@@ -817,7 +817,8 @@ const INTRO_FLAG = () =>
     "traders",
     "renegades",
     "clearsky",
-    "bandits"
+    "bandits",
+    "military"
   ];
   const map = {};
   for (const t of THEMES)

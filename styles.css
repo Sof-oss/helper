@@ -66,6 +66,9 @@ body {
 :root[data-theme="bandits"] {
   --bg-img: url("assets/bg-bandits.webp");
 }
+:root[data-theme="military"] {
+  --bg-img: url("assets/bg-military.webp");
+}
 @media (max-width: 1366px) {
   :root {
     --bg-img: url("assets/bg-merc-1280.webp");
@@ -102,6 +105,9 @@ body {
   }
   :root[data-theme="bandits"] {
     --bg-img: url("assets/bg-bandits-1280.webp");
+  }
+  :root[data-theme="military"] {
+    --bg-img: url("assets/bg-military-1280.webp");
   }
 }
 @media (max-width: 760px) {
@@ -141,6 +147,9 @@ body {
   :root[data-theme="bandits"] {
     --bg-img: url("assets/bg-bandits-m.webp");
   }
+  :root[data-theme="military"] {
+    --bg-img: url("assets/bg-military-m.webp");
+  }
 }
 :root {
   --bg-lq: url("data:image/webp;base64,UklGRoAAAABXRUJQVlA4IHQAAADwBACdASogABIAPtFSoUuoJKMhsAgBABoJYwClrBueCIzyHaeTkzxjHSeBzYvVPLAA/ukl7AwnT7DWgbyD2ngiRwR175pLv232N/wMTkgsNDYXjKVZr4qhqQIhJsILCetGwkAIGFFlp8Dr8CV5hbg6dAAAAA==");
@@ -171,6 +180,9 @@ body {
 }
 :root[data-theme="clearsky"] {
   --bg-lq: url("data:image/webp;base64,UklGRpAAAABXRUJQVlA4IIQAAAAQBQCdASogABIAPtFWpEuoJKOhsAgBABoJZQCnFCHgeZSMJStjY73P/1JsWLyPe+wAAP7o45/pCYBYZhGxgpLXQjPa6VwisOLsyhAgOCdMd8+b7dr2cG2liH6CNEQhPUKffXq+w4nLXbiZt/d+FDIyJC1d7bRTs97YYdEq5vGxtbzh4AA=");
+}
+:root[data-theme="military"] {
+  --bg-lq: url("data:image/webp;base64,UklGRpAAAABXRUJQVlA4IIQAAADwBACdASogABIAPt1apUyopSOiMAgBEBuJZwDNlf/gHQwFTKha10uoWE9Z7FErDAAA/tJEn6QQ1+qe1a1dxIUuu2iJYAmL8Pv10OWlgSDE1TAwyxMJ2ZEgjw6RkTqNC0oXS1ytw9S0KiZ6GVRlAZISejWRB9AEXBjjSEo6oAPi5fLwAAA=");
 }
 body::before {
   content: "";
@@ -1441,6 +1453,18 @@ svg.target-icon {
   --bg-dim: 0.34;
   --bg-lq: linear-gradient(160deg, #0a1515, #060e0e);
 }
+:root[data-theme="military"] {
+  --accent: #8be4b0;
+  --accent-2: #c7f3d9;
+  --accent-3: #e0a24b;
+  --accent-ink: #04140b;
+  --glass-line: rgba(139, 228, 176, 0.2);
+  --wash: rgba(139, 228, 176, 0.13);
+  --panel: #0a140f;
+  --panel-2: #060d09;
+  --panel-line: #1c3528;
+  --bg-dim: 0.36;
+}
 body::after {
   content: "";
   position: fixed;
@@ -1838,6 +1862,9 @@ input[type="number"]:focus {
 }
 .theme-item[data-theme-btn="bandits"] .ti-thumb {
   background-image: url("assets/bg-bandits-thumb.webp");
+}
+.theme-item[data-theme-btn="military"] .ti-thumb {
+  background-image: url("assets/bg-military-thumb.webp");
 }
 .theme-item:hover {
   transform: none;

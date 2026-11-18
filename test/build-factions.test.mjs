@@ -375,3 +375,38 @@ test("новичок в день появления: приход засчиты
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 });
+
+test("военные: подхватывает тему military, шеврон, цвет и фон карточки", () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "hotz-factions-mil-"));
+  const write = (file, data) => {
+    fs.mkdirSync(path.dirname(path.join(tmp, file)), { recursive: true });
+    fs.writeFileSync(path.join(tmp, file), typeof data === "string" ? data : JSON.stringify(data));
+  };
+  try {
+    write("ui.js", fs.readFileSync(path.join(ROOT, "ui.js"), "utf8"));
+    write("assets/bg-military-card.webp", fs.readFileSync(path.join(ROOT, "assets/bg-military-card.webp")));
+    write("top100/factions.json", { Военные: "#8be4b0" });
+    write("top100/clans.json", {
+      clans: [{ name: "Военные", level: 2, members: 2, leader: { id: 1, name: "Командир" } }]
+    });
+    write("factions-info.json", {});
+    write("top100-data.js", 'window.TOP100_HISTORY={"id":"2026-11-18"};');
+    write("top100-players.json", {
+      metrics: ["reputation"],
+      players: { 1: { n: "Командир", g: "Военные", l: 22, v: [500] } }
+    });
+
+    const res = factions(tmp);
+    const mil = res.cards.factions.find(f => f.n === "Военные");
+    assert.ok(mil);
+    assert.equal(mil.k, "military");
+    assert.equal(mil.c, "#8be4b0");
+    assert.doesNotMatch(mil.e, /<text\b/);
+    assert.match(mil.e, /#8be4b0/);
+    assert.match(mil.e, /#e0a24b/);
+    assert.match(res.list, /bg-military-card\.webp/);
+    assert.match(res.list, /--fx:#8be4b0/);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});
