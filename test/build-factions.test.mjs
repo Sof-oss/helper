@@ -410,3 +410,55 @@ test("военные: подхватывает тему military, шеврон, 
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 });
+
+test("активность: провал в серии (склейка тёзок или сброс) не уводит балл в минус и учитывает реальный рост", () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "hotz-factions-drop-"));
+  const write = (file, data) => {
+    fs.mkdirSync(path.dirname(path.join(tmp, file)), { recursive: true });
+    fs.writeFileSync(path.join(tmp, file), typeof data === "string" ? data : JSON.stringify(data));
+  };
+  try {
+    write("ui.js", fs.readFileSync(path.join(ROOT, "ui.js"), "utf8"));
+    write("top100/factions.json", { МОНОЛИТ: "#d9a52c" });
+    write("top100-data.js", 'window.TOP100_HISTORY={"id":"2026-11-19"};');
+    /* 12 дневных точек; окно 7 дней начинается с индекса 4 */
+    const dates = Array.from({ length: 12 }, (_, i) => Date.UTC(2026, 10, 8 + i, 3));
+    write("top100-players.json", {
+      updated: "2026-11-19 03:01",
+      dates,
+      metrics: ["reputation", "bosses"],
+      players: {
+        /* обычный активный игрок для задания якоря (+1000 реп, +10 боссов) */
+        1: {
+          n: "Ориентир",
+          g: "МОНОЛИТ",
+          l: 20,
+          v: [5000, 50],
+          s: [
+            [4, 19, 4000, 40],
+            [11, 20, 5000, 50]
+          ]
+        },
+        /* игрок с приклеенной старой точкой 44233 до окна и реальным ростом 110 -> 792 внутри окна */
+        7287: {
+          n: "Бродяга",
+          g: "МОНОЛИТ",
+          l: 3,
+          v: [792, 5],
+          s: [
+            [0, null, 44233, 181],
+            [9, 1, 110, 1],
+            [11, 3, 792, 5]
+          ]
+        }
+      }
+    });
+    const res = factions(tmp);
+    const act = res.cards.players["7287"];
+    assert.ok(act[0] >= 0 && act[0] <= 100, "балл активности должен быть в [0, 100], получено " + act[0]);
+    assert.deepEqual(act.slice(1), [682, 4]);
+    assert.ok(act[0] > 0, "реальный рост внутри недели должен давать положительную активность");
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});

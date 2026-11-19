@@ -163,3 +163,35 @@ test("CSV со старой колонкой «Завершено экспеди
   );
   fs.rmSync(dir, { recursive: true });
 });
+
+test("тёзки в старых снимках: история ветерана не приклеивается к новичку с тем же ником", () => {
+  const now = Date.now();
+  const dir = setup(
+    [
+      row(1, "Бродяга", 7, 44563, { id: "875" }),
+      row(2, "Бродяга", 0, 792, { id: "7287" }),
+      row(3, "No Name", 0, 10, { id: "6032" })
+    ],
+    {
+      [snapName(now - 10 * DAY)]: snapAll(
+        { Бродяга: [1, 7], "No Name": [2, 12] },
+        { Бродяга: [1, 44233], "No Name": [2, 63011] }
+      )
+    }
+  );
+  run(dir);
+  const playersJson = JSON.parse(fs.readFileSync(path.join(dir, "top100-players.json"), "utf8"));
+  const vet = playersJson.players["875"];
+  const newbie = playersJson.players["7287"];
+  const homonym = playersJson.players["6032"];
+  /* ветеран 875 получает старую точку (44233 -> 44563) */
+  assert.equal(vet.s.length, 2);
+  assert.equal(vet.s[0][7], 44233);
+  assert.equal(vet.s[1][7], 44563);
+  /* новичок 7287 и тёзка 6032 не получают чужие 44233 и 63011 */
+  assert.equal(newbie.s.length, 1);
+  assert.equal(newbie.s[0][7], 792);
+  assert.equal(homonym.s.length, 1);
+  assert.equal(homonym.s[0][7], 10);
+  fs.rmSync(dir, { recursive: true });
+});

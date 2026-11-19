@@ -525,10 +525,18 @@ function factionsMarkup(ROOT) {
       const base = actBaseOf(p);
       const row = [];
       for (let mi = 0; mi < actMetricsN; mi++) {
-        const before = valueAt(p, mi, base),
-          now = valueAt(p, mi, actLastIdx);
-        let g = now - before;
-        if (mi === actTalMi && actTalRows) g = actTalCum(now) - actTalCum(before); /* усилие вместо штук */
+        /* суммируем только положительные шаги внутри окна (base..actLastIdx]: для монотонного ряда
+           это равно now - before, но защищает от отрицательных баллов при сбросах или склейке тёзок */
+        let prev = valueAt(p, mi, base),
+          g = 0;
+        for (const pt of p.s) {
+          if (pt[0] <= base) continue;
+          if (pt[0] > actLastIdx) break;
+          const x = pt[2 + mi];
+          if (x === null || x === undefined) continue;
+          if (x > prev) g += mi === actTalMi && actTalRows ? actTalCum(x) - actTalCum(prev) : x - prev;
+          prev = x;
+        }
         row.push(g);
         if (g > 0) actGains[mi].push(g);
       }
@@ -548,7 +556,7 @@ function factionsMarkup(ROOT) {
         n = 0;
       for (let mi = 0; mi < actMetricsN; mi++) {
         if (!(actAnchors[mi] > 0)) continue;
-        sum += Math.min(100, (row[mi] / actAnchors[mi]) * 100);
+        sum += Math.max(0, Math.min(100, (row[mi] / actAnchors[mi]) * 100));
         n++;
       }
       actScores[id] = n ? Math.round(sum / n) : 0;

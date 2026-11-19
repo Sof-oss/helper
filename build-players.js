@@ -51,26 +51,85 @@ function buildPlayers(o) {
     return { id: f.replace(".json", ""), cols: d.cols, p: d.p };
   });
   const firstPlayerMs = playerSnaps.length ? snapTime(playerSnaps[0].id) : Infinity;
-  /* ник -> ID по всем снимкам игроков (последний выигрывает) */
-  const idByNick = {};
-  for (const s of playerSnaps) for (const id of Object.keys(s.p)) idByNick[s.p[id][0]] = id;
-  for (const pl of players) if (pl.id) idByNick[pl.nick] = pl.id;
+  /* ник -> все ID, когда-либо носившие этот ник, и первые известные показатели каждого ID в снимках игроков:
+     старые снимки рейтинга хранят только ник, поэтому новичку-тёзке нельзя приклеивать чужую историю с более
+     высокими показателями - значения в игре не убывают */
+  const idsByNick = new Map();
+  const addNick = (nick, id) => {
+    if (!nick || !id) return;
+    let set = idsByNick.get(nick);
+    if (!set) idsByNick.set(nick, (set = new Set()));
+    set.add(id);
+  };
+  const firstSnapInfo = {};
+  playerSnaps.forEach((s, si) => {
+    const ci = {};
+    s.cols.forEach((c, i) => {
+      ci[c] = i + 3;
+    });
+    for (const id of Object.keys(s.p)) {
+      const r = s.p[id];
+      addNick(r[0], id);
+      if (!firstSnapInfo[id]) {
+        const vals = {};
+        for (const k of METRICS) if (ci[k] !== undefined) vals[k] = r[ci[k]];
+        firstSnapInfo[id] = { idx: si, vals };
+      }
+    }
+  });
+  for (const pl of players) if (pl.id) addNick(pl.nick, pl.id);
+
+  const pickLegacyId = (nick, vals) => {
+    const ids = idsByNick.get(nick);
+    if (!ids || !ids.size) return null;
+    const keys = Object.keys(vals);
+    let bestId = null,
+      bestIdx = Infinity,
+      bestDiff = Infinity;
+    for (const id of ids) {
+      const info = firstSnapInfo[id];
+      if (!info) continue;
+      let ok = true,
+        diff = 0;
+      for (const k of keys) {
+        const fv = info.vals[k];
+        if (fv === undefined) continue;
+        if (vals[k] > fv) {
+          ok = false;
+          break;
+        }
+        diff += fv - vals[k];
+      }
+      if (!ok) continue;
+      if (info.idx < bestIdx || (info.idx === bestIdx && diff < bestDiff)) {
+        bestId = id;
+        bestIdx = info.idx;
+        bestDiff = diff;
+      }
+    }
+    return bestId;
+  };
 
   /* точка: ID -> {nick, group, off, vals{col: число}} ; у старых снимков рейтинга group = undefined */
   const points = [];
   for (const ls of legacySnaps) {
     const ms = snapTime(ls.id);
     if (ms >= firstPlayerMs) continue;
-    const byId = {};
+    const byNick = {};
     for (const key of METRICS) {
       const sec = ls.data[key];
       if (!sec) continue;
       for (const nick of Object.keys(sec)) {
-        const v = sec[nick],
-          id = idByNick[nick];
-        if (!id || !Array.isArray(v)) continue;
-        (byId[id] = byId[id] || { nick, vals: {} }).vals[key] = v[1];
+        const v = sec[nick];
+        if (!Array.isArray(v)) continue;
+        (byNick[nick] = byNick[nick] || {})[key] = v[1];
       }
+    }
+    const byId = {};
+    for (const [nick, vals] of Object.entries(byNick)) {
+      const id = pickLegacyId(nick, vals);
+      if (!id) continue;
+      byId[id] = { nick, vals };
     }
     points.push({ ms, byId });
   }
