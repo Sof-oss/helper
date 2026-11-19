@@ -6,35 +6,31 @@
 .fx-search,
 .fx-chip,
 .fx-stat {
-  --glass-tint: color-mix(in srgb, var(--fx, var(--accent)) 6%, rgba(10, 17, 26, 0.12));
+  --glass-tint: color-mix(in srgb, var(--fx, var(--accent)) 8%, rgba(8, 13, 20, 0.78));
 }
-/* жидкое стекло 2.0: почти прозрачная линза - лёгкое размытие, яркие блики по краям */
+/* затемнённое стекло ПДА: высокий контраст поверх любого фона, спокойные грани */
 .fx-hero,
 .fx-rank,
 .fx-card {
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
   background:
-    radial-gradient(120% 70% at 12% 0, rgba(255, 255, 255, 0.08), transparent 55%),
     linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.09),
-      rgba(255, 255, 255, 0.015) 36%,
-      rgba(255, 255, 255, 0) 60%,
-      rgba(255, 255, 255, 0.045)
+      180deg,
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0) 40%
     ),
     var(--glass-tint);
-  -webkit-backdrop-filter: blur(9px) saturate(190%) brightness(1.06);
-  backdrop-filter: blur(9px) saturate(190%) brightness(1.06);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  backdrop-filter: blur(10px) saturate(140%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.42),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.12),
-    inset 0 0 22px rgba(255, 255, 255, 0.045),
-    0 12px 32px rgba(0, 0, 0, 0.3);
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 12px 30px rgba(0, 0, 0, 0.36);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
-/* блики по краю: ярче сверху слева и снизу справа */
+/* мягкий верхний край по контуру без слепящего белого блика */
 .fx-hero::after,
 .fx-rank::after,
 .fx-card::after {
@@ -44,12 +40,10 @@
   padding: 1px;
   border-radius: inherit;
   background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.7),
-    rgba(255, 255, 255, 0.1) 22%,
-    rgba(255, 255, 255, 0.03) 50%,
-    rgba(255, 255, 255, 0.1) 78%,
-    rgba(255, 255, 255, 0.45)
+    180deg,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.02) 45%,
+    transparent
   );
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
@@ -62,7 +56,7 @@
   .fx-hero,
   .fx-rank,
   .fx-card {
-    background: color-mix(in srgb, var(--fx, var(--accent)) 8%, rgba(10, 16, 24, 0.9));
+    background: color-mix(in srgb, var(--fx, var(--accent)) 8%, rgba(10, 16, 24, 0.92));
   }
 }
 
@@ -74,7 +68,7 @@
   justify-content: space-between;
   gap: 18px 28px;
   margin: 0 0 16px;
-  padding: 22px 26px 24px;
+  padding: 20px 24px 22px;
 }
 .fx-hero-text {
   flex: 1 1 440px;
@@ -83,7 +77,7 @@
 .fx-intro {
   max-width: 680px;
   margin: 10px 0 0;
-  color: #c3d1dc;
+  color: #cbd8e3;
   font-size: var(--fs-md);
   line-height: 1.55;
 }
@@ -103,10 +97,10 @@
   justify-content: center;
   min-width: 112px;
   padding: 12px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 18px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)), var(--glass-tint);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 6%, rgba(6, 11, 18, 0.72));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
   text-align: center;
 }
 .fx-stat b {
@@ -118,9 +112,9 @@
   font-variant-numeric: tabular-nums;
 }
 .fx-stat span {
-  margin-top: 3px;
-  color: #9fb2c2;
-  font-size: 11px;
+  margin-top: 4px;
+  color: #aec0cf;
+  font-size: 11.5px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -159,11 +153,11 @@
 }
 .fx-rank-updated {
   flex: 0 0 auto;
-  padding: 4px 9px;
+  padding: 5px 10px;
   border: 1px solid color-mix(in srgb, var(--m, var(--accent)) 35%, var(--panel-line));
-  border-radius: 999px;
+  border-radius: 5px;
   background: color-mix(in srgb, var(--m, var(--accent)) 8%, #0a0f14);
-  color: #b9c9d6;
+  color: #c3d2de;
   font:
     700 11px/1 "ZoneMono",
     ui-monospace,
@@ -176,13 +170,13 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  margin: 0 0 8px;
+  margin: 0 0 10px;
 }
 .fx-rank-period-label {
-  margin-right: 2px;
-  color: #7f95a8;
+  margin-right: 4px;
+  color: #8ea3b5;
   font:
-    700 10px/1 "ZoneMono",
+    700 11px/1 "ZoneMono",
     ui-monospace,
     monospace;
   letter-spacing: 0.08em;
@@ -190,10 +184,10 @@
 }
 .fx-rank-period {
   padding: 6px 11px;
-  border: 1px solid var(--panel-line);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.03);
-  color: #aebfce;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(6, 11, 18, 0.55);
+  color: #b7c8d6;
   font:
     600 12px/1 Oswald,
     "Segoe UI",
@@ -207,7 +201,7 @@
 }
 .fx-rank-period.on {
   border-color: var(--m, var(--accent));
-  background: color-mix(in srgb, var(--m, var(--accent)) 14%, #0a0f14);
+  background: color-mix(in srgb, var(--m, var(--accent)) 22%, #0a1118);
   color: #fff;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--m, var(--accent)) 30%, transparent);
 }
@@ -330,10 +324,13 @@
   place-items: center;
   width: 30px;
   height: 30px;
-  border: 1px solid #33485a;
+  border: 1.5px solid #4f6b82;
   border-radius: 50%;
-  background: #0a0f14;
-  color: #b9c9d6;
+  background: radial-gradient(circle at 35% 30%, #203344, #0c141d);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.45);
+  color: #e2edf6;
   font:
     700 14px/1 "ZoneMono",
     ui-monospace,
@@ -501,10 +498,13 @@
   place-items: center;
   width: 26px;
   height: 26px;
-  border: 1px solid #33485a;
+  border: 1.5px solid #4f6b82;
   border-radius: 50%;
-  background: #0a0f14;
-  color: #b9c9d6;
+  background: radial-gradient(circle at 35% 30%, #203344, #0c141d);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.45);
+  color: #e2edf6;
   font:
     700 12px/1 "ZoneMono",
     ui-monospace,
@@ -714,8 +714,8 @@ body.fx-rank-lock {
     padding-bottom: 0;
   }
   .fx-rank-tab {
-    padding: 8px 4px;
-    font-size: 11px;
+    padding: 8px 6px;
+    font-size: 12px;
     line-height: 1.15;
     text-align: center;
     white-space: normal;
@@ -752,29 +752,42 @@ body.fx-rank-lock {
     transition: none;
   }
 }
-/* рейтинг на странице - стеклянная полоса: топ-5 строкой, полный рейтинг - в окне */
+/* рейтинг на странице - стеклянная полоса ПДА: топ-5 строкой, полный рейтинг - в окне */
 .fx-rank {
-  --glass-tint: color-mix(in srgb, var(--m, var(--accent)) 6%, rgba(10, 17, 26, 0.14));
+  --glass-tint: color-mix(in srgb, var(--m, var(--accent)) 7%, rgba(8, 13, 20, 0.82));
   overflow: visible;
   padding: 18px 20px 16px;
 }
 .fx-rank::before {
-  left: 22px;
-  right: 22px;
-  border-radius: 0 0 3px 3px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 10px 10px 0 0;
 }
 .fx-rank > * {
   position: relative;
   z-index: 1;
 }
-.fx-rank-period,
-.fx-rank-tab {
-  border-color: rgba(255, 255, 255, 0.14);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
+.fx-rank-period {
+  border-color: rgba(255, 255, 255, 0.13);
+  border-radius: 6px;
+  background: rgba(6, 11, 18, 0.62);
 }
 .fx-rank-period.on {
-  background: color-mix(in srgb, var(--m, var(--accent)) 30%, rgba(255, 255, 255, 0.08));
+  border-color: var(--m, var(--accent));
+  background: color-mix(in srgb, var(--m, var(--accent)) 26%, rgba(8, 13, 20, 0.88));
+}
+.fx-rank-tab {
+  border-color: rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  background: rgba(7, 13, 20, 0.68);
+}
+.fx-rank-tab.on {
+  border-color: color-mix(in srgb, var(--m, var(--accent)) 80%, rgba(255, 255, 255, 0.18));
+  background: color-mix(in srgb, var(--m, var(--accent)) 22%, rgba(8, 13, 20, 0.92));
+  box-shadow:
+    inset 0 -2px 0 var(--m, var(--accent)),
+    0 2px 10px color-mix(in srgb, var(--m, var(--accent)) 20%, transparent);
 }
 .fx-rank-compact .fx-rank-cards {
   gap: 8px;
@@ -790,9 +803,9 @@ body.fx-rank-lock {
   column-gap: 9px;
   align-items: center;
   padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.015));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: linear-gradient(170deg, color-mix(in srgb, var(--fx, var(--accent)) 10%, rgba(10, 17, 25, 0.82)), rgba(7, 12, 18, 0.9));
   text-align: left;
   transition:
     transform 0.15s,
@@ -802,8 +815,8 @@ body.fx-rank-lock {
   display: none;
 }
 .fx-rank-compact .fx-rank-card:nth-child(1) {
-  border-color: rgba(246, 211, 107, 0.35);
-  background: linear-gradient(160deg, rgba(246, 211, 107, 0.12), rgba(255, 255, 255, 0.015));
+  border-color: rgba(246, 211, 107, 0.4);
+  background: linear-gradient(160deg, rgba(246, 211, 107, 0.15), rgba(8, 13, 20, 0.9));
 }
 .fx-rank-compact .fx-rank-card:hover,
 .fx-rank-compact .fx-rank-card:focus-visible {
@@ -834,7 +847,7 @@ body.fx-rank-lock {
 .fx-rank-compact .fx-rank-card small {
   grid-area: small;
   margin: 1px 0 0;
-  font-size: 11px;
+  font-size: 11.5px;
 }
 .fx-rank-compact .fx-rank-card strong {
   grid-area: value;
@@ -859,16 +872,16 @@ body.fx-rank-lock {
   margin: 0 0 0 auto;
   padding: 9px 16px;
   border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
 }
 .fx-rank-open:hover,
 .fx-rank-open:focus-visible {
   border-color: var(--m, var(--accent));
-  background: color-mix(in srgb, var(--m, var(--accent)) 14%, transparent);
+  background: color-mix(in srgb, var(--m, var(--accent)) 16%, transparent);
 }
 .fx-rank-dialog {
-  --glass-tint: color-mix(in srgb, var(--m, var(--accent)) 5%, rgba(8, 13, 20, 0.5));
+  --glass-tint: color-mix(in srgb, var(--m, var(--accent)) 6%, rgba(8, 13, 20, 0.92));
 }
 @media (max-width: 1100px) and (min-width: 761px) {
   .fx-rank-compact .fx-rank-cards {
@@ -932,26 +945,26 @@ body.fx-rank-lock {
 }
 .fx-search input {
   width: 100%;
-  height: 44px;
-  padding: 0 16px 0 44px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)), var(--glass-tint);
-  -webkit-backdrop-filter: blur(9px) saturate(180%) brightness(1.05);
-  backdrop-filter: blur(9px) saturate(180%) brightness(1.05);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  height: 42px;
+  padding: 0 14px 0 42px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 5%, rgba(8, 13, 20, 0.82));
+  -webkit-backdrop-filter: blur(8px) saturate(135%);
+  backdrop-filter: blur(8px) saturate(135%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
   color: #eef4f8;
   font: inherit;
   font-size: var(--fs-md);
 }
 .fx-search input::placeholder {
-  color: #8ea3b5;
+  color: #93a6b6;
 }
 .fx-search input:focus {
   border-color: color-mix(in srgb, var(--accent) 75%, #fff3);
   outline: none;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
     0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
 }
 .fx-filters {
@@ -964,13 +977,13 @@ body.fx-rank-lock {
   align-items: center;
   gap: 7px;
   height: 40px;
-  padding: 0 15px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02)), var(--glass-tint);
-  -webkit-backdrop-filter: blur(9px) saturate(180%) brightness(1.05);
-  backdrop-filter: blur(9px) saturate(180%) brightness(1.05);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  padding: 0 13px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 5%, rgba(8, 13, 20, 0.78));
+  -webkit-backdrop-filter: blur(8px) saturate(135%);
+  backdrop-filter: blur(8px) saturate(135%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
   color: #d6e2ec;
   font: inherit;
   font-size: var(--fs-sm);
@@ -980,7 +993,7 @@ body.fx-rank-lock {
 .fx-chip b {
   min-width: 20px;
   padding: 1px 6px;
-  border-radius: 999px;
+  border-radius: 4px;
   background: rgba(255, 255, 255, 0.1);
   font:
     700 11px/1.5 "ZoneMono",
@@ -992,7 +1005,7 @@ body.fx-rank-lock {
   display: none;
 }
 .fx-chip:hover {
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.28);
   color: #fff;
 }
 .fx-chip:focus-visible {
@@ -1001,7 +1014,7 @@ body.fx-rank-lock {
 }
 .fx-chip.on {
   border-color: color-mix(in srgb, var(--accent) 80%, #fff3);
-  background: color-mix(in srgb, var(--accent) 38%, rgba(255, 255, 255, 0.08));
+  background: color-mix(in srgb, var(--accent) 30%, rgba(8, 13, 20, 0.9));
   color: #fff;
 }
 .fx-sort select {
@@ -1028,8 +1041,9 @@ body.fx-rank-lock {
   margin: 0;
   padding: 24px;
   border: 1px dashed rgba(255, 255, 255, 0.18);
-  border-radius: 18px;
-  color: #9fb2c2;
+  border-radius: 10px;
+  background: rgba(8, 13, 20, 0.78);
+  color: #a9bccb;
   text-align: center;
 }
 
@@ -1244,7 +1258,7 @@ a.fx-leader:focus-visible span {
   flex: 0 0 auto;
   padding: 7px 13px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 999px;
+  border-radius: 6px;
   background: color-mix(in srgb, var(--fx) 28%, rgba(255, 255, 255, 0.06));
   color: #fff;
   font-weight: 600;
@@ -1256,7 +1270,7 @@ a.fx-leader:focus-visible span {
     transform: translateY(-3px);
     border-color: color-mix(in srgb, var(--fx) 55%, rgba(255, 255, 255, 0.2));
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.32),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
       0 18px 44px rgba(0, 0, 0, 0.45),
       0 0 0 1px color-mix(in srgb, var(--fx) 25%, transparent);
   }
@@ -1266,8 +1280,8 @@ a.fx-leader:focus-visible span {
 }
 @media (max-width: 760px) {
   .fx-hero {
-    padding: 16px 16px 18px;
-    border-radius: 18px;
+    padding: 14px 14px 16px;
+    border-radius: 10px;
   }
   .fx-stats {
     width: 100%;
@@ -1275,15 +1289,15 @@ a.fx-leader:focus-visible span {
   .fx-stat {
     flex: 1 1 0;
     min-width: 0;
-    padding: 10px 6px;
-    border-radius: 14px;
+    padding: 9px 6px;
+    border-radius: 7px;
   }
   .fx-stat b {
-    font-size: 21px;
+    font-size: 20px;
   }
   .fx-stat span {
-    font-size: 10px;
-    letter-spacing: 0.03em;
+    font-size: 11px;
+    letter-spacing: 0.02em;
   }
   .fx-tools {
     gap: 8px;
@@ -1305,7 +1319,7 @@ a.fx-leader:focus-visible span {
     gap: 12px;
   }
   .fx-card {
-    border-radius: 18px;
+    border-radius: 10px;
   }
   .fx-photo {
     height: 100px;

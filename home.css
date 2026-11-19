@@ -109,38 +109,6 @@
   margin: 4px 0 14px;
   line-height: 1.1;
 }
-/* коротко о сайте - строка «индикаторов» ПДА, а не сплошной текст */
-.home-status {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  margin: 20px 0 0;
-  padding: 0;
-  list-style: none;
-}
-.home-status li {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 11px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 3px;
-  background: rgba(3, 5, 7, 0.6);
-  font: 600 12px/1.2 var(--mono);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #c4ced6;
-}
-.home-status li::before {
-  content: "";
-  width: 7px;
-  height: 7px;
-  flex: 0 0 7px;
-  border-radius: 1px;
-  background: #79c463;
-  box-shadow: 0 0 8px rgba(121, 196, 103, 0.7);
-}
 .home-hero .tour-start {
   margin-top: 18px;
 }
@@ -271,7 +239,7 @@
 /* телефон */
 @media (max-width: 760px) {
   .home-hero {
-    padding: 34px 14px 22px;
+    padding: 28px 14px 18px;
   }
   .home-hero::before {
     width: 260px;
@@ -289,21 +257,15 @@
   .home-hero-meta {
     left: 18px;
     right: 18px;
-    top: 13px;
+    top: 11px;
     font-size: 10px;
     letter-spacing: 0.1em;
   }
-  .home-status {
-    gap: 6px;
-    margin-top: 16px;
-  }
-  .home-status li {
-    padding: 5px 8px;
-    font-size: 11px;
-    letter-spacing: 0.02em;
+  .home-hero .tour-start {
+    margin-top: 14px;
   }
   .home-tape {
-    margin: 14px 0 16px;
+    margin: 12px 0 14px;
   }
   .home-tape span {
     font-size: 10px;
@@ -581,6 +543,8 @@ html.tour-seen .home-hero .tour-start {
   min-height: 44px;
   margin: -12px 0 -12px -6px;
   padding: 12px 6px;
+  border: 0;
+  background: none;
   justify-content: center;
   font-size: 0;
   letter-spacing: 0;
@@ -775,12 +739,20 @@ html.tour-seen .home-hero .tour-start {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 8px;
-  font: 600 11px/1 var(--mono);
-  letter-spacing: 0.14em;
+  margin-top: 12px;
+  padding: 6px 10px;
+  border: 1px solid color-mix(in srgb, var(--zn) 34%, transparent);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--zn) 8%, transparent);
+  font: 600 11.5px/1 var(--mono);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--zn);
   text-decoration: none;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
 }
 .zn-link::before {
   content: ">";
@@ -798,6 +770,8 @@ html.tour-seen .home-hero .tour-start {
 }
 .zn-link:hover,
 .zn-link:focus-visible {
+  border-color: color-mix(in srgb, var(--zn) 70%, transparent);
+  background: color-mix(in srgb, var(--zn) 16%, transparent);
   color: color-mix(in srgb, var(--zn) 70%, #fff);
 }
 .zn-link:hover svg {

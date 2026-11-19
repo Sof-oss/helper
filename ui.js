@@ -171,7 +171,7 @@ window.__trapTab = function (box, e) {
       if (badge) badge.innerHTML = emblem(t.key);
       var nm = tgl.querySelector(".tp-name");
       if (nm) nm.textContent = t.label;
-      tgl.setAttribute("title", "Тема: " + t.label);
+      tgl.setAttribute("title", "Тема и фон сайта: " + t.label + " (нажмите, чтобы сменить)");
       tgl.setAttribute("aria-label", "Тема интерфейса: " + t.label + ". Нажмите, чтобы выбрать другую");
       /* встроенный скрипт шапки (partials/header.html) на следующей странице рисует значок отсюда ещё до отрисовки */
       try {
@@ -309,15 +309,28 @@ window.__trapTab = function (box, e) {
   }
   applyTheme(current);
 
-  /* тень шапки при прокрутке */
+  /* тень шапки при прокрутке и кнопка «Наверх» */
   var siteHeader = d.querySelector(".site-header");
-  if (siteHeader) {
-    var onScroll = function () {
-      siteHeader.classList.toggle("scrolled", window.scrollY > 8);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-  }
+  var scrollTopBtn = d.createElement("button");
+  scrollTopBtn.type = "button";
+  scrollTopBtn.className = "scroll-top-btn";
+  scrollTopBtn.setAttribute("aria-label", "Наверх");
+  scrollTopBtn.setAttribute("title", "Наверх");
+  scrollTopBtn.innerHTML =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>';
+  scrollTopBtn.addEventListener("click", function () {
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+  });
+  d.body.appendChild(scrollTopBtn);
+
+  var onScroll = function () {
+    var y = window.scrollY || 0;
+    if (siteHeader) siteHeader.classList.toggle("scrolled", y > 8);
+    scrollTopBtn.classList.toggle("show", y > 520);
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
 
   /* кардиограмма в логотипе пишется только на видимой вкладке: вернувшись на фоновую страницу, браузер «догоняет»
      часы анимации, а с паузой она просто стоит столько, сколько страница была скрыта */

@@ -4,15 +4,15 @@
 .tour-start {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  margin-top: 20px;
-  height: 40px;
-  padding: 0 18px 0 14px;
-  border-radius: 999px;
+  gap: 8px;
+  margin-top: 16px;
+  height: 38px;
+  padding: 0 16px 0 13px;
+  border-radius: 6px;
   cursor: pointer;
-  border: 1px solid color-mix(in srgb, var(--accent) 70%, #fff 10%);
-  background: color-mix(in srgb, var(--accent) 18%, rgba(7, 13, 24, 0.7));
-  color: #fff;
+  border: 1px solid color-mix(in srgb, var(--accent) 48%, rgba(255, 255, 255, 0.14));
+  background: color-mix(in srgb, var(--accent) 12%, rgba(7, 13, 24, 0.76));
+  color: #e6eef5;
   font-family: var(--f-display, inherit);
   font-weight: 500;
   font-size: var(--fs-sm);
@@ -21,21 +21,25 @@
   backdrop-filter: blur(4px);
   transition:
     box-shadow 0.2s,
+    border-color 0.2s,
     transform 0.15s,
-    background 0.2s;
-  animation: tour-glow 2.4s ease-in-out infinite;
+    background 0.2s,
+    color 0.2s;
 }
 .tour-start[hidden] {
   display: none;
 }
 .tour-start svg {
-  width: 19px;
-  height: 19px;
+  width: 18px;
+  height: 18px;
   color: var(--accent-2, #fff);
 }
 .tour-start:hover {
   transform: translateY(-1px);
-  background: color-mix(in srgb, var(--accent) 30%, rgba(7, 13, 24, 0.7));
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 24%, rgba(7, 13, 24, 0.85));
+  color: #fff;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 22%, transparent);
 }
 .tour-start:focus-visible {
   outline: 2px solid var(--accent-2, #fff);

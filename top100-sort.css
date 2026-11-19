@@ -4,7 +4,7 @@
 
 .top100-content {
   /* оттенок стекла от цвета темы; считается здесь, поэтому у строк с --accent вкладки он не меняется */
-  --t100-tint: color-mix(in srgb, var(--accent) 6%, rgba(10, 17, 26, 0.12));
+  --t100-tint: color-mix(in srgb, var(--accent) 8%, rgba(8, 13, 20, 0.78));
   --t100-up: #5fd08a;
   --t100-down: #ef6a5a;
   --t100-gold: #e8b84a;
@@ -12,54 +12,41 @@
   --t100-bronze: #cf8a52;
 }
 
-/* стекло: почти прозрачная линза, лёгкое размытие, блики по краям */
+/* затемнённое стекло ПДА: высокий контраст поверх любого фона, спокойный верхний блик */
 .t100-hero,
 .t100-tools,
 .top100-panel .mp-bar,
 .t100-head,
 .t100-empty {
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.13);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   background:
-    radial-gradient(120% 70% at 12% 0, rgba(255, 255, 255, 0.08), transparent 55%),
     linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.09),
-      rgba(255, 255, 255, 0.015) 36%,
-      rgba(255, 255, 255, 0) 60%,
-      rgba(255, 255, 255, 0.045)
+      180deg,
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0) 42%
     ),
     var(--t100-tint);
-  -webkit-backdrop-filter: blur(9px) saturate(190%) brightness(1.06);
-  backdrop-filter: blur(9px) saturate(190%) brightness(1.06);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  backdrop-filter: blur(10px) saturate(140%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.42),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.12),
-    inset 0 0 22px rgba(255, 255, 255, 0.045),
-    0 12px 32px rgba(0, 0, 0, 0.3);
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 12px 30px rgba(0, 0, 0, 0.36);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
-/* блик по контуру: ярче сверху слева и снизу справа */
+/* акцентная верхняя кромка в стиле ПДА */
 .t100-hero::after,
 .t100-tools::after {
   content: "";
   position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.7),
-    rgba(255, 255, 255, 0.1) 22%,
-    rgba(255, 255, 255, 0.03) 50%,
-    rgba(255, 255, 255, 0.1) 78%,
-    rgba(255, 255, 255, 0.45)
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(90deg, var(--accent), transparent 68%);
+  opacity: 0.85;
   pointer-events: none;
 }
 
@@ -71,21 +58,20 @@
   justify-content: space-between;
   gap: 18px 28px;
   margin: 0 0 14px;
-  padding: 22px 26px 24px;
-  border-radius: 22px;
+  padding: 20px 24px 22px;
+  border-radius: 10px;
 }
 .t100-hero-text {
   flex: 1 1 380px;
   min-width: 0;
 }
-/* заголовок чуть мельче общего: рядом со сводкой он должен уместиться в одну строку */
 .t100-hero .result-title h1 {
-  font-size: 34px;
+  font-size: 38px;
 }
 .t100-intro {
   max-width: 560px;
   margin: 10px 0 0;
-  color: #c3d1dc;
+  color: #cbd8e3;
   font-size: var(--fs-md);
   line-height: 1.55;
 }
@@ -98,26 +84,26 @@
 }
 .t100-stat {
   min-width: 0;
-  padding: 13px 14px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 18px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)), var(--t100-tint);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  padding: 12px 14px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 6%, rgba(6, 11, 18, 0.72));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 .t100-stat small {
   display: block;
-  color: #8fa3b4;
+  color: #9db2c4;
   font:
-    600 10px/1.2 "ZoneMono",
+    600 11px/1.2 "ZoneMono",
     ui-monospace,
     monospace;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 .t100-stat b {
   display: block;
-  margin-top: 7px;
+  margin-top: 6px;
   overflow: hidden;
   color: #fff;
   font-family: var(--f-display);
@@ -132,7 +118,7 @@
   display: block;
   margin-top: 3px;
   overflow: hidden;
-  color: #9fb2c2;
+  color: #b4c6d5;
   font-size: 12px;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -162,10 +148,10 @@
   text-underline-offset: 3px;
 }
 .t100-stat span .t100-stat-nick {
-  color: #dfe8ef;
+  color: #e6eef5;
 }
 
-/* Вкладки рейтингов: стеклянные капсулы с иконкой, активная залита цветом раздела */
+/* Вкладки рейтингов: строгие вкладки ПДА с нижним акцентом */
 .t100-mtabs {
   display: flex;
   flex-wrap: wrap;
@@ -177,16 +163,16 @@
   align-items: center;
   gap: 8px;
   height: 42px;
-  padding: 0 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 16px;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.015)), var(--t100-tint);
-  -webkit-backdrop-filter: blur(9px) saturate(170%);
-  backdrop-filter: blur(9px) saturate(170%);
+  padding: 0 15px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 5%, rgba(8, 13, 20, 0.8));
+  -webkit-backdrop-filter: blur(8px) saturate(135%);
+  backdrop-filter: blur(8px) saturate(135%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    0 6px 16px rgba(0, 0, 0, 0.22);
-  color: #c4d1dc;
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.25);
+  color: #c8d6e1;
   font-family: var(--f-display);
   font-size: 14px;
   font-weight: 500;
@@ -206,22 +192,23 @@
   flex: 0 0 16px;
   width: 16px;
   height: 16px;
-  fill: color-mix(in srgb, var(--accent) 80%, #fff);
+  fill: color-mix(in srgb, var(--accent) 82%, #fff);
 }
 .t100-mtab:hover {
-  border-color: color-mix(in srgb, var(--accent) 50%, rgba(255, 255, 255, 0.14));
+  border-color: color-mix(in srgb, var(--accent) 55%, rgba(255, 255, 255, 0.16));
+  background: color-mix(in srgb, var(--accent) 12%, rgba(8, 13, 20, 0.86));
   color: #fff;
 }
 .t100-mtab.active {
-  border-color: rgba(255, 255, 255, 0.32);
+  border-color: color-mix(in srgb, var(--accent) 75%, rgba(255, 255, 255, 0.2));
   background: linear-gradient(
-    135deg,
-    color-mix(in srgb, var(--accent) 58%, rgba(255, 255, 255, 0.14)),
-    color-mix(in srgb, var(--accent) 22%, rgba(10, 17, 26, 0.3))
+    180deg,
+    color-mix(in srgb, var(--accent) 28%, rgba(10, 17, 26, 0.9)),
+    color-mix(in srgb, var(--accent) 14%, rgba(8, 13, 20, 0.94))
   );
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.5),
-    0 6px 20px color-mix(in srgb, var(--accent) 38%, transparent);
+    inset 0 -3px 0 var(--accent),
+    0 4px 16px color-mix(in srgb, var(--accent) 24%, transparent);
   color: #fff;
 }
 .t100-mtab.active svg {
@@ -235,8 +222,8 @@
   align-items: center;
   gap: 10px;
   margin: 0 0 12px;
-  padding: 10px;
-  border-radius: 22px;
+  padding: 10px 12px;
+  border-radius: 10px;
 }
 .t100-tools > * {
   position: relative;
@@ -262,12 +249,12 @@
 /* по id: общие правила полей в styles.css (input:not(...)) иначе сильнее */
 #top100Search {
   width: 100%;
-  height: 42px;
-  padding: 0 16px 0 41px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25);
+  height: 40px;
+  padding: 0 14px 0 40px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  background: rgba(5, 10, 16, 0.68);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
   color: #eef4fa;
   font: inherit;
   font-size: var(--fs-sm);
@@ -277,8 +264,8 @@
 }
 #top100Search:focus {
   outline: none;
-  border-color: color-mix(in srgb, var(--accent) 70%, rgba(255, 255, 255, 0.2));
-  background: rgba(255, 255, 255, 0.08);
+  border-color: color-mix(in srgb, var(--accent) 75%, rgba(255, 255, 255, 0.2));
+  background: rgba(6, 12, 19, 0.85);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
 }
 .t100-tools .t100-find,
@@ -287,13 +274,13 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 42px;
-  padding: 0 16px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.07);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  color: #fff;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  color: #eef4fa;
   font: inherit;
   font-size: var(--fs-sm);
   font-weight: 500;
@@ -307,8 +294,8 @@
 .t100-tools .t100-find:hover,
 .t100-tools .t100-vs-link:hover,
 .t100-factions-toggle:hover {
-  border-color: color-mix(in srgb, var(--accent) 55%, rgba(255, 255, 255, 0.2));
-  background: rgba(255, 255, 255, 0.12);
+  border-color: color-mix(in srgb, var(--accent) 60%, rgba(255, 255, 255, 0.2));
+  background: rgba(255, 255, 255, 0.11);
   color: #fff;
 }
 .t100-tools .t100-find svg,
@@ -326,7 +313,7 @@
   order: 3;
 }
 
-/* период изменений: подпись с датами и переключатель-«таблетка» */
+/* период изменений: подпись с датами и сегментный переключатель */
 .t100-period {
   order: 2;
   display: flex;
@@ -344,15 +331,15 @@
 .t100-period-btns {
   display: inline-flex;
   padding: 3px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 7px;
+  background: rgba(4, 9, 15, 0.62);
 }
 .t100-pbtn {
-  height: 34px;
-  padding: 0 14px;
+  height: 32px;
+  padding: 0 12px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 5px;
   background: none;
   color: #b8c7d4;
   font: inherit;
@@ -367,13 +354,13 @@
   color: #fff;
 }
 .t100-pbtn.active {
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  background: color-mix(in srgb, var(--accent) 28%, rgba(255, 255, 255, 0.12));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
   color: #fff;
 }
 .t100-period-range {
   margin: 0;
-  color: #9fb2c2;
+  color: #a9bccb;
   font-size: var(--fs-xs);
   white-space: nowrap;
 }
@@ -418,11 +405,11 @@
 .t100-chips-more {
   display: inline-flex;
   align-items: center;
-  height: 32px;
-  padding: 0 12px;
-  border: 1px dashed rgba(255, 255, 255, 0.24);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.03);
+  height: 30px;
+  padding: 0 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  border-radius: 6px;
+  background: rgba(6, 12, 19, 0.45);
   color: #b7c8d6;
   font: inherit;
   font-size: 12.5px;
@@ -448,14 +435,14 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 32px;
-  padding: 0 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  background: rgba(6, 12, 19, 0.56);
   color: #d6e2ec;
   font: inherit;
-  font-size: 13px;
+  font-size: 12.5px;
   white-space: nowrap;
   cursor: pointer;
   transition:
@@ -483,8 +470,8 @@
 }
 .t100-chip.active {
   border-color: color-mix(in srgb, var(--f) 75%, rgba(255, 255, 255, 0.25));
-  background: color-mix(in srgb, var(--f) 32%, rgba(255, 255, 255, 0.06));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background: color-mix(in srgb, var(--f) 28%, rgba(8, 13, 20, 0.85));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
   color: #fff;
 }
 .t100-chip.active small {
@@ -506,8 +493,8 @@
 /* «Моё место» - тоже стекло; цвет и раскладку содержимого задаёт my-place.css */
 .top100-panel .mp-bar {
   margin: 0 0 10px;
-  padding: 8px 10px 8px 12px;
-  border-radius: 18px;
+  padding: 8px 12px;
+  border-radius: 8px;
 }
 .top100-panel .mp-bar.empty {
   border-style: dashed;
@@ -518,14 +505,14 @@
 .top100-panel .mp-bar-place,
 .top100-panel .mp-pick input,
 .top100-panel .mp-chip {
-  border-radius: 999px;
+  border-radius: 6px;
 }
 .top100-legend {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: 0 6px 8px;
-  color: #9fb2c2;
+  margin: 4px 4px 12px;
+  color: #a9bccb;
   font-size: var(--fs-xs);
 }
 .t100-off {
@@ -592,12 +579,12 @@
 }
 /* шапка таблицы плотнее остального стекла: под ней проезжают строки */
 .t100-head {
-  padding: 9px 16px 9px 12px;
-  border-radius: 14px;
-  background-color: rgba(8, 13, 20, 0.84);
-  color: #9fb2c2;
+  padding: 6px 16px 6px 12px;
+  border-radius: 8px;
+  background-color: rgba(7, 12, 19, 0.94);
+  color: #a9bccb;
   font-family: var(--f-display);
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 500;
   line-height: 1.2;
   letter-spacing: 0.12em;
@@ -618,7 +605,11 @@
   all: unset;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
+  min-height: 30px;
+  padding: 4px 6px;
+  margin: -4px -6px;
+  border-radius: 4px;
   cursor: pointer;
 }
 .t100-sort-btn:hover {
@@ -633,7 +624,7 @@
 .t100-sort-btn i {
   font-size: 9px;
   font-style: normal;
-  opacity: 0.4;
+  opacity: 0.5;
 }
 .top100-sort.active {
   color: #fff;
@@ -643,27 +634,25 @@
   opacity: 1;
 }
 
-/* строка: полупрозрачная капсула, полоска цвета группировки слева, вся строка открывает карточку */
+/* строка: строгая карточка ПДА с полоской цвета группировки слева, вся строка открывает карточку */
 .t100-row {
-  --hi: 0.07;
+  --hi: 0.06;
   position: relative;
   min-height: 54px;
   padding: 8px 16px 8px 12px;
   border: 1px solid rgba(255, 255, 255, 0.11);
-  border-radius: 18px;
+  border-radius: 8px;
   background:
     var(--podium, linear-gradient(transparent, transparent)),
     linear-gradient(
-      135deg,
+      180deg,
       rgba(255, 255, 255, var(--hi)),
-      rgba(255, 255, 255, 0.012) 40%,
-      rgba(255, 255, 255, 0) 62%,
-      rgba(255, 255, 255, 0.035)
+      rgba(255, 255, 255, 0) 45%
     ),
-    color-mix(in srgb, var(--accent) 3%, rgba(10, 16, 24, 0.5));
+    color-mix(in srgb, var(--accent) 4%, rgba(9, 15, 23, 0.82));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.2),
-    0 6px 18px rgba(0, 0, 0, 0.22);
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 4px 14px rgba(0, 0, 0, 0.25);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
   cursor: pointer;
   scroll-margin-top: calc(var(--t100-head, 64px) + 64px);
@@ -675,24 +664,24 @@
   content: "";
   position: absolute;
   left: -1px;
-  top: 12px;
-  bottom: 12px;
+  top: 10px;
+  bottom: 10px;
   width: 3px;
   border-radius: 0 3px 3px 0;
   background: var(--c);
-  box-shadow: 0 0 12px var(--c);
+  box-shadow: 0 0 10px var(--c);
   pointer-events: none;
 }
 .t100-row:hover {
-  --hi: 0.13;
-  border-color: rgba(255, 255, 255, 0.2);
+  --hi: 0.11;
+  border-color: rgba(255, 255, 255, 0.22);
 }
 /* на компьютере под строками размытие, как у остального стекла; на телефоне - плотнее и без него (100 строк) */
 @media (min-width: 761px) {
   .t100-row {
     background-color: transparent;
-    -webkit-backdrop-filter: blur(8px) saturate(170%) brightness(1.05);
-    backdrop-filter: blur(8px) saturate(170%) brightness(1.05);
+    -webkit-backdrop-filter: blur(8px) saturate(135%);
+    backdrop-filter: blur(8px) saturate(135%);
   }
 }
 
@@ -859,10 +848,10 @@
   height: 26px;
   padding: 0 10px;
   box-sizing: border-box;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
   background: rgba(255, 255, 255, 0.04);
-  color: #75899a;
+  color: #8ea3b4;
   font:
     600 12px/1 "ZoneMono",
     ui-monospace,
@@ -907,9 +896,9 @@
   --hi: 0.12;
   border-color: color-mix(in srgb, var(--accent) 70%, transparent);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
     0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent),
-    0 0 24px color-mix(in srgb, var(--accent) 30%, transparent);
+    0 0 24px color-mix(in srgb, var(--accent) 26%, transparent);
 }
 .top100-table tr.mp-me .t100-player {
   font-weight: 700;
@@ -919,7 +908,7 @@
   display: inline-block;
   margin-left: 7px;
   padding: 1px 7px;
-  border-radius: 999px;
+  border-radius: 4px;
   background: var(--accent);
   color: var(--accent-ink, #000);
   font:
@@ -946,7 +935,7 @@
 /* никого не нашли */
 .t100-empty {
   display: block;
-  border-radius: 18px;
+  border-radius: 8px;
 }
 .top100-table .t100-empty td {
   padding: 22px 12px;
@@ -1000,10 +989,10 @@
     width: 100%;
   }
   .t100-hero {
-    gap: 10px;
-    margin-bottom: 10px;
-    padding: 12px 14px;
-    border-radius: 16px;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
   }
   .t100-hero-text {
     flex-basis: 100%;
@@ -1017,26 +1006,27 @@
   }
   .t100-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
+    gap: 5px;
   }
   .t100-stat {
-    padding: 8px 10px;
-    border-radius: 12px;
+    padding: 6px 8px;
+    border-radius: 6px;
   }
   .t100-stat small {
-    font-size: 9.5px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
   }
   .t100-stat b {
-    margin-top: 3px;
-    font-size: 17px;
+    margin-top: 2px;
+    font-size: 16px;
   }
   .t100-stat.lead b {
     font-size: 15px;
-    line-height: 20px;
+    line-height: 19px;
   }
   .t100-stat span {
-    margin-top: 2px;
-    font-size: 11px;
+    margin-top: 1px;
+    font-size: 11.5px;
   }
 
   /* вкладки одной строкой с прокруткой; края гаснут, если есть что листать (классы ставит top100.js) */
@@ -1052,33 +1042,33 @@
     display: none;
   }
   .t100-mtabs.fade-r {
-    -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent);
-    mask-image: linear-gradient(90deg, #000 85%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, #000 82%, transparent);
+    mask-image: linear-gradient(90deg, #000 82%, transparent);
   }
   .t100-mtabs.fade-l {
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%);
-    mask-image: linear-gradient(90deg, transparent, #000 15%);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%);
+    mask-image: linear-gradient(90deg, transparent, #000 18%);
   }
   .t100-mtabs.fade-l.fade-r {
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
-    mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 16%, #000 84%, transparent);
   }
   .t100-mtab {
     flex: 0 0 auto;
     height: 36px;
     padding: 0 12px;
-    border-radius: 12px;
+    border-radius: 6px;
     font-size: 12.5px;
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
-    background-color: rgba(10, 16, 24, 0.5);
+    background-color: rgba(8, 13, 20, 0.84);
   }
 
   .t100-tools {
-    gap: 8px;
+    gap: 7px;
     margin-bottom: 8px;
-    padding: 8px;
-    border-radius: 16px;
+    padding: 7px;
+    border-radius: 8px;
   }
   .t100-search {
     flex: 1 1 0;
@@ -1095,7 +1085,7 @@
     height: 38px;
     padding: 0 12px;
     border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 999px;
+    border-radius: 6px;
     background: rgba(255, 255, 255, 0.08);
     color: #e4edf5;
     font: inherit;
@@ -1129,11 +1119,11 @@
     min-width: 18px;
     height: 18px;
     padding: 0 5px;
-    border-radius: 999px;
+    border-radius: 4px;
     background: var(--accent);
     color: var(--accent-ink, #061018);
     font:
-      700 10px/1 "ZoneMono",
+      700 11px/1 "ZoneMono",
       ui-monospace,
       monospace;
   }
@@ -1208,11 +1198,12 @@
     height: 34px;
   }
   .top100-panel .mp-bar {
-    margin-bottom: 8px;
-    border-radius: 14px;
+    margin-bottom: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
   }
   .top100-legend {
-    margin-bottom: 6px;
+    margin: 2px 4px 8px;
   }
 
   /* строка в две линии: место | эмблема и ник | показатель, ниже - уровень, группировка и прирост */
@@ -1225,7 +1216,7 @@
     column-gap: 8px;
     min-height: 0;
     padding: 8px 12px 8px 8px;
-    border-radius: 16px;
+    border-radius: 8px;
   }
   .t100-nodelta .t100-row {
     grid-template-areas:
@@ -1267,7 +1258,7 @@
     font-size: 14px;
   }
   .t100-move {
-    font-size: 10px;
+    font-size: 11.5px;
   }
   .top100-table td.top100-nick {
     gap: 8px;
@@ -1286,9 +1277,9 @@
     line-height: 24px;
   }
   .t100-lvl span {
-    min-width: 26px;
-    height: 20px;
-    font-size: 10px;
+    min-width: 28px;
+    height: 22px;
+    font-size: 11.5px;
   }
   .top100-table td.top100-value {
     font-size: 15px;
@@ -1297,7 +1288,7 @@
     min-width: 0;
     height: 22px;
     padding: 0 8px;
-    font-size: 11px;
+    font-size: 11.5px;
   }
   .t100-delta svg {
     flex-basis: 11px;
@@ -1309,18 +1300,26 @@
     bottom: 10px;
   }
 
-  /* шапка на телефоне - только переключатели сортировки */
+  /* шапка на телефоне - только переключатели сортировки с крупными зонами нажатия */
   .t100-head {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
-    gap: 16px;
-    padding: 8px 12px;
-    border-radius: 12px;
+    gap: 6px;
+    padding: 3px 8px 3px 12px;
+    border-radius: 7px;
   }
   .t100-head::before {
     content: "Сортировка";
     margin-right: auto;
-    color: #7f93a5;
+    color: #93a8ba;
+    font-size: 11.5px;
+  }
+  .t100-sort-btn {
+    min-height: 36px;
+    padding: 6px 8px;
+    margin: 0;
+    font-size: 12px;
   }
   .t100-head .top100-rank,
   .t100-head .top100-nick,

@@ -48,12 +48,12 @@
 }
 .level-row {
   display: grid;
-  grid-template-columns: 34px 1fr 34px;
+  grid-template-columns: 40px 1fr 40px;
   gap: 6px;
 }
 .level-row button,
 .level-row input {
-  height: 34px;
+  height: 40px;
   border: 0;
   background: #091521;
   color: #9db2c4;
@@ -87,9 +87,9 @@
 .level-scale {
   display: flex;
   justify-content: space-between;
-  margin-top: 2px;
-  font-size: 10.5px;
-  color: #7f95a8;
+  margin-top: 3px;
+  font-size: 11.5px;
+  color: #94a9bc;
   font-variant-numeric: tabular-nums;
 }
 /* кнопки «−»/«+»: зажатие повторяет шаг (app.js), без выделения текста и меню долгого нажатия */
@@ -1425,10 +1425,11 @@
 .dmg-bar {
   grid-column: 1/-1;
   display: flex;
-  height: 6px;
-  border-radius: 3px;
+  height: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(160, 195, 225, 0.14);
 }
 .dmg-bar i {
   display: block;
@@ -3502,13 +3503,13 @@ input:focus-visible {
 }
 .arena-control {
   display: grid;
-  grid-template-columns: 32px 1fr 32px;
-  gap: 4px;
+  grid-template-columns: 38px 1fr 38px;
+  gap: 5px;
   margin: 7px 0 10px;
 }
 .arena-control input {
   width: 100%;
-  height: 34px;
+  height: 38px;
   padding: 0 8px;
   border: 1px solid color-mix(in srgb, var(--arena-ac) 28%, #2b3e50);
   border-radius: var(--r-sm, 4px);
@@ -3534,20 +3535,20 @@ input:focus-visible {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--arena-ac) 25%, transparent);
 }
 .arena-step {
-  height: 34px;
+  height: 38px;
   padding: 0;
-  border: 1px solid color-mix(in srgb, var(--arena-ac) 28%, #2b3e50);
+  border: 1px solid color-mix(in srgb, var(--arena-ac) 32%, #2b3e50);
   border-radius: var(--r-sm, 4px);
-  background: color-mix(in srgb, var(--arena-ac) 7%, #0a141e);
+  background: color-mix(in srgb, var(--arena-ac) 9%, #0a141e);
   color: #dfe7ee;
-  font-size: 17px;
+  font-size: 18px;
   line-height: 1;
   cursor: pointer;
 }
 .arena-step:hover,
 .arena-step:focus-visible {
   border-color: var(--arena-ac);
-  background: color-mix(in srgb, var(--arena-ac) 14%, #0a141e);
+  background: color-mix(in srgb, var(--arena-ac) 16%, #0a141e);
   color: var(--arena-ac-2);
   outline: none;
 }
@@ -3560,9 +3561,9 @@ input:focus-visible {
   align-items: center;
   gap: 5px;
   margin-bottom: 6px;
-  color: #a7bcd3;
+  color: #b5c8da;
   font:
-    700 10.5px "ZoneMono",
+    700 11px "ZoneMono",
     "JetBrains Mono",
     monospace;
   letter-spacing: 0.06em;
@@ -3579,34 +3580,34 @@ input:focus-visible {
 .arena-bonus {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px;
+  gap: 5px;
 }
 .arena-stat {
   min-width: 0;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 5px;
-  border: 1px solid color-mix(in srgb, var(--arena-ac) 16%, rgba(255, 255, 255, 0.07));
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--arena-ac) 5%, rgba(0, 0, 0, 0.2));
+  padding: 5px 6px;
+  border: 1px solid color-mix(in srgb, var(--arena-ac) 26%, rgba(255, 255, 255, 0.14));
+  border-radius: 4px;
+  background: rgba(10, 20, 30, 0.68);
 }
 .arena-stat .weapon-icon {
-  width: 25px;
-  height: 25px;
-  flex: 0 0 25px;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
   filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.55));
 }
 .arena-stat > span {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
 }
 .arena-stat small {
   overflow: hidden;
-  color: #a9bccc;
-  font-size: 10.5px;
+  color: #c0d0de;
+  font-size: 11.5px;
   line-height: 1.15;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -3619,10 +3620,10 @@ input:focus-visible {
     monospace;
 }
 .arena-stat.is-zero {
-  opacity: 0.38;
+  opacity: 0.84;
 }
 .arena-stat.is-zero b {
-  color: #8fa3b4;
+  color: #a5b9ca;
 }
 /* карточки урона: отдельная колонка арены */
 .damage-card .breakdown {
@@ -4067,10 +4068,10 @@ input:focus-visible {
 .slot-count {
   margin-left: auto;
   font:
-    600 11px/1 "ZoneMono",
+    600 11.5px/1 "ZoneMono",
     ui-monospace,
     monospace;
-  color: #6f8496;
+  color: #8ea3b5;
 }
 .slot-list {
   display: flex;
@@ -4171,8 +4172,8 @@ input:focus-visible {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   border: 0;
   border-radius: 5px;
@@ -4443,46 +4444,46 @@ html body .talent-game-header {
 }
 @media (min-width: 761px) {
   .sidebar .side-section {
-    padding: 8px 12px 9px;
+    padding: 12px 14px 13px;
   }
   .sidebar .side-title {
     padding-bottom: 7px;
-    margin-bottom: 9px;
+    margin-bottom: 10px;
     font-size: 14.5px;
   }
   .slots-section:empty {
     min-height: 152px;
   }
   .sidebar .level-range {
-    margin-top: 6px;
+    margin-top: 8px;
   }
   .sidebar .equipment-open {
-    min-height: 38px;
+    min-height: 40px;
   }
   .sidebar .arena-field {
-    margin-top: 8px;
-    padding: 8px;
+    margin-top: 10px;
+    padding: 10px;
   }
   .sidebar .arena-control {
-    margin: 5px 0 7px;
+    margin: 6px 0 9px;
   }
   .sidebar .arena-stat {
-    padding: 3px 5px;
+    padding: 5px 6px;
   }
   .sidebar .arena-stat .weapon-icon {
-    width: 22px;
-    height: 22px;
-    flex-basis: 22px;
+    width: 23px;
+    height: 23px;
+    flex-basis: 23px;
   }
   .sidebar .talent-open {
-    height: 38px;
+    height: 40px;
   }
   .sidebar .side-actions {
-    padding: 8px 12px 10px;
-    gap: 7px;
+    padding: 10px 14px 12px;
+    gap: 8px;
   }
   .sidebar .side-btn {
-    min-height: 34px;
+    min-height: 36px;
   }
 }
 @media (max-width: 760px) {
