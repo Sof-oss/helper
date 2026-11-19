@@ -35,6 +35,7 @@ test("build.js: страницы, CSP, sitemap и статическая обо�
     assert.match(index, /href="\/p\/431" data-pc-open="431"/);
     assert.match(index, /src="top100-common\.js\?v=/);
     assert.match(index, /src="awards\.js\?v=/);
+    assert.match(index, /src="achievements\.js\?v=/);
     assert.match(index, /src="player-card\.js\?v=/);
     assert.match(index, /event-raid-results-600\.webp\?v=/);
     assert.match(index, /event-raid-results-1200\.webp\?v=/);
@@ -44,10 +45,15 @@ test("build.js: страницы, CSP, sitemap и статическая обо�
     assert.match(homeCss, /\.zn-raid-summary/);
     assert.match(homeCss, /\.zn-raid-ranking\[open\]/);
     assert.match(homeCss, /\.pc-dialog/);
+    assert.match(homeCss, /\.pc-ach-card/);
 
     const top100 = read("top100.html");
     assert.match(top100, /id="top100Results" role="status"/);
     assert.match(top100, /top100-data\.js\?v=/);
+    assert.match(top100, /achievements\.js\?v=/);
+    const top100Css = read(/href="\/?(bundle-[\w-]+\.css)\?v=/.exec(top100)[1]);
+    assert.match(top100Css, /\.pc-card-tabs/);
+    assert.match(top100Css, /\.pc-ach-grid/);
     /* сводка в шапке, строки-капсулы и спрайт эмблем - сразу в HTML; эмблемы из ui.js, а не только щитки с буквой */
     assert.match(top100, /class="t100-stat lead"/);
     assert.match(top100, /<tr role="row" class="t100-row/);

@@ -462,3 +462,44 @@ test("активность: провал в серии (склейка тёзо�
     fs.rmSync(tmp, { recursive: true, force: true });
   }
 });
+
+test("leaders в factions-cards.json: включает действующих и бывших лидеров из clans-history.json", () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "hotz-factions-lead-"));
+  const write = (file, data) => {
+    fs.mkdirSync(path.dirname(path.join(tmp, file)), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmp, file),
+      typeof data === "string" || Buffer.isBuffer(data) ? data : JSON.stringify(data)
+    );
+  };
+  try {
+    write("ui.js", fs.readFileSync(path.join(ROOT, "ui.js"), "utf8"));
+    write("top100/factions.json", { Долг: "#d9534f" });
+    write("top100-data.js", 'window.TOP100_HISTORY={"id":"2026-11-19"};');
+    write("top100/clans.json", {
+      clans: [{ name: "Долг", level: 5, members: 10, leader: { id: 202, name: "НовыйЛидер" } }]
+    });
+    write("top100/clans-history.json", {
+      clans: {
+        Долг: [
+          ["2026-10-10", 4, 8, 101],
+          ["2026-11-10", 5, 10, 202]
+        ]
+      }
+    });
+    write("top100-players.json", {
+      updated: "2026-11-19 03:01",
+      dates: [Date.UTC(2026, 10, 19)],
+      metrics: ["reputation"],
+      players: {
+        101: { n: "БывшийЛидер", g: "Долг", l: 20, v: [1000] },
+        202: { n: "НовыйЛидер", g: "Долг", l: 25, v: [2000] }
+      }
+    });
+    const res = factions(tmp);
+    assert.deepEqual(res.cards.leaders["202"], [1, "Долг"]);
+    assert.deepEqual(res.cards.leaders["101"], [0, "Долг"]);
+  } finally {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  }
+});

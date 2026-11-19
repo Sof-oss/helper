@@ -59,8 +59,15 @@ export default [
         norm: "readonly",
         fmt: "readonly",
         top100Period: "readonly",
-        currentTop100Tab: "readonly"
+        currentTop100Tab: "readonly",
+        ZoneAchievements: "readonly"
       }
+    }
+  },
+  {
+    files: ["achievements.js"],
+    languageOptions: {
+      globals: { module: "readonly" }
     }
   },
   /* service worker */

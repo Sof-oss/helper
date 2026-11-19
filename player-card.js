@@ -68,6 +68,9 @@
   let cur = null,
     metric = null,
     period = null,
+    cardTab = "stats",
+    achStatus = "all",
+    achCat = "all",
     lastFocus = null;
 
   function load() {
@@ -257,6 +260,30 @@
         renderCard();
         return;
       }
+      const tabBtn = e.target.closest("[data-pc-tab]");
+      if (tabBtn) {
+        cardTab = tabBtn.dataset.pcTab === "achievements" ? "achievements" : "stats";
+        renderCard();
+        return;
+      }
+      const stBtn = e.target.closest("[data-ach-status]");
+      if (stBtn) {
+        achStatus = stBtn.dataset.achStatus || "all";
+        renderCard();
+        return;
+      }
+      const catBtn = e.target.closest("[data-ach-cat]");
+      if (catBtn) {
+        achCat = catBtn.dataset.achCat || "all";
+        renderCard();
+        return;
+      }
+      if (e.target.closest("[data-ach-reset]")) {
+        achStatus = "all";
+        achCat = "all";
+        renderCard();
+        return;
+      }
     });
     const inp = document.getElementById("pcSearch");
     inp.addEventListener("input", () => suggest(inp.value));
@@ -339,6 +366,9 @@
     root.hidden = true;
     document.documentElement.classList.remove("pc-lock");
     cur = null;
+    cardTab = "stats";
+    achStatus = "all";
+    achCat = "all";
     /* адрес страницы рейтинга возвращаем на место (см. open) */
     if (/^\/p\//.test(location.pathname) || /^#p=/.test(location.hash))
       history.replaceState(null, "", basePath + baseSearch);
@@ -655,6 +685,195 @@
   const metaOf = k =>
     k === "level" ? { label: "Уровень", accent: "#e7f0f8" } : TAB[k] || { label: k, accent: "#54bfff" };
   const cur_ = (p, mi) => (mi < 0 ? p.l : p.v[mi]);
+
+  function renderAchievements(achEval) {
+    const ZA = window.ZoneAchievements;
+    if (!ZA || !achEval) return "";
+    const sum = achEval.summary;
+    const catLabels = Object.fromEntries(ZA.CATEGORIES.map(c => [c.key, c.label]));
+    const statusTabs = [
+      { key: "all", label: "Все", count: sum.total },
+      { key: "unlocked", label: "Получены", count: sum.unlocked },
+      { key: "in_progress", label: "В процессе", count: sum.inProgress },
+      { key: "locked", label: "Не получены", count: sum.locked }
+    ];
+    const catCounts = {};
+    for (const c of ZA.CATEGORIES) catCounts[c.key] = { u: 0, t: 0 };
+    for (const it of achEval.items) {
+      if (!catCounts[it.category]) continue;
+      catCounts[it.category].t++;
+      if (it.status === "unlocked") catCounts[it.category].u++;
+    }
+    const filtered = ZA.filterItems(achEval.items, achStatus, achCat);
+
+    const statusLine = it => {
+      const u = it.unit ? " " + it.unit : "";
+      if (it.status === "unlocked") {
+        if (it.kind === "rank") return "Получено · лучшее место #" + fmt(it.bestRank);
+        if (it.kind === "boolean") return "Получено";
+        return "Получено · " + fmt(it.current) + " / " + fmt(it.target) + u;
+      }
+      if (it.status === "in_progress") {
+        if (it.kind === "rank") return "В процессе · сейчас #" + fmt(it.bestRank) + ", цель Топ-" + fmt(it.target);
+        return "В процессе · " + fmt(it.current) + " / " + fmt(it.target) + u + " (" + it.pct + "%)";
+      }
+      if (it.kind === "rank")
+        return it.bestRank ? "Не получено · сейчас #" + fmt(it.bestRank) : "Не получено · вне рейтингов";
+      if (it.kind === "boolean") return "Не получено";
+      return "Не получено · " + fmt(it.current) + " / " + fmt(it.target) + u;
+    };
+
+    const cardsHtml = filtered.length
+      ? '<ul class="pc-ach-grid">' +
+        filtered
+          .map(it => {
+            const barW =
+              it.status === "unlocked"
+                ? 100
+                : it.status === "in_progress"
+                  ? Math.max(5, it.pct)
+                  : it.kind === "numeric" && it.current > 0
+                    ? Math.max(3, it.pct)
+                    : 0;
+            return (
+              '<li class="pc-ach-card st-' +
+              it.status +
+              " r-" +
+              it.rarity +
+              '" style="--ac:' +
+              escAttr(it.color) +
+              ";--abg:" +
+              escAttr(it.bg) +
+              '">' +
+              ZA.badgeHtml(it) +
+              '<div class="pc-ach-info">' +
+              '<div class="pc-ach-top">' +
+              '<h4 class="pc-ach-name">' +
+              esc(it.name) +
+              "</h4>" +
+              '<span class="pc-ach-pts" title="Очки за достижение">' +
+              (it.status === "unlocked" ? '<span class="pc-ach-check" aria-hidden="true">✓</span> ' : "") +
+              "+" +
+              fmt(it.points) +
+              "</span>" +
+              "</div>" +
+              '<p class="pc-ach-desc">' +
+              esc(it.desc) +
+              "</p>" +
+              '<div class="pc-ach-prog">' +
+              '<div class="pc-ach-bar" aria-hidden="true"><i style="width:' +
+              barW +
+              '%"></i></div>' +
+              '<span class="pc-ach-state">' +
+              esc(statusLine(it)) +
+              "</span>" +
+              "</div>" +
+              '<div class="pc-ach-meta">' +
+              '<span class="pc-ach-rar">' +
+              esc(it.rarityLabel) +
+              "</span>" +
+              '<span aria-hidden="true">·</span>' +
+              "<span>" +
+              esc(catLabels[it.category] || it.category) +
+              "</span>" +
+              "</div>" +
+              "</div>" +
+              "</li>"
+            );
+          })
+          .join("") +
+        "</ul>"
+      : '<div class="pc-ach-empty"><p>По выбранным фильтрам достижений не найдено.</p><button type="button" class="pc-ach-reset" data-ach-reset>Показать все достижения</button></div>';
+
+    return (
+      '<div class="pc-ach-root">' +
+      '<section class="pc-section pc-ach-summary" aria-label="Сводка достижений">' +
+      '<div class="pc-ach-sum-head">' +
+      '<div class="pc-ach-score">' +
+      '<span class="pc-ach-rank-lbl">' +
+      esc(sum.rankTitle) +
+      "</span>" +
+      '<div class="pc-ach-score-val"><b>' +
+      fmt(sum.earnedPoints) +
+      "</b><span>из " +
+      fmt(sum.totalPoints) +
+      " очков</span></div>" +
+      "</div>" +
+      '<div class="pc-ach-counts">' +
+      "<span>Получено: <b>" +
+      fmt(sum.unlocked) +
+      "</b></span>" +
+      '<span aria-hidden="true">·</span>' +
+      "<span>В процессе: <b>" +
+      fmt(sum.inProgress) +
+      "</b></span>" +
+      '<span aria-hidden="true">·</span>' +
+      "<span>Не получено: <b>" +
+      fmt(sum.locked) +
+      "</b></span>" +
+      "</div>" +
+      "</div>" +
+      '<div class="pc-ach-meter" aria-hidden="true"><i style="width:' +
+      sum.pctPoints +
+      '%"></i></div>' +
+      '<p class="pc-ach-sum-note">Открыто ' +
+      fmt(sum.unlocked) +
+      " из " +
+      fmt(sum.total) +
+      " достижений (" +
+      sum.pctCount +
+      "%) · " +
+      sum.pctPoints +
+      "% от максимума очков</p>" +
+      "</section>" +
+      '<div class="pc-ach-controls">' +
+      '<div class="pc-ach-filters" role="group" aria-label="Статус достижений">' +
+      statusTabs
+        .map(
+          st =>
+            '<button type="button" class="pc-ach-fbtn' +
+            (achStatus === st.key ? " active" : "") +
+            '" data-ach-status="' +
+            st.key +
+            '" aria-pressed="' +
+            (achStatus === st.key) +
+            '">' +
+            esc(st.label) +
+            " <b>" +
+            fmt(st.count) +
+            "</b></button>"
+        )
+        .join("") +
+      "</div>" +
+      '<div class="pc-ach-cats" role="group" aria-label="Категории достижений">' +
+      '<button type="button" class="pc-ach-cbtn' +
+      (achCat === "all" ? " active" : "") +
+      '" data-ach-cat="all" aria-pressed="' +
+      (achCat === "all") +
+      '">Все категории</button>' +
+      ZA.CATEGORIES.map(
+        c =>
+          '<button type="button" class="pc-ach-cbtn' +
+          (achCat === c.key ? " active" : "") +
+          '" data-ach-cat="' +
+          c.key +
+          '" aria-pressed="' +
+          (achCat === c.key) +
+          '">' +
+          esc(c.label) +
+          " <span>" +
+          catCounts[c.key].u +
+          "/" +
+          catCounts[c.key].t +
+          "</span></button>"
+      ).join("") +
+      "</div>" +
+      "</div>" +
+      cardsHtml +
+      "</div>"
+    );
+  }
+
   function renderCard() {
     const p = data.players[cur];
     if (!p) return;
@@ -948,6 +1167,54 @@
       actChip = row("Активность", '<b class="pc-act-num" title="' + escAttr(tip) + '">' + actRow[0] + "</b>");
     }
 
+    const ZA = window.ZoneAchievements;
+    const leaderInfo = actData && actData.leaders ? actData.leaders[String(cur)] : null;
+    const achEval = ZA
+      ? ZA.evaluate(p, { metrics: data.metrics, bosses: data.bosses, dates: data.dates, leaderInfo })
+      : null;
+    const achChip = achEval
+      ? row(
+          "Достижения",
+          '<button type="button" class="pc-dossier-ach" data-pc-tab="achievements" title="Открыть вкладку достижений"><b>' +
+            fmt(achEval.summary.earnedPoints) +
+            "</b> <small>· " +
+            achEval.summary.unlocked +
+            "/" +
+            achEval.summary.total +
+            "</small></button>"
+        )
+      : "";
+    const cardTabs = achEval
+      ? '<div class="pc-card-tabs" role="tablist" aria-label="Разделы личного дела">' +
+        '<button type="button" class="pc-card-tab' +
+        (cardTab === "stats" ? " active" : "") +
+        '" role="tab" aria-selected="' +
+        (cardTab === "stats") +
+        '" data-pc-tab="stats">Показатели</button>' +
+        '<button type="button" class="pc-card-tab' +
+        (cardTab === "achievements" ? " active" : "") +
+        '" role="tab" aria-selected="' +
+        (cardTab === "achievements") +
+        '" data-pc-tab="achievements">Достижения <span class="pc-card-tab-num">' +
+        achEval.summary.unlocked +
+        "/" +
+        achEval.summary.total +
+        "</span></button></div>"
+      : "";
+    const tabContent =
+      achEval && cardTab === "achievements"
+        ? renderAchievements(achEval)
+        : periodBtns +
+          fromTxt +
+          '<div class="pc-tiles">' +
+          tiles +
+          "</div>" +
+          chart +
+          '<div class="pc-cols">' +
+          bosses +
+          faction +
+          "</div>";
+
     document.getElementById("pcBody").innerHTML =
       '<header class="pc-head' +
       (emb ? " has-bg" : "") +
@@ -983,22 +1250,15 @@
       row("Уровень", "<b>" + p.l + "</b>") +
       (p.z ? row("В Зоне", esc(p.z)) : "") +
       actChip +
+      achChip +
       "</dl></div>" +
       (stampTxt ? '<div class="pc-stamp" aria-hidden="true">' + stampTxt + "</div>" : "") +
       "</div>" +
       awards +
       patches +
       "</header>" +
-      periodBtns +
-      fromTxt +
-      '<div class="pc-tiles">' +
-      tiles +
-      "</div>" +
-      chart +
-      '<div class="pc-cols">' +
-      bosses +
-      faction +
-      "</div>" +
+      cardTabs +
+      tabContent +
       '<p class="pc-foot"><span>Сеть сталкеров · история с ' +
       dateFmt(data.dates[0]) +
       "</span><span>Синхронизация: " +

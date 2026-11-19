@@ -731,6 +731,24 @@ function factionsMarkup(ROOT) {
   try {
     history = (hist && JSON.parse(hist[1]).id) || "";
   } catch (e) {}
+  /* лидеры группировок (действующие и бывшие по clans-history.json) - для достижений в «Личном деле» */
+  const leaders = {};
+  const addLeader = (id, name, isCurrent) => {
+    if (id == null) return;
+    const key = String(id);
+    if (!leaders[key]) leaders[key] = [0];
+    if (isCurrent) leaders[key][0] = 1;
+    if (name && !leaders[key].includes(name)) leaders[key].push(name);
+  };
+  for (const f of list) {
+    if (f.leaderId) addLeader(f.leaderId, f.c.name, true);
+  }
+  for (const [name, rows] of Object.entries(clansHistory)) {
+    if (!Array.isArray(rows)) continue;
+    for (const r of rows) {
+      if (r && r[3] != null) addLeader(r[3], name, false);
+    }
+  }
   return {
     stats,
     rank,
@@ -741,6 +759,7 @@ function factionsMarkup(ROOT) {
       actAnchors,
       actMetrics: data.metrics,
       players: actPlayers,
+      leaders,
       factions: cardsData
     },
     history,
