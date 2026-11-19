@@ -316,8 +316,7 @@ window.__trapTab = function (box, e) {
   scrollTopBtn.className = "scroll-top-btn";
   scrollTopBtn.setAttribute("aria-label", "Наверх");
   scrollTopBtn.setAttribute("title", "Наверх");
-  scrollTopBtn.innerHTML =
-    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>';
+  scrollTopBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>';
   scrollTopBtn.addEventListener("click", function () {
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });

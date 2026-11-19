@@ -15,13 +15,7 @@
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 10px;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.05),
-      rgba(255, 255, 255, 0) 40%
-    ),
-    var(--glass-tint);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 40%), var(--glass-tint);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
   backdrop-filter: blur(10px) saturate(140%);
   box-shadow:
@@ -39,12 +33,7 @@
   inset: 0;
   padding: 1px;
   border-radius: inherit;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.2),
-    rgba(255, 255, 255, 0.02) 45%,
-    transparent
-  );
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.02) 45%, transparent);
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -805,7 +794,11 @@ body.fx-rank-lock {
   padding: 10px 12px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
-  background: linear-gradient(170deg, color-mix(in srgb, var(--fx, var(--accent)) 10%, rgba(10, 17, 25, 0.82)), rgba(7, 12, 18, 0.9));
+  background: linear-gradient(
+    170deg,
+    color-mix(in srgb, var(--fx, var(--accent)) 10%, rgba(10, 17, 25, 0.82)),
+    rgba(7, 12, 18, 0.9)
+  );
   text-align: left;
   transition:
     transform 0.15s,
