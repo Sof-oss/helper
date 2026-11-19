@@ -923,6 +923,7 @@ svg.target-icon {
   padding: 8px 0 12px;
   text-align: center;
   flex: 0 0 auto;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
 }
 .site-footer > span {
   display: inline-block;
@@ -1317,7 +1318,7 @@ svg.target-icon {
     rgba(8, 11, 14, 0.94)
   );
   --sh-panel: 0 18px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  --bg-dim: 0.42;
+  --bg-dim: 0.22;
 }
 :root[data-theme="merc"] {
   --accent: #5f8ac9;
@@ -1329,7 +1330,7 @@ svg.target-icon {
   --panel: #0c1218;
   --panel-2: #080c10;
   --panel-line: #1c2733;
-  --bg-dim: 0.38;
+  --bg-dim: 0.18;
 }
 :root[data-theme="dolg"] {
   --accent: #d9483f;
@@ -1341,7 +1342,7 @@ svg.target-icon {
   --panel: #140c0c;
   --panel-2: #0d0808;
   --panel-line: #3a1f1d;
-  --bg-dim: 0.5;
+  --bg-dim: 0.24;
 }
 :root[data-theme="svoboda"] {
   --accent: #4fb058;
@@ -1353,7 +1354,7 @@ svg.target-icon {
   --panel: #0b130e;
   --panel-2: #070c09;
   --panel-line: #1e3324;
-  --bg-dim: 0.58;
+  --bg-dim: 0.34;
 }
 :root[data-theme="science"] {
   --accent: #57c4f0;
@@ -1365,7 +1366,7 @@ svg.target-icon {
   --panel: #08121a;
   --panel-2: #060d13;
   --panel-line: #14303f;
-  --bg-dim: 0.34;
+  --bg-dim: 0.16;
 }
 :root[data-theme="monolith"] {
   --accent: #d9a52c;
@@ -1377,7 +1378,7 @@ svg.target-icon {
   --panel: #141007;
   --panel-2: #0d0a05;
   --panel-line: #3a2f15;
-  --bg-dim: 0.5;
+  --bg-dim: 0.26;
 }
 :root[data-theme="rassvet"] {
   --accent: #3d7bf0;
@@ -1389,7 +1390,7 @@ svg.target-icon {
   --panel: #0a111a;
   --panel-2: #070b11;
   --panel-line: #1d3047;
-  --bg-dim: 0.42;
+  --bg-dim: 0.24;
 }
 :root[data-theme="loners"] {
   --accent: #e0b83a;
@@ -1401,7 +1402,7 @@ svg.target-icon {
   --panel: #13100b;
   --panel-2: #0c0a07;
   --panel-line: #3a2f22;
-  --bg-dim: 0.45;
+  --bg-dim: 0.24;
 }
 :root[data-theme="traders"] {
   --accent: #a3b04a;
@@ -1413,7 +1414,7 @@ svg.target-icon {
   --panel: #11130c;
   --panel-2: #0b0c08;
   --panel-line: #33371f;
-  --bg-dim: 0.48;
+  --bg-dim: 0.28;
 }
 :root[data-theme="renegades"] {
   --accent: #2fa889;
@@ -1425,7 +1426,7 @@ svg.target-icon {
   --panel: #0a1411;
   --panel-2: #070d0b;
   --panel-line: #1d3a32;
-  --bg-dim: 0.45;
+  --bg-dim: 0.22;
 }
 :root[data-theme="clearsky"] {
   --accent: #ee8a3c;
@@ -1437,7 +1438,7 @@ svg.target-icon {
   --panel: #0b1420;
   --panel-2: #080e17;
   --panel-line: #22344a;
-  --bg-dim: 0.42;
+  --bg-dim: 0.22;
 }
 /* Бандиты: холодный бирюзовый кант с игры, кость с шеврона и огонь костра с фона - вместо серого третьего акцента, который выглядел как выключенный */
 :root[data-theme="bandits"] {
@@ -1450,7 +1451,7 @@ svg.target-icon {
   --panel: #0a1515;
   --panel-2: #060e0e;
   --panel-line: #1b3333;
-  --bg-dim: 0.34;
+  --bg-dim: 0.16;
   --bg-lq: linear-gradient(160deg, #0a1515, #060e0e);
 }
 :root[data-theme="military"] {
@@ -1463,7 +1464,7 @@ svg.target-icon {
   --panel: #0a140f;
   --panel-2: #060d09;
   --panel-line: #1c3528;
-  --bg-dim: 0.36;
+  --bg-dim: 0.18;
 }
 body::after {
   content: "";
@@ -2451,12 +2452,12 @@ body::before {
   background-image:
     linear-gradient(
       180deg,
-      rgba(4, 6, 8, calc(var(--bg-dim) + 0.1)) 0,
-      rgba(4, 6, 8, var(--bg-dim)) 30%,
-      rgba(4, 6, 8, calc(var(--bg-dim) + 0.15)) 70%,
-      #05070a 100%
+      rgba(4, 6, 8, calc(var(--bg-dim) + 0.08)) 0,
+      rgba(4, 6, 8, var(--bg-dim)) 26%,
+      rgba(4, 6, 8, calc(var(--bg-dim) + 0.08)) 74%,
+      rgba(5, 7, 10, calc(var(--bg-dim) + 0.38)) 100%
     ),
-    radial-gradient(120% 90% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.55) 100%), var(--bg-img), var(--bg-lq, none);
+    radial-gradient(125% 95% at 50% 42%, transparent 62%, rgba(0, 0, 0, 0.26) 100%), var(--bg-img), var(--bg-lq, none);
   background-position:
     0 0,
     0 0,

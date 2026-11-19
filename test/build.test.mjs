@@ -97,6 +97,14 @@ test("build.js: страницы, CSP, sitemap и статическая обо�
     assert.ok(!precache.includes("/top100"), "страница Топ-100 не входит в оболочку");
     assert.ok(!precache.some(u => /^\/top100-data\.js/.test(u)), "данные Топ-100 не входят в оболочку");
 
+    const bosses = read("info-bosses.html");
+    assert.match(bosses, /data-boss-preview/);
+    assert.doesNotMatch(bosses, /boss-event-preview/);
+    assert.match(bosses, /src="lightbox\.js\?v=/);
+    const bossesCss = read(/href="\/?(bundle-[\w-]+\.css)\?v=/.exec(bosses)[1]);
+    assert.match(bossesCss, /\.zn-lightbox/);
+    assert.match(bossesCss, /\.boss-event-sum-art-btn/);
+
     const sitemap = read("sitemap.xml");
     assert.match(sitemap, /https:\/\/heart-of-the-zone\.ru\/top100/);
     assert.doesNotMatch(sitemap, /\/build<\/loc>/);

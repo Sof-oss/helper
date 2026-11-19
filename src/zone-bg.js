@@ -372,9 +372,9 @@ void main(){
   c=mix(c,fogc*.82,smoothstep(.4,.05,s.y)*smoothstep(.42,.9,gn)*.25*uAtmos.x);
 
   /* 14. Затемнение и виньетка (как в CSS-фоне body::before для читаемости карточек) */
-  float t=1.-s.y,dm=t<.3?mix(uDim+.1,uDim,t/.3):t<.7?mix(uDim,uDim+.15,(t-.3)/.4):mix(uDim+.15,1.,(t-.7)/.3);
+  float t=1.-s.y,dm=t<.26?mix(uDim+.08,uDim,t/.26):t<.74?mix(uDim,uDim+.08,(t-.26)/.48):mix(uDim+.08,min(uDim+.38,.78),(t-.74)/.26);
   c=mix(c,vec3(.016,.024,.031),clamp(dm,0.,1.));
-  c*=1.-clamp((length(vec2((s.x-.5)/1.2,(t-.4)/.9))-.55)/.45,0.,1.)*.55;
+  c*=1.-clamp((length(vec2((s.x-.5)/1.25,(t-.42)/.95))-.62)/.38,0.,1.)*.26;
 
   /* 15. Пыль и пепел в трёх слоях параллакса */
   vec2 m1=motes(s+cam*.65,9.,.028,.045,1.,.05),m2=motes(s+cam*.38,16.,.022,.036,5.,.06),m3=motes(s+cam*.16,28.,.018,.026,9.,.08);

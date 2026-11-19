@@ -6,13 +6,44 @@
   let box = null,
     group = [],
     at = 0;
+  const still = () => !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const stopVideo = () => {
+    const vid = box && box.querySelector("video");
+    if (!vid) return;
+    vid.pause();
+    if (vid.hasAttribute("src")) {
+      vid.removeAttribute("src");
+      vid.load();
+    }
+  };
+  const showImage = (img, vid, b) => {
+    stopVideo();
+    vid.hidden = true;
+    img.hidden = false;
+    img.src = b.src;
+    img.alt = b.alt || "";
+  };
   const show = k => {
     at = (k + group.length) % group.length;
     const b = group[at],
       img = box.querySelector("img"),
+      vid = box.querySelector("video"),
       cap = box.querySelector(".zn-lb-cap");
-    img.src = b.src;
-    img.alt = b.alt || "";
+    if (b.video && !still()) {
+      stopVideo();
+      img.hidden = true;
+      img.src = b.src;
+      img.alt = b.alt || "";
+      vid.hidden = false;
+      vid.poster = b.src || "";
+      vid.setAttribute("aria-label", b.alt || "");
+      vid.src = b.video;
+      vid.load();
+      const p = vid.play();
+      if (p && p.catch) p.catch(() => {});
+    } else {
+      showImage(img, vid, b);
+    }
     const num = group.length > 1 ? at + 1 + " / " + group.length : "";
     cap.textContent = b.alt && num ? b.alt + "  ·  " + num : b.alt || num;
     cap.hidden = !cap.textContent;
@@ -23,15 +54,21 @@
     box.className = "zn-lightbox";
     box.setAttribute("aria-label", "Просмотр картинки");
     box.innerHTML =
-      '<div class="zn-lb-shell"><figure><img alt=""><figcaption class="zn-lb-cap"></figcaption></figure>' +
+      '<div class="zn-lb-shell"><figure><img alt=""><video class="zn-lb-video" muted loop playsinline disablepictureinpicture preload="none" hidden></video><figcaption class="zn-lb-cap"></figcaption></figure>' +
       '<button type="button" class="zn-lb-btn zn-lb-close" aria-label="Закрыть"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>' +
       '<button type="button" class="zn-lb-btn zn-lb-prev" aria-label="Предыдущая картинка"><svg viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></button>' +
       '<button type="button" class="zn-lb-btn zn-lb-next" aria-label="Следующая картинка"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button></div>';
     document.body.appendChild(box);
+    const vid = box.querySelector("video");
+    vid.addEventListener("error", () => {
+      const b = group[at];
+      if (b && b.src && !vid.hidden) showImage(box.querySelector("img"), vid, b);
+    });
+    box.addEventListener("close", stopVideo);
     box.addEventListener("click", e => {
       if (e.target.closest(".zn-lb-prev")) show(at - 1);
       else if (e.target.closest(".zn-lb-next")) show(at + 1);
-      else if (e.target.closest(".zn-lb-close") || !e.target.closest("img")) box.close();
+      else if (e.target.closest(".zn-lb-close") || !e.target.closest("img, video")) box.close();
     });
     box.addEventListener("keydown", e => {
       if (e.key === "ArrowLeft") show(at - 1);

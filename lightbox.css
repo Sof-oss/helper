@@ -46,7 +46,8 @@
   background: #080d12;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
 }
-.zn-lightbox img {
+.zn-lightbox img,
+.zn-lightbox video {
   display: block;
   max-width: 100%;
   max-height: calc(86dvh - 46px);
@@ -55,6 +56,10 @@
   border-radius: 0;
   background: #05080b;
   object-fit: contain;
+}
+.zn-lightbox img[hidden],
+.zn-lightbox video[hidden] {
+  display: none;
 }
 .zn-lb-cap {
   width: 100%;
@@ -111,7 +116,8 @@
     max-width: 100%;
     max-height: calc(100dvh - 24px);
   }
-  .zn-lightbox img {
+  .zn-lightbox img,
+  .zn-lightbox video {
     max-height: calc(100dvh - 68px);
   }
   .zn-lb-close {

@@ -1224,14 +1224,79 @@
 .boss-event-sum:focus-visible {
   outline-offset: -3px;
 }
-.boss-event-sum-art {
-  width: 64px;
-  height: 40px;
+.boss-event-sum-art-btn {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  padding: 0;
   border: 1px solid #6a4c58;
   border-radius: 6px;
+  overflow: hidden;
+  background: #0d0a12;
+  cursor: zoom-in;
+  transition:
+    border-color 0.16s,
+    box-shadow 0.16s;
+}
+.boss-event-sum-art-btn:hover,
+.boss-event-sum-art-btn:focus-visible {
+  border-color: #ff9a2ec7;
+  box-shadow: 0 0 0 2px #ff9a2e2e;
+}
+.boss-event-sum-art-btn:focus-visible {
+  outline: 2px solid #ff9a2e;
+  outline-offset: 2px;
+}
+.boss-event-sum-art {
+  display: block;
+  width: 64px;
+  height: 40px;
+  border: 0;
+  border-radius: 0;
   object-fit: cover;
-  object-position: right top;
-  filter: saturate(0.7);
+  object-position: center 6%;
+  filter: saturate(0.75);
+  transition:
+    filter 0.16s,
+    transform 0.2s;
+}
+.boss-event-sum-art-btn:hover .boss-event-sum-art,
+.boss-event-sum-art-btn:focus-visible .boss-event-sum-art {
+  filter: saturate(1);
+  transform: scale(1.06);
+}
+.boss-event-sum-zoom {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(255, 196, 130, 0.35);
+  border-radius: 4px;
+  background: rgba(10, 8, 16, 0.78);
+  color: #e8c8b1;
+  pointer-events: none;
+  transition:
+    border-color 0.16s,
+    background 0.16s,
+    color 0.16s;
+}
+.boss-event-sum-zoom svg {
+  width: 11px;
+  height: 11px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.boss-event-sum-art-btn:hover .boss-event-sum-zoom,
+.boss-event-sum-art-btn:focus-visible .boss-event-sum-zoom {
+  border-color: #ff9a2e99;
+  background: rgba(16, 10, 22, 0.92);
+  color: #ffcf8a;
 }
 .boss-event-sum-name {
   margin: 0;
@@ -1711,8 +1776,8 @@
     gap: 6px 10px;
   }
   .boss-event-sum-art {
-    width: 52px;
-    height: 34px;
+    width: 58px;
+    height: 38px;
   }
   .boss-event-sum-state {
     order: 3;

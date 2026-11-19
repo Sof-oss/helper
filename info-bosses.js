@@ -392,16 +392,26 @@
         eventBody(false) +
         "</article>"
       );
-    /* событие закончилось: карточка - одна строка, подробности под спойлером, видео не грузим */
+    /* событие закончилось: карточка - одна строка, подробности под спойлером, видео грузим только по клику по миниатюре */
+    const zoomIco =
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5M11 8.5v5M8.5 11h5"/></svg>';
+    const thumb =
+      '<button type="button" class="boss-event-sum-art-btn" data-boss-preview aria-label="Посмотреть босса «' +
+      e.name +
+      '» крупно" title="Открыть изображение босса крупно"><img class="boss-event-sum-art" src="assets/bosses/' +
+      e.key +
+      '.webp" alt="" width="96" height="60" loading="lazy" decoding="async"><span class="boss-event-sum-zoom" aria-hidden="true">' +
+      zoomIco +
+      "</span></button>";
     const more =
       '<span class="boss-event-sum-more"><span class="boss-event-sum-more-text">Подробности</span>' +
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>';
     return (
       '<details class="boss-card boss-event is-ended" data-boss="' +
       e.key +
-      '"><summary class="boss-event-sum"><img class="boss-event-sum-art" src="assets/bosses/' +
-      e.key +
-      '.webp" alt="" width="96" height="60" loading="lazy" decoding="async"><h2 class="boss-event-sum-name">' +
+      '"><summary class="boss-event-sum">' +
+      thumb +
+      '<h2 class="boss-event-sum-name">' +
       e.name +
       '</h2><span class="boss-event-sum-state">событие завершено · босс недоступен</span>' +
       more +
@@ -466,6 +476,36 @@
       EVENT_RANGE +
       "). Значок бронежилета в награде в игре - вещи комплекта, которые могут выпасть с босса.</p>";
   if (root) startEventCountdown();
+  if (root && root.addEventListener) {
+    const openEventPreview = () => {
+      if (!window.ZoneLightbox || !window.ZoneLightbox.open) return;
+      window.ZoneLightbox.open(
+        [
+          {
+            src: "assets/bosses/" + EVENT.key + ".webp",
+            video: "assets/bosses/" + EVENT.key + ".webm",
+            alt: EVENT.name + " · Хэллоуинский босс (" + EVENT_RANGE + ")"
+          }
+        ],
+        0
+      );
+    };
+    root.addEventListener("click", e => {
+      const btn = e.target && e.target.closest ? e.target.closest("[data-boss-preview]") : null;
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      openEventPreview();
+    });
+    root.addEventListener("keydown", e => {
+      if (e.key !== " " && e.key !== "Enter") return;
+      const btn = e.target && e.target.closest ? e.target.closest("[data-boss-preview]") : null;
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      openEventPreview();
+    });
+  }
   /* анимация из игры играет, только пока карточка на экране; при «уменьшить движение» остаётся кадр-заставка.
      Играет каждое видимое видео (четверть карточки и больше), скрытые - на паузе: preload="none" не даёт
      браузеру тянуть mp4/webm невидимых карточек, так что трафик - только за то, что реально на экране. */

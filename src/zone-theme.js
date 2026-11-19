@@ -19,7 +19,7 @@ export function readTheme() {
     key: document.documentElement.dataset.theme || "merc",
     accent: hexToRgb(cs.getPropertyValue("--accent")),
     accent2: hexToRgb(cs.getPropertyValue("--accent-2")),
-    dim: parseFloat(cs.getPropertyValue("--bg-dim")) || 0.45,
+    dim: parseFloat(cs.getPropertyValue("--bg-dim")) || 0.22,
     bg: cssUrl(cs.getPropertyValue("--bg-img")),
     /* карта глубины фото (zone3d.css, build-depth.py) */
     depth: cssUrl(cs.getPropertyValue("--depth-img"))
