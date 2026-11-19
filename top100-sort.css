@@ -666,10 +666,9 @@
   --hi: 0.11;
   border-color: rgba(255, 255, 255, 0.22);
 }
-/* на компьютере под строками размытие, как у остального стекла; на телефоне - плотнее и без него (100 строк) */
+/* на компьютере под строками размытие, как у остального стекла; на телефоне - без него (100 строк) */
 @media (min-width: 761px) {
   .t100-row {
-    background-color: transparent;
     -webkit-backdrop-filter: blur(8px) saturate(135%);
     backdrop-filter: blur(8px) saturate(135%);
   }

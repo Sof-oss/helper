@@ -694,17 +694,14 @@ document.addEventListener("click", e => {
   }
   const btn = e.target.closest("[data-top100-tab]");
   if (!btn) return;
-  /* смена раздела проходит через View Transition, если браузер умеет */
-  const swap = () => {
-    currentTop100Tab = btn.dataset.top100Tab;
-    levelSortDesc = false;
-    deltaSortDesc = false; // сортировка не переносится на другую вкладку
-    try {
-      localStorage.setItem(TOP100_TAB_KEY, currentTop100Tab);
-    } catch {}
-    renderTop100();
-  };
-  window.__vt ? window.__vt(swap) : swap();
+  /* смена раздела сразу без View Transition: иначе снимок 100 строк с backdrop-filter мигает полупрозрачностью */
+  currentTop100Tab = btn.dataset.top100Tab;
+  levelSortDesc = false;
+  deltaSortDesc = false; // сортировка не переносится на другую вкладку
+  try {
+    localStorage.setItem(TOP100_TAB_KEY, currentTop100Tab);
+  } catch {}
+  renderTop100();
 });
 renderTop100();
 {

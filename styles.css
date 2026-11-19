@@ -2347,20 +2347,14 @@ html.vt-same .site-header {
 ::view-transition-new(root) {
   animation: none;
 }
-html.vt-same #top100TableWrap {
-  view-transition-name: leaderboard;
-}
 html.vt-same #infoGroups {
   view-transition-name: infogroups;
 }
-::view-transition-old(leaderboard),
-::view-transition-new(leaderboard),
 ::view-transition-old(infogroups),
 ::view-transition-new(infogroups) {
   animation-duration: 0.22s;
   animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
 }
-::view-transition-group(leaderboard),
 ::view-transition-group(infogroups) {
   animation-duration: 0.22s;
 }
@@ -2373,8 +2367,6 @@ html.vt-same #infoGroups {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(leaderboard),
-  ::view-transition-new(leaderboard),
   ::view-transition-old(infogroups),
   ::view-transition-new(infogroups),
   ::view-transition-old(app-header),
