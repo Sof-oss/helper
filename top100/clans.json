@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-20T02:58:27+03:00",
+  "updated": "2026-11-21T02:58:36+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
@@ -41,7 +41,7 @@
     {
       "name": "Свобода",
       "level": 2,
-      "members": 22,
+      "members": 23,
       "leader": {
         "id": 388,
         "name": "«Cвобода» Чехов"
@@ -59,7 +59,7 @@
     {
       "name": "МОНОЛИТ",
       "level": 1,
-      "members": 11,
+      "members": 12,
       "leader": {
         "id": 4817,
         "name": "🪬МОНОЛИТ🪬ХАРОН"
@@ -77,7 +77,7 @@
     {
       "name": "Last Way 2",
       "level": 1,
-      "members": 20,
+      "members": 18,
       "leader": {
         "id": 5118,
         "name": "|LW| Артём"
@@ -86,7 +86,7 @@
     {
       "name": "Last Way",
       "level": 1,
-      "members": 18,
+      "members": 20,
       "leader": {
         "id": 3954,
         "name": "|LW| РуSSкая"
