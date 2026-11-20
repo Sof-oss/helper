@@ -73,6 +73,7 @@ const SKIP = new Set([
   "build-guide-images.js",
   "build-chrome.js",
   "build-factions.js",
+  "build-achievements.js",
   "factions-info.json",
   "previews",
   "test",
@@ -540,6 +541,13 @@ const PRERENDER = {
     writeFactionCards(f.cards);
     return fill(fill(fill(html, "factionsStats", f.stats), "factionsRank", f.rank), "factionsList", f.list);
   },
+  /* «Достижения»: рейтинг по очкам и статистика редкости по всем игрокам выгрузки */
+  "achievements.html": html => {
+    const a = require("./build-achievements.js")(ROOT);
+    html = html.replace('id="main" data-history=""', 'id="main" data-history="' + a.history + '"');
+    fs.writeFileSync(path.join(OUT, "achievements-data.json"), JSON.stringify(a.data));
+    return fill(fill(html, "achpStats", a.statsHtml), "achpTbody", a.rowsHtml);
+  },
 
   "index.html": html => {
     const els = runScripts(["changelog.js", "news.js"]);
@@ -631,6 +639,7 @@ function pageWords(name, html) {
 
   add("build.js");
   if (name === "factions.html") add("build-factions.js");
+  if (name === "achievements.html") add("build-achievements.js");
   const text = srcs.join("\n");
   const words = new Set(text.match(/[A-Za-z_][\w-]*/g));
   const glued = [...new Set([...text.matchAll(/["'`\s]([A-Za-z_][\w-]*)(?:["']\s*\+|\$\{)/g)].map(m => m[1]))];
@@ -1158,7 +1167,9 @@ if (fs.existsSync(smSrc)) {
       /* у списка гайдов дата - ещё и последний коммит папок гайдов */
       const deps =
         page === "guides.html" ? [...pageDeps(page), ...guides.map(g => "guides/" + g.slug)] : pageDeps(page);
-      const date = ((page === "top100.html" || page === "factions.html") && top100Date()) || gitDate(deps);
+      const date =
+        ((page === "top100.html" || page === "factions.html" || page === "achievements.html") && top100Date()) ||
+        gitDate(deps);
       return "<url><loc>" + loc + "</loc><lastmod>" + date + "</lastmod></url>";
     });
   /* гайды: страница списка и каждый гайд, дата - последний коммит папки гайда */
@@ -1252,6 +1263,7 @@ function addCsp(file) {
     "calculator.html",
     "build.html",
     "top100.html",
+    "achievements.html",
     "guides.html",
     "factions.html",
     "compare.html",
@@ -1271,8 +1283,8 @@ function addCsp(file) {
     for (const m of html.matchAll(/<(?:link|script|img)\b[^>]*?\s(?:href|src)="([^"]+\?v=[^"]+)"/g)) {
       if (/^([a-z]+:)?\/\//i.test(m[1])) continue;
       const u = m[1].startsWith("/") ? m[1] : "/" + m[1];
-      /* данные Топ-100 меняются каждый день - их место в DATA-кэше (network-first), а не в версии оболочки */
-      if (/^\/top100-(?:data\.js|players\.json)(?:\?|$)/.test(u)) continue;
+      /* данные Топ-100 и достижений меняются каждый день - их место в DATA-кэше (network-first), а не в версии оболочки */
+      if (/^\/(?:top100-(?:data\.js|players\.json)|achievements-data\.json)(?:\?|$)/.test(u)) continue;
       urls.add(u);
     }
     /* тур грузит загрузчик (lazyTour) - адреса нет в <script src>, но офлайн тур тоже должен открываться */

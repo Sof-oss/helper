@@ -35,13 +35,11 @@
   background: color-mix(in srgb, var(--accent, #54bfff) 18%, transparent);
   color: #fff;
 }
-.zp-suggest li > i {
-  flex: 0 0 8px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--f);
-  box-shadow: 0 0 6px var(--f);
+.zp-suggest .zp-emb {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 21px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 .zp-suggest li > span {
   flex: 1;
@@ -52,8 +50,8 @@
 }
 .zp-suggest small {
   flex: 0 0 auto;
-  font-size: 11.5px;
-  color: #7f95a8;
+  font-size: 12.5px;
+  color: #8ea3b5;
 }
 .zp-suggest .zp-empty {
   cursor: default;

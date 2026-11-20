@@ -13,6 +13,7 @@
   const URL_INDEX = "/top100-index.json" + VER_QS;
   const URL_FALLBACK = "/top100-players.json" + VER_QS;
   const URL_FACTIONS = "/factions-cards.json" + VER_QS;
+  const URL_ACH = "/achievements-data.json" + VER_QS;
   const DAY = 864e5;
   const PERIODS = [
     { key: "last", label: "С прошлого обновления" },
@@ -147,6 +148,28 @@
     return actLoading;
   }
 
+  /* глобальная статистика достижений (% и число игроков по каждой награде, места в Топ-100 по очкам) */
+  let achGlobalData = null,
+    achGlobalLoading = null;
+  function loadAchStats() {
+    if (achGlobalData) return Promise.resolve(achGlobalData);
+    if (!achGlobalLoading)
+      achGlobalLoading = fetch(URL_ACH)
+        .then(r => {
+          if (!r.ok) throw new Error(r.status);
+          return r.json();
+        })
+        .then(d => {
+          achGlobalData = d;
+          return d;
+        })
+        .catch(e => {
+          achGlobalLoading = null;
+          throw e;
+        });
+    return achGlobalLoading;
+  }
+
   /* цвет группировки: из выгрузки, иначе стабильный оттенок по названию */
   function factionColor(g) {
     if (!g) return "#8196a9";
@@ -263,6 +286,14 @@
       const tabBtn = e.target.closest("[data-pc-tab]");
       if (tabBtn) {
         cardTab = tabBtn.dataset.pcTab === "achievements" ? "achievements" : "stats";
+        if (cardTab === "achievements" && !achGlobalData) {
+          loadAchStats().then(
+            () => {
+              if (cur && cardTab === "achievements") renderCard();
+            },
+            () => {}
+          );
+        }
         renderCard();
         return;
       }
@@ -329,14 +360,13 @@
       ? found
           .map(x => {
             const p = data.players[x.id];
+            const embHtml = window.__factionPatch ? window.__factionPatch(p.g, factionColor(p.g), "pc-sug-emb") : "";
             return (
               '<li><button type="button" role="option" data-pc-id="' +
               escAttr(x.id) +
-              '"><i class="t100-dot" style="--f:' +
-              escAttr(factionColor(p.g)) +
-              '"' +
-              (p.g ? "" : " data-none") +
-              "></i><span>" +
+              '">' +
+              embHtml +
+              "<span>" +
               esc(x.n) +
               "</span><small>" +
               (p.g ? esc(p.g) + " · " : "") +
@@ -420,6 +450,7 @@
           id = null;
         }
         cur = id;
+        if (opts && opts.tab) cardTab = opts.tab === "achievements" ? "achievements" : "stats";
         document.getElementById("pcShare").hidden = !id;
         if (!id) {
           skin(null, "");
@@ -445,10 +476,16 @@
         if (!loadedId || seq !== openSeq) return;
         renderCard();
 
-        /* активность грузится следом за шардом: когда дойдёт, перерисовать открытую карточку с ней */
+        /* активность и статистика достижений грузятся следом за шардом: когда дойдут, перерисовать открытую карточку */
         loadAct().then(
           () => {
             if (seq === openSeq && cur) renderCard();
+          },
+          () => {}
+        );
+        loadAchStats().then(
+          () => {
+            if (seq === openSeq && cur && cardTab === "achievements") renderCard();
           },
           () => {}
         );
@@ -723,6 +760,18 @@
       return "Не получено · " + fmt(it.current) + " / " + fmt(it.target) + u;
     };
 
+    const achRank = achGlobalData && achGlobalData.ranks ? achGlobalData.ranks[String(cur)] : null;
+    const totalPlayers = achGlobalData && achGlobalData.totalPlayers ? Number(achGlobalData.totalPlayers) : 0;
+
+    const ownHtml = it => {
+      if (achGlobalData && achGlobalData.stats && totalPlayers > 0) {
+        const cnt = Number(achGlobalData.stats[it.id]) || 0;
+        const own = ZA.formatOwnership(cnt, totalPlayers);
+        return '<div class="pc-ach-own"><span>Есть у <b>' + esc(own.label) + "</b></span></div>";
+      }
+      return "";
+    };
+
     const cardsHtml = filtered.length
       ? '<ul class="pc-ach-grid">' +
         filtered
@@ -745,6 +794,7 @@
               ";--abg:" +
               escAttr(it.bg) +
               '">' +
+              '<div class="pc-ach-main">' +
               ZA.badgeHtml(it) +
               '<div class="pc-ach-info">' +
               '<div class="pc-ach-top">' +
@@ -778,6 +828,8 @@
               "</span>" +
               "</div>" +
               "</div>" +
+              "</div>" +
+              ownHtml(it) +
               "</li>"
             );
           })
@@ -792,6 +844,7 @@
       '<div class="pc-ach-score">' +
       '<span class="pc-ach-rank-lbl">' +
       esc(sum.rankTitle) +
+      (achRank ? " · #" + fmt(achRank) + " в рейтинге" : "") +
       "</span>" +
       '<div class="pc-ach-score-val"><b>' +
       fmt(sum.earnedPoints) +
@@ -816,6 +869,7 @@
       '<div class="pc-ach-meter" aria-hidden="true"><i style="width:' +
       sum.pctPoints +
       '%"></i></div>' +
+      '<div class="pc-ach-sum-foot">' +
       '<p class="pc-ach-sum-note">Открыто ' +
       fmt(sum.unlocked) +
       " из " +
@@ -824,7 +878,9 @@
       sum.pctCount +
       "%) · " +
       sum.pctPoints +
-      "% от максимума очков</p>" +
+      "% от максимума</p>" +
+      '<a class="pc-ach-board-link" href="/achievements">Рейтинг по очкам →</a>' +
+      "</div>" +
       "</section>" +
       '<div class="pc-ach-controls">' +
       '<div class="pc-ach-filters" role="group" aria-label="Статус достижений">' +
@@ -1005,11 +1061,15 @@
     /* группировки и ники */
     const gh = p.gh || [];
     let fac;
+    const tlPatch = (name, col) =>
+      '<span class="pc-tl-emb" aria-hidden="true">' +
+      (window.__factionPatch ? window.__factionPatch(name, col) : patchSvg(name, col, p.n)) +
+      "</span>";
     if (!gh.length)
       fac =
-        '<li class="pc-tl-item now"><i style="--f:' +
-        escAttr(color) +
-        '"></i><div><b>' +
+        '<li class="pc-tl-item now">' +
+        tlPatch(p.g, color) +
+        "<div><b>" +
         (p.g ? esc(p.g) : "Без группировки") +
         "</b><small>по последней выгрузке</small></div></li>";
     else
@@ -1025,9 +1085,9 @@
           return (
             '<li class="pc-tl-item' +
             (i ? "" : " now") +
-            '"><i style="--f:' +
-            escAttr(factionColor(g[1])) +
-            '"></i><div><b>' +
+            '">' +
+            tlPatch(g[1], factionColor(g[1])) +
+            "<div><b>" +
             (g[1] ? esc(g[1]) : "Без группировки") +
             "</b><small>" +
             since +
@@ -1241,10 +1301,13 @@
         p.g
           ? '<a class="pc-faction" href="/factions" data-fc-name="' +
               escAttr(p.g) +
-              '" title="Карточка группировки"><i></i>' +
+              '" title="Карточка группировки">' +
+              (window.__factionPatch ? window.__factionPatch(p.g, color, "pc-fac-emb") : "") +
               esc(p.g) +
               "</a>"
-          : '<span class="pc-faction"><i></i>Одиночка</span>'
+          : '<span class="pc-faction">' +
+              (window.__factionPatch ? window.__factionPatch("", color, "pc-fac-emb") : "") +
+              "Одиночка</span>"
       ) +
       row("Звание", esc(titleOf(p.l))) +
       row("Уровень", "<b>" + p.l + "</b>") +
@@ -1299,28 +1362,14 @@
     e.preventDefault();
     period = null;
     metric = null;
-    open(a.dataset.pcOpen);
+    const targetTab = a.dataset.pcOpenTab === "achievements" ? "achievements" : "stats";
+    open(a.dataset.pcOpen, { tab: targetTab });
   });
   document.addEventListener("keydown", e => {
     if (!root || root.hidden) return;
     if (e.key === "Escape") close();
     else if (window.__trapTab) window.__trapTab(root, e);
   });
-  /* кнопка «Найти игрока» рядом с поиском рейтинга */
-  const tools = document.querySelector(".t100-tools");
-  if (tools) {
-    /* в top100.html кнопка уже стоит (место занято заранее), на других страницах - вставляется */
-    if (!document.getElementById("pcOpenSearch"))
-      tools.insertAdjacentHTML(
-        "beforeend",
-        '<button type="button" class="t100-find" id="pcOpenSearch"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c.6-3.6 3.4-5.6 7-5.6s6.4 2 7 5.6"/></svg>Карточка игрока</button>'
-      );
-    document.getElementById("pcOpenSearch").addEventListener("click", () => {
-      period = null;
-      metric = null;
-      open(null);
-    });
-  }
   /* ссылка /top100#p=ID */
   function fromHash() {
     const m = location.hash.match(/^#p=(.+)$/);

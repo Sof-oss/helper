@@ -133,7 +133,13 @@
       '" title="Открыть карточку игрока">' +
       esc(p.n) +
       '</a></h2><dl class="pc-dossier">' +
-      row("Группировка", '<span class="pc-faction"><i></i>' + (p.g ? esc(p.g) : "Одиночка") + "</span>") +
+      row(
+        "Группировка",
+        '<span class="pc-faction">' +
+          (window.__factionPatch ? window.__factionPatch(p.g, color, "pc-fac-emb") : "") +
+          (p.g ? esc(p.g) : "Одиночка") +
+          "</span>"
+      ) +
       row("Звание", esc(ZP.titleOf(p.l))) +
       (p.z ? row("В Зоне", esc(p.z)) : "") +
       "</dl></div></div></header>"

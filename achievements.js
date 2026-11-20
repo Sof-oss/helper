@@ -91,13 +91,26 @@
     /* переходы вида A -> "" -> B в пределах истории также считаем сменой отряда */
     let prevNonEmpty = "";
     let distinctSwitches = 0;
+    const switchTimes = [];
     for (let i = 0; i < gh.length; i++) {
       const g = cleanName(gh[i][1]);
       if (!g) continue;
-      if (prevNonEmpty && g !== prevNonEmpty) distinctSwitches++;
+      if (prevNonEmpty && g !== prevNonEmpty) {
+        distinctSwitches++;
+        if (Array.isArray(dates) && typeof dates[gh[i][0]] === "number") {
+          switchTimes.push(dates[gh[i][0]]);
+        }
+      }
       prevNonEmpty = g;
     }
     const factionChanges = Math.max(switchCount, distinctSwitches);
+
+    /* максимальное число смен группировки в пределах 30 дней */
+    let maxSwitchesIn30d = 0;
+    for (let l = 0, r = 0; r < switchTimes.length; r++) {
+      while (switchTimes[r] - switchTimes[l] > 30 * DAY_MS) l++;
+      if (r - l + 1 > maxSwitchesIn30d) maxSwitchesIn30d = r - l + 1;
+    }
 
     /* лидерство: leaderInfo может быть [isCurrent (0|1), ...factions] или объектом { current, ever } */
     let isCurrentLeader = false;
@@ -116,6 +129,7 @@
       everLeft: leftCount > 0,
       leftCount,
       factionChanges,
+      maxSwitchesIn30d,
       maxStayDays: Math.floor(maxStayDays),
       isCurrentLeader,
       everLeader
@@ -176,7 +190,7 @@
     };
   }
 
-  /* каталог всех 64 игровых достижений */
+  /* каталог всех 65 игровых достижений */
   const DEFINITIONS = [
     /* ── Путь сталкера: уровень ── */
     {
@@ -510,6 +524,18 @@
       unit: "раз",
       icon: "fac-nomad",
       value: s => s.factions.factionChanges
+    },
+    {
+      id: "fac-frequent",
+      category: "factions",
+      rarity: "epic",
+      points: 65,
+      name: "Перекати-поле",
+      desc: "Сменить группировку 3 раза за 30 дней",
+      target: 3,
+      unit: "раз",
+      icon: "fac-frequent",
+      value: s => s.factions.maxSwitchesIn30d
     },
     {
       id: "fac-leader-now",
@@ -1263,6 +1289,8 @@
       '<path d="M20 17h14v30H20z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"/><path d="M31 32h16M41 26l6 6-6 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>',
     "fac-nomad":
       '<circle cx="19" cy="42" r="4" fill="currentColor"/><circle cx="32" cy="22" r="4" fill="currentColor"/><circle cx="45" cy="42" r="4" fill="currentColor"/><path d="M22 39l8-14M35 25l8 14M24 42h16" stroke="currentColor" stroke-width="2.4" stroke-dasharray="3 2.5" fill="none"/>',
+    "fac-frequent":
+      '<path d="M20 26a14 14 0 0 1 22-4" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M40 16l4 7-8 .5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M44 38a14 14 0 0 1-22 4" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M24 48l-4-7 8-.5" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="32" cy="32" r="5" fill="currentColor"/>',
     "fac-cmd":
       '<rect x="19" y="16" width="26" height="32" rx="4" fill="currentColor" opacity=".2" stroke="currentColor" stroke-width="2.6"/><path d="M32 22l2.6 5.2 5.8.8-4.2 4 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4 5.8-.8z" fill="currentColor"/><path d="M23 42h18" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/>',
     "fac-leader":
@@ -1363,6 +1391,30 @@
     );
   }
 
+  /* форматирование распространённости достижения: «4,8% игроков (141)» */
+  function formatOwnership(count, total) {
+    const n = Math.max(0, Math.floor(Number(count) || 0));
+    const tot = Math.max(0, Math.floor(Number(total) || 0));
+    const fmtNum = v => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+    if (!tot) return { pct: 0, pctText: "0%", count: n, total: 0, label: "0% игроков (" + fmtNum(n) + ")" };
+    const pct = Math.min(100, (n / tot) * 100);
+    let pctText;
+    if (n === 0) pctText = "0%";
+    else if (n >= tot) pctText = "100%";
+    else if (pct < 0.1) pctText = "<0,1%";
+    else {
+      const rounded = Math.round(pct * 10) / 10;
+      pctText = (rounded % 1 === 0 ? String(rounded) : rounded.toFixed(1).replace(".", ",")) + "%";
+    }
+    return {
+      pct,
+      pctText,
+      count: n,
+      total: tot,
+      label: pctText + " игроков (" + fmtNum(n) + ")"
+    };
+  }
+
   const api = {
     CATEGORIES,
     RARITIES,
@@ -1374,7 +1426,8 @@
     evaluate,
     filterItems,
     badgeHtml,
-    scoreRank
+    scoreRank,
+    formatOwnership
   };
 
   if (typeof module !== "undefined" && module.exports) module.exports = api;

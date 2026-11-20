@@ -70,6 +70,18 @@ export default [
       globals: { module: "readonly" }
     }
   },
+  {
+    files: ["achievements-page.js"],
+    languageOptions: {
+      globals: {
+        ZoneAchievements: "readonly",
+        esc: "readonly",
+        escAttr: "readonly",
+        norm: "readonly",
+        fmt: "readonly"
+      }
+    }
+  },
   /* service worker */
   {
     files: ["sw.js"],

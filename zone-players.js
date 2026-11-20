@@ -183,6 +183,8 @@
         ? items
             .map((x, i) => {
               const p = data && x.id ? data.players[x.id] : null;
+              const col = factionColor(p && p.g);
+              const embHtml = window.__factionPatch ? window.__factionPatch(p && p.g, col, "zp-emb") : "";
               return (
                 '<li role="option" id="' +
                 list.id +
@@ -190,9 +192,9 @@
                 i +
                 '" data-zp-i="' +
                 i +
-                '"><i style="--f:' +
-                esc(factionColor(p && p.g)) +
-                '"></i><span>' +
+                '">' +
+                embHtml +
+                "<span>" +
                 esc(x.n) +
                 "</span>" +
                 (p ? "<small>" + (p.g ? esc(p.g) + " · " : "") + "ур. " + p.l + "</small>" : "") +

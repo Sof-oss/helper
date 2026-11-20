@@ -94,6 +94,33 @@ test("analyzeFactions: вступление, выход, смены, срок в
   assert.equal(exLeader.isCurrentLeader, false);
   assert.equal(exLeader.everLeader, true);
   assert.equal(exLeader.everLeft, true);
+
+  /* частая смена группировок: 3 смены в пределах 30 дней открывают «Перекати-поле», а разнесённые по времени - нет */
+  const rapidDates = [t0, t0 + 5 * day, t0 + 12 * day, t0 + 20 * day];
+  const rapidPlayer = {
+    g: "Учёные",
+    gh: [
+      [0, "Долг"],
+      [1, "Свобода"],
+      [2, "Наёмники"],
+      [3, "Учёные"]
+    ]
+  };
+  const rapidFac = ZA.analyzeFactions(rapidPlayer, rapidDates, null);
+  assert.equal(rapidFac.factionChanges, 3);
+  assert.equal(rapidFac.maxSwitchesIn30d, 3);
+  const rapidEval = ZA.evaluate(rapidPlayer, { metrics: METRICS, bosses: BOSSES, dates: rapidDates });
+  const rapidById = Object.fromEntries(rapidEval.items.map(x => [x.id, x]));
+  assert.equal(rapidById["fac-frequent"].status, "unlocked");
+
+  const slowDates = [t0, t0 + 10 * day, t0 + 50 * day, t0 + 95 * day];
+  const slowFac = ZA.analyzeFactions(rapidPlayer, slowDates, null);
+  assert.equal(slowFac.factionChanges, 3);
+  assert.equal(slowFac.maxSwitchesIn30d, 1);
+  const slowEval = ZA.evaluate(rapidPlayer, { metrics: METRICS, bosses: BOSSES, dates: slowDates });
+  const slowById = Object.fromEntries(slowEval.items.map(x => [x.id, x]));
+  assert.equal(slowById["fac-frequent"].status, "in_progress");
+  assert.equal(slowById["fac-frequent"].current, 1);
 });
 
 test("evaluate: разделение на unlocked / in_progress / locked, цепочки серий и очки", () => {

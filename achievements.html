@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#070d18">
+<script>/* тема до первой отрисовки, чтобы не мигало */(function(){try{var t=localStorage.getItem("zoneTheme");if(t)document.documentElement.dataset.theme=t}catch(e){}})();</script>
+<script>/* адрес без .html: /calculator.html -> /calculator, /index.html -> / (на GitHub Pages нет серверных переадресаций, канонический адрес указан в rel=canonical) */(function(){var p=location.pathname;if(/\.html$/.test(p))history.replaceState(null,"",p.replace(/(^|\/)index\.html$/,"$1").replace(/\.html$/,"")+location.search+location.hash)})();</script>
+<title>Сердце Зоны - Рейтинг по достижениям</title>
+<meta name="description" content="Отдельный рейтинг сталкеров «Сердце Зоны» по очкам достижений и каталог всех 65 наград с процентом и числом игроков, получивших каждое достижение.">
+<link rel="canonical" href="https://heart-of-the-zone.ru/achievements">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Сердце Зоны">
+<meta property="og:title" content="Рейтинг по достижениям - Сердце Зоны">
+<meta property="og:description" content="Топ-100 сталкеров по очкам достижений и статистика редкости всех 65 наград Зоны.">
+<meta property="og:url" content="https://heart-of-the-zone.ru/achievements">
+<meta property="og:image" content="https://heart-of-the-zone.ru/assets/preview-top100.jpg?v=1">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="628">
+<meta property="og:image:alt" content="Сердце Зоны - Рейтинг по достижениям">
+<meta property="og:locale" content="ru_RU">
+<meta name="twitter:card" content="summary_large_image">
+<!-- структурированные данные для поисковиков: хлебные крошки -->
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Главная", "item": "https://heart-of-the-zone.ru/"}, {"@type": "ListItem", "position": 2, "name": "Топ-100", "item": "https://heart-of-the-zone.ru/top100"}, {"@type": "ListItem", "position": 3, "name": "Рейтинг по достижениям", "item": "https://heart-of-the-zone.ru/achievements"}]}]}</script>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!-- свои шрифты (assets/fonts, @font-face в styles.css); Oswald нужен сразу - заголовки и меню -->
+<link rel="preload" href="/assets/fonts/oswald-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/oswald-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/player-card.css">
+<link rel="stylesheet" href="/faction-card.css">
+<link rel="stylesheet" href="/top100-sort.css">
+<link rel="stylesheet" href="/achievements-page.css">
+<link rel="stylesheet" href="/sector.css">
+</head>
+<body>
+<!-- @include header active="/top100" -->
+
+<main class="content top100-content achp-content" id="main" data-history="">
+  <section class="achp-hero">
+    <div class="achp-hero-text">
+      <div class="result-title" data-sector="02" data-zone="Достижения">
+        <svg class="target-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 4h8v5a4 4 0 0 1-8 0V4Z" />
+            <path d="M8 6H5v2a3 3 0 0 0 3 3M16 6h3v2a3 3 0 0 1-3 3" />
+            <path d="M12 13v4M9 20h6M10 17h4" />
+          </g>
+        </svg>
+        <div class="result-title-text">
+          <a class="result-kicker achp-crumb" href="/top100">Топ-100</a>
+          <h1>Рейтинг по достижениям</h1>
+        </div>
+      </div>
+      <p class="achp-intro">Отдельный зачёт сталкеров по очкам достижений. Нажмите на игрока, чтобы открыть его вкладку наград, или перейдите к каталогу всех достижений с процентом обладателей.</p>
+    </div>
+    <div class="achp-stats" id="achpStats" aria-label="Сводка рейтинга достижений"></div>
+  </section>
+
+  <section class="achp-panel" aria-label="Рейтинг и каталог достижений">
+    <div class="achp-bar">
+      <div class="achp-tabs" role="tablist" aria-label="Вид раздела">
+        <button type="button" class="achp-tab active" role="tab" aria-selected="true" aria-controls="achpPanelRank" id="achpTabRank" data-achp-view="rank">Топ-100 по очкам</button>
+        <button type="button" class="achp-tab" role="tab" aria-selected="false" aria-controls="achpPanelCatalog" id="achpTabCatalog" data-achp-view="catalog">Все достижения <b id="achpTotalCnt">65</b></button>
+      </div>
+      <button type="button" class="achp-find-btn" data-pc-open="">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6" /><path d="M5 20c.6-3.6 3.4-5.6 7-5.6s6.4 2 7 5.6" /></svg>
+        Найти игрока
+      </button>
+    </div>
+
+    <div class="achp-view" id="achpPanelRank" role="tabpanel" aria-labelledby="achpTabRank">
+      <div class="achp-tools">
+        <label class="achp-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="m16 16 4.5 4.5" /></svg>
+          <input id="achpSearch" type="search" placeholder="Найти по нику или группировке" autocomplete="off" aria-label="Поиск по нику или группировке">
+        </label>
+        <div class="achp-factions" id="achpFactions" role="group" aria-label="Фильтр по группировке"></div>
+      </div>
+
+      <p class="damage-footnote achp-legend">
+        <span class="t100-off" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg></span>
+        Приглушены сталкеры, которые не заходили в игру больше 5 дней · клик по строке открывает вкладку достижений
+      </p>
+
+      <div class="achp-table-wrap">
+        <table class="achp-table" id="achpTable">
+          <thead>
+            <tr>
+              <th scope="col" class="c-rank">#</th>
+              <th scope="col" class="c-name">Сталкер</th>
+              <th scope="col" class="c-fac">Группировка</th>
+              <th scope="col" class="c-lvl" aria-sort="none"><button type="button" class="achp-sort-btn" data-achp-sort="lv">Ур.<i></i></button></th>
+              <th scope="col" class="c-cnt" aria-sort="none"><button type="button" class="achp-sort-btn" data-achp-sort="u">Открыто<i></i></button></th>
+              <th scope="col" class="c-rk">Звание</th>
+              <th scope="col" class="c-pts" aria-sort="descending"><button type="button" class="achp-sort-btn active desc" data-achp-sort="pts">Очки<i></i></button></th>
+            </tr>
+          </thead>
+          <tbody id="achpTbody"></tbody>
+        </table>
+      </div>
+      <p class="achp-empty" id="achpEmpty" hidden>По выбранным фильтрам сталкеров не найдено.</p>
+      <p class="sr-only" id="achpResults" role="status" aria-live="polite"></p>
+    </div>
+
+    <div class="achp-view" id="achpPanelCatalog" role="tabpanel" aria-labelledby="achpTabCatalog" hidden>
+      <div class="achp-cat-bar">
+        <div class="achp-cat-btns" id="achpCatBtns" role="group" aria-label="Категории достижений"></div>
+        <label class="achp-cat-sort">
+          <span>Сортировка:</span>
+          <select id="achpCatSort" aria-label="Сортировка достижений">
+            <option value="rare">сначала редкие</option>
+            <option value="common">сначала частые</option>
+            <option value="points">по очкам</option>
+            <option value="default">по категориям</option>
+          </select>
+        </label>
+      </div>
+      <p class="damage-footnote achp-cat-note">Для каждого достижения показан процент и количество игроков, у которых оно открыто.</p>
+      <ul class="achp-cat-grid" id="achpCatGrid"></ul>
+    </div>
+  </section>
+</main>
+
+<!-- @include footer -->
+
+<script src="/ui.js" defer></script>
+<script src="/top100-common.js" defer></script>
+<script src="/awards.js" defer></script>
+<script src="/achievements.js" defer></script>
+<script src="/achievements-page.js" defer></script>
+<script src="/player-card.js" defer></script>
+<script src="/faction-card.js" defer></script>
+<script src="/nav.js" defer></script>
+</body>
+</html>

@@ -133,6 +133,43 @@ window.__trapTab = function (box, e) {
     })[0];
     return t ? { key: t.key, svg: GLYPHS[t.key] } : null;
   };
+  function escPatch(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+  /* готовый SVG-патч группировки (каноничная эмблема, щиток с буквой или нейтральный щиток одиночки) */
+  window.__factionPatch = function (name, color, cls) {
+    var attr = cls ? ' class="' + escPatch(cls) + '"' : "";
+    var n = String(name || "").trim();
+    if (!n) {
+      return (
+        "<svg" +
+        attr +
+        ' viewBox="0 0 64 72" aria-hidden="true"><path d="M7 3h50a3 3 0 0 1 3 3v34c0 14-12 24-28 30C16 64 4 54 4 40V6a3 3 0 0 1 3-3z" fill="#0b0f14" stroke="#6f8496" stroke-opacity=".65" stroke-width="3" stroke-dasharray="6 4" stroke-linejoin="round"/><circle cx="32" cy="29" r="8" fill="none" stroke="#8aa0b2" stroke-width="3"/><path d="M18 52c2-7.5 8-11.5 14-11.5s12 4 14 11.5" fill="none" stroke="#8aa0b2" stroke-width="3" stroke-linecap="round"/></svg>'
+      );
+    }
+    var e = window.__factionEmblem(n);
+    if (e && e.svg) return "<svg" + attr + ' viewBox="0 0 64 72" aria-hidden="true">' + e.svg + "</svg>";
+    var c = escPatch(color || "#8196a9");
+    var m = n.replace(/[^\p{L}\p{N}]/gu, "");
+    var ch = escPatch((m ? m[0] : "?").toUpperCase());
+    return (
+      "<svg" +
+      attr +
+      ' viewBox="0 0 64 72" aria-hidden="true"><path d="M7 3h50a3 3 0 0 1 3 3v34c0 14-12 24-28 30C16 64 4 54 4 40V6a3 3 0 0 1 3-3z" fill="#0b0f14" stroke="' +
+      c +
+      '" stroke-width="3.5" stroke-linejoin="round"/><path d="M5.8 4.8h52.4V13H5.8z" fill="' +
+      c +
+      '"/><text x="32" y="50" text-anchor="middle" font-family="Oswald,Arial,sans-serif" font-size="30" font-weight="600" fill="' +
+      c +
+      '">' +
+      ch +
+      "</text></svg>"
+    );
+  };
   var THEME_KEY = "zoneTheme";
   var saved = null;
   try {

@@ -1,0 +1,713 @@
+/* Отдельная страница рейтинга по очкам достижений (/achievements) в стиле «Жидкого стекла». */
+
+.achp-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* шапка и 3 сводных показателя */
+.achp-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 18px 24px;
+  align-items: end;
+}
+.achp-hero-text {
+  min-width: 0;
+}
+.achp-crumb {
+  text-decoration: none;
+  color: color-mix(in srgb, var(--accent) 75%, #dbe7f2);
+}
+.achp-crumb:hover,
+.achp-crumb:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.achp-intro {
+  margin: 10px 0 0;
+  max-width: 58ch;
+  font:
+    400 14.5px/1.55 "Rubik",
+    system-ui,
+    sans-serif;
+  color: #c2d1de;
+}
+
+.achp-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.achp-stat {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(8, 14, 22, 0.62);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  backdrop-filter: blur(10px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 10px 26px rgba(0, 0, 0, 0.28);
+}
+.achp-stat:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+.achp-stat-lbl {
+  font:
+    500 11.5px/1.2 "Rubik",
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.03em;
+  color: #93a7b8;
+}
+.achp-stat-val,
+.achp-stat-link {
+  font:
+    600 19px/1.2 "Oswald",
+    sans-serif;
+  letter-spacing: 0.02em;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.achp-stat-link {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: block;
+  max-width: 100%;
+  font:
+    600 19px/1.2 "Oswald",
+    sans-serif;
+  letter-spacing: 0.02em;
+  color: #ffd87a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.16s ease;
+}
+.achp-stat-link:hover,
+.achp-stat-link:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  outline: none;
+}
+.achp-stat-sub {
+  font:
+    400 12px/1.3 "Rubik",
+    system-ui,
+    sans-serif;
+  color: #9db0c0;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* основная стеклянная панель */
+.achp-panel {
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(7, 12, 19, 0.68);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  backdrop-filter: blur(12px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 18px 46px rgba(0, 0, 0, 0.36);
+}
+
+/* верхняя строка: вкладки вида и поиск игрока */
+.achp-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  margin-bottom: 14px;
+}
+.achp-tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(5, 9, 15, 0.64);
+}
+.achp-tab {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  font:
+    500 14px/1 "Rubik",
+    system-ui,
+    sans-serif;
+  color: #b7c8d6;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease;
+}
+.achp-tab b {
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: #8da2b4;
+}
+.achp-tab:hover {
+  color: #fff;
+}
+.achp-tab.active {
+  background: color-mix(in srgb, var(--accent) 26%, rgba(255, 255, 255, 0.12));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.36);
+  color: #fff;
+}
+.achp-tab.active b {
+  color: #ffd87a;
+}
+.achp-tab:focus-visible,
+.achp-find-btn:focus-visible,
+.achp-fchip:focus-visible,
+.achp-sort-btn:focus-visible,
+.achp-player:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.achp-find-btn {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, rgba(255, 255, 255, 0.16));
+  background: color-mix(in srgb, var(--accent) 14%, rgba(10, 17, 26, 0.55));
+  color: #eef5fb;
+  font:
+    500 13.5px/1 "Rubik",
+    system-ui,
+    sans-serif;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease;
+}
+.achp-find-btn:hover {
+  background: color-mix(in srgb, var(--accent) 24%, rgba(10, 17, 26, 0.7));
+  color: #fff;
+}
+.achp-find-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+/* поиск и фильтр по группировке */
+.achp-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.achp-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 380px;
+}
+.achp-search svg {
+  position: absolute;
+  left: 13px;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: #94a9bc;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+.achp-search input {
+  width: 100%;
+  height: 38px;
+  padding: 0 14px 0 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(5, 10, 16, 0.65);
+  color: #eef5fb;
+  font:
+    400 14px/1 "Rubik",
+    system-ui,
+    sans-serif;
+  box-sizing: border-box;
+}
+.achp-search input::placeholder {
+  color: #7d93a6;
+}
+.achp-search input:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--accent) 70%, #fff);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.achp-factions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.achp-fchip {
+  all: unset;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 11px 0 9px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  background: rgba(9, 15, 23, 0.55);
+  font:
+    500 13.5px/1 "Rubik",
+    system-ui,
+    sans-serif;
+  color: #cddae5;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+.achp-fchip .achp-emb {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 21px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+.achp-fchip b {
+  font-size: 12px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: #8297a9;
+}
+.achp-fchip:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.24);
+}
+.achp-fchip.active {
+  background: color-mix(in srgb, var(--fc, var(--accent)) 22%, rgba(255, 255, 255, 0.08));
+  border-color: color-mix(in srgb, var(--fc, var(--accent)) 58%, rgba(255, 255, 255, 0.2));
+  color: #fff;
+}
+.achp-fchip.active b {
+  color: #e6eff7;
+}
+
+.achp-legend {
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* таблица рейтинга */
+.achp-table-wrap {
+  overflow-x: auto;
+  margin: 0 -4px;
+  padding: 0 4px;
+}
+.achp-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 5px;
+  font-variant-numeric: tabular-nums;
+}
+.achp-table thead th {
+  padding: 6px 10px 8px;
+  text-align: left;
+  font:
+    500 12px/1.2 "Rubik",
+    system-ui,
+    sans-serif;
+  color: #8ea3b5;
+  white-space: nowrap;
+}
+.achp-table thead th.c-rank {
+  width: 48px;
+  text-align: center;
+}
+.achp-table thead th.c-lvl,
+.achp-table thead th.c-pts {
+  text-align: right;
+}
+.achp-sort-btn {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+.achp-sort-btn:hover,
+.achp-sort-btn.active {
+  color: #fff;
+}
+.achp-sort-btn i::before {
+  content: "↕";
+  font-style: normal;
+  font-size: 11.5px;
+  opacity: 0.65;
+}
+.achp-sort-btn.active.desc i::before {
+  content: "↓";
+  opacity: 1;
+  color: #ffd87a;
+}
+.achp-sort-btn.active.asc i::before {
+  content: "↑";
+  opacity: 1;
+  color: #ffd87a;
+}
+
+.achp-table tbody tr {
+  cursor: pointer;
+  background: rgba(11, 18, 28, 0.72);
+  transition: background 0.14s ease;
+}
+.achp-table tbody tr:hover {
+  background: color-mix(in srgb, var(--accent) 16%, rgba(16, 26, 38, 0.88));
+}
+.achp-table tbody tr.is-top1 {
+  background: linear-gradient(90deg, rgba(255, 210, 122, 0.18), rgba(11, 18, 28, 0.78) 46%);
+}
+.achp-table tbody tr.is-top2 {
+  background: linear-gradient(90deg, rgba(215, 225, 234, 0.14), rgba(11, 18, 28, 0.78) 46%);
+}
+.achp-table tbody tr.is-top3 {
+  background: linear-gradient(90deg, rgba(227, 164, 111, 0.15), rgba(11, 18, 28, 0.78) 46%);
+}
+.achp-table tbody tr.is-off {
+  opacity: 0.56;
+}
+.achp-table tbody tr.is-off:hover {
+  opacity: 0.88;
+}
+.achp-table tbody td {
+  padding: 10px 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  vertical-align: middle;
+}
+.achp-table tbody td:first-child {
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px 0 0 12px;
+  text-align: center;
+}
+.achp-table tbody td:last-child {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0 12px 12px 0;
+}
+
+.achp-pos {
+  font:
+    600 14px/1 "Oswald",
+    sans-serif;
+  color: #9cb0c2;
+}
+.achp-medal {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font:
+    700 13px/1 "Oswald",
+    sans-serif;
+  color: #10151c;
+}
+.achp-medal.m1 {
+  background: linear-gradient(180deg, #ffe39b, #d89b2d);
+  box-shadow: 0 0 12px rgba(255, 210, 122, 0.45);
+}
+.achp-medal.m2 {
+  background: linear-gradient(180deg, #f0f5fa, #9fb0bf);
+}
+.achp-medal.m3 {
+  background: linear-gradient(180deg, #f3be93, #b97542);
+}
+
+.achp-table .c-name {
+  min-width: 150px;
+}
+.achp-player {
+  all: unset;
+  cursor: pointer;
+  font:
+    600 15px/1.25 "Rubik",
+    system-ui,
+    sans-serif;
+  color: #f0f6fb;
+  transition: color 0.14s ease;
+}
+.achp-player:hover {
+  color: #ffd87a;
+}
+.achp-table .c-name .t100-off {
+  margin-left: 6px;
+  vertical-align: -2px;
+}
+
+.achp-fac {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font:
+    500 14.5px/1.2 "Rubik",
+    system-ui,
+    sans-serif;
+  color: #d6e2ec;
+  white-space: nowrap;
+}
+.achp-fac .achp-emb {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 23px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+.achp-fac.none {
+  color: #6d8193;
+}
+
+.achp-table .c-lvl {
+  text-align: right;
+  font:
+    500 14px/1 "Rubik",
+    system-ui,
+    sans-serif;
+  color: #bfd0de;
+  white-space: nowrap;
+}
+.achp-table .c-cnt {
+  min-width: 108px;
+  white-space: nowrap;
+}
+.achp-cnt-val {
+  display: block;
+  font:
+    500 13px/1.2 "Rubik",
+    system-ui,
+    sans-serif;
+  color: #dbe6ef;
+  margin-bottom: 4px;
+}
+.achp-cnt-bar {
+  display: block;
+  width: 88px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+.achp-cnt-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #d8962a, #ffd87a);
+}
+
+.achp-table .c-rk {
+  font:
+    400 13px/1.2 "Rubik",
+    system-ui,
+    sans-serif;
+  color: #a8bac9;
+  white-space: nowrap;
+}
+.achp-table .c-pts {
+  text-align: right;
+  white-space: nowrap;
+}
+.achp-table .c-pts b {
+  font:
+    600 19px/1 "Oswald",
+    sans-serif;
+  letter-spacing: 0.02em;
+  color: #ffd87a;
+}
+
+.achp-empty {
+  margin: 18px 0 6px;
+  text-align: center;
+  font-size: 14px;
+  color: #9cb0c1;
+}
+
+/* вкладка каталога всех достижений */
+.achp-cat-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  margin-bottom: 10px;
+}
+.achp-cat-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.achp-cat-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 11px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  background: rgba(6, 11, 18, 0.65);
+  font:
+    400 12.5px/1 "Rubik",
+    system-ui,
+    sans-serif;
+  color: #9eb2c3;
+}
+.achp-cat-sort select {
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font:
+    500 12.5px/1 "Rubik",
+    system-ui,
+    sans-serif;
+  cursor: pointer;
+}
+.achp-cat-sort select option {
+  background: #0b121c;
+  color: #fff;
+}
+.achp-cat-note {
+  margin: 0 0 12px;
+}
+.achp-cat-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 10px;
+}
+
+@media (max-width: 960px) {
+  .achp-hero {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .achp-table .c-rk {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .achp-panel {
+    padding: 13px 12px;
+    border-radius: 18px;
+  }
+  .achp-stats {
+    gap: 8px;
+  }
+  .achp-stat {
+    padding: 10px 11px;
+    border-radius: 14px;
+  }
+  .achp-stat-val,
+  .achp-stat-link {
+    font-size: 16.5px;
+  }
+  .achp-bar {
+    gap: 8px;
+  }
+  .achp-tabs {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+  }
+  .achp-tab {
+    flex: 1 1 0;
+    justify-content: center;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+  .achp-find-btn {
+    width: 100%;
+    justify-content: center;
+    height: 36px;
+  }
+  .achp-search {
+    max-width: none;
+  }
+  .achp-factions {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .achp-factions::-webkit-scrollbar {
+    display: none;
+  }
+  .achp-fchip {
+    flex: 0 0 auto;
+  }
+  .achp-table thead th.c-fac,
+  .achp-table tbody td.c-fac,
+  .achp-table thead th.c-lvl,
+  .achp-table tbody td.c-lvl {
+    display: none;
+  }
+  .achp-table .c-name {
+    min-width: 0;
+  }
+  .achp-table .c-cnt {
+    min-width: 72px;
+  }
+  .achp-cnt-bar {
+    width: 58px;
+  }
+  .achp-table tbody td {
+    padding: 9px 7px;
+  }
+  .achp-player {
+    font-size: 14px;
+  }
+  .achp-table .c-pts b {
+    font-size: 17px;
+  }
+  .achp-cat-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}

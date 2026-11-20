@@ -324,6 +324,17 @@ function updateFiltersBadge() {
 }
 function renderFactions() {
   const { rows, count } = factionCounts();
+  const chipIcon = (key, color) => {
+    if (!key) return "";
+    if (key === NO_FACTION) {
+      return window.__factionPatch ? window.__factionPatch("", color, "t100-chip-emb") : "";
+    }
+    const idx = FACTION_INDEX.get(key);
+    if (idx !== undefined) {
+      return '<svg class="t100-chip-emb" viewBox="0 0 64 72" aria-hidden="true"><use href="#t100e-' + idx + '"/></svg>';
+    }
+    return window.__factionPatch ? window.__factionPatch(key, color, "t100-chip-emb") : "";
+  };
   const chip = (key, label, color, n, extra) =>
     '<button type="button" class="t100-chip' +
     (top100Faction === key ? " active" : "") +
@@ -334,7 +345,8 @@ function renderFactions() {
     escAttr(color) +
     '" aria-pressed="' +
     (top100Faction === key) +
-    '"><i></i>' +
+    '">' +
+    chipIcon(key, color) +
     esc(label) +
     "<small>" +
     n +

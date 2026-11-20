@@ -102,6 +102,23 @@ test("build.js: страницы, CSP, sitemap и статическая обо�
     assert.ok(!precache.includes("/"), "страницы не входят в статическую оболочку");
     assert.ok(!precache.includes("/top100"), "страница Топ-100 не входит в оболочку");
     assert.ok(!precache.some(u => /^\/top100-data\.js/.test(u)), "данные Топ-100 не входят в оболочку");
+    assert.ok(!precache.some(u => /^\/achievements-data\.json/.test(u)), "данные достижений не входят в оболочку");
+
+    const achHtml = read("achievements.html");
+    assert.match(achHtml, /id="achpStats"/);
+    assert.match(achHtml, /class="achp-stat"/);
+    assert.match(achHtml, /data-pc-open="\d+" data-pc-open-tab="achievements"/);
+    assert.match(achHtml, /achievements-page\.js\?v=/);
+    const achCss = read(/href="\/?(bundle-[\w-]+\.css)\?v=/.exec(achHtml)[1]);
+    assert.match(achCss, /\.achp-table/);
+    assert.match(achCss, /\.pc-ach-own/);
+    assert.match(top100Css, /\.pc-ach-own/);
+    const achData = JSON.parse(read("achievements-data.json"));
+    assert.equal(achData.top.length, 100);
+    assert.ok(achData.totalPlayers > 100);
+    assert.equal(achData.totalAchievements, 65);
+    assert.ok(achData.stats && typeof achData.stats["lvl-5"] === "number");
+    assert.ok(typeof achData.stats["fac-frequent"] === "number");
 
     const bosses = read("info-bosses.html");
     assert.match(bosses, /data-boss-preview/);
@@ -113,6 +130,7 @@ test("build.js: страницы, CSP, sitemap и статическая обо�
 
     const sitemap = read("sitemap.xml");
     assert.match(sitemap, /https:\/\/heart-of-the-zone\.ru\/top100/);
+    assert.match(sitemap, /https:\/\/heart-of-the-zone\.ru\/achievements/);
     assert.doesNotMatch(sitemap, /\/build<\/loc>/);
     assert.doesNotMatch(sitemap, /\/p\/\d+<\/loc>/);
   } finally {

@@ -157,7 +157,6 @@
         '<span class="mp-bar-btns"><button type="button" class="mp-btn" data-mp="go">' +
         ICON.go +
         "К моему месту</button>" +
-        (me.id ? '<a class="mp-btn ghost" href="' + compareHref(me.id) + '">' + ICON.vs + "Сравнить</a>" : "") +
         '<button type="button" class="mp-ic" data-mp="pick" title="Выбрать другого игрока" aria-label="Выбрать другого игрока">' +
         ICON.edit +
         '</button><button type="button" class="mp-ic" data-mp="forget" title="Снять отметку" aria-label="Снять отметку «это я»">' +
@@ -484,12 +483,24 @@
       const g = pl ? pl.g : "";
       const color = ZP.factionColor(g);
       const updated = window.TOP100_UPDATED ? short(window.TOP100_UPDATED) : "";
+      const nickHtml = me.id
+        ? '<a class="mp-home-nick" href="/p/' +
+          encodeURIComponent(me.id) +
+          '" data-pc-open="' +
+          esc(me.id) +
+          '" aria-haspopup="dialog" title="Открыть личное дело">' +
+          esc(me.n) +
+          "</a>"
+        : "<b>" + esc(me.n) + "</b>";
+      const patchHtml = window.__factionPatch
+        ? window.__factionPatch(g, color, "mp-home-emb")
+        : '<span class="mp-home-emb" aria-hidden="true">' + ZP.patchSvg(g, color, me.n) + "</span>";
       const sub =
         '<span class="mp-home-who" style="--f:' +
         esc(color) +
-        '"><i></i><b>' +
-        esc(me.n) +
-        "</b>" +
+        '">' +
+        patchHtml +
+        nickHtml +
         (pl ? "<small>" + (g ? esc(g) + " · " : "") + "ур. " + pl.l + "</small>" : "") +
         "</span>";
       const when = period
@@ -514,24 +525,7 @@
         "</p>" +
         '<div class="mp-tiles">' +
         tiles +
-        "</div>" +
-        '<div class="mp-home-acts">' +
-        (me.id
-          ? '<a class="mp-btn ghost" href="/p/' +
-            encodeURIComponent(me.id) +
-            '" data-pc-open="' +
-            esc(me.id) +
-            '" aria-haspopup="dialog">' +
-            ICON.card +
-            'Личное дело</a><a class="mp-btn ghost" href="' +
-            compareHref(me.id) +
-            '">' +
-            ICON.vs +
-            "Сравнить с игроком</a>"
-          : "") +
-        '<a class="mp-btn ghost" href="/top100#me">' +
-        ICON.go +
-        "К моему месту в Топ-100</a></div>";
+        "</div>";
       box.hidden = false;
     }
 
