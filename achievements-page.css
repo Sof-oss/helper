@@ -633,7 +633,7 @@
 
 @media (max-width: 760px) {
   .achp-panel {
-    padding: 13px 12px;
+    padding: 13px 10px;
     border-radius: 18px;
   }
   .achp-stats {
@@ -656,9 +656,10 @@
     display: flex;
   }
   .achp-tab {
-    flex: 1 1 0;
+    flex: 1 1 auto;
+    min-width: 0;
     justify-content: center;
-    padding: 0 10px;
+    padding: 0 8px;
     font-size: 13px;
   }
   .achp-find-btn {
@@ -682,6 +683,28 @@
   .achp-fchip {
     flex: 0 0 auto;
   }
+  .achp-table-wrap {
+    overflow-x: visible;
+    margin: 0;
+    padding: 0;
+  }
+  .achp-table {
+    table-layout: fixed;
+    width: 100%;
+  }
+  .achp-table thead th {
+    padding: 6px 5px 8px;
+    font-size: 11.5px;
+  }
+  .achp-table thead th.c-rank {
+    width: 34px;
+  }
+  .achp-table thead th.c-cnt {
+    width: 68px;
+  }
+  .achp-table thead th.c-pts {
+    width: 62px;
+  }
   .achp-table thead th.c-fac,
   .achp-table tbody td.c-fac,
   .achp-table thead th.c-lvl,
@@ -690,24 +713,65 @@
   }
   .achp-table .c-name {
     min-width: 0;
+    overflow: hidden;
   }
   .achp-table .c-cnt {
-    min-width: 72px;
+    min-width: 0;
+  }
+  .achp-cnt-val {
+    font-size: 12.5px;
   }
   .achp-cnt-bar {
-    width: 58px;
+    width: 48px;
   }
   .achp-table tbody td {
-    padding: 9px 7px;
+    padding: 9px 5px;
+  }
+  .achp-table tbody td:first-child {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+  .achp-table tbody td:last-child {
+    padding-right: 8px;
   }
   .achp-player {
-    font-size: 14px;
+    display: inline;
+    font-size: 13.5px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
   .achp-table .c-pts b {
-    font-size: 17px;
+    font-size: 16.5px;
   }
   .achp-cat-grid {
     grid-template-columns: 1fr;
     gap: 8px;
+  }
+}
+
+@media (max-width: 400px) {
+  .achp-tab {
+    font-size: 12px;
+    gap: 4px;
+    padding: 0 6px;
+  }
+  .achp-tab b {
+    font-size: 11.5px;
+  }
+  .achp-table thead th.c-rank {
+    width: 32px;
+  }
+  .achp-table thead th.c-cnt {
+    width: 64px;
+  }
+  .achp-table thead th.c-pts {
+    width: 58px;
+  }
+  .achp-cnt-bar {
+    width: 44px;
+  }
+  .achp-table .c-pts b {
+    font-size: 15.5px;
   }
 }
