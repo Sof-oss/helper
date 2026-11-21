@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-21T02:58:36+03:00",
+  "updated": "2026-11-22T02:58:17+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
@@ -14,7 +14,7 @@
     {
       "name": "Долг",
       "level": 3,
-      "members": 25,
+      "members": 23,
       "leader": {
         "id": 1253,
         "name": "🛡Д.О.Л.Г🛡 Акер"
@@ -32,7 +32,7 @@
     {
       "name": "Учёные",
       "level": 2,
-      "members": 25,
+      "members": 24,
       "leader": {
         "id": 1223,
         "name": "\"Учёные\"  СаХаРоК"
@@ -41,16 +41,25 @@
     {
       "name": "Свобода",
       "level": 2,
-      "members": 23,
+      "members": 24,
       "leader": {
         "id": 388,
         "name": "«Cвобода» Чехов"
       }
     },
     {
+      "name": "Last Way 3",
+      "level": 1,
+      "members": 6,
+      "leader": {
+        "id": 5119,
+        "name": "|LW| Орлов"
+      }
+    },
+    {
       "name": "Военные Сталкеры",
       "level": 1,
-      "members": 2,
+      "members": 3,
       "leader": {
         "id": 3037,
         "name": "[Военстал] Крот"
@@ -59,7 +68,7 @@
     {
       "name": "МОНОЛИТ",
       "level": 1,
-      "members": 12,
+      "members": 14,
       "leader": {
         "id": 4817,
         "name": "🪬МОНОЛИТ🪬ХАРОН"
