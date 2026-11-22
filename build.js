@@ -164,16 +164,29 @@ if (fs.existsSync(GUIDES_DIR)) {
     const { meta, body } = GuideMD.parse(fs.readFileSync(md, "utf8"));
     if (!meta.title) throw new Error("guides/" + slug + "/index.md: нет title в шапке");
     if (/^(true|yes|да)$/i.test(meta.draft || "")) continue;
-    /* картинки: только файлы из папки гайда, ссылки на них - /guide-img/<адрес>/<файл> */
-    const imgs = fs.readdirSync(path.join(GUIDES_DIR, slug)).filter(f => /\.(webp|jpe?g|png|gif)$/i.test(f));
-    if (imgs.length) {
+    /* картинки и видео: только файлы из папки гайда, ссылки на них - /guide-img/<адрес>/<файл> */
+    const dirFiles = fs.readdirSync(path.join(GUIDES_DIR, slug));
+    const imgs = dirFiles.filter(f => /\.(webp|jpe?g|png|gif)$/i.test(f));
+    const videos = dirFiles.filter(f => /\.(mp4|webm)$/i.test(f));
+    if (imgs.length || videos.length) {
       fs.mkdirSync(path.join(OUT, "guide-img", slug), { recursive: true });
-      imgs.forEach(f => fs.copyFileSync(path.join(GUIDES_DIR, slug, f), path.join(OUT, "guide-img", slug, f)));
+      [...imgs, ...videos].forEach(f =>
+        fs.copyFileSync(path.join(GUIDES_DIR, slug, f), path.join(OUT, "guide-img", slug, f))
+      );
     }
-    /* картинка -> адрес и размеры; уменьшенная копия <файл>-800w.webp (её делает build-guide-images.js) идёт в srcset */
+    /* картинка/видео -> адрес и размеры; уменьшенная копия <файл>-800w.webp (её делает build-guide-images.js) идёт в srcset */
     const image = src => {
       if (/^https?:\/\//i.test(src)) return src;
       const f = src.replace(/^\.\//, "");
+      if (videos.includes(f)) {
+        const stem = f.replace(/\.\w+$/, "");
+        const posterFile = [stem + ".webp", stem + ".jpg", stem + ".png"].find(p => imgs.includes(p));
+        return {
+          src: "/guide-img/" + slug + "/" + f,
+          video: true,
+          poster: posterFile ? "/guide-img/" + slug + "/" + posterFile : null
+        };
+      }
       if (!imgs.includes(f)) {
         console.warn("Предупреждение: guides/" + slug + ": нет картинки " + src);
         return null;

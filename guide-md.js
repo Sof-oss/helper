@@ -82,19 +82,34 @@
 
         let img = opt.image ? opt.image(m[2]) : safeUrl(m[2]);
         if (typeof img === "string") img = { src: img };
-        if (img && img.src)
-          out.push(
-            '<figure><img src="' +
-              esc(img.src) +
-              '"' +
-              (img.srcset ? ' srcset="' + esc(img.srcset) + '" sizes="' + esc(img.sizes || "100vw") + '"' : "") +
-              (img.width && img.height ? ' width="' + +img.width + '" height="' + +img.height + '"' : "") +
-              ' alt="' +
-              esc(m[1]) +
-              '" loading="lazy" decoding="async">' +
-              (m[1] ? "<figcaption>" + inline(m[1], opt) + "</figcaption>" : "") +
-              "</figure>"
-          );
+        if (img && img.src) {
+          const isVideo = Boolean(img.video) || /\.(mp4|webm)(?:[?#]|$)/i.test(img.src);
+          if (isVideo) {
+            out.push(
+              '<figure class="guide-video"><video src="' +
+                esc(img.src) +
+                '"' +
+                (img.poster ? ' poster="' + esc(img.poster) + '"' : "") +
+                (m[1] ? ' aria-label="' + esc(m[1]) + '"' : "") +
+                ' controls playsinline preload="metadata"></video>' +
+                (m[1] ? "<figcaption>" + inline(m[1], opt) + "</figcaption>" : "") +
+                "</figure>"
+            );
+          } else {
+            out.push(
+              '<figure><img src="' +
+                esc(img.src) +
+                '"' +
+                (img.srcset ? ' srcset="' + esc(img.srcset) + '" sizes="' + esc(img.sizes || "100vw") + '"' : "") +
+                (img.width && img.height ? ' width="' + +img.width + '" height="' + +img.height + '"' : "") +
+                ' alt="' +
+                esc(m[1]) +
+                '" loading="lazy" decoding="async">' +
+                (m[1] ? "<figcaption>" + inline(m[1], opt) + "</figcaption>" : "") +
+                "</figure>"
+            );
+          }
+        }
         continue;
       }
       if ((m = line.match(/^(#{1,3})\s+(.+)$/))) {
@@ -168,10 +183,12 @@
     max = max || 180;
     return t.length > max ? t.slice(0, max - 1).replace(/\s+\S*$/, "") + "…" : t;
   }
-  /* первая картинка гайда - обложка в списке */
+  /* первая картинка гайда - обложка в списке (видео пропускаем) */
   function firstImage(md) {
-    const m = String(md).match(/^\s*!\[[^\]]*\]\(([^)\s]+)\)\s*$/m);
-    return m ? m[1] : null;
+    for (const m of String(md).matchAll(/^\s*!\[[^\]]*\]\(([^)\s]+)\)\s*$/gm)) {
+      if (!/\.(mp4|webm)(?:[?#]|$)/i.test(m[1])) return m[1];
+    }
+    return null;
   }
 
   const api = { render, parse, excerpt, firstImage, esc };

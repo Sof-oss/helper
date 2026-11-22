@@ -86,3 +86,15 @@ test("ссылка с именем сайта в параметрах остаё
   const own = render("[x](https://www.heart-of-the-zone.ru/top100)", { siteHost: "heart-of-the-zone.ru" });
   assert.doesNotMatch(own, /nofollow/);
 });
+
+test("видео: рендерится в <video> с постером и не становится обложкой гайда", () => {
+  const html = render("![Мульт-разбор](clip.mp4)", {
+    image: () => ({ src: "/guide-img/x/clip.mp4", video: true, poster: "/guide-img/x/clip.webp" })
+  });
+  assert.match(html, /<figure class="guide-video"><video src="\/guide-img\/x\/clip\.mp4"/);
+  assert.match(html, /poster="\/guide-img\/x\/clip\.webp"/);
+  assert.match(html, /controls playsinline preload="metadata"/);
+  assert.match(html, /<figcaption>Мульт-разбор<\/figcaption>/);
+  assert.equal(firstImage("![Видео](clip.mp4)\n\n![Картинка](cover.webp)"), "cover.webp");
+  assert.equal(firstImage("![Только видео](clip.mp4)"), null);
+});
