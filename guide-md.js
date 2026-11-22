@@ -18,10 +18,28 @@
 
   /* строчная разметка; текст сначала экранируется, поэтому вставить свой HTML нельзя */
   function inline(text, opt) {
-    const codes = [];
+    const codes = [],
+      pics = [];
     let s = String(text).replace(/`([^`\n]+)`/g, (m, c) => {
       codes.push(c);
       return "\u0000" + (codes.length - 1) + "\u0000";
+    });
+    /* картинка внутри строки (эмодзи в заголовке или тексте) - до ссылок, иначе [alt](src) съест ссылочный разбор */
+    s = s.replace(/!\[([^\]\n]*)\]\(([^)\s]+)\)/g, (m, alt, src) => {
+      let img = opt && opt.image ? opt.image(src) : safeUrl(src);
+      if (typeof img === "string") img = { src: img };
+      if (!img || !img.src) return alt;
+      const size = img.width && img.height ? ' width="' + +img.width + '" height="' + +img.height + '"' : "";
+      pics.push(
+        '<img class="guide-inline-img" src="' +
+          esc(img.src) +
+          '"' +
+          size +
+          ' alt="' +
+          esc(alt) +
+          '" loading="lazy" decoding="async">'
+      );
+      return "\u0001" + (pics.length - 1) + "\u0001";
     });
     s = esc(s);
     s = s.replace(/\[([^\]\n]+)\]\(([^)\s]+)\)/g, (m, label, url) => {
@@ -34,6 +52,7 @@
     });
     s = s.replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>").replace(/(^|[^*\w])\*([^*\n]+)\*(?!\w)/g, "$1<i>$2</i>");
     s = s.replace(/\u0000(\d+)\u0000/g, (m, i) => "<code>" + esc(codes[+i]) + "</code>");
+    s = s.replace(/\u0001(\d+)\u0001/g, (m, i) => pics[+i]);
     return s;
   }
 

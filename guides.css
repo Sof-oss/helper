@@ -314,6 +314,14 @@
   outline: 2px solid #d9a441;
   outline-offset: 2px;
 }
+/* картинка внутри строки (guide-md.js: ![alt](файл) в тексте) - маленький «эмодзи» в строке */
+.guide-body .guide-inline-img {
+  display: inline-block;
+  height: 1.4em;
+  width: auto;
+  margin-left: 0.3em;
+  vertical-align: -0.3em;
+}
 .guide-body figure.guide-video {
   margin: 14px 0 18px;
 }

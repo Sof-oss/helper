@@ -168,6 +168,10 @@ gh run view <id> --log-failed                   # что упало
 - Упал «Tests and lint» - то же, что локально в разделе 1; упал «Build» - смотри лог (`throw` в `build.js` или
   сборщике картинок). Сайт при этом остаётся прошлой версии. Повторный запуск - новый push с исправлением
   (`gh run rerun` / `gh workflow run pages.yml --ref main` требуют прав Actions на запись).
+- «Deploy» упал с «No artifacts named "github-pages" were found», хотя «Upload artifact» зелёный и артефакт
+  `github-pages` есть в списке, - это временный сбой GitHub (API/Pages), а не код: 22.11.2026 так упал #609 при
+  зелёных проверках и сборке. Лечится перезапуском запуска (Re-run all jobs) или Run workflow на `main`; если
+  повторяется - проверить githubstatus.com и настройки Pages.
 - Живой сайт: HTML отдаётся с `cache-control: max-age=600` - до 10 минут можно видеть старую страницу. Проверяй в
   обход кэша: `curl -s "https://heart-of-the-zone.ru/calculator?nocache=$(date +%s)" | grep -c '<новый текст>'`.
   Файлы css/js/картинки имеют `?v=<хэш содержимого>` - сменился файл, сменился и `?v=`, сравни с `dist/`:
