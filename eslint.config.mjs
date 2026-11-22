@@ -89,7 +89,7 @@ export default [
   },
   /* скрипты сборки и выгрузки - Node.js */
   {
-    files: ["build*.js", "dev.js", "fetch-players.js", "yandex/**/*.js", "guide-md.js", "test/**"],
+    files: ["build*.js", "dev.js", "fetch-players.js", "yandex/**/*.js", "guide-md.js", "guide-video.js", "test/**"],
     languageOptions: { globals: { ...globals.node } }
   }
 ];

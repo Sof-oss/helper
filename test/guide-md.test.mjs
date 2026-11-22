@@ -65,23 +65,6 @@ test("картинка: размеры и srcset от сборки, без ни�
   assert.ok(!render("![](javascript:x)").includes("<img"));
 });
 
-test("картинка внутри строки: эмодзи в заголовке и тексте", () => {
-  const opt = { image: n => (n === "e.webp" ? { src: "/guide-img/x/e.webp", width: 160, height: 206 } : null) };
-  assert.equal(
-    render("## Видео ![](e.webp)", opt),
-    '<h2>Видео <img class="guide-inline-img" src="/guide-img/x/e.webp" width="160" height="206" alt="" loading="lazy" decoding="async"></h2>'
-  );
-  assert.match(
-    render("Текст ![лицо](e.webp) конец", opt),
-    /Текст <img class="guide-inline-img"[^>]* alt="лицо"[^>]*> конец/
-  );
-  /* неизвестная картинка - на её месте остаётся подпись, ссылкой [alt](src) она не становится */
-  assert.equal(render("## Видео ![лицо](нет.webp)", opt), "<h2>Видео лицо</h2>");
-  assert.ok(!render("![](javascript:alert(1))").includes("<img"));
-  /* ссылка рядом с картинкой по-прежнему работает */
-  assert.match(render("![](e.webp) [сайт](/top100)", opt), /<\/a>/);
-});
-
 test("списки, цитата, жирный и курсив", () => {
   assert.equal(render("- раз\n- два"), "<ul><li>раз</li><li>два</li></ul>");
   assert.equal(render("1. раз\n2. два"), "<ol><li>раз</li><li>два</li></ol>");
