@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-23T02:58:17+03:00",
+  "updated": "2026-11-24T02:59:42+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
@@ -32,7 +32,7 @@
     {
       "name": "Учёные",
       "level": 2,
-      "members": 25,
+      "members": 24,
       "leader": {
         "id": 1223,
         "name": "\"Учёные\"  СаХаРоК"
@@ -41,16 +41,25 @@
     {
       "name": "Свобода",
       "level": 2,
-      "members": 24,
+      "members": 23,
       "leader": {
         "id": 388,
         "name": "«Cвобода» Чехов"
       }
     },
     {
+      "name": "Воля",
+      "level": 1,
+      "members": 1,
+      "leader": {
+        "id": 2818,
+        "name": "Дмитрий Дегтярёв"
+      }
+    },
+    {
       "name": "Last Way 3",
       "level": 1,
-      "members": 9,
+      "members": 13,
       "leader": {
         "id": 5119,
         "name": "|LW| Орлов"
@@ -59,7 +68,7 @@
     {
       "name": "Военные Сталкеры",
       "level": 1,
-      "members": 3,
+      "members": 4,
       "leader": {
         "id": 3037,
         "name": "[Военстал] Крот"
@@ -86,7 +95,7 @@
     {
       "name": "Last Way 2",
       "level": 1,
-      "members": 19,
+      "members": 20,
       "leader": {
         "id": 5118,
         "name": "|LW| Артём"
@@ -131,7 +140,7 @@
     {
       "name": "Бандиты",
       "level": 1,
-      "members": 12,
+      "members": 11,
       "leader": {
         "id": 3178,
         "name": "«Братва» Изверг"
@@ -194,7 +203,7 @@
     {
       "name": "Чистое небо",
       "level": 1,
-      "members": 20,
+      "members": 19,
       "leader": {
         "id": 1220,
         "name": "Петя кок"
