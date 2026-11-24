@@ -15,10 +15,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -62,6 +59,19 @@ jobs:
         with:
           path: dist
 
+  # Деплой отдельным job: в одном job deploy-pages иногда опрашивает артефакт
+  # через доли секунды после загрузки и не находит его («No artifacts named github-pages»,
+  # github.com/actions/deploy-pages/issues/451). Здесь проверка идёт после запуска нового job.
+  deploy:
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v5
