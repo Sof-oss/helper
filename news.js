@@ -30,7 +30,7 @@ window.ZONE_NEWS = [
         alt: "Деревня на карте: дома, колодец и вход с вопросительным знаком"
       }
     ],
-    event: "update"
+    event: "soon"
   },
   {
     date: "2026-11-16",
@@ -328,6 +328,8 @@ window.ZONE_NEWS = [
   const EVENTS = {
     halloween:
       '<div class="zn-event" aria-hidden="true"><img src="assets/event-halloween-600.webp" srcset="assets/event-halloween-600.webp 600w, assets/event-halloween-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-eye zn-ev-l"></span><span class="zn-ev-eye zn-ev-r"></span><span class="zn-ev-izlom"><img src="assets/event-izlom-shadow.webp" width="366" height="320" alt="" loading="lazy" decoding="async"><i class="zn-ev-ie zn-ev-ie1"></i><i class="zn-ev-ie zn-ev-ie2"></i></span><span class="zn-ev-soon">Скоро</span></div>',
+    /* анонс будущей активности: сталкеры готовятся к вылазке, метка «Скоро» */
+    soon: '<div class="zn-event zn-ev-update" aria-hidden="true"><img src="/assets/event-soon-600.webp" srcset="/assets/event-soon-600.webp 600w, /assets/event-soon-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>Скоро</span></div>',
     /* слухи об обновлении: картинка-баннер и метка «Слухи», мигающая точка как у рации */
     update:
       '<div class="zn-event zn-ev-update" aria-hidden="true"><img src="/assets/event-update-600.webp" srcset="/assets/event-update-600.webp 600w, /assets/event-update-1200.webp 1200w" sizes="(max-width: 760px) 92vw, 460px" width="1200" height="375" alt="" loading="lazy" decoding="async"><span class="zn-ev-soon"><i class="zn-ev-dot"></i>Слухи</span></div>',

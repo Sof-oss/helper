@@ -49,6 +49,7 @@ description: Ведёт блок «Новости Зоны» на главной
 | `event` | Картинка | Метка, цвет `--ev` |
 |---|---|---|
 | `halloween` | `assets/event-halloween-*` + анимация тыквы и Излома | «Скоро» (без точки - `when` не работает) |
+| `soon` | `/assets/event-soon-*` | «Скоро», бирюзовая, мигающая точка |
 | `update` | `/assets/event-update-*` | «Слухи», бирюзовая, мигающая точка |
 | `update-halloween` | `/assets/event-update-halloween-*` | «Слухи» |
 | `release` | `/assets/event-update-*` (тот же кадр) | «Вышло», зелёная |
