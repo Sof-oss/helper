@@ -40,7 +40,7 @@
       name: "Болотная тварь",
       hp: 100000,
       req: "purple",
-      reward: { card: "orange", exp: 100, bullets: 500, rep: 60 },
+      reward: { card: "orange", exp: 100, bullets: 500, tokens: 7, rep: 60 },
       set: { name: "КХК-01", img: "khk", items: ["Шлем", "Комбинезон"] }
     },
     {
