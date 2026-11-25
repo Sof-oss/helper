@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-25T02:59:21+03:00",
+  "updated": "2026-11-26T02:58:37+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
@@ -14,7 +14,7 @@
     {
       "name": "Долг",
       "level": 3,
-      "members": 23,
+      "members": 24,
       "leader": {
         "id": 1253,
         "name": "🛡Д.О.Л.Г🛡 Акер"
@@ -86,7 +86,7 @@
     {
       "name": "МОНОЛИТ",
       "level": 1,
-      "members": 13,
+      "members": 8,
       "leader": {
         "id": 4817,
         "name": "🪬МОНОЛИТ🪬ХАРОН"
