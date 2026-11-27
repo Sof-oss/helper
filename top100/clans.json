@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-27T06:03:28+03:00",
+  "updated": "2026-11-28T02:58:51+03:00",
   "source": "API игры: /clans/search",
   "clans": [
     {
@@ -86,7 +86,7 @@
     {
       "name": "Военные Сталкеры",
       "level": 1,
-      "members": 5,
+      "members": 6,
       "leader": {
         "id": 3037,
         "name": "[Военстал] Крот"
@@ -113,7 +113,7 @@
     {
       "name": "Last Way 2",
       "level": 1,
-      "members": 20,
+      "members": 19,
       "leader": {
         "id": 5118,
         "name": "|LW| Артём"
@@ -122,7 +122,7 @@
     {
       "name": "Last Way",
       "level": 1,
-      "members": 19,
+      "members": 20,
       "leader": {
         "id": 3954,
         "name": "|LW| РуSSкая"
@@ -140,7 +140,7 @@
     {
       "name": "Призраки Зоны",
       "level": 1,
-      "members": 1,
+      "members": 2,
       "leader": {
         "id": 3349,
         "name": "Alex Brain"
